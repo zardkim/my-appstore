@@ -58,6 +58,10 @@ data/library/*
 data/config/*
 !data/config/.gitkeep
 
+# Attachments
+data/attachments/*
+!data/attachments/.gitkeep
+
 # Logs
 data/logs/
 *.log
@@ -88,3 +92,7 @@ htmlcov/
 *.tmp
 *.temp
 .cache/
+
+# Development folders
+docs/
+sample/
