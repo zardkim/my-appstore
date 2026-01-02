@@ -1,0 +1,156 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: myapp-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-myappstore}
+      # PostgreSQL logging
+      POSTGRES_INITDB_ARGS: "-c logging_collector=on"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./data/logs/postgresql:/var/log/postgresql
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    command:
+      - "postgres"
+      - "-c"
+      - "log_statement=all"
+      - "-c"
+      - "log_duration=on"
+      - "-c"
+      - "log_min_duration_statement=1000"
+      - "-c"
+      - "log_line_prefix=%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h "
+      - "-c"
+      - "log_connections=on"
+      - "-c"
+      - "log_disconnections=on"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - myapp-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: myapp-redis-prod
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - myapp-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    image: myappstore-backend:latest
+    container_name: myapp-backend-prod
+    restart: unless-stopped
+    volumes:
+      - ./data/icons:/app/static/icons
+      - ./data/screenshots:/app/static/screenshots
+      - ./data/eximage:/app/static/eximage
+      - ./data/library:/library
+      - ./data/config:/app/data
+      - ./data/logs:/app/data/logs
+      # Optional: Mount NAS software folder (read-only)
+      # - /volume1/Software:/library/NAS:ro
+    environment:
+      # Database
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-myappstore}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-myappstore}
+      - DB_HOST=db
+
+      # Redis
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-}@redis:6379/0
+
+      # Security
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+
+      # AI
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+
+      # Paths
+      - SCAN_BASE_PATH=/library
+      - ICON_CACHE_DIR=/app/static/icons
+      - SCREENSHOT_CACHE_DIR=/app/static/screenshots
+      - EXIMAGE_DIR=/app/static/eximage
+      - CONFIG_DATA_DIR=/app/data
+      - SCAN_EXCLUSIONS_FILE=/app/data/scan_exclusions.txt
+
+      # CORS
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost}
+
+      # Server
+      - HOST=0.0.0.0
+      - PORT=8100
+
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_DIR=/app/data/logs
+      - ENVIRONMENT=production
+    ports:
+      - "${BACKEND_PORT:-8100}:8100"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - myapp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    image: myappstore-frontend:latest
+    container_name: myapp-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-5900}:80"
+    depends_on:
+      - backend
+    networks:
+      - myapp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  myapp-network:
+    driver: bridge

@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: myapp-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: myappstore
+      # PostgreSQL 로깅 설정
+      POSTGRES_INITDB_ARGS: "-c logging_collector=on"
+    volumes:
+      - ./data/db/postgres_data:/var/lib/postgresql/data
+      - ./data/logs/postgresql:/var/log/postgresql
+    ports:
+      - "5432:5432"
+    command:
+      - "postgres"
+      - "-c"
+      - "log_statement=all"              # 모든 SQL 문 로깅
+      - "-c"
+      - "log_duration=on"                # 쿼리 실행 시간 로깅
+      - "-c"
+      - "log_min_duration_statement=1000" # 1초 이상 쿼리만 별도 로깅
+      - "-c"
+      - "log_line_prefix=%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h "
+      - "-c"
+      - "log_connections=on"             # 연결 로깅
+      - "-c"
+      - "log_disconnections=on"          # 연결 해제 로깅
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: myapp-redis
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: myapp-backend
+    volumes:
+      - ./backend:/app
+      - ./data/icons:/app/static/icons
+      # Library folder - main storage for software files
+      - ./data/library:/library
+      # Config data directory
+      - ./data:/app/data
+      # Optional: Mount your NAS software folder here (adjust path as needed)
+      # - /volume1/Software:/library/NAS:ro
+    environment:
+      # Database
+      - DATABASE_URL=postgresql://postgres:password@db:5432/myappstore
+
+      # Redis
+      - REDIS_URL=redis://redis:6379/0
+
+      # Security
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-this-in-production}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+      # AI
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+
+      # Paths
+      - SCAN_BASE_PATH=/library
+      - ICON_CACHE_DIR=/app/static/icons
+      - CONFIG_DATA_DIR=/app/data
+      - SCAN_EXCLUSIONS_FILE=/app/data/scan_exclusions.txt
+
+      # CORS - comma-separated origins
+      # 개발/내부 NAS 환경: "*"로 모든 origin 허용 (프로덕션에서는 구체적인 도메인 지정 권장)
+      - CORS_ORIGINS=*
+
+      # Server
+      - HOST=0.0.0.0
+      - PORT=8100
+    ports:
+      - "8100:8100"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: myapp-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5900:5900"
+    environment:
+      # 브라우저에서 실행되므로 실제 접속 IP 주소 사용 권장
+      # localhost: 호스트 머신에서만 접속
+      # 192.168.0.X: 같은 네트워크의 다른 기기에서도 접속 가능
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8100/api}
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8100}
+      - VITE_APP_URL=${VITE_APP_URL:-http://localhost:5900}
+    depends_on:
+      - backend

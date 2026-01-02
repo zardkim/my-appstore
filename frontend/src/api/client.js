@@ -1,0 +1,52 @@
+import axios from 'axios'
+
+// 동적으로 API URL 생성
+// 환경 변수가 설정되어 있으면 사용하고, 없으면 현재 호스트를 기준으로 생성
+function getApiBaseUrl() {
+  const envUrl = import.meta.env.VITE_API_BASE_URL
+
+  // 환경 변수가 설정되어 있고 절대 URL이면 그대로 사용
+  if (envUrl && (envUrl.startsWith('http://') || envUrl.startsWith('https://'))) {
+    return envUrl
+  }
+
+  // 환경 변수가 상대 경로면 그대로 사용
+  if (envUrl && envUrl.startsWith('/')) {
+    return envUrl
+  }
+
+  // 환경 변수가 없으면 현재 호스트 기준으로 API URL 생성
+  const hostname = window.location.hostname
+  const protocol = window.location.protocol
+  return `${protocol}//${hostname}:8100/api`
+}
+
+const apiClient = axios.create({
+  baseURL: getApiBaseUrl(),
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+// Request interceptor to add token
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+// Response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('access_token')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
+export default apiClient

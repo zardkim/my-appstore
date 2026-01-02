@@ -1,0 +1,28 @@
+{
+  "name": "myappstore",
+  "version": "1.0.0",
+  "description": "NAS-based personal software library management system",
+  "private": true,
+  "scripts": {
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "release:patch": "standard-version --release-as patch",
+    "release:first": "standard-version --first-release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/myappstore.git"
+  },
+  "keywords": [
+    "nas",
+    "software-management",
+    "app-store",
+    "self-hosted"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "standard-version": "^9.5.0"
+  }
+}

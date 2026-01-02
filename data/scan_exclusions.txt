@@ -1,0 +1,8 @@
+.git
+node_modules
+__MACOSX
+$RECYCLE.BIN
+.Trash
+System Volume Information
+.DS_Store
+Thumbs.db

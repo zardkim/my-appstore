@@ -1,0 +1,90 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+*.egg-info/
+*.pyc
+
+# Node
+node_modules/
+dist/
+.npm
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/db/*
+!data/db/.gitkeep
+
+# Icons cache
+data/icons/*
+!data/icons/.gitkeep
+
+# Screenshots
+data/screenshots/*
+!data/screenshots/.gitkeep
+
+# External images
+data/eximage/*
+!data/eximage/.gitkeep
+
+# Library (software files)
+data/library/*
+!data/library/.gitkeep
+
+# Config data
+data/config/*
+!data/config/.gitkeep
+
+# Logs
+data/logs/
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+*.pid
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Test files
+backend/tests/__pycache__/
+coverage/
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

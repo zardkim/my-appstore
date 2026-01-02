@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fee140;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="200" height="200" rx="40" fill="url(#bg4)"/>
+  
+  <g transform="translate(100, 85)">
+    <!-- Circle background -->
+    <circle cx="0" cy="0" r="45" fill="white" opacity="0.95"/>
+    
+    <!-- Download arrow -->
+    <path d="M 0,-20 L 0,15" stroke="#fa709a" stroke-width="6" stroke-linecap="round"/>
+    <path d="M -12,8 L 0,20 L 12,8" fill="none" stroke="#fa709a" stroke-width="6" 
+          stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Base line -->
+    <path d="M -18,28 L 18,28" stroke="#fa709a" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Small app dots -->
+    <circle cx="-20" cy="-25" r="3" fill="#fee140"/>
+    <circle cx="0" cy="-28" r="3" fill="#fee140"/>
+    <circle cx="20" cy="-25" r="3" fill="#fee140"/>
+  </g>
+  
+  <text x="100" y="160" font-family="Arial, sans-serif" font-size="20" font-weight="bold" 
+        text-anchor="middle" fill="white">myapp</text>
+  <text x="100" y="178" font-family="Arial, sans-serif" font-size="14" 
+        text-anchor="middle" fill="white" opacity="0.9">STORE</text>
+</svg>

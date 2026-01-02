@@ -1,0 +1,33 @@
+{
+  "types": [
+    {"type": "feat", "section": "Features"},
+    {"type": "fix", "section": "Bug Fixes"},
+    {"type": "chore", "hidden": false, "section": "Maintenance"},
+    {"type": "docs", "hidden": false, "section": "Documentation"},
+    {"type": "style", "hidden": true},
+    {"type": "refactor", "section": "Code Refactoring"},
+    {"type": "perf", "section": "Performance Improvements"},
+    {"type": "test", "hidden": true}
+  ],
+  "bumpFiles": [
+    {
+      "filename": "package.json",
+      "type": "json"
+    },
+    {
+      "filename": "frontend/package.json",
+      "type": "json"
+    },
+    {
+      "filename": "backend/app/version.py",
+      "updater": "scripts/version-updater.js"
+    }
+  ],
+  "skip": {
+    "changelog": false
+  },
+  "releaseCommitMessageFormat": "chore(release): {{currentTag}}",
+  "scripts": {
+    "postbump": "echo '\n✓ Version bumped successfully!\nNext steps:\n1. Review CHANGELOG.md\n2. git push --follow-tags origin main\n3. Build and deploy Docker images with the new version tag\n'"
+  }
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MyApp Store - 디버그 정보</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #2196F3;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #666;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+        .value {
+            color: #2196F3;
+            font-family: monospace;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        #apiTest {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 MyApp Store 디버그 정보</h1>
+
+    <div class="card">
+        <h2>현재 페이지 정보</h2>
+        <div>
+            <span class="label">프로토콜:</span>
+            <span class="value" id="protocol"></span>
+        </div>
+        <div>
+            <span class="label">호스트명:</span>
+            <span class="value" id="hostname"></span>
+        </div>
+        <div>
+            <span class="label">포트:</span>
+            <span class="value" id="port"></span>
+        </div>
+        <div>
+            <span class="label">전체 URL:</span>
+            <span class="value" id="href"></span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>계산된 API URL</h2>
+        <div>
+            <span class="label">백엔드 API URL:</span>
+            <span class="value" id="apiUrl"></span>
+        </div>
+        <div>
+            <span class="label">백엔드 Base URL:</span>
+            <span class="value" id="backendUrl"></span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>브라우저 정보</h2>
+        <div>
+            <span class="label">User Agent:</span>
+        </div>
+        <pre id="userAgent"></pre>
+    </div>
+
+    <div class="card">
+        <h2>API 연결 테스트</h2>
+        <button onclick="testHealth()">Health Check</button>
+        <button onclick="testSetup()">Setup Check</button>
+        <div style="margin: 10px 0;">
+            <input type="text" id="testUsername" value="nuricom" placeholder="사용자명" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 150px;">
+            <input type="password" id="testPassword" value="008keykmn#" placeholder="비밀번호" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 150px; margin-left: 5px;">
+        </div>
+        <button onclick="testLogin()">로그인 테스트</button>
+        <div id="apiTest"></div>
+    </div>
+
+    <div class="card">
+        <h2>전체 정보 (JSON)</h2>
+        <pre id="fullInfo"></pre>
+    </div>
+
+    <script>
+        // 현재 페이지 정보 수집
+        const protocol = window.location.protocol;
+        const hostname = window.location.hostname;
+        const port = window.location.port || (protocol === 'https:' ? '443' : '80');
+        const href = window.location.href;
+
+        // API URL 계산 (프론트엔드 코드와 동일한 로직)
+        const apiUrl = protocol + '//' + hostname + ':8100/api';
+        const backendUrl = protocol + '//' + hostname + ':8100';
+
+        // 전체 정보
+        const info = {
+            location: {
+                protocol: protocol,
+                hostname: hostname,
+                port: port,
+                href: href,
+                origin: window.location.origin
+            },
+            computed: {
+                apiUrl: apiUrl,
+                backendUrl: backendUrl
+            },
+            browser: {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                cookieEnabled: navigator.cookieEnabled
+            },
+            screen: {
+                width: window.screen.width,
+                height: window.screen.height,
+                availWidth: window.screen.availWidth,
+                availHeight: window.screen.availHeight
+            }
+        };
+
+        // 정보 표시
+        document.getElementById('protocol').textContent = protocol;
+        document.getElementById('hostname').textContent = hostname;
+        document.getElementById('port').textContent = port;
+        document.getElementById('href').textContent = href;
+        document.getElementById('apiUrl').textContent = apiUrl;
+        document.getElementById('backendUrl').textContent = backendUrl;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('fullInfo').textContent = JSON.stringify(info, null, 2);
+
+        // API 테스트 함수
+        function showTestResult(message, isError = false) {
+            const div = document.getElementById('apiTest');
+            div.innerHTML = '<pre class="' + (isError ? 'error' : 'success') + '">' + message + '</pre>';
+        }
+
+        async function testHealth() {
+            try {
+                showTestResult('테스트 중...');
+                const response = await fetch(backendUrl + '/health');
+                const data = await response.json();
+                showTestResult('✅ Health Check 성공!\n\n' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                showTestResult('❌ Health Check 실패!\n\n' + error.message, true);
+            }
+        }
+
+        async function testSetup() {
+            try {
+                showTestResult('테스트 중...');
+                const response = await fetch(apiUrl.replace('/api', '') + '/api/auth/check-setup');
+                const data = await response.json();
+                showTestResult('✅ Setup Check 성공!\n\n' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                showTestResult('❌ Setup Check 실패!\n\n' + error.message, true);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                showTestResult('로그인 테스트 중...');
+
+                const username = document.getElementById('testUsername').value;
+                const password = document.getElementById('testPassword').value;
+
+                if (!username || !password) {
+                    showTestResult('❌ 사용자명과 비밀번호를 입력하세요.', true);
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('password', password);
+
+                const response = await fetch(apiUrl.replace('/api', '') + '/api/auth/login', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showTestResult('✅ 로그인 성공!\n\nToken: ' + data.access_token.substring(0, 50) + '...');
+                } else {
+                    showTestResult('❌ 로그인 실패!\n\nStatus: ' + response.status + '\n\n' + JSON.stringify(data, null, 2), true);
+                }
+            } catch (error) {
+                showTestResult('❌ 로그인 실패!\n\n' + error.message + '\n\n(CORS 오류일 수 있습니다)', true);
+            }
+        }
+    </script>
+</body>
+</html>

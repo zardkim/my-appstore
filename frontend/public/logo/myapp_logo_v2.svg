@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#11998e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38ef7d;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="200" height="200" rx="40" fill="url(#bg2)"/>
+  
+  <g transform="translate(100, 80)">
+    <!-- 3x3 App grid -->
+    <rect x="-40" y="-25" width="22" height="22" rx="5" fill="white" opacity="0.95"/>
+    <rect x="-11" y="-25" width="22" height="22" rx="5" fill="white" opacity="0.95"/>
+    <rect x="18" y="-25" width="22" height="22" rx="5" fill="white" opacity="0.95"/>
+    
+    <rect x="-40" y="4" width="22" height="22" rx="5" fill="white" opacity="0.85"/>
+    <rect x="-11" y="4" width="22" height="22" rx="5" fill="white" opacity="0.85"/>
+    <rect x="18" y="4" width="22" height="22" rx="5" fill="white" opacity="0.85"/>
+    
+    <rect x="-40" y="33" width="22" height="22" rx="5" fill="white" opacity="0.75"/>
+    <rect x="-11" y="33" width="22" height="22" rx="5" fill="white" opacity="0.75"/>
+    <rect x="18" y="33" width="22" height="22" rx="5" fill="white" opacity="0.75"/>
+  </g>
+  
+  <text x="100" y="160" font-family="Arial, sans-serif" font-size="20" font-weight="bold" 
+        text-anchor="middle" fill="white">myapp</text>
+  <text x="100" y="178" font-family="Arial, sans-serif" font-size="14" 
+        text-anchor="middle" fill="white" opacity="0.9">STORE</text>
+</svg>
