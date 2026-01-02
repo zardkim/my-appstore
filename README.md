@@ -11,7 +11,7 @@
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![Vue.js](https://img.shields.io/badge/vue.js-3-green.svg)](https://vuejs.org/)
 
-[기능 소개](#-주요-기능) • [빠른 시작](#-빠른-시작) • [설치 가이드](#-설치-및-배포) • [문서](#-문서)
+[기능 소개](#-주요-기능) • [빠른 시작](#-빠른-시작) • [환경 변수](#-환경-변수) • [문서](#-문서)
 
 </div>
 
@@ -19,7 +19,7 @@
 
 ## 📖 소개
 
-**MyApp Store**는 NAS에 저장된 소프트웨어 파일들을 자동으로 스캔하고, AI를 활용하여 메타데이터(설명, 아이콘, 제조사, 카테고리)를 생성한 뒤, Netflix 스타일의 세련된 웹 UI로 제공하는 개인용 소프트웨어 라이브러리 관리 시스템입니다.
+**MyApp Store**는 NAS에 저장된 소프트웨어 파일들을 자동으로 스캔하고, AI를 활용하여 메타데이터(설명, 아이콘, 제조사, 카테고리)를 생성한 뒤, 세련된 웹 UI로 제공하는 개인용 소프트웨어 라이브러리 관리 시스템입니다.
 
 ### 핵심 가치
 
@@ -38,27 +38,17 @@
 ### 🔍 자동 메타데이터 생성 (AI 기반)
 
 - **파일명 분석**: `Adobe_Photoshop_2024_v25.0.iso` → `Adobe`, `Photoshop`, `2024` 추출
-- **AI 쿼리**: OpenAI GPT-4o-mini, Gemini, Claude, Azure OpenAI 지원
-- **멀티소스 크롤링**: 9개 소스에서 병렬 검색
-  - **Priority 1**: Softpedia, GitHub, Archive.org
-  - **Priority 2**: FileHippo, SourceForge, GitLab
-  - **Priority 3**: DuckDuckGo, Bing
-  - **Priority 4**: AlternativeTo
+- **AI 쿼리**: OpenAI GPT-4o-mini, Google Gemini 지원
 - **로컬 캐싱**: 아이콘과 메타데이터를 NAS에 저장
-
-### 📅 자동 스캔 스케줄러
-
-- **Cron 표현식**: 원하는 시간에 자동 스캔 (예: `0 2 * * *` = 매일 새벽 2시)
-- **APScheduler**: 백그라운드에서 실행되는 자동 스캔
-- **이력 관리**: 스캔 결과 및 통계 추적
+- **Fallback 메커니즘**: AI 실패 시 파일명 파싱으로 대체
 
 ### 🎯 버전 관리
 
 - **폴더 = 제품**: 각 폴더를 하나의 소프트웨어로 인식
 - **파일 = 버전**: 폴더 내 파일들을 버전으로 관리
-- **다운로드 최적화**: X-Accel-Redirect를 통한 고속 다운로드
+- **다운로드 최적화**: 파일 다운로드 기능
 
-### 🖥️ Netflix 스타일 UI
+### 🖥️ 사용자 인터페이스
 
 - **카테고리별 정렬**: 그래픽, 개발, 오피스, 미디어 등 20개 카테고리
 - **검색 및 필터**: 실시간 검색, 자동완성, 필터링
@@ -96,7 +86,6 @@
 - **Redis 7** - 캐싱 및 세션 관리
 - **SQLAlchemy** - ORM
 - **Alembic** - 데이터베이스 마이그레이션
-- **APScheduler** - 스케줄링
 
 ### Frontend
 - **Vue.js 3** - Composition API
@@ -106,17 +95,14 @@
 - **Axios** - HTTP 클라이언트
 - **TinyMCE** - 리치 텍스트 에디터
 
-### AI & 크롤링
+### AI
 - **OpenAI API** - GPT-4o-mini
 - **Google Gemini** - Gemini Pro
-- **Anthropic Claude** - Claude 3
-- **Azure OpenAI** - Azure 통합
-- **HTTPX** - 비동기 HTTP 클라이언트
 
 ### Deployment
 - **Docker & Docker Compose** - 컨테이너화
-- **Nginx** - 프론트엔드 서빙 및 리버스 프록시
-- **Uvicorn** - ASGI 서버 (멀티 워커)
+- **Nginx** - 프론트엔드 서빙
+- **Uvicorn** - ASGI 서버
 
 ---
 
@@ -132,8 +118,8 @@
 ### 1. 저장소 클론
 
 ```bash
-git clone https://github.com/your-username/myappStore.git
-cd myappStore
+git clone https://github.com/zardkim/my-appstore.git
+cd my-appstore
 ```
 
 ### 2. 환경변수 설정
@@ -142,7 +128,7 @@ cd myappStore
 # 환경변수 파일 생성
 cp .env.production.example .env.production
 
-# 필수 변경 사항
+# 환경변수 파일 편집
 nano .env.production
 ```
 
@@ -160,15 +146,23 @@ VITE_API_BASE_URL=http://your-server-ip:8100/api
 VITE_APP_URL=http://your-server-ip:5900
 ```
 
-### 3. 빌드 및 실행
+### 3. Docker Compose로 실행
+
+#### 개발 환경
 
 ```bash
-# 자동 빌드 스크립트 (권장)
-./build-and-test.sh
+docker-compose up -d
+```
 
-# 또는 수동 실행
+#### 프로덕션 환경
+
+```bash
+# 빌드 및 실행
 docker-compose -f docker-compose.prod.yml --env-file .env.production build
 docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+
+# 또는 자동 빌드 스크립트 사용 (권장)
+./build-and-test.sh
 ```
 
 ### 4. 접속
@@ -184,7 +178,154 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 2. 관리자 계정 생성
 3. 스캔 경로 설정 (예: `/library`)
 4. AI API 키 입력 (선택사항)
-5. 자동 스캔 스케줄 설정
+
+---
+
+## 🐳 Docker Compose 설정
+
+### docker-compose.yml (개발 환경)
+
+```yaml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: myapp-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: myappstore
+    volumes:
+      - ./data/db/postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: myapp-redis
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    container_name: myapp-backend
+    volumes:
+      - ./backend:/app
+      - ./data/icons:/app/static/icons
+      - ./data/library:/library
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/myappstore
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-secret-key-change-this
+    ports:
+      - "8100:8100"
+    depends_on:
+      - db
+      - redis
+
+  frontend:
+    build: ./frontend
+    container_name: myapp-frontend
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5900:5900"
+    depends_on:
+      - backend
+```
+
+### NAS 폴더 마운트 예시
+
+NAS의 소프트웨어 폴더를 컨테이너에 마운트하려면:
+
+```yaml
+backend:
+  volumes:
+    # 기존 볼륨
+    - ./backend:/app
+    - ./data/icons:/app/static/icons
+    - ./data/library:/library
+    # NAS 폴더 추가 (읽기 전용 권장)
+    - /volume1/Software:/library/NAS:ro
+```
+
+---
+
+## 🔧 환경 변수
+
+### 데이터베이스 설정
+
+| 변수 | 설명 | 필수 | 기본값 | 예시 |
+|------|------|------|--------|------|
+| `POSTGRES_USER` | PostgreSQL 사용자명 | ✅ | `postgres` | `postgres` |
+| `POSTGRES_PASSWORD` | PostgreSQL 비밀번호 | ✅ | - | `strong-password-123` |
+| `POSTGRES_DB` | 데이터베이스 이름 | ✅ | `myappstore` | `myappstore` |
+| `DATABASE_URL` | 데이터베이스 연결 URL | ✅ | - | `postgresql://user:pass@db:5432/myappstore` |
+
+### Redis 설정
+
+| 변수 | 설명 | 필수 | 기본값 | 예시 |
+|------|------|------|--------|------|
+| `REDIS_URL` | Redis 연결 URL | ✅ | - | `redis://redis:6379/0` |
+| `REDIS_PASSWORD` | Redis 비밀번호 | ❌ | - | `redis-password-123` |
+
+### 보안 설정
+
+| 변수 | 설명 | 필수 | 기본값 | 예시 |
+|------|------|------|--------|------|
+| `SECRET_KEY` | JWT 토큰 서명 키 | ✅ | - | `openssl rand -hex 32` 생성 |
+| `ALGORITHM` | JWT 알고리즘 | ❌ | `HS256` | `HS256` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | 토큰 만료 시간 (분) | ❌ | `30` | `30` |
+
+### AI 설정
+
+| 변수 | 설명 | 필수 | 기본값 | 예시 |
+|------|------|------|--------|------|
+| `OPENAI_API_KEY` | OpenAI API 키 | ❌ | - | `sk-...` |
+| `GEMINI_API_KEY` | Google Gemini API 키 | ❌ | - | `AI...` |
+
+### 경로 설정
+
+| 변수 | 설명 | 필수 | 기본값 | 예시 |
+|------|------|------|--------|------|
+| `SCAN_BASE_PATH` | 스캔할 기본 경로 | ✅ | `/library` | `/library` |
+| `ICON_CACHE_DIR` | 아이콘 캐시 디렉토리 | ✅ | `/app/static/icons` | `/app/static/icons` |
+| `CONFIG_DATA_DIR` | 설정 파일 디렉토리 | ✅ | `/app/data` | `/app/data` |
+
+### CORS 설정
+
+| 변수 | 설명 | 필수 | 기본값 | 예시 |
+|------|------|------|--------|------|
+| `CORS_ORIGINS` | 허용할 프론트엔드 도메인 | ✅ | `*` | `http://localhost:5900,http://192.168.0.8:5900` |
+
+### 서버 설정
+
+| 변수 | 설명 | 필수 | 기본값 | 예시 |
+|------|------|------|--------|------|
+| `HOST` | 백엔드 호스트 | ❌ | `0.0.0.0` | `0.0.0.0` |
+| `PORT` | 백엔드 포트 | ❌ | `8100` | `8100` |
+| `FRONTEND_PORT` | 프론트엔드 포트 | ❌ | `5900` | `5900` |
+
+### 로깅 설정
+
+| 변수 | 설명 | 필수 | 기본값 | 예시 |
+|------|------|------|--------|------|
+| `LOG_LEVEL` | 로그 레벨 | ❌ | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `LOG_DIR` | 로그 디렉토리 | ❌ | `/app/data/logs` | `/app/data/logs` |
+| `ENVIRONMENT` | 실행 환경 | ❌ | `development` | `development`, `production` |
+
+### 프론트엔드 환경변수
+
+| 변수 | 설명 | 필수 | 기본값 | 예시 |
+|------|------|------|--------|------|
+| `VITE_API_BASE_URL` | 백엔드 API URL | ✅ | - | `http://localhost:8100/api` |
+| `VITE_BACKEND_URL` | 백엔드 기본 URL | ✅ | - | `http://localhost:8100` |
+| `VITE_APP_URL` | 프론트엔드 URL | ✅ | - | `http://localhost:5900` |
+
+**전체 환경변수 목록**: [.env.production.example](.env.production.example) 참조
 
 ---
 
@@ -193,7 +334,7 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 자세한 설치 및 배포 가이드는 다음 문서를 참조하세요:
 
 - **[QUICKSTART.md](QUICKSTART.md)** - 빠른 시작 가이드
-- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - 상세 배포 가이드 (200+ 라인)
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - 상세 배포 가이드
 
 ### 개발 모드 실행
 
@@ -216,59 +357,6 @@ npm run dev
 
 ---
 
-## 📂 프로젝트 구조
-
-```
-myappStore/
-├── backend/                    # FastAPI 백엔드
-│   ├── app/
-│   │   ├── api/               # API 라우터 (17개)
-│   │   ├── core/              # 핵심 비즈니스 로직
-│   │   │   ├── ai_metadata.py         # AI 메타데이터 생성
-│   │   │   ├── scanner.py             # 파일 스캐너
-│   │   │   ├── scheduler.py           # 자동 스캔 스케줄러
-│   │   │   ├── icon_cache.py          # 아이콘 캐싱
-│   │   │   ├── redis_cache.py         # Redis 캐시
-│   │   │   └── logger.py              # 로깅 시스템
-│   │   ├── models/            # SQLAlchemy 모델 (10개)
-│   │   ├── schemas/           # Pydantic 스키마
-│   │   ├── middleware/        # 미들웨어 (로깅)
-│   │   ├── config.py          # 설정 관리
-│   │   └── main.py            # FastAPI 앱
-│   ├── alembic/               # 데이터베이스 마이그레이션
-│   ├── tests/                 # 테스트 코드
-│   ├── Dockerfile.prod        # 프로덕션 Dockerfile
-│   └── requirements.txt
-├── frontend/                   # Vue.js 프론트엔드
-│   ├── src/
-│   │   ├── api/               # API 클라이언트
-│   │   ├── components/        # 재사용 컴포넌트
-│   │   ├── views/             # 페이지 뷰 (10개)
-│   │   ├── router/            # Vue Router
-│   │   ├── store/             # Pinia 스토어
-│   │   └── main.js
-│   ├── Dockerfile.prod        # 프로덕션 Dockerfile
-│   ├── nginx.conf             # Nginx 설정
-│   └── package.json
-├── data/                       # 데이터 볼륨
-│   ├── db/                    # PostgreSQL 데이터
-│   ├── logs/                  # 애플리케이션 로그
-│   ├── icons/                 # 캐시된 아이콘
-│   ├── screenshots/           # 스크린샷
-│   ├── library/               # 소프트웨어 라이브러리
-│   └── config/                # 설정 파일
-├── docker-compose.yml         # 개발 환경
-├── docker-compose.prod.yml    # 프로덕션 환경
-├── .env.production.example    # 환경변수 템플릿
-├── build-and-test.sh          # 자동 빌드 스크립트
-├── DEPLOYMENT_GUIDE.md        # 배포 가이드
-├── QUICKSTART.md              # 빠른 시작 가이드
-├── CLAUDE.md                  # 프로젝트 아키텍처 문서
-└── README.md                  # 이 파일
-```
-
----
-
 ## 📚 문서
 
 ### 사용자 가이드
@@ -287,43 +375,18 @@ myappStore/
 
 ---
 
-## 🔧 환경 변수
-
-### 필수 환경변수
-
-| 변수 | 설명 | 예시 |
-|------|------|------|
-| `SECRET_KEY` | JWT 토큰 서명 키 | `openssl rand -hex 32` |
-| `POSTGRES_PASSWORD` | PostgreSQL 비밀번호 | `strong-password` |
-| `CORS_ORIGINS` | 허용할 프론트엔드 도메인 | `http://localhost:5900` |
-| `VITE_API_BASE_URL` | 백엔드 API URL | `http://localhost:8100/api` |
-
-### 선택 환경변수
-
-| 변수 | 설명 | 기본값 |
-|------|------|--------|
-| `OPENAI_API_KEY` | OpenAI API 키 | - |
-| `REDIS_PASSWORD` | Redis 비밀번호 | - |
-| `LOG_LEVEL` | 로그 레벨 | `INFO` |
-| `FRONTEND_PORT` | 프론트엔드 포트 | `5900` |
-| `BACKEND_PORT` | 백엔드 포트 | `8100` |
-
-전체 환경변수 목록은 [.env.production.example](.env.production.example) 참조
-
----
-
 ## 🎯 사용 예시
 
 ### 1. 소프트웨어 라이브러리 스캔
 
 ```bash
 # NAS 폴더를 /library에 마운트
-# docker-compose.prod.yml에서 설정:
+# docker-compose.yml에서 설정:
 volumes:
   - /volume1/Software:/library/NAS:ro
 
 # 관리자 페이지에서 스캔 경로 추가: /library/NAS
-# 수동 스캔 또는 자동 스캔 스케줄 설정
+# 수동 스캔 실행
 ```
 
 ### 2. AI 메타데이터 생성
@@ -339,21 +402,6 @@ OPENAI_API_KEY=sk-...
 # - 제조사: "Adobe Inc."
 # - 카테고리: "Graphics"
 # - 아이콘: 공식 아이콘 다운로드
-```
-
-### 3. 자동 스캔 스케줄
-
-```bash
-# 관리자 페이지 → 스케줄러 설정
-# Cron 표현식: 0 2 * * *  (매일 새벽 2시)
-# 스캔 경로: /library
-# AI 사용: 활성화
-
-# 스케줄러가 자동으로:
-# - 새 소프트웨어 감지
-# - 메타데이터 생성
-# - 아이콘 다운로드
-# - 데이터베이스 업데이트
 ```
 
 ---
@@ -388,7 +436,7 @@ cat backup_20260103.sql | docker exec -i myapp-db-prod psql -U postgres myappsto
 
 ```bash
 # 로그 확인
-docker-compose -f docker-compose.prod.yml logs backend
+docker-compose logs backend
 
 # 일반적인 원인:
 # - 환경변수 오류
@@ -400,10 +448,10 @@ docker-compose -f docker-compose.prod.yml logs backend
 
 ```bash
 # PostgreSQL 상태 확인
-docker exec myapp-db-prod pg_isready -U postgres
+docker exec myapp-db pg_isready -U postgres
 
 # 연결 문자열 확인
-docker-compose -f docker-compose.prod.yml exec backend env | grep DATABASE_URL
+docker-compose exec backend env | grep DATABASE_URL
 ```
 
 ### 프론트엔드에서 백엔드 접속 안 됨
@@ -446,8 +494,8 @@ curl http://localhost:8100/debug-cors
 
 ## 📞 지원 및 문의
 
-- **GitHub Issues**: [Issues 페이지](https://github.com/your-username/myappStore/issues)
-- **문서**: [Documentation](https://github.com/your-username/myappStore/wiki)
+- **GitHub Issues**: [Issues 페이지](https://github.com/zardkim/my-appstore/issues)
+- **문서**: [Documentation](https://github.com/zardkim/my-appstore/wiki)
 
 ---
 
@@ -461,6 +509,7 @@ curl http://localhost:8100/debug-cors
 - [Redis](https://redis.io/) - 인메모리 데이터 구조 저장소
 - [Docker](https://www.docker.com/) - 컨테이너 플랫폼
 - [OpenAI](https://openai.com/) - AI API
+- [Google Gemini](https://ai.google.dev/) - AI API
 
 ---
 
@@ -476,15 +525,12 @@ curl http://localhost:8100/debug-cors
 
 ### ✅ Phase 2: AI 메타데이터 엔진 (완료)
 - ✅ 파일명 파싱 알고리즘
-- ✅ AI 메타데이터 자동 생성 (OpenAI, Gemini, Claude, Azure)
+- ✅ AI 메타데이터 자동 생성 (OpenAI, Gemini)
 - ✅ 아이콘 이미지 다운로드 및 로컬 캐싱
-- ✅ 멀티소스 웹 크롤링 (9개 소스)
 - ✅ Fallback 메커니즘
 
 ### ✅ Phase 3: 고급 기능 (완료)
-- ✅ 자동 스캔 스케줄러 (APScheduler + Cron)
-- ✅ 다운로드 최적화 (X-Accel-Redirect)
-- ✅ 스캔 이력 추적
+- ✅ 다운로드 최적화
 - ✅ 고급 검색 및 필터링
 - ✅ 카테고리별 제품 그룹화
 - ✅ 커뮤니티 게시판
@@ -492,7 +538,7 @@ curl http://localhost:8100/debug-cors
 - ✅ 프로덕션 빌드 설정
 
 ### 🔄 향후 개선 계획
-- [ ] Elasticsearch 연동으로 검색 고도화
+- [ ] 자동 스캔 스케줄러 (APScheduler + Cron)
 - [ ] 다운로드 통계 및 인기 소프트웨어 추적
 - [ ] 사용자별 다운로드 히스토리
 - [ ] 알림 기능 (이메일/웹훅)
