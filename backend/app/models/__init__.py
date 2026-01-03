@@ -9,6 +9,9 @@ from app.models.scrap import Scrap
 from app.models.post import Post
 from app.models.comment import Comment
 from app.models.filename_violation import FilenameViolation
+from app.models.invitation import Invitation
+from app.models.metadata_cache import MetadataCache
+from app.models.unmatched_item import UnmatchedItem
 
 __all__ = [
     "User",
@@ -23,4 +26,7 @@ __all__ = [
     "Post",
     "Comment",
     "FilenameViolation",
+    "Invitation",
+    "MetadataCache",
+    "UnmatchedItem",
 ]
