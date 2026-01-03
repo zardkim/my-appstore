@@ -2,13 +2,16 @@
   <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4 px-6">
     <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
       <div class="flex items-center space-x-4">
-        <span>&copy; {{ currentYear }} MyApp Store. {{ $t('footer.copyright') }}</span>
+        <span>
+          <a href="https://discord.gg/tbG3EwsY" target="_blank" rel="noopener noreferrer" class="hover:text-gray-900 dark:hover:text-white transition-colors">zardkim</a>
+          &copy; {{ currentYear }} MyApp Store. {{ $t('footer.copyright') }}
+        </span>
         <span class="text-gray-400 dark:text-gray-600">|</span>
         <span>{{ $t('footer.subtitle') }}</span>
       </div>
       <div class="flex items-center space-x-4">
         <a
-          href="https://github.com/yourusername/myappstore"
+          href="https://github.com/zardkim/my-appstore"
           target="_blank"
           rel="noopener noreferrer"
           class="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
@@ -19,7 +22,7 @@
           <span>GitHub</span>
         </a>
         <span class="text-gray-400 dark:text-gray-600">|</span>
-        <span class="text-xs">v{{ version }}</span>
+        <span class="text-xs">v{{ appVersion }}</span>
       </div>
     </div>
   </footer>
@@ -27,8 +30,8 @@
 
 <script setup>
 import { computed } from 'vue'
-import packageJson from '../../../package.json'
+import { version } from '../../version.js'
 
 const currentYear = computed(() => new Date().getFullYear())
-const version = packageJson.version
+const appVersion = version
 </script>

@@ -5,11 +5,10 @@
     <div class="flex items-center justify-between px-4 py-5 border-b border-gray-200 dark:border-gray-700">
       <div v-if="!isCollapsed" class="flex items-center space-x-3">
         <div class="w-9 h-9 flex items-center justify-center">
-          <img src="/logo/myapp_logo_v4.svg" alt="MyApp Store" class="w-9 h-9" />
+          <img src="/logo/myapp_logo_v2.svg" alt="MyApp Store" class="w-9 h-9" />
         </div>
         <div>
           <h1 class="font-bold text-gray-900 dark:text-white">MyApp Store</h1>
-          <p class="text-xs text-gray-500 dark:text-gray-400">v{{ version }}</p>
         </div>
       </div>
       <button
@@ -290,14 +289,11 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
-import packageJson from '../../../package.json'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
-
-const version = packageJson.version
 
 const isCollapsed = ref(false)
 const showUserMenu = ref(false)

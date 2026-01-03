@@ -255,29 +255,39 @@ backend:
 
 ## 🔧 환경 변수
 
+**표기 설명**:
+- ✅ **필수**: 반드시 설정해야 하는 환경변수
+- ⚙️ **기본값 제공**: 환경변수 미설정 시 기본값 사용. 필요시 커스터마이징 가능
+- ❌ **선택**: 해당 기능 사용 시에만 필요
+
 ### 데이터베이스 설정
 
 | 변수 | 설명 | 필수 | 기본값 | 예시 |
 |------|------|------|--------|------|
-| `POSTGRES_USER` | PostgreSQL 사용자명 | ✅ | `postgres` | `postgres` |
-| `POSTGRES_PASSWORD` | PostgreSQL 비밀번호 | ✅ | - | `strong-password-123` |
-| `POSTGRES_DB` | 데이터베이스 이름 | ✅ | `myappstore` | `myappstore` |
-| `DATABASE_URL` | 데이터베이스 연결 URL | ✅ | - | `postgresql://user:pass@db:5432/myappstore` |
+| `POSTGRES_USER` | PostgreSQL 사용자명 | ⚙️ | `postgres` | `postgres` |
+| `POSTGRES_PASSWORD` | PostgreSQL 비밀번호 | ✅ | `password` | `strong-password-123` |
+| `POSTGRES_DB` | 데이터베이스 이름 | ⚙️ | `myappstore` | `myappstore` |
+| `DATABASE_URL` | 데이터베이스 연결 URL | ⚙️ | `postgresql://postgres:password@db:5432/myappstore` | `postgresql://user:pass@db:5432/myappstore` |
+
+> **🔒 보안 주의**: `POSTGRES_PASSWORD`는 프로덕션 환경에서 **반드시** 강력한 비밀번호로 변경하세요!
 
 ### Redis 설정
 
 | 변수 | 설명 | 필수 | 기본값 | 예시 |
 |------|------|------|--------|------|
-| `REDIS_URL` | Redis 연결 URL | ✅ | - | `redis://redis:6379/0` |
-| `REDIS_PASSWORD` | Redis 비밀번호 | ❌ | - | `redis-password-123` |
+| `REDIS_URL` | Redis 연결 URL (비밀번호 포함 가능) | ⚙️ | `redis://localhost:6379/0` | `redis://:password@redis:6379/0` |
+
+> **💡 참고**: Redis에 비밀번호가 설정된 경우 URL에 포함: `redis://:비밀번호@호스트:포트/DB번호`
 
 ### 보안 설정
 
 | 변수 | 설명 | 필수 | 기본값 | 예시 |
 |------|------|------|--------|------|
 | `SECRET_KEY` | JWT 토큰 서명 키 | ✅ | - | `openssl rand -hex 32` 생성 |
-| `ALGORITHM` | JWT 알고리즘 | ❌ | `HS256` | `HS256` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | 토큰 만료 시간 (분) | ❌ | `30` | `30` |
+| `ALGORITHM` | JWT 알고리즘 | ⚙️ | `HS256` | `HS256` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | 토큰 만료 시간 (분) | ⚙️ | `30` | `30` |
+
+> **⚙️ 기본값 제공**: 환경변수 미설정 시 기본값 사용. 프로덕션에서는 보안 요구사항에 맞게 조정 권장
 
 ### AI 설정
 
@@ -290,31 +300,35 @@ backend:
 
 | 변수 | 설명 | 필수 | 기본값 | 예시 |
 |------|------|------|--------|------|
-| `SCAN_BASE_PATH` | 스캔할 기본 경로 | ✅ | `/library` | `/library` |
-| `ICON_CACHE_DIR` | 아이콘 캐시 디렉토리 | ✅ | `/app/static/icons` | `/app/static/icons` |
-| `CONFIG_DATA_DIR` | 설정 파일 디렉토리 | ✅ | `/app/data` | `/app/data` |
+| `SCAN_BASE_PATH` | 스캔할 기본 경로 | ⚙️ | `/library` | `/library` |
+| `ICON_CACHE_DIR` | 아이콘 캐시 디렉토리 | ⚙️ | `/app/static/icons` | `/app/static/icons` |
+| `CONFIG_DATA_DIR` | 설정 파일 디렉토리 | ⚙️ | `/app/data` | `/app/data` |
+
+> **⚙️ 기본값 제공**: Docker 환경에서 자동 설정. 커스터마이징 필요시에만 변경
 
 ### CORS 설정
 
 | 변수 | 설명 | 필수 | 기본값 | 예시 |
 |------|------|------|--------|------|
-| `CORS_ORIGINS` | 허용할 프론트엔드 도메인 | ✅ | `*` | `http://localhost:5900,http://192.168.0.8:5900` |
+| `CORS_ORIGINS` | 허용할 프론트엔드 도메인 | ⚙️ | `http://localhost:5900,http://localhost:3000` | `http://localhost:5900,http://192.168.0.8:5900` |
+
+> **⚙️ 기본값 제공**: 로컬 개발용 기본 설정. 프로덕션에서는 실제 도메인으로 변경 권장 (`*`는 보안상 권장하지 않음)
 
 ### 서버 설정
 
 | 변수 | 설명 | 필수 | 기본값 | 예시 |
 |------|------|------|--------|------|
-| `HOST` | 백엔드 호스트 | ❌ | `0.0.0.0` | `0.0.0.0` |
-| `PORT` | 백엔드 포트 | ❌ | `8100` | `8100` |
-| `FRONTEND_PORT` | 프론트엔드 포트 | ❌ | `5900` | `5900` |
+| `HOST` | 백엔드 호스트 | ⚙️ | `0.0.0.0` | `0.0.0.0` |
+| `PORT` | 백엔드 포트 | ⚙️ | `8100` | `8100` |
+| `FRONTEND_PORT` | 프론트엔드 포트 | ⚙️ | `5900` | `5900` |
 
 ### 로깅 설정
 
 | 변수 | 설명 | 필수 | 기본값 | 예시 |
 |------|------|------|--------|------|
-| `LOG_LEVEL` | 로그 레벨 | ❌ | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
-| `LOG_DIR` | 로그 디렉토리 | ❌ | `/app/data/logs` | `/app/data/logs` |
-| `ENVIRONMENT` | 실행 환경 | ❌ | `development` | `development`, `production` |
+| `LOG_LEVEL` | 로그 레벨 | ⚙️ | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `LOG_DIR` | 로그 디렉토리 | ⚙️ | `/app/data/logs` | `/app/data/logs` |
+| `ENVIRONMENT` | 실행 환경 | ⚙️ | `development` | `development`, `production` |
 
 ### 프론트엔드 환경변수
 
@@ -365,7 +379,6 @@ npm run dev
 ### API 문서
 - **Swagger UI**: http://localhost:8100/docs
 - **ReDoc**: http://localhost:8100/redoc
-- **API 상태 페이지**: http://localhost:8100/api-status
 
 ### 개발자 가이드
 - [CLAUDE.md](CLAUDE.md) - 프로젝트 개요 및 아키텍처
@@ -550,7 +563,7 @@ curl http://localhost:8100/debug-cors
 
 **MyApp Store**로 소프트웨어 라이브러리를 아름답게 관리하세요! 🎉
 
-Made with ❤️
+Made by [zardkim](https://github.com/zardkim) (.feat Claude)
 
 [⬆ 맨 위로](#myapp-store)
 
