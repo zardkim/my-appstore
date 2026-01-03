@@ -170,7 +170,6 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 - **프론트엔드**: http://localhost:5900
 - **백엔드 API**: http://localhost:8100
 - **API 문서**: http://localhost:8100/docs
-- **API 상태**: http://localhost:8100/api-status
 
 ### 5. 초기 설정
 
