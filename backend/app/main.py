@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 import os
 from pathlib import Path
 import logging
@@ -38,10 +39,138 @@ for directory in required_directories:
 
 from app.version import get_version
 
+# API 문서용 태그 메타데이터
+tags_metadata = [
+    {
+        "name": "Authentication",
+        "description": "사용자 인증 및 계정 관리 (로그인, 회원가입, 비밀번호 변경)",
+    },
+    {
+        "name": "Products",
+        "description": "제품(소프트웨어) 관리 - 목록 조회, 상세 정보, 검색, 통계",
+    },
+    {
+        "name": "Users",
+        "description": "사용자 관리 (관리자 전용)",
+    },
+    {
+        "name": "Invitations",
+        "description": "초대 코드 관리 (관리자 전용)",
+    },
+    {
+        "name": "Scan",
+        "description": "파일 시스템 스캔 및 메타데이터 생성",
+    },
+    {
+        "name": "Download",
+        "description": "파일 다운로드",
+    },
+    {
+        "name": "Scheduler",
+        "description": "자동 스캔 스케줄러 관리",
+    },
+    {
+        "name": "Filesystem",
+        "description": "파일 시스템 탐색기",
+    },
+    {
+        "name": "Favorites",
+        "description": "즐겨찾기 관리",
+    },
+    {
+        "name": "Scraps",
+        "description": "스크랩(북마크) 관리",
+    },
+    {
+        "name": "Config",
+        "description": "설정 관리",
+    },
+    {
+        "name": "Metadata",
+        "description": "AI 메타데이터 생성 및 관리",
+    },
+    {
+        "name": "Unmatched",
+        "description": "매칭되지 않은 파일 관리",
+    },
+    {
+        "name": "Posts",
+        "description": "게시판(팁&테크) 게시글 관리",
+    },
+    {
+        "name": "Comments",
+        "description": "댓글 관리",
+    },
+    {
+        "name": "Images",
+        "description": "이미지 검색 및 업로드",
+    },
+    {
+        "name": "Filename Violations",
+        "description": "파일명 규칙 위반 관리",
+    },
+    {
+        "name": "Version",
+        "description": "버전 정보",
+    },
+    {
+        "name": "Cache",
+        "description": "캐시 관리 (Redis)",
+    },
+]
+
 app = FastAPI(
     title="MyApp Store API",
-    description="NAS-based personal software library management system",
-    version=get_version()
+    description="""
+# MyApp Store API
+
+NAS 기반 개인 소프트웨어 라이브러리 관리 시스템
+
+## 주요 기능
+
+* **AI 메타데이터 생성**: OpenAI GPT-4o-mini, Google Gemini를 활용한 자동 메타데이터 생성
+* **파일 스캔**: 폴더 구조 기반 자동 소프트웨어 감지 및 버전 관리
+* **사용자 인증**: JWT 기반 인증 시스템
+* **게시판**: 팁&테크 공유 게시판
+* **즐겨찾기/스크랩**: 개인화된 소프트웨어 관리
+* **스케줄러**: 자동 스캔 스케줄링 (Cron 표현식 지원)
+* **Redis 캐싱**: 빠른 응답을 위한 캐시 시스템
+
+## 기술 스택
+
+* FastAPI (Python 3.11+)
+* PostgreSQL
+* Redis
+* SQLAlchemy ORM
+* Alembic (마이그레이션)
+* JWT 인증
+* OpenAI & Google Gemini API
+
+## 인증
+
+대부분의 API는 JWT 토큰 기반 인증이 필요합니다.
+
+1. `/api/auth/login`으로 로그인
+2. 받은 `access_token`을 `Authorization: Bearer <token>` 헤더에 포함
+
+## 바로가기
+
+* [API 상태 페이지](/api-status)
+* [Health Check](/health)
+* [버전 정보](/api/version)
+    """,
+    version=get_version(),
+    openapi_tags=tags_metadata,
+    docs_url="/docs",
+    redoc_url=None,  # 커스텀 ReDoc 사용
+    openapi_url="/openapi.json",
+    contact={
+        "name": "MyApp Store",
+        "url": "https://github.com/zardkim/my-appstore",
+    },
+    license_info={
+        "name": "MIT License",
+    },
 )
 
 # CORS configuration - 환경변수에서 동적 로드
@@ -153,11 +282,58 @@ async def shutdown_event():
 
 @app.get("/")
 async def root():
+    """API 루트 엔드포인트"""
     return {
         "message": "MyApp Store API",
-        "version": "3.0.0",
-        "phase": "Phase 3 - Advanced Features",
-        "docs": "/docs"
+        "version": get_version(),
+        "status": "running",
+        "docs": "/docs",
+        "redoc": "/redoc",
+        "openapi": "/openapi.json",
+        "health": "/health"
+    }
+
+@app.get("/api")
+async def api_info():
+    """API 정보 엔드포인트"""
+    return {
+        "name": "MyApp Store API",
+        "version": get_version(),
+        "description": "NAS 기반 개인 소프트웨어 라이브러리 관리 시스템",
+        "documentation": {
+            "swagger": "http://localhost:8100/docs",
+            "redoc": "http://localhost:8100/redoc",
+            "openapi_schema": "http://localhost:8100/openapi.json"
+        },
+        "endpoints": {
+            "authentication": "/api/auth",
+            "products": "/api/products",
+            "users": "/api/users",
+            "scan": "/api/scan",
+            "download": "/api/download",
+            "scheduler": "/api/scheduler",
+            "filesystem": "/api/filesystem",
+            "favorites": "/api/favorites",
+            "scraps": "/api/scraps",
+            "config": "/api/config",
+            "metadata": "/api/metadata",
+            "posts": "/api/posts",
+            "images": "/api/images",
+            "cache": "/api/cache",
+            "version": "/api/version"
+        },
+        "features": [
+            "AI 메타데이터 생성 (OpenAI GPT-4o-mini, Google Gemini)",
+            "파일 시스템 자동 스캔",
+            "JWT 기반 인증",
+            "게시판 (팁&테크)",
+            "즐겨찾기/스크랩",
+            "자동 스캔 스케줄러",
+            "Redis 캐싱"
+        ],
+        "contact": {
+            "github": "https://github.com/zardkim/my-appstore"
+        }
     }
 
 @app.get("/debug-cors")
@@ -166,6 +342,33 @@ async def debug_cors():
         "configured_origins": settings.get_cors_origins(),
         "message": "Current CORS origins from environment variables"
     }
+
+
+@app.get("/redoc", response_class=HTMLResponse)
+async def redoc_html():
+    """커스텀 ReDoc 문서 페이지"""
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>MyApp Store API - ReDoc</title>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+        <link rel="shortcut icon" href="https://fastapi.tiangolo.com/img/favicon.png">
+        <style>
+            body {{
+                margin: 0;
+                padding: 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <redoc spec-url="/openapi.json"></redoc>
+        <script src="https://cdn.jsdelivr.net/npm/redoc@2.1.3/bundles/redoc.standalone.js"></script>
+    </body>
+    </html>
+    """
 
 
 @app.get("/health")
