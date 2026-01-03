@@ -9,18 +9,37 @@ class FilenameParser:
 
     # 제거할 일반적인 키워드 (노이즈)
     NOISE_WORDS = {
-        'setup', 'installer', 'install', 'portable', 'full', 'final',
-        'crack', 'keygen', 'patch', 'x64', 'x86', 'win', 'mac', 'linux',
-        'multilingual', 'retail', 'incl', 'repack', 'cracked', 'pre',
-        'activated', 'registered',
-        'bits', 'bit', 'dvd', 'cd', 'iso', 'img', 'exe', 'msi', 'zip', 'rar',
-        'ssq', 'sse', 'rg', 'tbe', 'fosi', 'xforce', 'team'  # 릴리즈 그룹
+        # 설치 관련
+        'setup', 'installer', 'install', 'portable', 'full', 'final', 'with',
+        # 크랙/인증 관련
+        'crack', 'keygen', 'patch', 'serial', 'key', 'keys', 'cracked',
+        'activation', 'activator', 'activated', 'registered', 'licensed',
+        # 아키텍처
+        'x64', 'x86', 'ia64', 'x32', 'win', 'mac', 'linux', 'bits', 'bit',
+        # 에디션 타입
+        'multilingual', 'retail', 'oem', 'vlsc', 'vol', 'trial',
+        # 패키징
+        'repack', 'repacked', 'incl', 'pre', 'extras', 'addon', 'addons',
+        'custom', 'embedded', 'delta', 'winpe',
+        # 빌드 관련
+        'build', 'sp1', 'sp2', 'sp3', 'r1', 'r2', 'ltsc',
+        # 파일 확장자
+        'dvd', 'cd', 'iso', 'img', 'exe', 'msi', 'zip', 'rar', '7z', 'cab',
+        # 릴리즈 그룹/사이트
+        'sadeempc', 'downloadly', 'tryroom', 'koreacrack', 'kpojiuk',
+        'xetrin', 'yaschir', 'ssq', 'sse', 'rg', 'tbe', 'fosi', 'xforce', 'team',
+        # 한글 노이즈
+        '한국어판', '설치법', '인증방법', '스크린샷', '포터블', '휴대용',
+        # 기타
+        'readme', 'instructions', 'screenshot', 'preview', 'info'
     }
 
     # 에디션 키워드 (제품명에 포함)
     EDITION_WORDS = {
         'pro', 'plus', 'premium', 'ultimate', 'enterprise', 'professional',
-        'home', 'business', 'student', 'standard', 'deluxe', 'complete'
+        'home', 'business', 'student', 'standard', 'deluxe', 'complete',
+        'technician', 'server', 'advanced', 'workstation', 'edition',
+        'master', 'suite', 'studio', 'creative', 'cloud'
     }
 
     # 알려진 제조사 목록 (첫 단어로 등장하는 경우)
@@ -52,15 +71,33 @@ class FilenameParser:
         # 확장자 제거
         name_without_ext = re.sub(r'\.[^.]+$', '', filename)
 
+        # 버전 정보를 먼저 추출 (노이즈 제거 전)
+        version = FilenameParser._extract_version(name_without_ext)
+
+        # 연도 추출 (노이즈 제거 전)
+        year = FilenameParser._extract_year(name_without_ext)
+
+        # 릴리즈 그룹 패턴 제거 (by xxx, [xxx])
+        name_without_ext = re.sub(r'\bby\s+\w+', '', name_without_ext, flags=re.IGNORECASE)
+        name_without_ext = re.sub(r'\[.*?\]', '', name_without_ext)
+
+        # 웹사이트 도메인 제거 (.ir, .com, .net 등)
+        name_without_ext = re.sub(r'\.\w{2,3}($|\s)', ' ', name_without_ext)
+
+        # Build 번호 패턴 제거
+        name_without_ext = re.sub(r'\bbuild[_\s]*\d+', '', name_without_ext, flags=re.IGNORECASE)
+
+        # 날짜 형식 제거
+        name_without_ext = re.sub(r'\b\d{14}\b', '', name_without_ext)  # yyyyMMddHHmmss
+        name_without_ext = re.sub(r'\b\d{4}-\d{2}-\d{2}\b', '', name_without_ext)  # yyyy-MM-dd
+        name_without_ext = re.sub(r'\b\d{4}\.\d{4}\b', '', name_without_ext)  # yyyy.MMdd
+
+        # 괄호 안의 노이즈 제거 (단, 버전 정보는 유지)
+        name_without_ext = re.sub(r'\((x86|x64|32bit|64bit|win|portable)\)', '', name_without_ext, flags=re.IGNORECASE)
+
         # 특수문자를 공백으로 변환
         cleaned = re.sub(r'[._\-\[\]()]', ' ', name_without_ext)
         cleaned = re.sub(r'\s+', ' ', cleaned).strip()
-
-        # 버전 정보 추출
-        version = FilenameParser._extract_version(cleaned)
-
-        # 연도 추출
-        year = FilenameParser._extract_year(cleaned)
 
         # 소프트웨어 이름 추출 (버전, 연도, 노이즈 제거)
         software_name = FilenameParser._extract_software_name(
@@ -89,26 +126,35 @@ class FilenameParser:
     @staticmethod
     def _extract_version(text: str) -> Optional[str]:
         """버전 정보 추출"""
-        # 버전 패턴 (우선순위 순서)
+        # 버전 패턴 (우선순위 순서 - v 접두사 우선)
         version_patterns = [
-            r'v?(\d+\.\d+\.\d+\.\d+)',  # 1.2.3.4
-            r'v?(\d+\.\d+\.\d+)',        # 1.2.3
-            r'v?(\d+\.\d+)',             # 1.2
-            r'\b(20\d{2})\b',            # 2022 (연도 형식 버전)
-            r'\bSP(\d+)\b',              # SP1, SP2 (Service Pack)
-            r'\bR(\d+)\b',               # R1, R2 (Release)
-            r'\bv(\d+)\b',               # v1 (단독)
+            r'v(\d+\.\d+\.\d+\.\d+)',        # v1.2.3.4 (v 접두사 우선)
+            r'v(\d+\.\d+\.\d+)',             # v1.2.3 (v 접두사 우선)
+            r'v(\d+\.\d+)',                  # v1.2 (v 접두사 우선)
+            r'(\d+\.\d+\.\d+\.\d+\.\d+)',    # 1.2.3.4.5 (매우 복잡한 버전)
+            r'(\d+\.\d+\.\d+\.\d+)',         # 1.2.3.4
+            r'(\d+\.\d+\.\d+)',              # 1.2.3
+            r'[\s_](\d+\.\d+)[\s_]',         # 공백/언더스코어로 둘러싸인 1.2
+            r'\b(20\d{2})\b',                # 2022 (연도 형식 버전)
+            r'\bSP(\d+)\b',                  # SP1, SP2 (Service Pack)
+            r'\bR(\d+)\b',                   # R1, R2 (Release)
+            r'\bv(\d+)\b',                   # v1 (단독)
         ]
 
         versions = []
         for pattern in version_patterns:
             match = re.search(pattern, text, re.IGNORECASE)
             if match:
-                versions.append(match.group(1))
+                ver = match.group(1)
+                # 너무 긴 버전은 첫 3-4단계만 사용
+                if ver.count('.') > 3:
+                    parts = ver.split('.')
+                    ver = '.'.join(parts[:3])
+                versions.append(ver)
 
-        # 여러 버전 정보가 있으면 결합
+        # 여러 버전 정보가 있으면 첫 번째만 사용
         if versions:
-            return ' '.join(versions[:2])  # 최대 2개까지만
+            return versions[0]
 
         return None
 
