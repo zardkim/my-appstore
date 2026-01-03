@@ -81,19 +81,16 @@ class FilenameParser:
         name_without_ext = re.sub(r'\bby\s+\w+', '', name_without_ext, flags=re.IGNORECASE)
         name_without_ext = re.sub(r'\[.*?\]', '', name_without_ext)
 
-        # 웹사이트 도메인 제거 (.ir, .com, .net 등)
-        name_without_ext = re.sub(r'\.\w{2,3}($|\s)', ' ', name_without_ext)
+        # ===== TOP 2: x64/x86 아키텍처 제거 (빈도: 4.5%) =====
+        # 패턴: _x64_, .x86., (x64) 등
+        name_without_ext = re.sub(r'[._\s](x64|x86|32bit|64bit)[._\s]', ' ', name_without_ext, flags=re.IGNORECASE)
+        name_without_ext = re.sub(r'\((x64|x86|32bit|64bit|win|portable)\)', '', name_without_ext, flags=re.IGNORECASE)
 
-        # Build 번호 패턴 제거
+        # Build 번호 패턴 제거 (빈도: 1.4%)
         name_without_ext = re.sub(r'\bbuild[_\s]*\d+', '', name_without_ext, flags=re.IGNORECASE)
 
-        # 날짜 형식 제거
-        name_without_ext = re.sub(r'\b\d{14}\b', '', name_without_ext)  # yyyyMMddHHmmss
-        name_without_ext = re.sub(r'\b\d{4}-\d{2}-\d{2}\b', '', name_without_ext)  # yyyy-MM-dd
-        name_without_ext = re.sub(r'\b\d{4}\.\d{4}\b', '', name_without_ext)  # yyyy.MMdd
-
-        # 괄호 안의 노이즈 제거 (단, 버전 정보는 유지)
-        name_without_ext = re.sub(r'\((x86|x64|32bit|64bit|win|portable)\)', '', name_without_ext, flags=re.IGNORECASE)
+        # 웹사이트 도메인 제거 (.ir, .com 등)
+        name_without_ext = re.sub(r'\.\w{2,3}($|\s)', ' ', name_without_ext)
 
         # 특수문자를 공백으로 변환
         cleaned = re.sub(r'[._\-\[\]()]', ' ', name_without_ext)
