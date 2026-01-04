@@ -1,42 +1,55 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-600 dark:from-green-700 dark:to-blue-800">
+    <!-- Language Selector - Top Right -->
+    <div class="absolute top-4 right-4 sm:top-6 sm:right-6">
+      <select
+        v-model="selectedLanguage"
+        @change="changeLanguage"
+        class="px-3 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-white/20 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-white/50 focus:border-transparent cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-all shadow-lg"
+      >
+        <option value="auto">🌐 {{ t('auth.languageAuto') }}</option>
+        <option value="ko">🇰🇷 {{ t('auth.languageKorean') }}</option>
+        <option value="en">🇺🇸 {{ t('auth.languageEnglish') }}</option>
+      </select>
+    </div>
+
     <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-96">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">초기 설정</h1>
-        <p class="text-gray-600 dark:text-gray-400">관리자 계정을 생성하세요</p>
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">{{ t('setup.title') }}</h1>
+        <p class="text-gray-600 dark:text-gray-400">{{ t('setup.subtitle') }}</p>
       </div>
 
       <form @submit.prevent="handleSetup">
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">관리자 이름</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('setup.adminUsername') }}</label>
           <input
             v-model="username"
             type="text"
             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="admin"
+            :placeholder="t('setup.usernamePlaceholder')"
             required
           />
         </div>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비밀번호</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('setup.adminPassword') }}</label>
           <input
             v-model="password"
             type="password"
             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="8자 이상"
+            :placeholder="t('setup.passwordPlaceholder')"
             required
             minlength="8"
           />
         </div>
 
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비밀번호 확인</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('setup.confirmPassword') }}</label>
           <input
             v-model="passwordConfirm"
             type="password"
             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="비밀번호 재입력"
+            :placeholder="t('setup.confirmPasswordPlaceholder')"
             required
           />
         </div>
@@ -46,7 +59,7 @@
           :disabled="loading"
           class="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
         >
-          {{ loading ? '생성 중...' : '관리자 계정 생성' }}
+          {{ loading ? t('setup.creating') : t('setup.createAccount') }}
         </button>
       </form>
 
@@ -56,10 +69,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { authApi } from '../api/auth'
 import { useDialog } from '../composables/useDialog'
+
+const { t, locale } = useI18n()
 
 const router = useRouter()
 const { alert } = useDialog()
@@ -69,17 +85,46 @@ const password = ref('')
 const passwordConfirm = ref('')
 const error = ref('')
 const loading = ref(false)
+const selectedLanguage = ref('auto')
+
+// Detect browser language
+const detectBrowserLanguage = () => {
+  const browserLang = navigator.language || navigator.userLanguage
+  return browserLang.startsWith('ko') ? 'ko' : 'en'
+}
+
+// Apply language setting
+const applyLanguage = (lang) => {
+  if (lang === 'auto') {
+    locale.value = detectBrowserLanguage()
+  } else {
+    locale.value = lang
+  }
+}
+
+// Change language
+const changeLanguage = () => {
+  localStorage.setItem('language', selectedLanguage.value)
+  applyLanguage(selectedLanguage.value)
+}
+
+onMounted(() => {
+  // Load saved language preference (default to 'auto')
+  const savedLanguage = localStorage.getItem('language') || 'auto'
+  selectedLanguage.value = savedLanguage
+  applyLanguage(savedLanguage)
+})
 
 const handleSetup = async () => {
   error.value = ''
 
   if (password.value !== passwordConfirm.value) {
-    error.value = '비밀번호가 일치하지 않습니다.'
+    error.value = t('setup.passwordMismatch')
     return
   }
 
   if (password.value.length < 8) {
-    error.value = '비밀번호는 최소 8자 이상이어야 합니다.'
+    error.value = t('setup.passwordMismatch')
     return
   }
 
@@ -87,10 +132,10 @@ const handleSetup = async () => {
 
   try {
     await authApi.setup(username.value, password.value)
-    await alert.success('관리자 계정이 생성되었습니다. 로그인 페이지로 이동합니다.')
+    await alert.success(t('setup.setupSuccess'))
     router.push('/login')
   } catch (err) {
-    error.value = err.response?.data?.detail || '계정 생성에 실패했습니다.'
+    error.value = err.response?.data?.detail || t('setup.setupFailed')
   } finally {
     loading.value = false
   }

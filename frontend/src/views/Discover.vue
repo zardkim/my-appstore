@@ -3,7 +3,7 @@
     <!-- Left Sidebar - Categories (Desktop only) -->
     <div class="hidden lg:block w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto flex-shrink-0 scrollbar-hide">
       <div class="p-6">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">카테고리</h2>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('discover.categories') }}</h2>
         <nav class="space-y-0.5">
           <button
             @click="selectCategory(null)"
@@ -14,7 +14,7 @@
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             ]"
           >
-            <span>전체</span>
+            <span>{{ t('discover.allCategories') }}</span>
             <span class="text-xs opacity-75">{{ totalProducts }}</span>
           </button>
 
@@ -30,7 +30,7 @@
             ]"
           >
             <span class="text-lg mr-3">{{ category.icon }}</span>
-            <span class="flex-1">{{ category.label }}</span>
+            <span class="flex-1">{{ t(`categories.${category.name}`) }}</span>
             <span class="text-xs opacity-75">{{ getCategoryCount(category.name) }}</span>
           </button>
         </nav>
@@ -43,8 +43,8 @@
         <!-- Header -->
         <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3">
           <div class="flex-1">
-            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">앱 스토어</h1>
-            <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">{{ totalProducts }}개의 프로그램</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{{ t('discover.title') }}</h1>
+            <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">{{ totalProducts }}{{ t('discover.productsCount') }}</p>
           </div>
 
           <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -52,26 +52,26 @@
             <button
               @click="goToFilingRules"
               class="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
-              title="파일명 정규식 안내"
+              :title="t('discover.filingRulesTitle')"
             >
               <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span class="hidden sm:inline">정규식 안내</span>
-              <span class="sm:hidden">정규식</span>
+              <span class="hidden sm:inline">{{ t('discover.filingRules') }}</span>
+              <span class="sm:hidden">{{ t('discover.filingRulesShort') }}</span>
             </button>
 
             <!-- Filename Violations Button -->
             <button
               @click="goToViolations"
               class="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
-              title="검색된 목록"
+              :title="t('discover.violationsList')"
             >
               <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <span class="hidden sm:inline">검색된 목록</span>
-              <span class="sm:hidden">검색된</span>
+              <span class="hidden sm:inline">{{ t('discover.violationsList') }}</span>
+              <span class="sm:hidden">{{ t('discover.violationsListShort') }}</span>
             </button>
 
             <!-- Scan Button -->
@@ -79,12 +79,12 @@
               v-if="authStore.isAdmin"
               @click="goToScan"
               class="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
-              title="프로그램 스캔하기"
+              :title="t('discover.scanProgramsTitle')"
             >
               <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              <span>스캔</span>
+              <span>{{ t('discover.scanPrograms') }}</span>
             </button>
           </div>
         </div>
@@ -96,7 +96,7 @@
             <button
               @click="showCategoryModal = true"
               class="lg:hidden flex-shrink-0 p-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-              title="카테고리 선택"
+              :title="t('discover.selectCategory')"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -113,7 +113,7 @@
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="검색..."
+                :placeholder="t('discover.searchPlaceholder')"
                 class="block w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 @input="handleSearch"
               />
@@ -123,9 +123,9 @@
               class="px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white flex-shrink-0"
               @change="loadProducts"
             >
-              <option value="id">최신순</option>
-              <option value="title">이름순</option>
-              <option value="category">카테고리순</option>
+              <option value="id">{{ t('discover.sortByLatest') }}</option>
+              <option value="title">{{ t('discover.sortByName') }}</option>
+              <option value="category">{{ t('discover.sortByCategory') }}</option>
             </select>
           </div>
         </div>
@@ -136,7 +136,7 @@
           <div v-if="loading" class="flex justify-center py-20">
             <div class="text-center">
               <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
-              <p class="text-gray-500 dark:text-gray-400">로딩 중...</p>
+              <p class="text-gray-500 dark:text-gray-400">{{ t('common.loading') }}</p>
             </div>
           </div>
 
@@ -148,8 +148,8 @@
                       d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">검색 결과가 없습니다</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">다른 검색어나 필터를 사용해보세요</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ t('discover.noResults') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ t('discover.noResultsDesc') }}</p>
           </div>
 
           <!-- Products Grid -->
@@ -220,7 +220,7 @@
         >
           <!-- Modal Header -->
           <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white">카테고리</h2>
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('discover.categories') }}</h2>
             <button
               @click="showCategoryModal = false"
               class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -242,7 +242,7 @@
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
               ]"
             >
-              <span>전체</span>
+              <span>{{ t('discover.allCategories') }}</span>
               <span class="text-xs opacity-75">{{ totalProducts }}</span>
             </button>
 
@@ -258,7 +258,7 @@
               ]"
             >
               <span class="text-lg mr-3">{{ category.icon }}</span>
-              <span class="flex-1">{{ category.label }}</span>
+              <span class="flex-1">{{ t(`categories.${category.name}`) }}</span>
               <span class="text-xs opacity-75">{{ getCategoryCount(category.name) }}</span>
             </button>
           </div>
@@ -295,37 +295,40 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { productsApi } from '../api/products'
 import ProductCard from '../components/product/ProductCard.vue'
 import ProductAISearchDialog from '../components/product/ProductAISearchDialog.vue'
 import ProductManualEditDialog from '../components/product/ProductManualEditDialog.vue'
 import { useAuthStore } from '../store/auth'
 
+const { t } = useI18n()
+
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
 const categories = [
-  { name: 'Graphics', label: '그래픽', icon: '🎨' },
-  { name: 'Office', label: '오피스', icon: '📊' },
-  { name: 'Development', label: '개발', icon: '💻' },
-  { name: 'Utility', label: '유틸리티', icon: '🛠️' },
-  { name: 'Media', label: '미디어', icon: '🎬' },
-  { name: 'OS', label: '운영체제', icon: '💿' },
-  { name: 'Security', label: '보안', icon: '🔒' },
-  { name: 'Network', label: '네트워크', icon: '🌐' },
-  { name: 'Mac', label: '맥', icon: '🍎' },
-  { name: 'Mobile', label: '모바일', icon: '📱' },
-  { name: 'Patch', label: '패치', icon: '🔧' },
-  { name: 'Driver', label: '드라이버', icon: '⚙️' },
-  { name: 'Source', label: '소스', icon: '📦' },
-  { name: 'Backup', label: '백업&복구', icon: '💾' },
-  { name: 'Business', label: '업무용', icon: '💼' },
-  { name: 'Engineering', label: '공학용', icon: '📐' },
-  { name: 'Theme', label: '테마&스킨', icon: '🎭' },
-  { name: 'Hardware', label: '하드웨어', icon: '🔌' },
-  { name: 'Font', label: '글꼴', icon: '🔤' },
-  { name: 'Uncategorized', label: '미분류', icon: '📂' }
+  { name: 'Graphics', icon: '🎨' },
+  { name: 'Office', icon: '📊' },
+  { name: 'Development', icon: '💻' },
+  { name: 'Utility', icon: '🛠️' },
+  { name: 'Media', icon: '🎬' },
+  { name: 'OS', icon: '💿' },
+  { name: 'Security', icon: '🔒' },
+  { name: 'Network', icon: '🌐' },
+  { name: 'Mac', icon: '🍎' },
+  { name: 'Mobile', icon: '📱' },
+  { name: 'Patch', icon: '🔧' },
+  { name: 'Driver', icon: '⚙️' },
+  { name: 'Source', icon: '📦' },
+  { name: 'Backup', icon: '💾' },
+  { name: 'Business', icon: '💼' },
+  { name: 'Engineering', icon: '📐' },
+  { name: 'Theme', icon: '🎭' },
+  { name: 'Hardware', icon: '🔌' },
+  { name: 'Font', icon: '🔤' },
+  { name: 'Uncategorized', icon: '📂' }
 ]
 
 const searchQuery = ref('')

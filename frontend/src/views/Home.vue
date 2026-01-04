@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 text-white">
       <div class="max-w-7xl">
-        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">환영합니다! 👋</h1>
-        <p class="text-blue-100 text-sm sm:text-base lg:text-lg">나만의 소프트웨어 라이브러리를 관리하세요</p>
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">{{ t('home.welcome') }}! 👋</h1>
+        <p class="text-blue-100 text-sm sm:text-base lg:text-lg">{{ t('auth.personalLibrary') }}</p>
       </div>
     </div>
 
@@ -15,7 +15,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">완료된 소프트웨어</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('home.totalProducts') }}</p>
               <p class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {{ stats.total_products }}
               </p>
@@ -31,7 +31,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer" @click="$router.push('/filename-violations')">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">미완료된 소프트웨어</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('home.incompleteProducts') }}</p>
               <p class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                 {{ stats.incomplete_count }}
               </p>
@@ -47,7 +47,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">마지막 스캔</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('home.lastScan') }}</p>
               <p class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white mt-2">{{ lastScanFormatted }}</p>
             </div>
             <div class="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-2xl">
@@ -64,7 +64,7 @@
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 mb-6 lg:mb-8" v-if="Object.keys(stats.category_stats).length > 0">
         <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5 lg:mb-6 flex items-center">
           <span class="mr-2">📊</span>
-          카테고리별 통계
+          {{ t('home.categoryStats') }}
         </h2>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           <button
@@ -85,13 +85,13 @@
         <div class="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
           <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center">
             <span class="mr-2">🆕</span>
-            최근 추가된 프로그램
+            {{ t('home.recentlyAdded') }}
           </h2>
           <router-link
             to="/discover"
             class="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center group"
           >
-            전체보기
+            {{ t('home.viewAll') }}
             <svg class="w-3 h-3 sm:w-4 sm:h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -101,7 +101,7 @@
         <div v-if="loading" class="flex justify-center py-12 sm:py-16">
           <div class="text-center">
             <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">로딩 중...</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ t('common.loading') }}</p>
           </div>
         </div>
 
@@ -112,8 +112,8 @@
                     d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
           </div>
-          <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">등록된 프로그램이 없습니다</h3>
-          <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-6">프로그램을 스캔하여 라이브러리를 구축하세요</p>
+          <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ t('home.noProducts') }}</h3>
+          <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-6">{{ t('home.noProductsDesc') }}</p>
           <router-link
             v-if="isAdmin"
             to="/admin"
@@ -123,7 +123,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            프로그램 스캔하기
+            {{ t('home.scanPrograms') }}
           </router-link>
         </div>
 

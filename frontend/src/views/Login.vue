@@ -1,32 +1,45 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 dark:from-blue-700 dark:to-purple-800 px-4">
+    <!-- Language Selector - Top Right -->
+    <div class="absolute top-4 right-4 sm:top-6 sm:right-6">
+      <select
+        v-model="selectedLanguage"
+        @change="changeLanguage"
+        class="px-3 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-white/20 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-white/50 focus:border-transparent cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-all shadow-lg"
+      >
+        <option value="auto">🌐 {{ t('auth.languageAuto') }}</option>
+        <option value="ko">🇰🇷 {{ t('auth.languageKorean') }}</option>
+        <option value="en">🇺🇸 {{ t('auth.languageEnglish') }}</option>
+      </select>
+    </div>
+
     <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md">
       <div class="text-center mb-6 sm:mb-8">
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-2">MyApp Store</h1>
-        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">개인용 소프트웨어 라이브러리</p>
+        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">{{ t('auth.personalLibrary') }}</p>
       </div>
 
       <form @submit.prevent="handleLogin">
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">사용자 이름</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('auth.username') }}</label>
           <input
             v-model="username"
             type="text"
             autocomplete="username"
             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Username"
+            :placeholder="t('auth.usernamePlaceholder')"
             required
           />
         </div>
 
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비밀번호</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('auth.password') }}</label>
           <input
             v-model="password"
             type="password"
             autocomplete="current-password"
             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Password"
+            :placeholder="t('auth.passwordPlaceholder')"
             required
           />
         </div>
@@ -36,7 +49,7 @@
           :disabled="loading"
           class="w-full bg-blue-500 dark:bg-blue-600 text-white py-2.5 sm:py-3 text-sm sm:text-base rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed font-medium"
         >
-          {{ loading ? '로그인 중...' : '로그인' }}
+          {{ loading ? t('auth.loggingIn') : t('auth.loginButton') }}
         </button>
       </form>
 
@@ -48,8 +61,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../store/auth'
 import { authApi } from '../api/auth'
+
+const { t, locale } = useI18n()
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -58,8 +74,35 @@ const username = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+const selectedLanguage = ref('auto')
+
+// Detect browser language
+const detectBrowserLanguage = () => {
+  const browserLang = navigator.language || navigator.userLanguage
+  return browserLang.startsWith('ko') ? 'ko' : 'en'
+}
+
+// Apply language setting
+const applyLanguage = (lang) => {
+  if (lang === 'auto') {
+    locale.value = detectBrowserLanguage()
+  } else {
+    locale.value = lang
+  }
+}
+
+// Change language
+const changeLanguage = () => {
+  localStorage.setItem('language', selectedLanguage.value)
+  applyLanguage(selectedLanguage.value)
+}
 
 onMounted(async () => {
+  // Load saved language preference (default to 'auto')
+  const savedLanguage = localStorage.getItem('language') || 'auto'
+  selectedLanguage.value = savedLanguage
+  applyLanguage(savedLanguage)
+
   // Check if setup is needed
   try {
     const response = await authApi.checkSetup()
@@ -79,7 +122,7 @@ const handleLogin = async () => {
     await authStore.login(username.value, password.value)
     router.push('/')
   } catch (err) {
-    error.value = '로그인에 실패했습니다. 사용자 이름과 비밀번호를 확인하세요.'
+    error.value = t('auth.loginFailed')
   } finally {
     loading.value = false
   }
