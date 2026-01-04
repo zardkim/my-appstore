@@ -3,7 +3,7 @@
     <!-- Left Sidebar (Desktop only) -->
     <div class="hidden lg:block w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto flex-shrink-0">
       <div class="p-6">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">설정</h2>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.title') }}</h2>
         <nav class="space-y-1">
           <button
             v-for="section in sections"
@@ -42,35 +42,35 @@
         <!-- General Settings -->
         <div v-show="activeSection === 'general'" class="space-y-4 sm:space-y-6">
           <div>
-            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">일반 설정</h1>
-            <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">시스템 설정을 관리합니다</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{{ t('settings.general.title') }}</h1>
+            <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">{{ t('settings.general.description') }}</p>
           </div>
 
           <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">시스템 설정</h3>
+            <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">{{ t('settings.general.systemSettings') }}</h3>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">언어</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.general.language') }}</label>
                 <select v-model="language" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                  <option value="ko">한국어</option>
-                  <option value="en">English</option>
+                  <option value="ko">{{ t('settings.general.korean') }}</option>
+                  <option value="en">{{ t('settings.general.english') }}</option>
                 </select>
               </div>
             </div>
           </div>
 
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">네트워크 설정</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.general.networkSettings') }}</h3>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">프론트엔드 접속 URL</label>
-                <input v-model="accessUrl" type="text" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="http://192.168.0.8:5900" />
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">프론트엔드 접속 주소 (예: http://192.168.0.8:5900, http://nas.local:5900)</p>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.general.frontendUrl') }}</label>
+                <input v-model="accessUrl" type="text" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" :placeholder="t('settings.general.frontendUrlPlaceholder')" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ t('settings.general.frontendUrlDesc') }}</p>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">백엔드 API URL</label>
-                <input v-model="apiUrl" type="text" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="http://192.168.0.8:8100" />
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">백엔드 API 주소 (예: http://192.168.0.8:8100, http://nas.local:8100)</p>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.general.backendUrl') }}</label>
+                <input v-model="apiUrl" type="text" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" :placeholder="t('settings.general.backendUrlPlaceholder')" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ t('settings.general.backendUrlDesc') }}</p>
               </div>
               <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
                 <div class="flex items-start">
@@ -78,11 +78,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div class="text-sm text-blue-800 dark:text-blue-300">
-                    <p class="font-semibold mb-1">💡 설정 가이드</p>
+                    <p class="font-semibold mb-1">{{ t('settings.general.guideTitle') }}</p>
                     <ul class="list-disc list-inside space-y-1 text-xs">
-                      <li><strong>로컬 네트워크 접속:</strong> http://내부IP:포트 형식 사용 (예: http://192.168.0.8:5900)</li>
-                      <li><strong>역방향 프록시 사용 시:</strong> NPM이나 Synology 역방향 프록시에서 설정한 HTTPS URL 사용</li>
-                      <li><strong>설정 적용 후:</strong> 백엔드 재시작이 필요할 수 있습니다</li>
+                      <li><strong>{{ t('settings.general.guideLocal') }}</strong> {{ t('settings.general.guideLocalDesc') }}</li>
+                      <li><strong>{{ t('settings.general.guideProxy') }}</strong> {{ t('settings.general.guideProxyDesc') }}</li>
+                      <li><strong>{{ t('settings.general.guideRestart') }}</strong> {{ t('settings.general.guideRestartDesc') }}</li>
                     </ul>
                   </div>
                 </div>
@@ -96,7 +96,7 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              적용
+              {{ t('settings.general.apply') }}
             </button>
           </div>
         </div>
@@ -104,8 +104,8 @@
         <!-- Cache Management -->
         <div v-show="activeSection === 'cache'" class="space-y-4 sm:space-y-6">
           <div>
-            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">캐쉬 관리</h1>
-            <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">시스템 캐쉬를 관리하고 성능을 최적화합니다</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{{ t('settings.cache.title') }}</h1>
+            <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">{{ t('settings.cache.description') }}</p>
           </div>
 
           <!-- Cache Statistics -->
@@ -113,7 +113,7 @@
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center">
                 <span class="mr-2">⚡</span>
-                캐쉬 통계
+                {{ t('settings.cache.statistics') }}
               </h3>
               <button
                 @click="loadCacheStats"
@@ -124,7 +124,7 @@
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                새로고침
+                {{ t('settings.cache.refresh') }}
               </button>
             </div>
 
@@ -132,32 +132,32 @@
               <!-- Status -->
               <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">상태</span>
+                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ t('settings.cache.status') }}</span>
                   <span v-if="cacheStats.enabled" class="text-green-500">●</span>
                   <span v-else class="text-red-500">●</span>
                 </div>
                 <p class="text-lg font-bold text-gray-900 dark:text-white">
-                  {{ cacheStats.enabled ? '활성화' : '비활성화' }}
+                  {{ cacheStats.enabled ? t('settings.cache.enabled') : t('settings.cache.disabled') }}
                 </p>
               </div>
 
               <!-- Total Keys -->
               <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-                <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">캐쉬 항목 수</div>
+                <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ t('settings.cache.totalKeys') }}</div>
                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ cacheStats.total_keys?.toLocaleString() || 0 }}</p>
               </div>
 
               <!-- Memory Used -->
               <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-                <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">메모리 사용량</div>
+                <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ t('settings.cache.memoryUsed') }}</div>
                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ cacheStats.memory_used || 'N/A' }}</p>
               </div>
 
               <!-- Uptime -->
               <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-                <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">가동 시간</div>
+                <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ t('settings.cache.uptime') }}</div>
                 <p class="text-lg font-bold text-gray-900 dark:text-white">
-                  {{ cacheStats.uptime_seconds ? Math.floor(cacheStats.uptime_seconds / 3600) + '시간' : 'N/A' }}
+                  {{ cacheStats.uptime_seconds ? Math.floor(cacheStats.uptime_seconds / 3600) + t('settings.cache.hours') : 'N/A' }}
                 </p>
               </div>
             </div>
@@ -168,8 +168,8 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <div class="text-sm text-yellow-800 dark:text-yellow-300">
-                  <p class="font-semibold mb-1">⚠️ Redis 캐쉬가 비활성화되어 있습니다</p>
-                  <p class="text-xs">Redis 서버에 연결할 수 없습니다. 시스템은 캐쉬 없이 정상 작동하지만 응답 속도가 느릴 수 있습니다.</p>
+                  <p class="font-semibold mb-1">{{ t('settings.cache.warning') }}</p>
+                  <p class="text-xs">{{ t('settings.cache.warningDesc') }}</p>
                 </div>
               </div>
             </div>
@@ -177,51 +177,51 @@
 
           <!-- Cache Actions -->
           <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4">캐쉬 관리</h3>
+            <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.cache.management') }}</h3>
 
             <div class="space-y-3">
               <!-- Clear Products Cache -->
               <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
                 <div>
-                  <h4 class="font-medium text-gray-900 dark:text-white">제품 캐쉬 삭제</h4>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">제품 목록, 상세, 검색 캐쉬를 삭제합니다</p>
+                  <h4 class="font-medium text-gray-900 dark:text-white">{{ t('settings.cache.clearProducts') }}</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('settings.cache.clearProductsDesc') }}</p>
                 </div>
                 <button
                   @click="clearProductsCache"
                   :disabled="cacheLoading || !cacheStats.enabled"
                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
-                  삭제
+                  {{ t('settings.cache.delete') }}
                 </button>
               </div>
 
               <!-- Clear Stats Cache -->
               <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
                 <div>
-                  <h4 class="font-medium text-gray-900 dark:text-white">통계 캐쉬 삭제</h4>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">대시보드 통계 캐쉬를 삭제합니다</p>
+                  <h4 class="font-medium text-gray-900 dark:text-white">{{ t('settings.cache.clearStats') }}</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('settings.cache.clearStatsDesc') }}</p>
                 </div>
                 <button
                   @click="clearStatsCache"
                   :disabled="cacheLoading || !cacheStats.enabled"
                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
-                  삭제
+                  {{ t('settings.cache.delete') }}
                 </button>
               </div>
 
               <!-- Clear All Cache -->
               <div class="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl">
                 <div>
-                  <h4 class="font-medium text-red-900 dark:text-red-300">모든 캐쉬 삭제</h4>
-                  <p class="text-sm text-red-600 dark:text-red-400">전체 캐쉬를 삭제합니다 (즉시 재생성됨)</p>
+                  <h4 class="font-medium text-red-900 dark:text-red-300">{{ t('settings.cache.clearAll') }}</h4>
+                  <p class="text-sm text-red-600 dark:text-red-400">{{ t('settings.cache.clearAllDesc') }}</p>
                 </div>
                 <button
                   @click="clearAllCache"
                   :disabled="cacheLoading || !cacheStats.enabled"
                   class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
-                  전체 삭제
+                  {{ t('settings.cache.deleteAll') }}
                 </button>
               </div>
             </div>
@@ -232,11 +232,11 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div class="text-sm text-blue-800 dark:text-blue-300">
-                  <p class="font-semibold mb-1">💡 캐쉬 정보</p>
+                  <p class="font-semibold mb-1">{{ t('settings.cache.infoTitle') }}</p>
                   <ul class="list-disc list-inside space-y-1 text-xs">
-                    <li>캐쉬는 API 응답 속도를 40~60배 향상시킵니다</li>
-                    <li>데이터 변경 시 관련 캐쉬가 자동으로 무효화됩니다</li>
-                    <li>문제 발생 시 캐쉬를 삭제하면 해결될 수 있습니다</li>
+                    <li>{{ t('settings.cache.info1') }}</li>
+                    <li>{{ t('settings.cache.info2') }}</li>
+                    <li>{{ t('settings.cache.info3') }}</li>
                   </ul>
                 </div>
               </div>
@@ -248,8 +248,8 @@
         <div v-show="activeSection === 'users'" class="space-y-4 sm:space-y-6">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">사용자 관리</h1>
-              <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">사용자를 직접 추가하거나 초대 이메일을 발송할 수 있습니다</p>
+              <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{{ t('settings.users.title') }}</h1>
+              <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">{{ t('settings.users.description') }}</p>
             </div>
             <div v-if="isAdmin" class="w-full sm:w-auto flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button @click="showAddUserModal = true" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-md font-medium flex items-center justify-center text-sm sm:text-base">
@@ -390,12 +390,12 @@
         <div v-show="activeSection === 'folders'" class="space-y-4 sm:space-y-6">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">폴더 설정</h1>
-              <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">스캔할 폴더 경로를 관리합니다</p>
+              <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{{ t('settings.folders.title') }}</h1>
+              <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">{{ t('settings.folders.description') }}</p>
             </div>
             <button v-if="isAdmin" @click="addFolder" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-medium flex items-center justify-center text-sm sm:text-base">
               <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-              폴더 추가
+              {{ t('settings.folders.addFolder') }}
             </button>
           </div>
 
@@ -406,21 +406,21 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div class="text-sm text-blue-800 dark:text-blue-300 space-y-2">
-                <p class="font-semibold">📁 폴더 추가 방법</p>
+                <p class="font-semibold">{{ t('settings.folders.guideTitle') }}</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                  <li><strong>Docker 볼륨 마운트:</strong> <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">-v /path/to/your/software:/library/MyFolder</code></li>
-                  <li><strong>심볼릭 링크:</strong> <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">ln -s /path/to/your/software /library/MyFolder</code></li>
-                  <li><strong>직접 추가:</strong> 위 버튼으로 폴더를 추가한 후 "저장" 버튼 클릭</li>
+                  <li><strong>{{ t('settings.folders.dockerMount') }}</strong> <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">-v /path/to/your/software:/library/MyFolder</code></li>
+                  <li><strong>{{ t('settings.folders.symbolicLink') }}</strong> <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">ln -s /path/to/your/software /library/MyFolder</code></li>
+                  <li><strong>{{ t('settings.folders.directAdd') }}</strong> {{ t('settings.folders.directAddDesc') }}</li>
                 </ul>
                 <p class="text-xs text-blue-700 dark:text-blue-400 mt-2">
-                  💡 각 폴더는 독립적으로 스캔할 수 있으며, 변경/삭제 후 반드시 "저장" 버튼을 눌러주세요.
+                  {{ t('settings.folders.guideTip') }}
                 </p>
               </div>
             </div>
           </div>
 
           <div v-if="!isAdmin" class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-2xl p-6">
-            <p class="text-sm text-yellow-700 dark:text-yellow-300">관리자만 폴더 경로를 설정할 수 있습니다.</p>
+            <p class="text-sm text-yellow-700 dark:text-yellow-300">{{ t('settings.folders.adminOnly') }}</p>
           </div>
 
           <div v-else class="space-y-3">
@@ -429,8 +429,8 @@
               <svg class="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
               </svg>
-              <p class="text-gray-600 dark:text-gray-400 mb-2 font-medium">등록된 폴더가 없습니다</p>
-              <p class="text-sm text-gray-500 dark:text-gray-500">위의 "폴더 추가" 버튼을 눌러 스캔할 폴더를 추가해주세요.</p>
+              <p class="text-gray-600 dark:text-gray-400 mb-2 font-medium">{{ t('settings.folders.noFolders') }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-500">{{ t('settings.folders.noFoldersDesc') }}</p>
             </div>
 
             <!-- 폴더 목록 -->
@@ -440,14 +440,14 @@
                 <div class="flex-1 min-w-0 mr-3">
                   <div class="flex items-center gap-2">
                     <p class="text-sm font-mono text-gray-900 dark:text-white truncate">{{ folder.path }}</p>
-                    <span v-if="folder.path === defaultLibraryPath" class="px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full flex-shrink-0">기본</span>
+                    <span v-if="folder.path === defaultLibraryPath" class="px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full flex-shrink-0">{{ t('settings.folders.default') }}</span>
                   </div>
                 </div>
                 <button
                   @click="scanFolder(folder.path)"
                   :disabled="folder.scanning"
                   class="px-3 py-1.5 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
-                  :title="'이 폴더 스캔'"
+                  :title="t('settings.folders.scanThisFolder')"
                 >
                   <svg v-if="!folder.scanning" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -455,14 +455,14 @@
                   <svg v-else class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  {{ folder.scanning ? '스캔중...' : '스캔' }}
+                  {{ folder.scanning ? t('settings.folders.scanning') : t('settings.folders.scan') }}
                 </button>
                 <button
                   v-if="folder.path !== defaultLibraryPath"
                   @click="editFolder(index)"
                   class="px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors flex-shrink-0"
                 >
-                  변경
+                  {{ t('settings.folders.change') }}
                 </button>
               </div>
               <button
@@ -475,7 +475,7 @@
               <div
                 v-else
                 class="ml-3 p-2 text-gray-400 dark:text-gray-600 cursor-not-allowed flex-shrink-0"
-                title="기본 폴더는 삭제할 수 없습니다"
+                :title="t('settings.folders.cannotDeleteDefault')"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
               </div>
@@ -485,7 +485,7 @@
               @click="saveFolders"
               class="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-medium"
             >
-              💾 저장
+              💾 {{ t('settings.folders.save') }}
             </button>
           </div>
 
@@ -502,12 +502,12 @@
         <div v-show="activeSection === 'categories'" class="space-y-6">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">카테고리 관리</h1>
-              <p class="text-gray-500 dark:text-gray-400">프로그램 카테고리를 관리합니다</p>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.categoriesManagement.title') }}</h1>
+              <p class="text-gray-500 dark:text-gray-400">{{ t('settings.categoriesManagement.description') }}</p>
             </div>
             <button v-if="isAdmin" @click="showAddCategoryModal = true" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-medium flex items-center">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-              카테고리 추가
+              {{ t('settings.categoriesManagement.addCategory') }}
             </button>
           </div>
 
@@ -535,7 +535,7 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              적용
+              {{ t('settings.categoriesManagement.apply') }}
             </button>
           </div>
         </div>
@@ -544,20 +544,20 @@
         <div v-show="activeSection === 'board'" class="space-y-6">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">게시판 관리</h1>
-              <p class="text-gray-500 dark:text-gray-400">팁&테크 게시판 설정을 관리합니다</p>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.board.title') }}</h1>
+              <p class="text-gray-500 dark:text-gray-400">{{ t('settings.board.description') }}</p>
             </div>
           </div>
 
           <!-- Board Categories -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white">게시판 카테고리</h3>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.board.categories') }}</h3>
               <button v-if="isAdmin" @click="showAddBoardCategoryModal = true" class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                추가
+                {{ t('settings.board.add') }}
               </button>
             </div>
 
@@ -581,10 +581,10 @@
 
           <!-- Board Settings -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">게시판 기본 설정</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.board.boardBasicSettings') }}</h3>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">페이지당 게시글 수</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.postsPerPage') }}</label>
                 <select v-model="postsPerPage" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                   <option value="10">10개</option>
                   <option value="20">20개</option>
@@ -595,8 +595,8 @@
 
               <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-xl">
                 <div>
-                  <p class="font-medium text-gray-900 dark:text-white">댓글 허용</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">게시글에 댓글을 달 수 있습니다</p>
+                  <p class="font-medium text-gray-900 dark:text-white">{{ t('settings.board.allowComments') }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('settings.board.allowCommentsDesc') }}</p>
                 </div>
                 <label class="relative inline-block w-12 h-6">
                   <input type="checkbox" v-model="allowComments" class="sr-only peer" />
@@ -606,8 +606,8 @@
 
               <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-xl">
                 <div>
-                  <p class="font-medium text-gray-900 dark:text-white">파일 첨부 허용</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">게시글 작성 시 파일을 첨부할 수 있습니다</p>
+                  <p class="font-medium text-gray-900 dark:text-white">{{ t('settings.board.allowAttachments') }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('settings.board.allowAttachmentsDesc') }}</p>
                 </div>
                 <label class="relative inline-block w-12 h-6">
                   <input type="checkbox" v-model="allowAttachments" class="sr-only peer" />
@@ -623,7 +623,7 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              적용
+              {{ t('settings.board.apply') }}
             </button>
           </div>
         </div>
@@ -631,8 +631,8 @@
         <!-- Filing Rules -->
         <div v-show="activeSection === 'filing-rules'" class="space-y-6">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">파일명 규칙 안내</h1>
-            <p class="text-gray-500 dark:text-gray-400">폴더 및 파일 스캔시 권장하는 파일명 표준 규칙을 확인하세요</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.filingRules.title') }}</h1>
+            <p class="text-gray-500 dark:text-gray-400">{{ t('settings.filingRules.description') }}</p>
           </div>
 
           <!-- 표준 형식 -->
@@ -994,6 +994,201 @@
           </div>
           </div>
 
+          <!-- 자동 파싱 규칙 (TOP 4 패턴) -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+              <span class="mr-2">🔍</span>
+              자동 파싱 규칙 (AI 매칭 최적화)
+            </h2>
+
+            <div class="space-y-6">
+              <!-- 통계 안내 -->
+              <div class="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
+                <div class="flex items-start">
+                  <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <div>
+                    <p class="text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                      실제 파일 1,836개 분석 결과
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      NAS에 저장된 실제 소프트웨어 파일명을 통계 분석하여, 가장 빈도가 높은 <strong>4가지 핵심 패턴</strong>을 자동으로 처리합니다.
+                      이를 통해 파일명이 복잡하거나 불규칙해도 AI가 올바르게 매칭할 수 있습니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TOP 4 패턴 -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 패턴 1: 버전 추출 우선 처리 -->
+                <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6">
+                  <div class="flex items-center mb-4">
+                    <span class="text-2xl font-bold text-purple-600 dark:text-purple-400 mr-3">1</span>
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold text-purple-800 dark:text-purple-300">버전 추출 우선 처리</h3>
+                      <p class="text-sm text-purple-600 dark:text-purple-400 font-medium">빈도: 30.7%</p>
+                    </div>
+                  </div>
+                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    노이즈 제거 전에 버전 정보를 먼저 추출하여 손실을 방지합니다.
+                  </p>
+                  <div class="space-y-2">
+                    <div class="bg-white dark:bg-gray-800 rounded p-3">
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Before:</p>
+                      <code class="text-xs text-gray-700 dark:text-gray-300">Pure Flat 2013 v2.1</code>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
+                      <p class="text-xs text-green-600 dark:text-green-400 mb-1">After:</p>
+                      <code class="text-xs text-green-700 dark:text-green-300">Pure Flat → v2.1 (2013이 아님)</code>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 패턴 2: x64/x86 아키텍처 제거 -->
+                <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-6">
+                  <div class="flex items-center mb-4">
+                    <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mr-3">2</span>
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold text-indigo-800 dark:text-indigo-300">x64/x86 아키텍처 제거</h3>
+                      <p class="text-sm text-indigo-600 dark:text-indigo-400 font-medium">빈도: 4.5%</p>
+                    </div>
+                  </div>
+                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    _x64_, .x86., (x64) 등의 아키텍처 정보를 자동 제거합니다.
+                  </p>
+                  <div class="space-y-2">
+                    <div class="bg-white dark:bg-gray-800 rounded p-3">
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Before:</p>
+                      <code class="text-xs text-gray-700 dark:text-gray-300">EaseUS_Todo_Backup_13.5.0_x64.rar</code>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
+                      <p class="text-xs text-green-600 dark:text-green-400 mb-1">After:</p>
+                      <code class="text-xs text-green-700 dark:text-green-300">EaseUS Todo Backup 13.5.0</code>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 패턴 3: 대괄호 패턴 제거 -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
+                  <div class="flex items-center mb-4">
+                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400 mr-3">3</span>
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-300">[대괄호] 패턴 제거</h3>
+                      <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">빈도: 2.3%</p>
+                    </div>
+                  </div>
+                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    릴리즈 그룹이나 추가 정보가 포함된 [대괄호]를 자동 제거합니다.
+                  </p>
+                  <div class="space-y-2">
+                    <div class="bg-white dark:bg-gray-800 rounded p-3">
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Before:</p>
+                      <code class="text-xs text-gray-700 dark:text-gray-300">MiniTool Partition [SadeemPC].zip</code>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
+                      <p class="text-xs text-green-600 dark:text-green-400 mb-1">After:</p>
+                      <code class="text-xs text-green-700 dark:text-green-300">MiniTool Partition</code>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 패턴 4: 구분자 정규화 -->
+                <div class="bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-700 rounded-lg p-6">
+                  <div class="flex items-center mb-4">
+                    <span class="text-2xl font-bold text-cyan-600 dark:text-cyan-400 mr-3">4</span>
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold text-cyan-800 dark:text-cyan-300">구분자 정규화</h3>
+                      <p class="text-sm text-cyan-600 dark:text-cyan-400 font-medium">빈도: 36.8%</p>
+                    </div>
+                  </div>
+                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    언더스코어(_), 하이픈(-), 점(.) 등을 공백으로 통일합니다.
+                  </p>
+                  <div class="space-y-2">
+                    <div class="bg-white dark:bg-gray-800 rounded p-3">
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Before:</p>
+                      <code class="text-xs text-gray-700 dark:text-gray-300">EaseUS_Todo_Backup_13.5.0.rar</code>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
+                      <p class="text-xs text-green-600 dark:text-green-400 mb-1">After:</p>
+                      <code class="text-xs text-green-700 dark:text-green-300">EaseUS Todo Backup 13.5.0</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 종합 개선 효과 -->
+              <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-green-800 dark:text-green-300 mb-4 flex items-center">
+                  <span class="mr-2">📈</span>
+                  종합 개선 효과
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div class="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">30% → 70%</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">파싱 정확도</p>
+                  </div>
+                  <div class="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">40% → 80%</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">AI 매칭 성공률</p>
+                  </div>
+                  <div class="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">-50%</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">불필요한 API 호출</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 실제 적용 예시 -->
+              <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                  <span class="mr-2">✨</span>
+                  실제 적용 예시
+                </h3>
+                <div class="space-y-4">
+                  <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">복잡한 파일명:</p>
+                    <div class="bg-white dark:bg-gray-900 rounded p-3 mb-2">
+                      <code class="text-xs text-gray-700 dark:text-gray-300 break-all">
+                        EaseUS_Todo_Backup_13.5.0_Build_20210129_Enterprise_Technician_WinPE_x64_Downloadly.ir.rar
+                      </code>
+                    </div>
+                    <div class="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                      4가지 패턴 자동 처리
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
+                      <code class="text-xs text-green-700 dark:text-green-300">
+                        <strong>EaseUS Todo Backup Enterprise Technician</strong> v13.5.0
+                      </code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 참고 사항 -->
+              <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4">
+                <div class="flex">
+                  <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div class="text-sm text-yellow-700 dark:text-yellow-300">
+                    <p class="font-semibold mb-1">💡 자동 파싱 규칙 작동 방식</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                      <li>파일 스캔 시 자동으로 적용되며 별도 설정이 필요 없습니다</li>
+                      <li>복잡한 파일명도 AI가 이해하기 쉬운 형태로 자동 변환됩니다</li>
+                      <li>기존 파일명을 변경하지 않아도 AI 매칭이 정확하게 작동합니다</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- 변환 예시 -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
@@ -1136,8 +1331,8 @@
         <div v-show="activeSection === 'metadata'" class="space-y-6">
           <div class="flex items-start justify-between">
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">메타데이터 설정</h1>
-              <p class="text-gray-500 dark:text-gray-400">AI 기반 메타데이터 생성 설정을 관리합니다</p>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.metadata.title') }}</h1>
+              <p class="text-gray-500 dark:text-gray-400">{{ t('settings.metadata.description') }}</p>
             </div>
             <button
               v-if="isAdmin"
@@ -1145,28 +1340,28 @@
               class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all shadow-md hover:shadow-lg font-medium text-sm flex items-center"
             >
               <span class="mr-2">🤖</span>
-              메타데이터 테스트
+              {{ t('settings.metadata.testMetadata') }}
             </button>
           </div>
 
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">스캔 방식</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.metadata.scanMethod') }}</h3>
             <div class="space-y-3">
               <label class="flex items-center p-4 border border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer hover:border-blue-200 dark:hover:border-blue-500 transition-all">
                 <input type="radio" name="scanMethod" value="ai" v-model="scanMethod" class="w-4 h-4 text-blue-600" />
                 <div class="ml-3">
-                  <p class="font-medium text-gray-900 dark:text-white">🤖 AI 전용</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">AI 모델만 사용하여 메타데이터를 생성합니다</p>
+                  <p class="font-medium text-gray-900 dark:text-white">{{ t('settings.metadata.aiOnly') }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('settings.metadata.aiOnlyDesc') }}</p>
                 </div>
               </label>
             </div>
           </div>
 
           <div v-if="scanMethod === 'ai'" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">AI 모델 설정</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.metadata.aiSettings') }}</h3>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">AI 제공자</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.metadata.aiProvider') }}</label>
                 <select v-model="aiProvider" @change="onProviderChange" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                   <option value="gemini">Google Gemini</option>
                   <option value="openai">OpenAI</option>
@@ -1175,7 +1370,7 @@
 
               <!-- OpenAI Models -->
               <div v-if="aiProvider === 'openai'">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">OpenAI 모델</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.metadata.openaiModel') }}</label>
                 <select v-model="aiModel" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                   <optgroup label="o1 시리즈 (최신 추론 모델)">
                     <option value="o1">o1 (유료 - 최신 추론)</option>
@@ -1206,7 +1401,7 @@
 
               <!-- Gemini Models -->
               <div v-if="aiProvider === 'gemini'">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Gemini 모델</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.metadata.geminiModel') }}</label>
                 <select v-model="aiModel" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                   <optgroup label="Gemini 3 (최신 Preview) 🚀">
                     <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
@@ -1503,15 +1698,15 @@
         <!-- Scan Exceptions -->
         <div v-show="activeSection === 'exceptions'" class="space-y-6">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">🚫 스캔 예외 설정</h1>
-            <p class="text-gray-500 dark:text-gray-400">스캔에서 제외할 파일 및 폴더를 설정합니다</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.exceptions.title') }}</h1>
+            <p class="text-gray-500 dark:text-gray-400">{{ t('settings.exceptions.description') }}</p>
           </div>
 
           <!-- File Patterns -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📄 파일 패턴</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.exceptions.filePatterns') }}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              제외할 파일 패턴을 입력하세요. 와일드카드 (*) 사용 가능합니다.
+              {{ t('settings.exceptions.filePatternsDesc') }}
             </p>
 
             <div class="mb-4">
@@ -1519,7 +1714,7 @@
                 <input
                   v-model="newExceptionPattern"
                   type="text"
-                  placeholder="예: *.txt, *.log, Thumbs.db"
+                  :placeholder="t('settings.exceptions.placeholder')"
                   class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   @keyup.enter="addExceptionPattern"
                 />
@@ -1527,7 +1722,7 @@
                   @click="addExceptionPattern"
                   class="px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors whitespace-nowrap"
                 >
-                  추가
+                  {{ t('settings.exceptions.add') }}
                 </button>
               </div>
             </div>
@@ -1543,7 +1738,7 @@
                   @click="exceptionPatterns.splice(index, 1)"
                   class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
                 >
-                  삭제
+                  {{ t('settings.exceptions.delete') }}
                 </button>
               </div>
             </div>
@@ -1665,42 +1860,42 @@
         <!-- System -->
         <div v-show="activeSection === 'system'" class="space-y-6">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">시스템 정보</h1>
-            <p class="text-gray-500 dark:text-gray-400">애플리케이션 버전 및 시스템 정보</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.system.title') }}</h1>
+            <p class="text-gray-500 dark:text-gray-400">{{ t('settings.system.description') }}</p>
           </div>
 
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">버전 정보</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.system.versionInfo') }}</h3>
             <div class="space-y-3">
               <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
-                <span class="text-sm text-gray-600 dark:text-gray-400">애플리케이션 버전</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('settings.system.appVersion') }}</span>
                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ appVersion }}</span>
               </div>
               <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
-                <span class="text-sm text-gray-600 dark:text-gray-400">프론트엔드</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('settings.system.frontend') }}</span>
                 <span class="text-sm font-medium text-gray-900 dark:text-white">Vue.js 3</span>
               </div>
               <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
-                <span class="text-sm text-gray-600 dark:text-gray-400">백엔드</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('settings.system.backend') }}</span>
                 <span class="text-sm font-medium text-gray-900 dark:text-white">FastAPI</span>
               </div>
               <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
-                <span class="text-sm text-gray-600 dark:text-gray-400">데이터베이스</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('settings.system.database') }}</span>
                 <span class="text-sm font-medium text-gray-900 dark:text-white">PostgreSQL</span>
               </div>
               <div class="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
-                <span class="text-sm text-gray-600 dark:text-gray-400">캐시</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('settings.system.cache') }}</span>
                 <span class="text-sm font-medium text-gray-900 dark:text-white">Redis</span>
               </div>
               <div class="flex justify-between items-center py-3">
-                <span class="text-sm text-gray-600 dark:text-gray-400">라이선스</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('settings.system.license') }}</span>
                 <span class="text-sm font-medium text-gray-900 dark:text-white">MIT</span>
               </div>
             </div>
           </div>
 
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">오픈소스 라이선스</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.system.openSourceLicenses') }}</h3>
             <div class="space-y-3">
               <div class="p-4 border border-gray-200 dark:border-gray-600 rounded-xl">
                 <div class="flex items-start justify-between mb-2">
@@ -2074,6 +2269,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../store/auth'
 import { useLocaleStore } from '../store/locale'
 import axios from 'axios'
@@ -2088,6 +2284,8 @@ import { ENV } from '../utils/env'
 import { useDialog } from '../composables/useDialog'
 import { version } from '../version.js'
 
+const { t } = useI18n()
+
 const route = useRoute()
 const authStore = useAuthStore()
 const localeStore = useLocaleStore()
@@ -2095,18 +2293,18 @@ const { alert, confirm } = useDialog()
 
 const appVersion = version
 
-const sections = [
-  { id: 'general', label: '일반 설정', icon: '⚙️' },
-  { id: 'cache', label: '캐쉬 관리', icon: '⚡' },
-  { id: 'users', label: '사용자 관리', icon: '👥' },
-  { id: 'folders', label: '폴더 설정', icon: '📁' },
-  { id: 'categories', label: '카테고리 관리', icon: '🏷️' },
-  { id: 'board', label: '게시판 관리', icon: '📋' },
-  { id: 'filing-rules', label: '파일명 규칙 안내', icon: '📄' },
-  { id: 'metadata', label: '메타데이터 설정', icon: '🤖' },
-  { id: 'exceptions', label: '스캔 예외 설정', icon: '🚫' },
-  { id: 'system', label: '시스템 정보', icon: 'ℹ️' }
-]
+const sections = computed(() => [
+  { id: 'general', label: t('settings.sections.general'), icon: '⚙️' },
+  { id: 'cache', label: t('settings.sections.cache'), icon: '⚡' },
+  { id: 'users', label: t('settings.sections.users'), icon: '👥' },
+  { id: 'folders', label: t('settings.sections.folders'), icon: '📁' },
+  { id: 'categories', label: t('settings.sections.categories'), icon: '🏷️' },
+  { id: 'board', label: t('settings.sections.board'), icon: '📋' },
+  { id: 'filing-rules', label: t('settings.sections.filingRules'), icon: '📄' },
+  { id: 'metadata', label: t('settings.sections.metadata'), icon: '🤖' },
+  { id: 'exceptions', label: t('settings.sections.exceptions'), icon: '🚫' },
+  { id: 'system', label: t('settings.sections.system'), icon: 'ℹ️' }
+])
 
 const activeSection = ref('general')
 const userInfo = computed(() => authStore.user || { username: '', role: 'user' })

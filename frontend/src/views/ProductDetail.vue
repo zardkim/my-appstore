@@ -211,30 +211,38 @@
                 :class="tabClass('info')"
                 class="text-sm sm:text-base whitespace-nowrap"
               >
-                정보
+                {{ t('product.tabs.info') }}
               </button>
               <button
                 @click="activeTab = 'versions'"
                 :class="tabClass('versions')"
                 class="text-sm sm:text-base whitespace-nowrap"
               >
-                <span class="hidden sm:inline">버전 ({{ product.versions?.length || 0 }})</span>
-                <span class="sm:hidden">버전</span>
+                <span class="hidden sm:inline">{{ t('product.tabs.versions') }} ({{ product.versions?.length || 0 }})</span>
+                <span class="sm:hidden">{{ t('product.tabs.versions') }}</span>
               </button>
               <button
                 @click="activeTab = 'screenshots'"
                 :class="tabClass('screenshots')"
                 class="text-sm sm:text-base whitespace-nowrap"
               >
-                <span class="hidden sm:inline">스크린샷 ({{ product.screenshots?.length || 0 }})</span>
-                <span class="sm:hidden">스샷</span>
+                <span class="hidden sm:inline">{{ t('product.tabs.screenshots') }} ({{ product.screenshots?.length || 0 }})</span>
+                <span class="sm:hidden">{{ t('product.tabs.screenshots') }}</span>
               </button>
               <button
                 @click="activeTab = 'installation'"
                 :class="tabClass('installation')"
                 class="text-sm sm:text-base whitespace-nowrap"
               >
-                설치방법
+                {{ t('product.tabs.installation') }}
+              </button>
+              <button
+                @click="activeTab = 'patches'"
+                :class="tabClass('patches')"
+                class="text-sm sm:text-base whitespace-nowrap"
+              >
+                <span class="hidden sm:inline">{{ t('product.tabs.patches') }} ({{ attachments?.length || 0 }})</span>
+                <span class="sm:hidden">{{ t('product.tabs.patches') }}</span>
               </button>
             </nav>
           </div>
@@ -246,40 +254,40 @@
               <div>
                 <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center">
                   <span class="mr-2 text-lg sm:text-xl">📝</span>
-                  프로그램 설명
+                  {{ t('product.info.title') }}
                 </h3>
                 <textarea
                   v-if="isEditing"
                   v-model="editForm.description"
                   rows="3"
                   class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
-                  placeholder="프로그램 설명을 입력하세요"
+                  :placeholder="t('product.info.descriptionPlaceholder')"
                 ></textarea>
-                <p v-else class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm sm:text-base lg:text-lg">{{ product.description || '설명이 없습니다.' }}</p>
+                <p v-else class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm sm:text-base lg:text-lg">{{ product.description || t('product.info.noDescription') }}</p>
               </div>
 
               <!-- 플랫폼 & 지원 사양 (1번 요구사항: 라이센스를 지원 사양으로 변경) -->
               <div class="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 sm:mb-2">플랫폼</h4>
+                    <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 sm:mb-2">{{ t('product.info.platform') }}</h4>
                     <input
                       v-if="isEditing"
                       v-model="editForm.platform"
                       type="text"
                       class="w-full px-3 sm:px-4 py-1.5 sm:py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
-                      placeholder="Windows, macOS, Linux 등"
+                      :placeholder="t('product.info.platformPlaceholder')"
                     />
                     <p v-else class="text-sm sm:text-base text-gray-900 dark:text-white">{{ product.platform || 'N/A' }}</p>
                   </div>
                   <div>
-                    <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 sm:mb-2">지원 사양</h4>
+                    <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 sm:mb-2">{{ t('product.info.supportedSpecs') }}</h4>
                     <input
                       v-if="isEditing"
                       v-model="editForm.license_type"
                       type="text"
                       class="w-full px-3 sm:px-4 py-1.5 sm:py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
-                      placeholder="최소 사양 정보"
+                      :placeholder="t('product.info.specsPlaceholder')"
                     />
                     <p v-else class="text-sm sm:text-base text-gray-900 dark:text-white">{{ product.license_type || 'N/A' }}</p>
                   </div>
@@ -290,27 +298,27 @@
               <div v-if="product.release_date || product.release_notes || isEditing" class="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
                 <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center">
                   <span class="mr-2 text-lg sm:text-xl">📅</span>
-                  릴리즈 정보
+                  {{ t('product.info.releaseInfo') }}
                 </h3>
                 <div class="space-y-2 sm:space-y-3">
                   <div v-if="product.release_date || isEditing">
-                    <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">릴리즈 날짜</h4>
+                    <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">{{ t('product.info.releaseDate') }}</h4>
                     <input
                       v-if="isEditing"
                       v-model="editForm.release_date"
                       type="text"
-                      placeholder="예: 2024-01-15"
+                      :placeholder="t('product.info.releaseDatePlaceholder')"
                       class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                     />
                     <p v-else class="text-sm sm:text-base text-gray-900 dark:text-white">{{ product.release_date }}</p>
                   </div>
                   <div v-if="product.release_notes || isEditing">
-                    <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">릴리즈 노트</h4>
+                    <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">{{ t('product.info.releaseNotes') }}</h4>
                     <textarea
                       v-if="isEditing"
                       v-model="editForm.release_notes"
                       rows="3"
-                      placeholder="릴리즈 노트를 입력하세요"
+                      :placeholder="t('product.info.releaseNotesPlaceholder')"
                       class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
                     ></textarea>
                     <p v-else class="text-sm sm:text-base text-gray-700 dark:text-gray-300">{{ product.release_notes }}</p>
@@ -322,7 +330,7 @@
               <div v-if="product.features || isEditing" class="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
                 <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center">
                   <span class="mr-2 text-lg sm:text-xl">✨</span>
-                  주요 기능
+                  {{ t('product.info.keyFeatures') }}
                 </h3>
                 <div v-if="product.features && product.features.length > 0" class="space-y-1.5 sm:space-y-2">
                   <div v-for="(feature, idx) in product.features" :key="idx" class="flex items-start">
@@ -330,14 +338,14 @@
                     <span class="text-sm sm:text-base text-gray-700 dark:text-gray-300">{{ feature }}</span>
                   </div>
                 </div>
-                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">주요 기능 정보가 없습니다.</p>
+                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noFeatures') }}</p>
               </div>
 
               <!-- System Requirements -->
               <div v-if="product.system_requirements || isEditing" class="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
                 <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center">
                   <span class="mr-2 text-lg sm:text-xl">💻</span>
-                  시스템 요구사항
+                  {{ t('product.info.systemRequirements') }}
                 </h3>
                 <div v-if="product.system_requirements && Object.keys(product.system_requirements).length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div v-for="(value, key) in product.system_requirements" :key="key">
@@ -345,28 +353,28 @@
                     <p class="text-sm sm:text-base text-gray-900 dark:text-white">{{ typeof value === 'object' ? JSON.stringify(value) : value }}</p>
                   </div>
                 </div>
-                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">시스템 요구사항 정보가 없습니다.</p>
+                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noSystemRequirements') }}</p>
               </div>
 
               <!-- Supported Formats -->
               <div v-if="product.supported_formats || isEditing" class="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
                 <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center">
                   <span class="mr-2 text-lg sm:text-xl">📂</span>
-                  지원 형식
+                  {{ t('product.info.supportedFormats') }}
                 </h3>
                 <div v-if="product.supported_formats && product.supported_formats.length > 0" class="flex flex-wrap gap-1.5 sm:gap-2">
                   <span v-for="(format, idx) in product.supported_formats" :key="idx" class="inline-block px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-blue-700 dark:text-blue-300 rounded-lg text-xs sm:text-sm font-medium border border-blue-200 dark:border-blue-700">
                     {{ format }}
                   </span>
                 </div>
-                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">지원 형식 정보가 없습니다.</p>
+                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noSupportedFormats') }}</p>
               </div>
 
               <!-- Installation Info -->
               <div v-if="product.installation_info || isEditing" class="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
                 <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center">
                   <span class="mr-2 text-lg sm:text-xl">⚙️</span>
-                  설치 정보
+                  {{ t('product.info.installationInfo') }}
                 </h3>
                 <div v-if="product.installation_info && Object.keys(product.installation_info).length > 0" class="space-y-1.5 sm:space-y-2">
                   <div v-for="(value, key) in product.installation_info" :key="key">
@@ -374,7 +382,7 @@
                     <p class="text-sm sm:text-base text-gray-900 dark:text-white">{{ typeof value === 'object' ? JSON.stringify(value) : value }}</p>
                   </div>
                 </div>
-                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">설치 정보가 없습니다.</p>
+                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noInstallationInfo') }}</p>
               </div>
             </div>
 
@@ -382,7 +390,7 @@
             <div v-if="activeTab === 'versions'">
               <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center">
                 <span class="mr-2 text-lg sm:text-xl">📦</span>
-                다운로드 가능한 버전
+                {{ t('product.versions.title') }}
               </h3>
               <div v-if="product.versions?.length === 0" class="text-center py-12 sm:py-16">
                 <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 rounded-2xl sm:rounded-3xl flex items-center justify-center">
@@ -391,8 +399,8 @@
                           d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                   </svg>
                 </div>
-                <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1.5 sm:mb-2">등록된 버전이 없습니다</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">아직 다운로드 가능한 버전이 없습니다</p>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1.5 sm:mb-2">{{ t('product.versions.noVersions') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">{{ t('product.versions.noVersionsDesc') }}</p>
               </div>
               <div v-else class="space-y-3 sm:space-y-4">
                 <div
@@ -415,7 +423,7 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                         </svg>
-                        버전 {{ version.version_name }}
+                        {{ t('product.versions.version') }} {{ version.version_name }}
                       </span>
                       <span class="flex items-center">
                         <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -437,14 +445,14 @@
                         class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700"
                       >
                         <span class="mr-1">🎒</span>
-                        포터블
+                        {{ t('product.versions.portable') }}
                       </span>
                       <span
                         v-else
                         class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
                       >
                         <span class="mr-1">💿</span>
-                        설치형
+                        {{ t('product.versions.installer') }}
                       </span>
                     </div>
 
@@ -466,7 +474,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    다운로드
+                    {{ t('product.versions.download') }}
                   </button>
                 </div>
               </div>
@@ -477,7 +485,7 @@
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
                   <span class="mr-2 text-lg sm:text-xl">📸</span>
-                  스크린샷
+                  {{ t('product.screenshots.title') }}
                 </h3>
 
                 <!-- Screenshot Search Button (Admin only) -->
@@ -489,7 +497,7 @@
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  <span>스크린샷 검색</span>
+                  <span>{{ t('product.screenshots.searchButton') }}</span>
                 </button>
               </div>
 
@@ -530,7 +538,7 @@
                         v-if="authStore.user?.role === 'admin'"
                         @click.stop="triggerScreenshotUpload(idx - 1)"
                         class="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 p-1.5 sm:p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors opacity-0 group-hover:opacity-100"
-                        title="스크린샷 업로드"
+                        :title="t('product.screenshots.uploadButton')"
                       >
                         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -542,7 +550,7 @@
                         v-if="isEditing && getScreenshotAtIndex(idx - 1)"
                         @click.stop="deleteScreenshot(idx - 1)"
                         class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 p-1.5 sm:p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-colors"
-                        title="스크린샷 삭제"
+                        :title="t('product.screenshots.deleteButton')"
                       >
                         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -550,7 +558,7 @@
                       </button>
                     </div>
                     <div class="p-3 sm:p-4 bg-white dark:bg-gray-800">
-                      <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">스크린샷 {{ idx }}</p>
+                      <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('product.screenshots.screenshot') }} {{ idx }}</p>
                     </div>
                   </div>
                 </div>
@@ -573,7 +581,7 @@
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
                   <span class="mr-2 text-lg sm:text-xl">⚙️</span>
-                  설치 방법
+                  {{ t('product.installation.title') }}
                 </h3>
 
                 <!-- 가이드 작성 버튼 (가이드가 없고, 편집/작성 모드가 아닐 때 표시) -->
@@ -585,7 +593,7 @@
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                   </svg>
-                  가이드 작성
+                  {{ t('product.installation.writeGuide') }}
                 </button>
 
                 <!-- 수정/삭제 버튼 (가이드가 있고, 편집/작성 모드가 아닐 때 표시) -->
@@ -655,6 +663,185 @@
 
               <!-- HTML Content (보기 모드) -->
               <div v-else class="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none" v-html="product.installation_guide"></div>
+            </div>
+
+            <!-- Patches Tab -->
+            <div v-if="activeTab === 'patches'">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                  <span class="mr-2 text-lg sm:text-xl">📦</span>
+                  {{ t('product.patches.title') }}
+                </h3>
+              </div>
+
+              <!-- 파일 업로드 영역 (관리자만) -->
+              <div v-if="authStore.user?.role === 'admin'" class="mb-6">
+                <div
+                  @drop.prevent="handleDrop"
+                  @dragover.prevent="isDragging = true"
+                  @dragleave.prevent="isDragging = false"
+                  :class="[
+                    'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
+                    isDragging
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800'
+                  ]"
+                >
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    @change="handleFileSelect"
+                    class="hidden"
+                  />
+                  <div class="space-y-4">
+                    <svg class="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <div>
+                      <button
+                        @click="$refs.fileInput.click()"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        {{ t('common.selectFile') }}
+                      </button>
+                      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{{ t('common.dragAndDrop') }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 파일 업로드 폼 (파일 선택 후) -->
+                <div v-if="selectedFile" class="mt-4 p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                      <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <div>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ selectedFile.name }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatFileSize(selectedFile.size) }}</p>
+                      </div>
+                    </div>
+                    <button
+                      @click="selectedFile = null"
+                      class="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="space-y-3">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('product.patches.fileType') }}</label>
+                      <select v-model="uploadForm.type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                        <option value="patch">{{ t('product.patches.types.patch') }}</option>
+                        <option value="crack">{{ t('product.patches.types.crack') }}</option>
+                        <option value="manual">{{ t('product.patches.types.manual') }}</option>
+                        <option value="other">{{ t('product.patches.types.other') }}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('product.patches.descriptionOptional') }}</label>
+                      <textarea
+                        v-model="uploadForm.note"
+                        rows="2"
+                        :placeholder="t('product.patches.descriptionPlaceholder')"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none"
+                      ></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                      <button
+                        @click="uploadFile"
+                        :disabled="uploading"
+                        class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        <svg v-if="!uploading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {{ uploading ? t('common.uploading') : t('common.upload') }}
+                      </button>
+                      <button
+                        @click="selectedFile = null"
+                        :disabled="uploading"
+                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+                      >
+                        {{ t('common.cancel') }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 파일 목록 -->
+              <div v-if="attachments && attachments.length > 0" class="space-y-3">
+                <div
+                  v-for="attachment in attachments"
+                  :key="attachment.id"
+                  class="flex items-center justify-between p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors"
+                >
+                  <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="flex-shrink-0">
+                      <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ attachment.file_name }}</p>
+                        <span :class="[
+                          'px-2 py-0.5 text-xs rounded-full flex-shrink-0',
+                          attachment.type === 'patch' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+                          attachment.type === 'crack' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
+                          attachment.type === 'manual' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                          'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300'
+                        ]">
+                          {{ t(`product.patches.types.${attachment.type}`) }}
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatFileSize(attachment.file_size) }} · {{ formatDate(attachment.created_at) }}</p>
+                      <p v-if="attachment.note" class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ attachment.note }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 ml-4">
+                    <button
+                      @click="downloadPatchFile(attachment.id, attachment.file_name)"
+                      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      {{ t('common.download') }}
+                    </button>
+                    <button
+                      v-if="authStore.user?.role === 'admin'"
+                      @click="deleteAttachment(attachment.id)"
+                      class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      :title="t('common.delete')"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 파일 없음 -->
+              <div v-else class="text-center py-12">
+                <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 rounded-3xl flex items-center justify-center">
+                  <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ t('product.patches.noFiles') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">
+                  {{ authStore.user?.role === 'admin' ? t('product.patches.noFilesAdmin') : t('product.patches.noFilesDesc') }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -762,8 +949,10 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { productsApi } from '../api/products'
 import { imagesApi } from '../api/images'
+import attachmentsApi from '../api/attachments'
 import { useAuthStore } from '../store/auth'
 import { useThemeStore } from '../store/theme'
 import { getDownloadUrl } from '../utils/env'
@@ -771,6 +960,7 @@ import ProductLogoSearchDialog from '../components/product/ProductLogoSearchDial
 import ProductImageSearchDialog from '../components/product/ProductImageSearchDialog.vue'
 
 const route = useRoute()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const product = ref(null)
@@ -1342,10 +1532,124 @@ const uploadScreenshot = async (event, index) => {
   }
 }
 
+// Attachments (패치/크랙 파일) 관련
+const attachments = ref([])
+const selectedFile = ref(null)
+const isDragging = ref(false)
+const uploading = ref(false)
+const fileInput = ref(null)
+const uploadForm = ref({
+  type: 'patch',
+  note: ''
+})
+
+// 파일 선택 핸들러
+const handleFileSelect = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    selectedFile.value = file
+  }
+}
+
+// 드래그 앤 드롭 핸들러
+const handleDrop = (event) => {
+  isDragging.value = false
+  const file = event.dataTransfer.files[0]
+  if (file) {
+    selectedFile.value = file
+  }
+}
+
+// 파일 크기 포맷팅
+const formatFileSize = (bytes) => {
+  if (!bytes) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+}
+
+// 파일 업로드
+const uploadFile = async () => {
+  if (!selectedFile.value) return
+
+  uploading.value = true
+  try {
+    await attachmentsApi.uploadAttachment(
+      product.value.id,
+      selectedFile.value,
+      uploadForm.value.note,
+      uploadForm.value.type
+    )
+
+    // 업로드 성공 후 목록 갱신
+    await loadAttachments()
+
+    // 폼 초기화
+    selectedFile.value = null
+    uploadForm.value.note = ''
+    uploadForm.value.type = 'patch'
+
+    alert(t('product.patches.uploadSuccess'))
+  } catch (error) {
+    console.error('File upload error:', error)
+    alert(t('product.patches.uploadFailed'))
+  } finally {
+    uploading.value = false
+  }
+}
+
+// 패치 파일 다운로드
+const downloadPatchFile = async (attachmentId, filename) => {
+  try {
+    const response = await attachmentsApi.downloadAttachment(attachmentId)
+
+    // Blob URL 생성 및 다운로드
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('File download error:', error)
+    alert(t('product.patches.downloadFailed'))
+  }
+}
+
+// 패치 파일 삭제
+const deleteAttachment = async (attachmentId) => {
+  if (!confirm(t('product.patches.deleteConfirm'))) return
+
+  try {
+    await attachmentsApi.deleteAttachment(attachmentId)
+    await loadAttachments()
+    alert(t('product.patches.deleteSuccess'))
+  } catch (error) {
+    console.error('File delete error:', error)
+    alert(t('product.patches.deleteFailed'))
+  }
+}
+
+// 패치 파일 목록 로드
+const loadAttachments = async () => {
+  try {
+    attachments.value = await attachmentsApi.getProductAttachments(product.value.id)
+  } catch (error) {
+    console.error('Failed to load attachments:', error)
+    attachments.value = []
+  }
+}
+
 onMounted(async () => {
   try {
     const response = await productsApi.getById(route.params.id)
     product.value = response.data
+
+    // 패치 파일 목록 로드
+    await loadAttachments()
   } catch (error) {
     console.error('Failed to load product:', error)
   } finally {
