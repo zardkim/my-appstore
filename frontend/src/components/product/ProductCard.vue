@@ -45,13 +45,22 @@
       </p>
 
       <div class="flex items-center justify-between gap-1 sm:gap-2">
-        <span
-          v-if="product.category"
-          class="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 lg:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-700"
-        >
-          <span class="text-xs sm:text-sm">{{ getCategoryIcon(product.category) }}</span>
-          <span class="hidden sm:inline">{{ product.category }}</span>
-        </span>
+        <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+          <span
+            v-if="product.category"
+            class="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 lg:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-700"
+          >
+            <span class="text-xs sm:text-sm">{{ getCategoryIcon(product.category) }}</span>
+            <span class="hidden sm:inline">{{ product.category }}</span>
+          </span>
+          <span
+            v-if="product.is_portable"
+            class="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 lg:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 text-green-700 dark:text-green-300 border border-green-100 dark:border-green-700"
+          >
+            <span class="text-xs sm:text-sm">🎒</span>
+            <span class="hidden sm:inline">Portable</span>
+          </span>
+        </div>
         <div v-if="versionCount" class="flex items-center text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
           <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -99,7 +108,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
-            AI 매칭
+            {{ t('productCard.aiMatching') }}
           </button>
           <button
             @click="handleManualEdit"
@@ -108,7 +117,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            수동 수정
+            {{ t('productCard.manualEdit') }}
           </button>
         </div>
       </div>
@@ -118,10 +127,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { favoritesApi } from '../../api/favorites'
 import { getIconUrl } from '../../utils/env'
 import { useDialog } from '../../composables/useDialog'
 
+const { t } = useI18n({ useScope: 'global' })
 const { alert } = useDialog()
 
 const props = defineProps({
@@ -198,12 +209,12 @@ const toggleFavorite = async () => {
   } catch (error) {
     console.error('Failed to toggle favorite:', error)
     if (error.response?.status === 401) {
-      await alert.warning('로그인이 필요합니다.')
+      await alert.warning(t('productCard.loginRequired'))
     } else if (error.response?.status === 400) {
       // 이미 즐겨찾기에 있는 경우 등
       await checkFavorite()
     } else {
-      await alert.error('즐겨찾기 처리에 실패했습니다.')
+      await alert.error(t('productCard.favoriteFailed'))
     }
   }
 }

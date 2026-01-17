@@ -8,14 +8,14 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-            취소
+            {{ t('tips.cancel') }}
           </button>
-          <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ isEdit ? '글 수정' : '글쓰기' }}</h1>
+          <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ isEdit ? t('tips.editPost') : t('tips.writePost') }}</h1>
         </div>
         <div class="flex items-center space-x-3">
-          <button @click="saveDraft" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">임시저장</button>
+          <button @click="saveDraft" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">{{ t('tips.saveDraft') }}</button>
           <button @click="submitPost" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md font-medium">
-            {{ isEdit ? '수정하기' : '작성하기' }}
+            {{ isEdit ? t('tips.updateButton') : t('tips.publishButton') }}
           </button>
         </div>
       </div>
@@ -28,42 +28,42 @@
             <!-- Category & Notice -->
             <div class="flex items-center space-x-4">
               <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">카테고리 *</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('tips.categoryLabel') }}</label>
                 <select v-model="post.category" required class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                  <option value="">카테고리를 선택하세요</option>
-                  <option v-if="isAdmin" value="notice">📢 공지사항</option>
-                  <option value="tip">💡 팁</option>
-                  <option value="tech">⚙️ 기술</option>
-                  <option value="tutorial">📚 튜토리얼</option>
-                  <option value="qna">❓ Q&A</option>
-                  <option value="news">📰 뉴스</option>
+                  <option value="">{{ t('tips.selectCategory') }}</option>
+                  <option v-if="isAdmin" value="notice">{{ t('tips.categoryNotice') }}</option>
+                  <option value="tip">💡 {{ t('tips.categoryTip') }}</option>
+                  <option value="tech">⚙️ {{ t('tips.categoryTech') }}</option>
+                  <option value="tutorial">📚 {{ t('tips.categoryTutorial') }}</option>
+                  <option value="qna">❓ {{ t('tips.categoryQna') }}</option>
+                  <option value="news">📰 {{ t('tips.categoryNews') }}</option>
                 </select>
               </div>
               <div v-if="isAdmin" class="pt-8">
                 <label class="flex items-center cursor-pointer">
                   <input type="checkbox" v-model="post.is_notice" class="w-5 h-5 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500">
-                  <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">공지사항으로 등록</span>
+                  <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('tips.publishAsNotice') }}</span>
                 </label>
               </div>
             </div>
 
             <!-- Title -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">제목 *</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('tips.titleLabel') }}</label>
               <input
                 v-model="post.title"
                 type="text"
                 required
                 maxlength="100"
                 class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-lg font-medium bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="제목을 입력하세요 (최대 100자)"
+                :placeholder="t('tips.titlePlaceholder')"
               >
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-right">{{ post.title.length }} / 100</p>
             </div>
 
             <!-- Content -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">내용 *</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('tips.contentLabel') }}</label>
               <textarea
                 id="tinymce-editor"
                 v-model="post.content"
@@ -73,19 +73,19 @@
 
             <!-- Tags (Optional) -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">태그 (선택사항)</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('tips.tagsLabel') }}</label>
               <input
                 v-model="post.tags"
                 type="text"
                 class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="태그를 쉼표(,)로 구분하여 입력하세요 (예: windows, 단축키, 팁)"
+                :placeholder="t('tips.tagsPlaceholder')"
               >
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">태그는 검색과 분류에 도움이 됩니다</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ t('tips.tagsHelp') }}</p>
             </div>
 
             <!-- Attachments -->
             <div v-if="allowAttachments">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">첨부파일 (선택사항)</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('tips.attachmentsLabel') }}</label>
 
               <!-- File Upload Area -->
               <div
@@ -104,7 +104,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                   <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                    파일을 드래그 앤 드롭하거나 클릭하여 선택하세요
+                    {{ t('tips.dragDropFiles') }}
                   </p>
                   <input
                     ref="fileInput"
@@ -118,9 +118,9 @@
                     @click="$refs.fileInput.click()"
                     class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium"
                   >
-                    파일 선택
+                    {{ t('tips.selectFiles') }}
                   </button>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">최대 10MB, 최대 5개 파일</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ t('tips.fileLimit') }}</p>
                 </div>
               </div>
 
@@ -160,11 +160,11 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div class="text-sm text-blue-800 dark:text-blue-300">
-                  <p class="font-medium mb-1">작성 전 확인사항</p>
+                  <p class="font-medium mb-1">{{ t('tips.beforePostingTitle') }}</p>
                   <ul class="list-disc list-inside space-y-1 text-blue-700 dark:text-blue-300">
-                    <li>제목과 내용이 게시판 주제에 적합한지 확인해주세요</li>
-                    <li>타인을 비방하거나 욕설이 포함된 내용은 삭제될 수 있습니다</li>
-                    <li>저작권을 침해하는 내용은 게시할 수 없습니다</li>
+                    <li>{{ t('tips.guidelineAppropriate') }}</li>
+                    <li>{{ t('tips.guidelineRespect') }}</li>
+                    <li>{{ t('tips.guidelineCopyright') }}</li>
                   </ul>
                 </div>
               </div>
@@ -178,20 +178,29 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../store/auth'
 import { useThemeStore } from '../store/theme'
+import { useLocaleStore } from '../store/locale'
 import { postsApi } from '../api/posts'
 import { imagesApi } from '../api/images'
 import { useDialog } from '../composables/useDialog'
 
+const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+const localeStore = useLocaleStore()
 const { alert, confirm } = useDialog()
 
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 const isEdit = computed(() => route.params.id !== undefined)
+
+// TinyMCE language mapping
+const editorLanguage = computed(() => {
+  return localeStore.locale === 'ko' ? 'ko_KR' : 'en_US'
+})
 
 let editorInstance = null
 
@@ -283,8 +292,8 @@ const initEditor = () => {
 
     content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
 
-    // 한국어 언어 설정
-    language: 'ko_KR',
+    // 언어 설정 (동적)
+    language: editorLanguage.value,
 
     branding: false,
     promotion: false,
@@ -293,7 +302,7 @@ const initEditor = () => {
     elementpath: false,
     skin: themeStore.isDark ? 'oxide-dark' : 'oxide',
     content_css: themeStore.isDark ? 'dark' : 'default',
-    placeholder: '내용을 입력하세요...',
+    placeholder: t('tips.contentPlaceholder'),
 
     // 에디터 내용 변경 시 v-model 업데이트
     setup: (editor) => {
@@ -313,6 +322,21 @@ const initEditor = () => {
 
 // 테마 변경 감지하여 에디터 재초기화
 watch(() => themeStore.isDark, () => {
+  if (editorInstance) {
+    const currentContent = editorInstance.getContent()
+    editorInstance.remove()
+    initEditor()
+    // 에디터가 초기화된 후 내용 복원
+    setTimeout(() => {
+      if (window.tinymce.get('tinymce-editor')) {
+        window.tinymce.get('tinymce-editor').setContent(currentContent)
+      }
+    }, 100)
+  }
+})
+
+// 언어 변경 감지하여 에디터 재초기화
+watch(() => localeStore.locale, () => {
   if (editorInstance) {
     const currentContent = editorInstance.getContent()
     editorInstance.remove()
@@ -378,19 +402,19 @@ const addFiles = (files) => {
   for (const file of files) {
     // 최대 파일 개수 체크
     if (attachments.value.length >= MAX_FILES) {
-      alert.warning(`최대 ${MAX_FILES}개의 파일만 첨부할 수 있습니다.`)
+      alert.warning(t('tips.maxFilesError').replace('{n}', MAX_FILES))
       break
     }
 
     // 파일 크기 체크
     if (file.size > MAX_FILE_SIZE) {
-      alert.warning(`${file.name}의 크기가 너무 큽니다. 최대 ${formatFileSize(MAX_FILE_SIZE)}까지 업로드 가능합니다.`)
+      alert.warning(t('tips.fileTooLargeError').replace('{name}', file.name).replace('{size}', formatFileSize(MAX_FILE_SIZE)))
       continue
     }
 
     // 중복 파일 체크
     if (attachments.value.some(f => f.name === file.name && f.size === file.size)) {
-      alert.warning(`${file.name}은(는) 이미 추가되었습니다.`)
+      alert.warning(t('tips.duplicateFileError').replace('{name}', file.name))
       continue
     }
 
@@ -431,14 +455,14 @@ onMounted(async () => {
       }
     } catch (error) {
       console.error('Failed to load post:', error)
-      await alert.error('게시글을 불러오는데 실패했습니다.')
+      await alert.error(t('tips.postLoadFailed'))
       router.push('/tips')
     }
   } else {
     // 새 글 작성: 임시저장 데이터 복구
     const draft = localStorage.getItem('tips_draft')
     if (draft) {
-      const shouldRestore = await confirm.info('임시저장된 글이 있습니다. 불러오시겠습니까?')
+      const shouldRestore = await confirm.info(t('tips.restoreDraftConfirm'))
       if (shouldRestore) {
         post.value = JSON.parse(draft)
       }
@@ -455,7 +479,7 @@ onBeforeUnmount(() => {
 
 const goBack = async () => {
   if (post.value.title || post.value.content) {
-    const shouldLeave = await confirm.warning('작성 중인 내용이 있습니다. 정말 나가시겠습니까?')
+    const shouldLeave = await confirm.warning(t('tips.leaveConfirm'))
     if (shouldLeave) {
       router.push('/tips')
     }
@@ -467,22 +491,22 @@ const goBack = async () => {
 const saveDraft = async () => {
   // TODO: 임시저장 API 호출
   localStorage.setItem('tips_draft', JSON.stringify(post.value))
-  await alert.success('임시저장되었습니다.')
+  await alert.success(t('tips.draftSaved'))
 }
 
 const submitPost = async () => {
   if (!post.value.category) {
-    await alert.warning('카테고리를 선택해주세요.')
+    await alert.warning(t('tips.selectCategoryError'))
     return
   }
 
   if (!post.value.title.trim()) {
-    await alert.warning('제목을 입력해주세요.')
+    await alert.warning(t('tips.enterTitleError'))
     return
   }
 
   if (!post.value.content.trim()) {
-    await alert.warning('내용을 입력해주세요.')
+    await alert.warning(t('tips.enterContentError'))
     return
   }
 
@@ -520,7 +544,7 @@ const submitPost = async () => {
           })
         } catch (uploadError) {
           console.error(`첨부파일 업로드 실패 (${file.name}):`, uploadError)
-          await alert.warning(`${file.name} 업로드에 실패했습니다.`)
+          await alert.warning(t('tips.attachmentUploadFailed').replace('{name}', file.name))
         }
       }
     }
@@ -539,11 +563,11 @@ const submitPost = async () => {
     if (isEdit.value) {
       // 게시글 수정
       await postsApi.updatePost(route.params.id, postData)
-      await alert.success('게시글이 수정되었습니다.')
+      await alert.success(t('tips.postUpdated'))
     } else {
       // 게시글 작성
       await postsApi.createPost(postData)
-      await alert.success('게시글이 작성되었습니다.')
+      await alert.success(t('tips.postCreated'))
     }
 
     // 임시저장 데이터 삭제
@@ -553,8 +577,8 @@ const submitPost = async () => {
     router.push('/tips')
   } catch (error) {
     console.error('게시글 저장 오류:', error)
-    const errorMessage = error.response?.data?.detail || error.message || '게시글 저장에 실패했습니다.'
-    await alert.error(`저장 실패: ${errorMessage}`)
+    const errorMessage = error.response?.data?.detail || error.message || t('tips.postSaveFailed')
+    await alert.error(`${t('tips.saveFailed')}${errorMessage}`)
   }
 }
 </script>

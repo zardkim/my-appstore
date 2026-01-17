@@ -20,14 +20,14 @@
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
-              메타데이터 수정
+              {{ t('manualEditDialog.title') }}
             </h3>
             <div class="flex items-center gap-2">
               <!-- 참조사이트 아이콘 -->
               <button
                 @click="showReferenceSitesDialog = true"
                 class="text-white hover:text-gray-200 transition-colors p-2 hover:bg-white/10 rounded-lg"
-                title="참조사이트 보기"
+                :title="t('manualEditDialog.viewReferences')"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -50,10 +50,10 @@
           <form @submit.prevent="save" class="space-y-6">
             <!-- Basic Info Section -->
             <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">기본 정보</h4>
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ t('manualEditDialog.basicInfo') }}</h4>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">제품명</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.productName') }}</label>
                   <input
                     v-model="formData.title"
                     type="text"
@@ -61,7 +61,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">부제목</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.subtitle') }}</label>
                   <input
                     v-model="formData.subtitle"
                     type="text"
@@ -69,7 +69,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">제조사</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.vendor') }}</label>
                   <input
                     v-model="formData.vendor"
                     type="text"
@@ -77,12 +77,12 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">카테고리</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.category') }}</label>
                   <select
                     v-model="formData.category"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   >
-                    <option value="">선택하세요</option>
+                    <option value="">{{ t('manualEditDialog.selectCategory') }}</option>
                     <option value="Graphics">Graphics</option>
                     <option value="Office">Office</option>
                     <option value="Development">Development</option>
@@ -105,7 +105,7 @@
                   </select>
                 </div>
                 <div class="col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">짧은 설명</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.shortDescription') }}</label>
                   <textarea
                     v-model="formData.description"
                     rows="3"
@@ -117,10 +117,10 @@
 
             <!-- Extended Info Section -->
             <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">추가 정보</h4>
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ t('manualEditDialog.extendedInfo') }}</h4>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">공식 웹사이트</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.officialWebsite') }}</label>
                   <input
                     v-model="formData.official_website"
                     type="url"
@@ -129,74 +129,74 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">다운로드 URL</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.downloadUrl') }}</label>
                   <input
                     v-model="formData.download_url"
                     type="url"
-                    placeholder="https://example.com/download"
+                    :placeholder="t('manualEditDialog.downloadUrlPlaceholder')"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">지원 사양</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.supportedSpecs') }}</label>
                   <input
                     v-model="formData.license_type"
                     type="text"
-                    placeholder="최소 사양 정보"
+                    :placeholder="t('manualEditDialog.supportedSpecsPlaceholder')"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">플랫폼</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.platform') }}</label>
                   <input
                     v-model="formData.platform"
                     type="text"
-                    placeholder="예: Windows, macOS, Linux"
+                    :placeholder="t('manualEditDialog.platformPlaceholder')"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">릴리즈 날짜</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.releaseDate') }}</label>
                   <input
                     v-model="formData.release_date"
                     type="text"
-                    placeholder="예: 2024-01-15"
+                    :placeholder="t('manualEditDialog.releaseDatePlaceholder')"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">지원 포맷</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.supportedFormats') }}</label>
                   <input
                     v-model="supportedFormatsText"
                     type="text"
-                    placeholder="예: .jpg, .png, .gif (쉼표로 구분)"
+                    :placeholder="t('manualEditDialog.supportedFormatsPlaceholder')"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                 </div>
                 <div class="col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">주요 기능</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.keyFeatures') }}</label>
                   <textarea
                     v-model="featuresText"
                     rows="4"
-                    placeholder="주요 기능을 한 줄씩 입력하세요 (줄바꿈으로 구분)"
+                    :placeholder="t('manualEditDialog.keyFeaturesPlaceholder')"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   ></textarea>
                 </div>
                 <div class="col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">릴리즈 노트</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.releaseNotes') }}</label>
                   <textarea
                     v-model="formData.release_notes"
                     rows="3"
-                    placeholder="릴리즈 노트를 입력하세요"
+                    :placeholder="t('manualEditDialog.releaseNotesPlaceholder')"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   ></textarea>
                 </div>
                 <div class="col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">시스템 요구사항 (JSON 형식)</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('manualEditDialog.systemRequirements') }}</label>
                   <textarea
                     v-model="systemRequirementsText"
                     rows="4"
-                    placeholder='{"OS": "Windows 10 이상", "CPU": "Intel Core i5", "RAM": "8GB"}'
+                    placeholder='{"OS": "Windows 10+", "CPU": "Intel Core i5", "RAM": "8GB"}'
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
                   ></textarea>
                 </div>
@@ -205,16 +205,16 @@
 
             <!-- Images Section -->
             <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">이미지</h4>
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ t('manualEditDialog.images') }}</h4>
 
               <!-- Logo -->
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">로고</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('manualEditDialog.logo') }}</label>
                 <div class="flex gap-2 mb-2">
                   <input
                     v-model="logoUrl"
                     type="url"
-                    placeholder="로고 URL 입력 또는 파일 업로드"
+                    :placeholder="t('manualEditDialog.logoUrlPlaceholder')"
                     class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                   <button
@@ -223,21 +223,28 @@
                     :disabled="!logoUrl || uploadingLogo"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    다운로드
+                    {{ t('manualEditDialog.download') }}
                   </button>
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  @change="uploadLogo"
-                  class="block w-full text-sm text-gray-500 dark:text-gray-400
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-lg file:border-0
-                    file:text-sm file:font-medium
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100
-                    dark:file:bg-blue-900 dark:file:text-blue-300"
-                />
+                <div class="flex items-center gap-2">
+                  <input
+                    ref="logoFileInput"
+                    type="file"
+                    accept="image/*"
+                    @change="uploadLogo"
+                    class="hidden"
+                  />
+                  <button
+                    type="button"
+                    @click="$refs.logoFileInput.click()"
+                    class="px-4 py-2 bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
+                  >
+                    {{ t('manualEditDialog.selectFile') }}
+                  </button>
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ logoFileName || t('manualEditDialog.noFileSelected') }}
+                  </span>
+                </div>
                 <div v-if="formData.icon_url" class="mt-2">
                   <img :src="formData.icon_url" alt="Logo" class="w-24 h-24 object-contain bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600" />
                 </div>
@@ -245,12 +252,12 @@
 
               <!-- Screenshots -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">스크린샷 (최대 4개)</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('manualEditDialog.screenshots') }}</label>
                 <div class="flex gap-2 mb-2">
                   <input
                     v-model="screenshotUrl"
                     type="url"
-                    placeholder="스크린샷 URL 입력 (여러 개는 쉼표로 구분)"
+                    :placeholder="t('manualEditDialog.screenshotsUrlPlaceholder')"
                     class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                   <button
@@ -259,22 +266,29 @@
                     :disabled="!screenshotUrl || uploadingScreenshots"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    다운로드
+                    {{ t('manualEditDialog.download') }}
                   </button>
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  @change="uploadScreenshots"
-                  class="block w-full text-sm text-gray-500 dark:text-gray-400
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-lg file:border-0
-                    file:text-sm file:font-medium
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100
-                    dark:file:bg-blue-900 dark:file:text-blue-300"
-                />
+                <div class="flex items-center gap-2">
+                  <input
+                    ref="screenshotFileInput"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    @change="uploadScreenshots"
+                    class="hidden"
+                  />
+                  <button
+                    type="button"
+                    @click="$refs.screenshotFileInput.click()"
+                    class="px-4 py-2 bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
+                  >
+                    {{ t('manualEditDialog.selectFile') }}
+                  </button>
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ screenshotFileNames || t('manualEditDialog.noFileSelected') }}
+                  </span>
+                </div>
                 <div v-if="formData.screenshots?.length > 0" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div v-for="(screenshot, index) in formData.screenshots" :key="index" class="relative group bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-all">
                     <div class="aspect-video relative">
@@ -283,7 +297,7 @@
                         type="button"
                         @click="removeScreenshot(index)"
                         class="absolute top-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-colors"
-                        title="스크린샷 삭제"
+                        :title="t('manualEditDialog.deleteScreenshot')"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -291,7 +305,7 @@
                       </button>
                     </div>
                     <div class="p-3 bg-white dark:bg-gray-800">
-                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">스크린샷 {{ index + 1 }}</p>
+                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('manualEditDialog.screenshotLabel') }} {{ index + 1 }}</p>
                     </div>
                   </div>
                 </div>
@@ -306,14 +320,14 @@
             @click="close"
             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
           >
-            취소
+            {{ t('manualEditDialog.cancel') }}
           </button>
           <button
             @click="save"
             :disabled="saving"
             class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ saving ? '저장 중...' : '저장' }}
+            {{ saving ? t('manualEditDialog.saving') : t('manualEditDialog.save') }}
           </button>
         </div>
       </div>
@@ -335,7 +349,7 @@
             <svg class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
-            <h3 class="text-xl font-bold text-white">참조사이트 (수동 수정 시 참고)</h3>
+            <h3 class="text-xl font-bold text-white">{{ t('productDetail.referenceSitesTitle') }}</h3>
           </div>
           <button
             @click="showReferenceSitesDialog = false"
@@ -350,7 +364,7 @@
         <!-- Dialog Content -->
         <div class="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
           <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            메타데이터를 수동으로 수정할 때 아래 사이트들을 참고하세요:
+            {{ t('productDetail.referenceSitesDescription') }}
           </p>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <a
@@ -380,8 +394,13 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { productsApi } from '../../api/products'
 import { imagesApi } from '../../api/images'
+import { useDialog } from '../../composables/useDialog'
+
+const { t } = useI18n({ useScope: 'global' })
+const { alert } = useDialog()
 
 const props = defineProps({
   product: {
@@ -421,6 +440,8 @@ const uploadingLogo = ref(false)
 const uploadingScreenshots = ref(false)
 const saving = ref(false)
 const showReferenceSitesDialog = ref(false)
+const logoFileName = ref('')
+const screenshotFileNames = ref('')
 
 // Helper refs for text-based inputs
 const featuresText = ref('')
@@ -469,6 +490,8 @@ watch(() => props.isOpen, (isOpen) => {
 
     logoUrl.value = ''
     screenshotUrl.value = ''
+    logoFileName.value = ''
+    screenshotFileNames.value = ''
   }
 })
 
@@ -477,13 +500,15 @@ const uploadLogo = async (event) => {
   const file = event.target.files[0]
   if (!file) return
 
+  logoFileName.value = file.name
   uploadingLogo.value = true
   try {
     const response = await imagesApi.uploadLogo(props.product.id, file)
     formData.value.icon_url = response.data.icon_url
   } catch (error) {
     console.error('Logo upload error:', error)
-    alert('로고 업로드에 실패했습니다.')
+    await alert.error(t('manualEditDialog.logoUploadFailed'))
+    logoFileName.value = ''
   } finally {
     uploadingLogo.value = false
     event.target.value = ''
@@ -501,7 +526,7 @@ const downloadLogoFromUrl = async () => {
     logoUrl.value = ''
   } catch (error) {
     console.error('Logo download error:', error)
-    alert('로고 다운로드에 실패했습니다.')
+    await alert.error(t('manualEditDialog.logoDownloadFailed'))
   } finally {
     uploadingLogo.value = false
   }
@@ -512,13 +537,15 @@ const uploadScreenshots = async (event) => {
   const files = Array.from(event.target.files)
   if (!files.length) return
 
+  screenshotFileNames.value = `${files.length} ${t('manualEditDialog.filesSelected')}`
   uploadingScreenshots.value = true
   try {
     const response = await imagesApi.uploadScreenshots(props.product.id, files)
     formData.value.screenshots = response.data.screenshots
   } catch (error) {
     console.error('Screenshots upload error:', error)
-    alert('스크린샷 업로드에 실패했습니다.')
+    await alert.error(t('manualEditDialog.screenshotUploadFailed'))
+    screenshotFileNames.value = ''
   } finally {
     uploadingScreenshots.value = false
     event.target.value = ''
@@ -540,7 +567,7 @@ const downloadScreenshotsFromUrl = async () => {
     screenshotUrl.value = ''
   } catch (error) {
     console.error('Screenshots download error:', error)
-    alert('스크린샷 다운로드에 실패했습니다.')
+    await alert.error(t('manualEditDialog.screenshotDownloadFailed'))
   } finally {
     uploadingScreenshots.value = false
   }
@@ -568,7 +595,7 @@ const save = async () => {
       try {
         dataToSave.system_requirements = JSON.parse(systemRequirementsText.value)
       } catch (e) {
-        alert('시스템 요구사항 JSON 형식이 올바르지 않습니다.')
+        await alert.warning(t('manualEditDialog.invalidJsonFormat'))
         saving.value = false
         return
       }
@@ -581,7 +608,7 @@ const save = async () => {
     emit('close')
   } catch (error) {
     console.error('Save error:', error)
-    alert('저장에 실패했습니다.')
+    await alert.error(t('manualEditDialog.saveError'))
   } finally {
     saving.value = false
   }

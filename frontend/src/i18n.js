@@ -9,7 +9,7 @@
  */
 
 import { createI18n } from 'vue-i18n'
-import messages from './locales'
+import { messages } from './locales'
 
 // 브라우저 언어 감지 (선택적)
 const getBrowserLocale = () => {
@@ -18,7 +18,7 @@ const getBrowserLocale = () => {
   return browserLocale.split('-')[0]
 }
 
-// 사용자 저장 언어 또는 브라우저 언어 또는 기본 언어
+// 사용자 저장 언어 또는 기본 언어
 const savedLocale = localStorage.getItem('locale')
 const browserLocale = getBrowserLocale()
 const supportedLocales = Object.keys(messages)
@@ -26,17 +26,22 @@ const defaultLocale = 'ko'
 
 // 지원하는 언어인지 확인
 const getInitialLocale = () => {
+  // 'auto'가 저장되어 있다면 제거하고 기본값 사용
+  if (savedLocale === 'auto') {
+    localStorage.removeItem('locale')
+    return defaultLocale
+  }
+
   if (savedLocale && supportedLocales.includes(savedLocale)) {
     return savedLocale
   }
-  if (supportedLocales.includes(browserLocale)) {
-    return browserLocale
-  }
+
   return defaultLocale
 }
 
 const i18n = createI18n({
   legacy: false, // Composition API 사용
+  globalInjection: true, // $t를 전역에서 사용 가능하게 함
   locale: getInitialLocale(),
   fallbackLocale: defaultLocale,
   messages,

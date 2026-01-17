@@ -1,6 +1,6 @@
 <template>
   <div class="image-manager border border-gray-300 dark:border-gray-600 rounded-lg p-6 mt-6">
-    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">🖼️ 이미지 관리</h3>
+    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">🖼️ {{ t('imageManager.title') }}</h3>
 
     <!-- Tabs -->
     <div class="flex space-x-2 border-b border-gray-200 dark:border-gray-700 mb-4">
@@ -23,7 +23,7 @@
     <div v-if="activeTab === 'logo'" class="space-y-4">
       <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
         <p class="text-sm text-blue-800 dark:text-blue-300">
-          <strong>{{ searchQuery || props.product?.title || '소프트웨어' }}</strong>의 로고를 검색합니다.
+          {{ t('imageManager.searchingLogoFor', { name: searchQuery || props.product?.title || t('imageManager.software') }) }}
         </p>
       </div>
 
@@ -33,7 +33,7 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <span class="ml-3 text-gray-600 dark:text-gray-400">로고 검색 중...</span>
+        <span class="ml-3 text-gray-600 dark:text-gray-400">{{ t('imageManager.searchingLogo') }}</span>
       </div>
 
       <!-- Error Message -->
@@ -45,15 +45,15 @@
       <div v-if="!searchLoading && searchResults.length > 0" class="space-y-3">
         <div class="flex items-center justify-between">
           <p class="text-sm text-gray-600 dark:text-gray-400">
-            {{ searchResults.length }}개의 로고를 찾았습니다.
-            <span v-if="hasMore" class="text-blue-500">(스크롤하여 더 보기)</span>
+            {{ t('imageManager.foundLogos', { count: searchResults.length }) }}
+            <span v-if="hasMore" class="text-blue-500">({{ t('imageManager.scrollForMore') }})</span>
           </p>
           <button
             v-if="selectedImages.length > 0"
             @click="downloadSelectedImages"
             class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
           >
-            선택한 로고 저장
+            {{ t('imageManager.saveSelectedLogo') }}
           </button>
         </div>
         <div class="grid grid-cols-3 md:grid-cols-5 gap-4">
@@ -98,16 +98,16 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">더 불러오는 중...</span>
+            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ t('imageManager.loadingMore') }}</span>
           </div>
           <div v-else-if="!hasMore" class="text-center text-sm text-gray-500 dark:text-gray-400">
-            모든 결과를 불러왔습니다.
+            {{ t('imageManager.allResultsLoaded') }}
           </div>
         </div>
       </div>
 
       <div v-else-if="!searchLoading && searchResults.length === 0 && searchPerformed" class="text-center py-8 text-gray-500 dark:text-gray-400">
-        검색 결과가 없습니다.
+        {{ t('imageManager.errors.noResults') }}
       </div>
     </div>
 
@@ -115,8 +115,8 @@
     <div v-if="activeTab === 'screenshot'" class="space-y-4">
       <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-3">
         <p class="text-sm text-purple-800 dark:text-purple-300">
-          <strong>{{ searchQuery || props.product?.title || '소프트웨어' }}</strong>의 스크린샷을 검색합니다.
-          <span class="text-xs block mt-1">(최대 10개까지 선택 가능)</span>
+          {{ t('imageManager.searchingScreenshotFor', { name: searchQuery || props.product?.title || t('imageManager.software') }) }}
+          <span class="text-xs block mt-1">({{ t('imageManager.maxSelectHint') }})</span>
         </p>
       </div>
 
@@ -126,7 +126,7 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <span class="ml-3 text-gray-600 dark:text-gray-400">스크린샷 검색 중...</span>
+        <span class="ml-3 text-gray-600 dark:text-gray-400">{{ t('imageManager.searchingScreenshot') }}</span>
       </div>
 
       <!-- Error Message -->
@@ -138,10 +138,10 @@
       <div v-if="!searchLoading && searchResults.length > 0" class="space-y-3">
         <div class="flex items-center justify-between">
           <p class="text-sm text-gray-600 dark:text-gray-400">
-            {{ searchResults.length }}개의 스크린샷을 찾았습니다.
-            <span v-if="hasMore" class="text-purple-500">(스크롤하여 더 보기)</span>
+            {{ t('imageManager.foundScreenshots', { count: searchResults.length }) }}
+            <span v-if="hasMore" class="text-purple-500">({{ t('imageManager.scrollForMore') }})</span>
             <span class="text-purple-600 dark:text-purple-400">
-              ({{ selectedImages.length }}개 선택됨)
+              ({{ t('imageManager.selectedCount', { count: selectedImages.length }) }})
             </span>
           </p>
           <button
@@ -149,7 +149,7 @@
             @click="downloadSelectedImages"
             class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
           >
-            선택한 스크린샷 저장 ({{ selectedImages.length }}개)
+            {{ t('imageManager.saveSelectedScreenshots', { count: selectedImages.length }) }}
           </button>
         </div>
         <div class="grid grid-cols-3 md:grid-cols-5 gap-4">
@@ -194,16 +194,16 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">더 불러오는 중...</span>
+            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ t('imageManager.loadingMore') }}</span>
           </div>
           <div v-else-if="!hasMore" class="text-center text-sm text-gray-500 dark:text-gray-400">
-            모든 결과를 불러왔습니다.
+            {{ t('imageManager.allResultsLoaded') }}
           </div>
         </div>
       </div>
 
       <div v-else-if="!searchLoading && searchResults.length === 0 && searchPerformed" class="text-center py-8 text-gray-500 dark:text-gray-400">
-        검색 결과가 없습니다.
+        {{ t('imageManager.errors.noResults') }}
       </div>
     </div>
 
@@ -212,7 +212,7 @@
       <!-- Logo Upload -->
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          로고 업로드
+          {{ t('imageManager.uploadLogo') }}
         </label>
         <input
           type="file"
@@ -222,14 +222,14 @@
           class="block w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 focus:outline-none"
         />
         <p class="text-xs text-gray-500 dark:text-gray-400">
-          PNG, JPG, GIF, SVG, WebP 지원 (최대 5MB)
+          {{ t('imageManager.supportedFormats') }}
         </p>
       </div>
 
       <!-- Screenshot Upload -->
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          스크린샷 업로드 (최대 10개)
+          {{ t('imageManager.uploadScreenshots') }}
         </label>
         <input
           type="file"
@@ -240,7 +240,7 @@
           class="block w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 focus:outline-none"
         />
         <p class="text-xs text-gray-500 dark:text-gray-400">
-          여러 파일 선택 가능 (각 최대 5MB)
+          {{ t('imageManager.multiSelectHint') }}
         </p>
       </div>
 
@@ -260,7 +260,7 @@
       <!-- Current Logo -->
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          현재 로고
+          {{ t('imageManager.currentLogo') }}
         </label>
         <div v-if="currentLogo" class="flex items-center space-x-4">
           <img
@@ -273,24 +273,24 @@
             @click="deleteLogo"
             class="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
           >
-            삭제
+            {{ t('common.delete') }}
           </button>
         </div>
         <div v-else class="text-sm text-gray-500 dark:text-gray-400">
-          로고가 없습니다.
+          {{ t('imageManager.noLogo') }}
         </div>
       </div>
 
       <!-- Current Screenshots -->
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          현재 스크린샷 ({{ currentScreenshots.length }}개)
+          {{ t('imageManager.currentScreenshots', { count: currentScreenshots.length }) }}
         </label>
         <div v-if="currentScreenshots.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div v-for="(screenshot, index) in currentScreenshots" :key="index" class="relative group">
             <img
               :src="screenshot.url"
-              :alt="`스크린샷 ${index + 1}`"
+              :alt="t('imageManager.screenshotAlt', { index: index + 1 })"
               class="w-full h-32 object-cover border border-gray-200 dark:border-gray-700 rounded cursor-pointer"
               @click="openImageInNewTab(screenshot.url)"
               @error="handleImageError"
@@ -299,15 +299,15 @@
               @click="deleteScreenshot(index)"
               class="absolute top-2 right-2 px-2 py-1 bg-red-600 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              삭제
+              {{ t('common.delete') }}
             </button>
             <span class="absolute bottom-2 left-2 px-2 py-1 bg-black bg-opacity-50 text-white text-xs rounded">
-              {{ screenshot.type === 'local' ? '로컬' : '외부' }}
+              {{ screenshot.type === 'local' ? t('imageManager.local') : t('imageManager.external') }}
             </span>
           </div>
         </div>
         <div v-else class="text-sm text-gray-500 dark:text-gray-400">
-          스크린샷이 없습니다.
+          {{ t('imageManager.noScreenshots') }}
         </div>
       </div>
 
@@ -317,7 +317,7 @@
           @click="deleteAll"
           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
-          모든 이미지 삭제
+          {{ t('imageManager.deleteAll') }}
         </button>
       </div>
     </div>
@@ -359,7 +359,12 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { imagesApi } from '../api/images'
+import { useDialog } from '../composables/useDialog'
+
+const { t } = useI18n({ useScope: 'global' })
+const { alert, confirm: confirmDialog } = useDialog()
 
 const props = defineProps({
   productId: {
@@ -393,16 +398,16 @@ const props = defineProps({
 const emit = defineEmits(['update:logo', 'update:screenshots'])
 
 // Tabs
-const allTabs = [
-  { id: 'logo', label: '로고' },
-  { id: 'screenshot', label: '스크린샷' },
-  { id: 'upload', label: '직접 업로드' },
-  { id: 'current', label: '현재 이미지' }
-]
+const allTabs = computed(() => [
+  { id: 'logo', label: t('imageManager.tabs.logo') },
+  { id: 'screenshot', label: t('imageManager.tabs.screenshot') },
+  { id: 'upload', label: t('imageManager.tabs.upload') },
+  { id: 'current', label: t('imageManager.tabs.current') }
+])
 
 // visibleTabs prop에 따라 표시할 탭만 필터링
 const tabs = computed(() => {
-  return allTabs.filter(tab => props.visibleTabs.includes(tab.id))
+  return allTabs.value.filter(tab => props.visibleTabs.includes(tab.id))
 })
 
 const activeTab = ref(props.defaultTab)
@@ -537,16 +542,16 @@ const searchLogos = async (isLoadMore = false) => {
         if (response.data.error) {
           searchError.value = response.data.error
         } else {
-          searchError.value = '검색 결과가 없습니다.'
+          searchError.value = t('imageManager.errors.noResults')
         }
       }
     } else {
       console.error('API returned error:', response.data.error)
-      searchError.value = response.data.error || '검색에 실패했습니다.'
+      searchError.value = response.data.error || t('imageManager.errors.searchFailed')
     }
   } catch (error) {
     console.error('Logo search error:', error)
-    searchError.value = 'Google API가 설정되지 않았거나 오류가 발생했습니다: ' + (error.message || '알 수 없는 오류')
+    searchError.value = t('imageManager.errors.googleApiError', { error: error.message || t('imageManager.errors.unknownError') })
   } finally {
     searchLoading.value = false
     isLoadingMore.value = false
@@ -610,16 +615,16 @@ const searchScreenshots = async (isLoadMore = false) => {
         if (response.data.error) {
           searchError.value = response.data.error
         } else {
-          searchError.value = '검색 결과가 없습니다.'
+          searchError.value = t('imageManager.errors.noResults')
         }
       }
     } else {
       console.error('API returned error:', response.data.error)
-      searchError.value = response.data.error || '검색에 실패했습니다.'
+      searchError.value = response.data.error || t('imageManager.errors.searchFailed')
     }
   } catch (error) {
     console.error('Screenshot search error:', error)
-    searchError.value = 'Google API가 설정되지 않았거나 오류가 발생했습니다: ' + (error.message || '알 수 없는 오류')
+    searchError.value = t('imageManager.errors.googleApiError', { error: error.message || t('imageManager.errors.unknownError') })
   } finally {
     searchLoading.value = false
     isLoadingMore.value = false
@@ -675,7 +680,7 @@ const setupIntersectionObserver = () => {
 }
 
 // 이미지 선택/선택 해제 토글
-const toggleImageSelection = (result) => {
+const toggleImageSelection = async (result) => {
   const index = selectedImages.value.findIndex(img => img.url === result.url)
 
   if (index >= 0) {
@@ -690,7 +695,7 @@ const toggleImageSelection = (result) => {
       if (selectedImages.value.length < 10) {
         selectedImages.value.push(result)
       } else {
-        alert('최대 10개까지만 선택할 수 있습니다.')
+        await alert.warning(t('imageManager.errors.maxSelectionLimit'))
       }
     }
   }
@@ -756,7 +761,7 @@ const downloadSelectedImages = async () => {
 
       if (response.data.success) {
         emit('update:logo', response.data.url)
-        alert('로고가 저장되었습니다.')
+        await alert.success(t('imageManager.success.logoSaved'))
         // 검색 결과 초기화
         searchResults.value = []
         selectedImages.value = []
@@ -766,7 +771,7 @@ const downloadSelectedImages = async () => {
           activeTab.value = 'current'
         }
       } else {
-        alert('로고 저장에 실패했습니다: ' + (response.data.error || '알 수 없는 오류'))
+        await alert.error(t('imageManager.errors.logoSaveFailed') + ': ' + (response.data.error || t('imageManager.errors.unknownError')))
       }
     } else {
       // 스크린샷 다운로드
@@ -778,7 +783,7 @@ const downloadSelectedImages = async () => {
       const newUrls = selectedImages.value.map(img => img.url).slice(0, 4)
 
       if (selectedImages.value.length > 4) {
-        alert(`스크린샷은 최대 4개까지만 저장할 수 있습니다. 처음 4개만 저장됩니다.`)
+        await alert.warning(t('imageManager.errors.maxScreenshotLimit'))
       }
 
       // 교체 로직: 새로운 스크린샷으로 앞에서부터 교체
@@ -807,13 +812,13 @@ const downloadSelectedImages = async () => {
         }))
         emit('update:screenshots', screenshots)
 
-        let message = `${finalUrls.length}개의 스크린샷이 저장되었습니다.`
+        let message = t('imageManager.success.screenshotsSaved', { count: finalUrls.length })
         if (newUrls.length < existingUrls.length && existingUrls.length <= 4) {
-          message += ` (1~${newUrls.length}번 교체, ${newUrls.length + 1}~${finalUrls.length}번 유지)`
+          message += ` (${t('imageManager.success.partialReplace', { replaced: newUrls.length, kept: finalUrls.length })})`
         } else {
-          message += ` (전체 교체)`
+          message += ` (${t('imageManager.success.fullReplace')})`
         }
-        alert(message)
+        await alert.success(message)
 
         // 검색 결과 초기화
         searchResults.value = []
@@ -824,13 +829,13 @@ const downloadSelectedImages = async () => {
           activeTab.value = 'current'
         }
       } else {
-        alert('스크린샷 저장에 실패했습니다: ' + (response.data.error || '알 수 없는 오류'))
+        await alert.error(t('imageManager.errors.screenshotSaveFailed') + ': ' + (response.data.error || t('imageManager.errors.unknownError')))
       }
     }
   } catch (error) {
     console.error('Image download error:', error)
     console.error('Error response:', error.response?.data)
-    alert('이미지 저장 중 오류가 발생했습니다: ' + (error.response?.data?.detail || error.message))
+    await alert.error(t('imageManager.errors.imageSaveError') + ': ' + (error.response?.data?.detail || error.message))
   }
 }
 
@@ -845,15 +850,15 @@ const handleLogoUpload = async (event) => {
   try {
     const response = await imagesApi.uploadLogo(props.productId, file)
     if (response.data.success) {
-      uploadSuccess.value = '로고가 성공적으로 업로드되었습니다.'
+      uploadSuccess.value = t('imageManager.success.logoUploaded')
       emit('update:logo', response.data.url)
       logoFileInput.value.value = ''
     } else {
-      uploadError.value = response.data.error || '로고 업로드에 실패했습니다.'
+      uploadError.value = response.data.error || t('imageManager.errors.logoUploadFailed')
     }
   } catch (error) {
     console.error('Logo upload error:', error)
-    uploadError.value = '로고 업로드 중 오류가 발생했습니다.'
+    uploadError.value = t('imageManager.errors.logoUploadError')
   }
 }
 
@@ -863,7 +868,7 @@ const handleScreenshotUpload = async (event) => {
   if (files.length === 0) return
 
   if (files.length > 10) {
-    uploadError.value = '최대 10개의 파일만 업로드할 수 있습니다.'
+    uploadError.value = t('imageManager.errors.maxFileUploadLimit')
     return
   }
 
@@ -873,62 +878,62 @@ const handleScreenshotUpload = async (event) => {
   try {
     const response = await imagesApi.uploadScreenshots(props.productId, files)
     if (response.data.success) {
-      uploadSuccess.value = `${files.length}개의 스크린샷이 성공적으로 업로드되었습니다.`
+      uploadSuccess.value = t('imageManager.success.screenshotsUploaded', { count: files.length })
       const screenshots = (response.data.urls || []).map(url => ({ type: 'local', url }))
       emit('update:screenshots', screenshots)
       screenshotFileInput.value.value = ''
     } else {
-      uploadError.value = response.data.error || '스크린샷 업로드에 실패했습니다.'
+      uploadError.value = response.data.error || t('imageManager.errors.screenshotUploadFailed')
     }
   } catch (error) {
     console.error('Screenshot upload error:', error)
-    uploadError.value = '스크린샷 업로드 중 오류가 발생했습니다.'
+    uploadError.value = t('imageManager.errors.screenshotUploadError')
   }
 }
 
 // Delete logo
 const deleteLogo = async () => {
-  if (!confirm('로고를 삭제하시겠습니까?')) return
+  if (!confirm(t('imageManager.confirm.deleteLogo'))) return
 
   try {
     const response = await imagesApi.deleteImages(props.productId, 'logo')
     if (response.data.success) {
       emit('update:logo', null)
-      alert('로고가 삭제되었습니다.')
+      await alert.success(t('imageManager.success.logoDeleted'))
     } else {
-      alert('로고 삭제에 실패했습니다.')
+      await alert.error(t('imageManager.errors.logoDeleteFailed'))
     }
   } catch (error) {
     console.error('Logo delete error:', error)
-    alert('로고 삭제 중 오류가 발생했습니다.')
+    await alert.error(t('imageManager.errors.logoDeleteError'))
   }
 }
 
 // Delete single screenshot
 const deleteScreenshot = async (index) => {
-  if (!confirm('이 스크린샷을 삭제하시겠습니까?')) return
+  if (!confirm(t('imageManager.confirm.deleteScreenshot'))) return
 
   // For now, delete all screenshots as the API doesn't support single deletion
   // In a full implementation, we'd need a separate endpoint for single screenshot deletion
-  alert('개별 스크린샷 삭제는 아직 구현되지 않았습니다. "모든 이미지 삭제"를 사용하세요.')
+  await alert.info(t('imageManager.info.singleDeleteNotSupported'))
 }
 
 // Delete all images
 const deleteAll = async () => {
-  if (!confirm('모든 이미지를 삭제하시겠습니까?')) return
+  if (!confirm(t('imageManager.confirm.deleteAll'))) return
 
   try {
     const response = await imagesApi.deleteImages(props.productId, 'all')
     if (response.data.success) {
       emit('update:logo', null)
       emit('update:screenshots', [])
-      alert(`${response.data.deleted_count}개의 이미지가 삭제되었습니다.`)
+      await alert.success(t('imageManager.success.imagesDeleted', { count: response.data.deleted_count }))
     } else {
-      alert('이미지 삭제에 실패했습니다.')
+      await alert.error(t('imageManager.errors.imageDeleteFailed'))
     }
   } catch (error) {
     console.error('Delete all error:', error)
-    alert('이미지 삭제 중 오류가 발생했습니다.')
+    await alert.error(t('imageManager.errors.imageDeleteError'))
   }
 }
 

@@ -237,26 +237,10 @@ def cache_response(prefix: str = "api", ttl: int = 300):
             # 캐시 키 생성
             cache_key = redis_cache.generate_key(prefix, **cache_params)
 
-            # 캐시 조회
-            try:
-                cached_value = redis_cache.get(cache_key)
-                if cached_value is not None:
-                    logger.debug(f"Cache HIT: {cache_key}")
-                    return cached_value
-            except Exception as e:
-                logger.error(f"Cache GET error {cache_key}: {e}", exc_info=True)
-                # 캐시 읽기 실패 시 원본 함수 실행
-
-            # 캐시 미스 - 원본 함수 실행
-            logger.debug(f"Cache MISS: {cache_key}")
+            # 캐시 비활성화 - 직접 원본 함수 실행
+            # TODO: Pydantic 모델 복원 로직 추가 필요
+            logger.debug(f"Cache DISABLED for {prefix}")
             result = await func(*args, **kwargs)
-
-            # 결과 캐싱 (실패해도 원본 결과는 반환)
-            try:
-                redis_cache.set(cache_key, result, ttl)
-            except Exception as e:
-                logger.error(f"Cache SET error {cache_key}: {e}", exc_info=True)
-
             return result
 
         return wrapper

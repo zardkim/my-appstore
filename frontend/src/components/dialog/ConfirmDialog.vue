@@ -31,14 +31,14 @@
                 @click="cancel"
                 class="px-6 py-2.5 rounded-xl font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
               >
-                {{ cancelText }}
+                {{ displayCancelText }}
               </button>
               <button
                 @click="confirm"
                 :class="confirmButtonClass"
                 class="px-6 py-2.5 rounded-xl font-medium transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 text-white"
               >
-                {{ confirmText }}
+                {{ displayConfirmText }}
               </button>
             </div>
           </div>
@@ -50,6 +50,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n({ useScope: 'global' })
 
 const props = defineProps({
   modelValue: {
@@ -71,12 +74,22 @@ const props = defineProps({
   },
   confirmText: {
     type: String,
-    default: '확인'
+    default: ''
   },
   cancelText: {
     type: String,
-    default: '취소'
+    default: ''
   }
+})
+
+// Use translation if no custom text provided
+const displayConfirmText = computed(() => {
+  if (props.confirmText) return props.confirmText
+  return props.type === 'danger' ? t('common.dialogDelete') : t('common.dialogConfirm')
+})
+
+const displayCancelText = computed(() => {
+  return props.cancelText || t('common.dialogCancel')
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])

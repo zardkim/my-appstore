@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white">폴더 선택</h2>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ t('folderBrowser.title') }}</h2>
           <button @click="close" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
             <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -24,7 +24,7 @@
             @keyup.enter="navigateToPath"
           />
           <button @click="navigateToPath" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
-            이동
+            {{ t('folderBrowser.go') }}
           </button>
         </div>
       </div>
@@ -64,7 +64,7 @@
           </svg>
           <p class="text-red-600 dark:text-red-400 font-medium">{{ error }}</p>
           <button @click="loadDirectory(currentPath)" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-            다시 시도
+            {{ t('folderBrowser.retry') }}
           </button>
         </div>
 
@@ -129,7 +129,7 @@
             <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
             </svg>
-            <p class="text-sm">이 폴더는 비어있습니다</p>
+            <p class="text-sm">{{ t('folderBrowser.emptyFolder') }}</p>
           </div>
         </div>
       </div>
@@ -139,18 +139,18 @@
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-600 dark:text-gray-400">
             <span v-if="selectedPath" class="font-mono">{{ selectedPath }}</span>
-            <span v-else class="text-gray-400 dark:text-gray-500">폴더를 선택하세요</span>
+            <span v-else class="text-gray-400 dark:text-gray-500">{{ t('folderBrowser.selectFolder') }}</span>
           </div>
           <div class="flex items-center space-x-3">
             <button @click="close" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-              취소
+              {{ t('folderBrowser.cancel') }}
             </button>
             <button
               @click="confirmSelection"
               :disabled="!selectedPath"
               class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              선택
+              {{ t('folderBrowser.select') }}
             </button>
           </div>
         </div>
@@ -161,7 +161,10 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { filesystemApi } from '../api/filesystem'
+
+const { t } = useI18n({ useScope: 'global' })
 
 const props = defineProps({
   show: {
@@ -210,7 +213,7 @@ const loadDirectory = async (path) => {
     items.value = response.data.items
   } catch (err) {
     console.error('Failed to browse directory:', err)
-    error.value = err.response?.data?.detail || '폴더를 불러오는데 실패했습니다'
+    error.value = err.response?.data?.detail || t('folderBrowser.loadFailed')
   } finally {
     loading.value = false
   }

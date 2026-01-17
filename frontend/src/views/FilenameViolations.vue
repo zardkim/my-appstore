@@ -10,7 +10,7 @@
           <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
-          <span class="hidden sm:inline">뒤로 가기</span>
+          <span class="hidden sm:inline">{{ t('detectedList.backButton') }}</span>
         </button>
 
         <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
@@ -22,7 +22,7 @@
             <svg class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-            <span class="hidden sm:inline">{{ isAllSelected ? '전체 해제' : '전체 선택' }}</span>
+            <span class="hidden sm:inline">{{ isAllSelected ? t('detectedList.deselectAll') : t('detectedList.selectAll') }}</span>
           </button>
 
           <button
@@ -33,7 +33,7 @@
             <svg class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            <span class="hidden sm:inline">선택 항목 일괄 변경</span>
+            <span class="hidden sm:inline">{{ t('detectedList.batchRename') }}</span>
             <span>({{ selectedIds.length }})</span>
           </button>
 
@@ -44,7 +44,7 @@
             <svg class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span class="hidden sm:inline">새로고침</span>
+            <span class="hidden sm:inline">{{ t('detectedList.refresh') }}</span>
           </button>
         </div>
       </div>
@@ -54,8 +54,8 @@
     <div class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 pb-20 lg:pb-8">
       <!-- Title Section -->
       <div class="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-4 sm:pb-6">
-        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">🔍 검색된 목록</h1>
-        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">스캔된 파일 목록입니다</p>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ t('detectedList.pageTitle') }}</h1>
+        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">{{ t('detectedList.pageDescription') }}</p>
       </div>
 
       <!-- Stats -->
@@ -65,7 +65,7 @@
           <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">전체 항목</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('detectedList.totalItems') }}</p>
               <p class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {{ stats.total }}
               </p>
@@ -82,7 +82,7 @@
           <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">스캔된 항목</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('detectedList.scannedItems') }}</p>
               <p class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 {{ stats.scanned }}
               </p>
@@ -99,7 +99,7 @@
           <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">불일치 항목</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('detectedList.mismatchedItems') }}</p>
               <p class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                 {{ stats.mismatched }}
               </p>
@@ -117,7 +117,7 @@
       <!-- Violations List -->
       <div class="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-8">
         <div v-if="loading" class="flex justify-center items-center h-64">
-          <div class="text-gray-500 dark:text-gray-400">로딩 중...</div>
+          <div class="text-gray-500 dark:text-gray-400">{{ t('detectedList.loading') }}</div>
         </div>
 
         <div v-else-if="violations.length === 0" class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 sm:p-12 lg:p-16">
@@ -127,8 +127,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p class="text-gray-900 dark:text-white text-xl font-bold mb-2">검색된 파일이 없습니다</p>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">스캔된 파일이 없습니다</p>
+            <p class="text-gray-900 dark:text-white text-xl font-bold mb-2">{{ t('detectedList.noFiles') }}</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ t('detectedList.noFilesDesc') }}</p>
           </div>
         </div>
 
@@ -162,7 +162,7 @@
 
                   <!-- 매칭 상태 뱃지 -->
                   <span v-if="violation.product_id" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] sm:text-xs rounded-full flex-shrink-0">
-                    ✓ 스토어 등록됨
+                    {{ t('detectedList.registered') }}
                   </span>
                   <span v-else class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-[10px] sm:text-xs rounded-full flex-shrink-0">
                     {{ getViolationTypeLabel(violation.violation_type) }}
@@ -175,13 +175,13 @@
                     <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400">파일명 수정 중</h3>
+                    <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400">{{ t('detectedList.editingTitle') }}</h3>
                   </div>
                   <input
                     v-model="editingFilename"
                     type="text"
                     class="w-full px-4 py-2 border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="새로운 파일명을 입력하세요"
+                    :placeholder="t('detectedList.filenamePlaceholder')"
                     @keyup.enter="saveEdit(violation.id)"
                     @keyup.esc="cancelEdit"
                   />
@@ -190,13 +190,13 @@
                       @click="saveEdit(violation.id)"
                       class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                     >
-                      저장
+                      {{ t('detectedList.save') }}
                     </button>
                     <button
                       @click="cancelEdit"
                       class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg text-sm font-medium transition-colors"
                     >
-                      취소
+                      {{ t('detectedList.cancel') }}
                     </button>
                   </div>
                 </div>
@@ -208,18 +208,18 @@
 
                 <!-- 위반 내용 -->
                 <div v-if="editingId !== violation.id" class="mt-3 text-sm text-gray-700 dark:text-gray-300">
-                  <span class="font-medium">문제:</span> {{ violation.violation_details }}
+                  <span class="font-medium">{{ t('detectedList.problem') }}</span> {{ violation.violation_details }}
                 </div>
 
                 <!-- 제안 -->
                 <div v-if="editingId !== violation.id && violation.suggestion" class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <span class="text-sm font-medium text-blue-700 dark:text-blue-400">제안:</span>
+                  <span class="text-sm font-medium text-blue-700 dark:text-blue-400">{{ t('detectedList.suggestion') }}</span>
                   <span class="text-sm text-blue-600 dark:text-blue-300 ml-2">{{ violation.suggestion }}</span>
                 </div>
 
                 <!-- 날짜 -->
                 <div v-if="editingId !== violation.id" class="mt-3 text-xs text-gray-500 dark:text-gray-500">
-                  발견 시각: {{ formatDate(violation.created_at) }}
+                  {{ t('detectedList.discoveredAt') }} {{ formatDate(violation.created_at) }}
                 </div>
                 </div>
               </div>
@@ -230,7 +230,7 @@
                 <button
                   v-if="violation.product_id"
                   @click="goToProduct(violation.product_id)"
-                  title="스토어에서 보기"
+                  :title="t('detectedList.viewInStore')"
                   class="p-1.5 sm:p-2 lg:p-3 text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:shadow-lg rounded-lg sm:rounded-xl transition-all"
                 >
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,27 +239,22 @@
                   </svg>
                 </button>
 
-                <!-- AI 매칭 버튼 (아직 매칭되지 않은 경우) -->
+                            <!-- AI 매칭 버튼 (아직 매칭되지 않은 경우) -->
                 <button
                   v-else
-                  @click="handleAIMatching(violation.id)"
-                  :disabled="aiMatchingInProgress.has(violation.id)"
-                  title="AI 메타데이터 생성 및 스토어 등록"
-                  class="p-1.5 sm:p-2 lg:p-3 text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg rounded-lg sm:rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  @click="openAIMatchingDialog(violation)"
+                  :title="t('detectedList.aiMatching')"
+                  class="p-1.5 sm:p-2 lg:p-3 text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg rounded-lg sm:rounded-xl transition-all"
                 >
-                  <svg v-if="!aiMatchingInProgress.has(violation.id)" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                  <svg v-else class="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 </button>
 
                 <button
                   v-if="violation.suggestion"
                   @click="renameSingle(violation)"
-                  title="제안으로 변경"
+                  :title="t('detectedList.applySuggestion')"
                   class="p-1.5 sm:p-2 lg:p-3 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
                 >
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,7 +263,7 @@
                 </button>
                 <button
                   @click="startEdit(violation)"
-                  title="파일명 수정"
+                  :title="t('detectedList.editFilename')"
                   class="p-1.5 sm:p-2 lg:p-3 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
                 >
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,7 +272,7 @@
                 </button>
                 <button
                   @click="resolveViolation(violation.id)"
-                  title="해결됨으로 표시"
+                  :title="t('detectedList.markResolved')"
                   class="p-1.5 sm:p-2 lg:p-3 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
                 >
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,7 +281,7 @@
                 </button>
                 <button
                   @click="deleteViolation(violation.id)"
-                  title="삭제"
+                  :title="t('detectedList.deleteItem')"
                   class="p-1.5 sm:p-2 lg:p-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
                 >
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,16 +294,29 @@
         </div>
       </div>
     </div>
+
+    <!-- AI Matching Dialog -->
+    <ViolationAISearchDialog
+      :is-open="aiMatchingDialogOpen"
+      :violation="selectedViolation"
+      @close="closeAIMatchingDialog"
+      @saved="handleAIMatchingSaved"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { filenameViolationsApi } from '../api/filenameViolations'
 import { productsApi } from '../api/products'
+import ViolationAISearchDialog from '../components/violation/ViolationAISearchDialog.vue'
+import { useDialog } from '../composables/useDialog'
 
 const router = useRouter()
+const { t } = useI18n({ useScope: 'global' })
+const { alert, confirm } = useDialog()
 
 const loading = ref(true)
 const violations = ref([])
@@ -322,19 +330,11 @@ const editingId = ref(null)
 const editingFilename = ref('')
 const selectedIds = ref([])
 const isAllSelected = ref(false)
-const aiMatchingInProgress = ref(new Set()) // AI 매칭 진행 중인 violation ID들
-
-const violationTypeLabels = {
-  underscore_overuse: '언더스코어 과다',
-  bracket_usage: '대괄호 사용',
-  version_format: '버전 형식 오류',
-  lowercase_name: '소문자 전용',
-  complex_name: '파일명 복잡',
-  invalid_chars: '특수문자 사용'
-}
+const aiMatchingDialogOpen = ref(false)
+const selectedViolation = ref(null)
 
 const getViolationTypeLabel = (type) => {
-  return violationTypeLabels[type] || type
+  return t(`detectedList.violationTypes.${type}`) || type
 }
 
 const formatDate = (dateString) => {
@@ -355,7 +355,7 @@ const loadViolations = async () => {
     isAllSelected.value = false
   } catch (error) {
     console.error('Failed to load violations:', error)
-    alert('위반 항목을 불러오는데 실패했습니다.')
+    await alert.error(t('detectedList.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -389,25 +389,26 @@ const resolveViolation = async (id) => {
   try {
     await filenameViolationsApi.resolveViolation(id)
     await loadViolations()
-    alert('해결됨으로 표시되었습니다.')
+    await alert.success(t('detectedList.resolveSuccess'))
   } catch (error) {
     console.error('Failed to resolve violation:', error)
-    alert('처리에 실패했습니다.')
+    await alert.error(t('detectedList.resolveFailed'))
   }
 }
 
 const deleteViolation = async (id) => {
-  if (!confirm('이 항목을 삭제하시겠습니까?')) {
+  const shouldDelete = await confirm.danger(t('detectedList.deleteConfirm'))
+  if (!shouldDelete) {
     return
   }
 
   try {
     await filenameViolationsApi.deleteViolation(id)
     await loadViolations()
-    alert('삭제되었습니다.')
+    await alert.success(t('detectedList.deleteSuccess'))
   } catch (error) {
     console.error('Failed to delete violation:', error)
-    alert('삭제에 실패했습니다.')
+    await alert.error(t('detectedList.deleteFailed'))
   }
 }
 
@@ -423,7 +424,7 @@ const cancelEdit = () => {
 
 const saveEdit = async (id) => {
   if (!editingFilename.value.trim()) {
-    alert('파일명을 입력해주세요.')
+    await alert.warning(t('detectedList.enterFilename'))
     return
   }
 
@@ -433,21 +434,22 @@ const saveEdit = async (id) => {
     await loadViolations()
     editingId.value = null
     editingFilename.value = ''
-    alert('파일명이 성공적으로 변경되었습니다.\nAI 매칭 버튼을 클릭하여 스토어에 등록할 수 있습니다.')
+    await alert.success(t('detectedList.renameSuccess'))
   } catch (error) {
     console.error('Failed to rename file:', error)
-    const errorMsg = error.response?.data?.detail || '파일명 변경에 실패했습니다.'
-    alert(errorMsg)
+    const errorMsg = error.response?.data?.detail || t('detectedList.renameFailed')
+    await alert.error(errorMsg)
   }
 }
 
 const renameSingle = async (violation) => {
   if (!violation.suggestion) {
-    alert('제안된 파일명이 없습니다.')
+    await alert.warning(t('detectedList.noSuggestion'))
     return
   }
 
-  if (!confirm(`"${violation.suggestion}"로 변경하시겠습니까?`)) {
+  const shouldRename = await confirm.warning(t('detectedList.renameConfirm', { filename: violation.suggestion }))
+  if (!shouldRename) {
     return
   }
 
@@ -455,21 +457,22 @@ const renameSingle = async (violation) => {
     await filenameViolationsApi.renameFile(violation.id, violation.suggestion)
 
     await loadViolations()
-    alert('파일명이 성공적으로 변경되었습니다.\nAI 매칭 버튼을 클릭하여 스토어에 등록할 수 있습니다.')
+    await alert.success(t('detectedList.renameSuccess'))
   } catch (error) {
     console.error('Failed to rename file:', error)
-    const errorMsg = error.response?.data?.detail || '파일명 변경에 실패했습니다.'
-    alert(errorMsg)
+    const errorMsg = error.response?.data?.detail || t('detectedList.renameFailed')
+    await alert.error(errorMsg)
   }
 }
 
 const batchRenameSelected = async () => {
   if (selectedIds.value.length === 0) {
-    alert('변경할 항목을 선택해주세요.')
+    await alert.warning(t('detectedList.selectItems'))
     return
   }
 
-  if (!confirm(`선택한 ${selectedIds.value.length}개 항목을 제안된 파일명으로 변경하시겠습니까?`)) {
+  const shouldRename = await confirm.warning(t('detectedList.batchRenameConfirm', { count: selectedIds.value.length }))
+  if (!shouldRename) {
     return
   }
 
@@ -482,42 +485,51 @@ const batchRenameSelected = async () => {
     let message = result.message + '\n'
 
     if (result.results.failed.length > 0) {
-      message += '\n실패한 항목:\n'
+      message += t('detectedList.batchRenamePartialSuccess')
       result.results.failed.forEach(item => {
         message += `- ${item.filename}: ${item.error}\n`
       })
     }
 
-    message += '\n\nAI 매칭 버튼을 클릭하여 스토어에 등록할 수 있습니다.'
-    alert(message)
+    message += '\n\n' + t('detectedList.renameSuccess').split('\n')[1]
+    await alert.info(message)
   } catch (error) {
     console.error('Failed to batch rename:', error)
-    alert('일괄 변경에 실패했습니다.')
+    await alert.error(t('detectedList.batchRenameFailed'))
   }
 }
 
-const handleAIMatching = async (violationId) => {
-  if (!confirm('AI로 메타데이터를 생성하고 스토어에 등록하시겠습니까?')) {
-    return
+const openAIMatchingDialog = (violation) => {
+  selectedViolation.value = violation
+  aiMatchingDialogOpen.value = true
+}
+
+const closeAIMatchingDialog = () => {
+  aiMatchingDialogOpen.value = false
+  selectedViolation.value = null
+}
+
+const handleAIMatchingSaved = async (data) => {
+  console.log('AI matching saved:', data)
+
+  // 목록에서 해당 항목 제거
+  if (selectedViolation.value?.id) {
+    violations.value = violations.value.filter(v => v.id !== selectedViolation.value.id)
+
+    // 통계 업데이트
+    if (stats.value) {
+      stats.value.scanned = Math.max(0, stats.value.scanned - 1)
+      stats.value.total = Math.max(0, stats.value.total - 1)
+    }
   }
 
-  try {
-    aiMatchingInProgress.value.add(violationId)
+  // 성공 메시지 표시
+  const productTitle = data.product?.title || '제품'
+  await alert.success(`${t('detectedList.productCreateSuccess')}\n\n제품명: ${productTitle}`)
 
-    const response = await filenameViolationsApi.createProduct(violationId)
-
-    if (response.data.success) {
-      alert('Product가 성공적으로 생성되었습니다.\n스토어 페이지로 이동합니다.')
-
-      // 스토어 페이지로 이동
-      router.push('/discover')
-    }
-  } catch (error) {
-    console.error('Failed to create product:', error)
-    const errorMsg = error.response?.data?.detail || 'Product 생성에 실패했습니다.'
-    alert(errorMsg)
-  } finally {
-    aiMatchingInProgress.value.delete(violationId)
+  // 목록이 비었으면 다시 로드
+  if (violations.value.length === 0) {
+    await loadViolations()
   }
 }
 

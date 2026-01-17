@@ -36,6 +36,7 @@ class ProductCreate(ProductBase):
 class ProductResponse(ProductBase):
     id: int
     folder_path: str
+    is_portable: bool = False
     versions: List[VersionResponse] = []
 
     # 확장 메타데이터
@@ -52,7 +53,6 @@ class ProductResponse(ProductBase):
     last_crawled_at: Optional[datetime] = None
     screenshots: Optional[List[str]] = None  # 문자열 배열로 변경 (URL 직접 저장)
     installation_guide: Optional[str] = None
-    installation_info: Optional[Dict[str, Any]] = None
 
     @field_validator('screenshots', mode='before')
     @classmethod
@@ -85,6 +85,7 @@ class ProductUpdateRequest(BaseModel):
     vendor: Optional[str] = None
     category: Optional[str] = None
     icon_url: Optional[str] = None
+    is_portable: Optional[bool] = None
 
     # 확장 메타데이터
     official_website: Optional[str] = None
@@ -98,7 +99,6 @@ class ProductUpdateRequest(BaseModel):
     release_notes: Optional[str] = None
     release_date: Optional[str] = None
     screenshots: Optional[List[str]] = None  # 문자열 배열로 변경
-    installation_info: Optional[Dict[str, Any]] = None
 
 
 class VersionUpdateRequest(BaseModel):

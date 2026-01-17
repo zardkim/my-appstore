@@ -4,14 +4,14 @@
     <div class="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-700 dark:to-purple-800 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 text-white">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">💡 팁&테크</h1>
-          <p class="text-sm sm:text-base text-blue-100 dark:text-blue-200">유용한 팁과 기술 정보를 공유하는 공간입니다</p>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">{{ t('tips.title') }}</h1>
+          <p class="text-sm sm:text-base text-blue-100 dark:text-blue-200">{{ t('tips.description') }}</p>
         </div>
         <button v-if="isAdmin" @click="goToWrite" class="px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 rounded-lg sm:rounded-xl hover:shadow-lg transition-all font-medium flex items-center text-sm sm:text-base self-start sm:self-auto">
           <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          글쓰기
+          {{ t('tips.writeNew') }}
         </button>
       </div>
     </div>
@@ -21,21 +21,21 @@
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-3">
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <select v-model="selectedCategory" class="px-3 sm:px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-            <option value="all">전체 카테고리</option>
-            <option value="tip">팁</option>
-            <option value="tech">기술</option>
-            <option value="tutorial">튜토리얼</option>
-            <option value="qna">Q&A</option>
-            <option value="news">뉴스</option>
+            <option value="all">{{ t('tips.allCategories') }}</option>
+            <option value="tip">{{ t('tips.categoryTip') }}</option>
+            <option value="tech">{{ t('tips.categoryTech') }}</option>
+            <option value="tutorial">{{ t('tips.categoryTutorial') }}</option>
+            <option value="qna">{{ t('tips.categoryQna') }}</option>
+            <option value="news">{{ t('tips.categoryNews') }}</option>
           </select>
           <select v-model="sortBy" class="px-3 sm:px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-            <option value="latest">최신순</option>
-            <option value="views">조회수순</option>
-            <option value="comments">댓글순</option>
+            <option value="latest">{{ t('tips.sortLatest') }}</option>
+            <option value="views">{{ t('tips.sortViews') }}</option>
+            <option value="comments">{{ t('tips.sortComments') }}</option>
           </select>
         </div>
         <div class="relative">
-          <input v-model="searchQuery" type="text" placeholder="검색..." class="w-full sm:w-64 lg:w-80 pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm">
+          <input v-model="searchQuery" type="text" :placeholder="t('tips.searchPlaceholder')" class="w-full sm:w-64 lg:w-80 pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm">
           <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
@@ -51,20 +51,20 @@
           <table class="w-full">
             <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               <tr>
-                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-20">번호</th>
-                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-32">카테고리</th>
-                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">제목</th>
-                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-32">작성자</th>
-                <th class="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-24">조회수</th>
-                <th class="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-24">댓글</th>
-                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-40">작성일</th>
+                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-20">{{ t('tips.number') }}</th>
+                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-32">{{ t('tips.category') }}</th>
+                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ t('tips.titleColumn') }}</th>
+                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-32">{{ t('tips.author') }}</th>
+                <th class="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-24">{{ t('tips.views') }}</th>
+                <th class="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-24">{{ t('tips.comments') }}</th>
+                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-40">{{ t('tips.date') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
               <!-- Notice Posts -->
               <tr v-for="post in noticePosts" :key="'notice-' + post.id" class="bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 cursor-pointer transition-colors" @click="goToDetail(post.id)">
                 <td class="px-6 py-4">
-                  <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-red-500 dark:bg-red-600 text-white">공지</span>
+                  <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-red-500 dark:bg-red-600 text-white">{{ t('tips.notice') }}</span>
                 </td>
                 <td class="px-6 py-4">
                   <span :class="getCategoryStyle(post.category)">{{ getCategoryLabel(post.category) }}</span>
@@ -75,7 +75,7 @@
                       <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
                     </svg>
                     <span class="font-medium text-gray-900 dark:text-white">{{ post.title }}</span>
-                    <span v-if="isNew(post.created_at)" class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">NEW</span>
+                    <span v-if="isNew(post.created_at)" class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">{{ t('tips.new') }}</span>
                   </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ post.author_username }}</td>
@@ -96,7 +96,7 @@
                   <div class="flex items-center justify-between">
                     <div class="flex items-center">
                       <span class="font-medium text-gray-900 dark:text-white">{{ post.title }}</span>
-                      <span v-if="isNew(post.created_at)" class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">NEW</span>
+                      <span v-if="isNew(post.created_at)" class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">{{ t('tips.new') }}</span>
                       <span v-if="post.has_image" class="ml-2">📷</span>
                     </div>
                     <button
@@ -127,8 +127,8 @@
                     <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p class="text-lg font-medium">게시글이 없습니다</p>
-                    <p class="text-sm mt-2">첫 번째 글을 작성해보세요!</p>
+                    <p class="text-lg font-medium">{{ t('tips.noPosts') }}</p>
+                    <p class="text-sm mt-2">{{ t('tips.noPostsDesc') }}</p>
                   </div>
                 </td>
               </tr>
@@ -147,17 +147,17 @@
           >
             <div class="flex items-start justify-between gap-2 mb-2">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-500 text-white">공지</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-500 text-white">{{ t('tips.notice') }}</span>
                 <span :class="getCategoryStyle(post.category)">{{ getCategoryLabel(post.category) }}</span>
-                <span v-if="isNew(post.created_at)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">NEW</span>
+                <span v-if="isNew(post.created_at)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">{{ t('tips.new') }}</span>
               </div>
             </div>
             <h3 class="font-medium text-gray-900 dark:text-white mb-2 line-clamp-2">{{ post.title }}</h3>
             <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
               <div class="flex items-center gap-3">
                 <span>{{ post.author_username }}</span>
-                <span>조회 {{ post.views }}</span>
-                <span class="text-blue-600 dark:text-blue-400 font-medium">댓글 {{ post.comments_count }}</span>
+                <span>{{ t('tips.views') }} {{ post.views }}</span>
+                <span class="text-blue-600 dark:text-blue-400 font-medium">{{ t('tips.comments') }} {{ post.comments_count }}</span>
               </div>
               <span>{{ formatDate(post.created_at) }}</span>
             </div>
@@ -173,7 +173,7 @@
             <div class="flex items-start justify-between gap-2 mb-2">
               <div class="flex items-center gap-2 flex-wrap flex-1">
                 <span :class="getCategoryStyle(post.category)">{{ getCategoryLabel(post.category) }}</span>
-                <span v-if="isNew(post.created_at)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">NEW</span>
+                <span v-if="isNew(post.created_at)" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">{{ t('tips.new') }}</span>
                 <span v-if="post.has_image">📷</span>
               </div>
               <button
@@ -191,8 +191,8 @@
             <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
               <div class="flex items-center gap-3">
                 <span>{{ post.author_username }}</span>
-                <span>조회 {{ post.views }}</span>
-                <span v-if="post.comments_count > 0" class="text-blue-600 dark:text-blue-400 font-medium">댓글 {{ post.comments_count }}</span>
+                <span>{{ t('tips.views') }} {{ post.views }}</span>
+                <span v-if="post.comments_count > 0" class="text-blue-600 dark:text-blue-400 font-medium">{{ t('tips.comments') }} {{ post.comments_count }}</span>
               </div>
               <span>{{ formatDate(post.created_at) }}</span>
             </div>
@@ -204,8 +204,8 @@
               <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <p class="text-lg font-medium">게시글이 없습니다</p>
-              <p class="text-sm mt-2">첫 번째 글을 작성해보세요!</p>
+              <p class="text-lg font-medium">{{ t('tips.noPosts') }}</p>
+              <p class="text-sm mt-2">{{ t('tips.noPostsDesc') }}</p>
             </div>
           </div>
         </div>
@@ -257,11 +257,13 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../store/auth'
 import { scrapsApi } from '../api/scraps'
 import { postsApi } from '../api/posts'
 import { useDialog } from '../composables/useDialog'
 
+const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
 const authStore = useAuthStore()
 const { alert } = useDialog()
@@ -341,11 +343,11 @@ const pageNumbers = computed(() => {
 
 const getCategoryLabel = (category) => {
   const labels = {
-    tip: '팁',
-    tech: '기술',
-    tutorial: '튜토리얼',
-    qna: 'Q&A',
-    news: '뉴스'
+    tip: t('tips.categoryTip'),
+    tech: t('tips.categoryTech'),
+    tutorial: t('tips.categoryTutorial'),
+    qna: t('tips.categoryQna'),
+    news: t('tips.categoryNews')
   }
   return labels[category] || category
 }
@@ -365,16 +367,16 @@ const formatDate = (dateStr) => {
   const date = new Date(dateStr)
   const now = new Date()
   const diffTime = Math.abs(now - date)
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
   if (diffDays < 1) {
-    return '오늘'
+    return t('tips.today')
   } else if (diffDays < 2) {
-    return '어제'
+    return t('tips.yesterday')
   } else if (diffDays < 7) {
-    return `${diffDays}일 전`
+    return t('tips.daysAgo').replace('{n}', diffDays)
   } else {
-    return date.toLocaleDateString('ko-KR')
+    return date.toLocaleDateString()
   }
 }
 
@@ -382,7 +384,7 @@ const isNew = (dateStr) => {
   const date = new Date(dateStr)
   const now = new Date()
   const diffTime = Math.abs(now - date)
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
   return diffDays <= 3
 }
 
@@ -424,7 +426,7 @@ const loadPosts = async () => {
     posts.value = response.data
   } catch (error) {
     console.error('Failed to load posts:', error)
-    await alert.error('게시글 목록을 불러오는데 실패했습니다.')
+    await alert.error(t('tips.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -457,9 +459,9 @@ const toggleScrap = async (post) => {
   } catch (error) {
     console.error('Failed to toggle scrap:', error)
     if (error.response?.status === 401) {
-      await alert.warning('로그인이 필요합니다.')
+      await alert.warning(t('tips.loginRequired'))
     } else {
-      await alert.error('스크랩 처리에 실패했습니다.')
+      await alert.error(t('tips.scrapFailed'))
     }
   }
 }

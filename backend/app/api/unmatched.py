@@ -97,6 +97,15 @@ async def approve_suggestion(
     try:
         metadata = item.suggested_metadata
 
+        # 필수 필드 검증
+        if not metadata.get('title'):
+            raise HTTPException(status_code=400, detail="제품명이 없습니다.")
+
+        # 같은 folder_path로 Product가 이미 있는지 확인
+        existing_product = db.query(Product).filter(Product.folder_path == item.folder_path).first()
+        if existing_product:
+            raise HTTPException(status_code=400, detail=f"이미 등록된 제품입니다: {existing_product.title}")
+
         # Product 생성
         product = Product(
             title=metadata.get('title'),

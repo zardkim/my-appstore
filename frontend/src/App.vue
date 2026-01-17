@@ -26,15 +26,17 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useAuthStore } from './store/auth'
 import { useThemeStore } from './store/theme'
+import { useLocaleStore } from './store/locale'
 import { useDialog } from './composables/useDialog'
 import AlertDialog from './components/dialog/AlertDialog.vue'
 import ConfirmDialog from './components/dialog/ConfirmDialog.vue'
 
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+const localeStore = useLocaleStore()
 const { alertDialogState, confirmDialogState } = useDialog()
 
 onMounted(() => {
@@ -43,6 +45,17 @@ onMounted(() => {
 
   // Check authentication on app mount
   authStore.checkAuth()
+
+  // Initialize locale from localStorage
+  const savedLocale = localStorage.getItem('locale')
+  if (savedLocale && savedLocale !== 'auto') {
+    localeStore.setLocale(savedLocale)
+  }
+})
+
+// Watch for locale changes to ensure reactivity
+watch(() => localeStore.locale, (newLocale) => {
+  console.log('Locale changed in App.vue:', newLocale)
 })
 </script>
 

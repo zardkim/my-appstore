@@ -7,7 +7,7 @@ from pathlib import Path
 import logging
 
 from app.database import engine, Base
-from app.api import auth, products, users, scan, download, scheduler, filesystem, favorites, scraps, config, metadata, unmatched, posts, invitations, images, filename_violations, version, comments, cache
+from app.api import auth, products, users, scan, download, scheduler, filesystem, favorites, scraps, config, metadata, unmatched, posts, invitations, images, filename_violations, version, comments, cache, attachments
 from app.core.scheduler import scan_scheduler
 from app.config import settings
 
@@ -26,6 +26,7 @@ required_directories = [
     settings.ICON_CACHE_DIR,
     settings.SCREENSHOT_CACHE_DIR,
     settings.EXIMAGE_DIR,
+    settings.PATCHES_DIR,
     settings.CONFIG_DATA_DIR,
     settings.SCAN_BASE_PATH
 ]
@@ -116,6 +117,10 @@ tags_metadata = [
     {
         "name": "Cache",
         "description": "캐시 관리 (Redis)",
+    },
+    {
+        "name": "Attachments",
+        "description": "패치/크랙 파일 관리 (업로드, 다운로드, 삭제)",
     },
 ]
 
@@ -228,6 +233,7 @@ app.include_router(images.router, prefix="/api/images", tags=["Images"])
 app.include_router(filename_violations.router, tags=["Filename Violations"])
 app.include_router(version.router, prefix="/api", tags=["Version"])
 app.include_router(cache.router, prefix="/api/cache", tags=["Cache"])
+app.include_router(attachments.router, tags=["Attachments"])
 
 
 @app.on_event("startup")

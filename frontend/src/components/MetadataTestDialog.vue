@@ -5,7 +5,7 @@
       <div class="sticky top-0 bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4 flex items-center justify-between z-10">
         <h2 class="text-xl font-bold text-white flex items-center">
           <span class="mr-2">🤖</span>
-          AI 메타데이터 테스트
+          {{ t('metadataTest.title') }}
         </h2>
         <button
           @click="closeDialog"
@@ -23,13 +23,13 @@
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              소프트웨어 이름
+              {{ t('metadataTest.softwareName') }}
             </label>
             <input
               v-model="softwareName"
               type="text"
               class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="예: Adobe Photoshop 2024, ArcSoft TotalMedia Extreme 3"
+              :placeholder="t('metadataTest.softwareNamePlaceholder')"
               @keyup.enter="generateMetadata"
             />
           </div>
@@ -44,7 +44,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              {{ loading ? 'AI가 분석 중입니다...' : '메타데이터 생성' }}
+              {{ loading ? t('metadataTest.analyzing') : t('metadataTest.generateMetadata') }}
             </button>
 
             <div class="grid grid-cols-2 gap-3">
@@ -56,7 +56,7 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                로고 검색
+                {{ t('metadataTest.logoSearch') }}
               </button>
 
               <button
@@ -67,7 +67,7 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                스크린샷 검색
+                {{ t('metadataTest.screenshotSearch') }}
               </button>
             </div>
           </div>
@@ -83,7 +83,7 @@
           <!-- Header with Icon and Provider Badge -->
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white">AI 응답 데이터</h3>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('metadataTest.aiResponseData') }}</h3>
               <div v-if="metadata.icon_url" class="flex items-center">
                 <img
                   :src="metadata.icon_url"
@@ -104,10 +104,10 @@
               <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/4">
-                    필드명
+                    {{ t('metadataTest.fieldName') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    값
+                    {{ t('metadataTest.value') }}
                   </th>
                 </tr>
               </thead>
@@ -127,42 +127,42 @@
                     <!-- system_requirements 특별 처리 -->
                     <div v-else-if="key === 'system_requirements' && typeof value === 'object' && value !== null" class="space-y-2">
                       <div v-if="value.os" class="flex items-start">
-                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">OS:</span>
+                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">{{ t('metadataTest.sysReq.os') }}:</span>
                         <span class="flex-1">{{ value.os }}</span>
                       </div>
                       <div v-if="value.cpu" class="flex items-start">
-                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">CPU:</span>
+                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">{{ t('metadataTest.sysReq.cpu') }}:</span>
                         <span class="flex-1">{{ value.cpu }}</span>
                       </div>
                       <div v-if="value.ram" class="flex items-start">
-                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">RAM:</span>
+                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">{{ t('metadataTest.sysReq.ram') }}:</span>
                         <span class="flex-1">{{ value.ram }}</span>
                       </div>
                       <div v-if="value.disk_space" class="flex items-start">
-                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">디스크:</span>
+                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">{{ t('metadataTest.sysReq.disk') }}:</span>
                         <span class="flex-1">{{ value.disk_space }}</span>
                       </div>
                       <div v-if="value.gpu" class="flex items-start">
-                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">GPU:</span>
+                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">{{ t('metadataTest.sysReq.gpu') }}:</span>
                         <span class="flex-1">{{ value.gpu }}</span>
                       </div>
                       <div v-if="value.additional" class="flex items-start">
-                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">추가사항:</span>
+                        <span class="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px]">{{ t('metadataTest.sysReq.additional') }}:</span>
                         <span class="flex-1">{{ value.additional }}</span>
                       </div>
                     </div>
                     <!-- installation_info 특별 처리 -->
                     <div v-else-if="key === 'installation_info' && typeof value === 'object' && value !== null" class="space-y-2">
                       <div v-if="value.installer_type" class="flex items-start">
-                        <span class="font-semibold text-green-600 dark:text-green-400 min-w-[120px]">설치 방식:</span>
+                        <span class="font-semibold text-green-600 dark:text-green-400 min-w-[120px]">{{ t('metadataTest.installInfo.type') }}:</span>
                         <span class="flex-1">{{ value.installer_type }}</span>
                       </div>
                       <div v-if="value.file_size" class="flex items-start">
-                        <span class="font-semibold text-green-600 dark:text-green-400 min-w-[120px]">파일 크기:</span>
+                        <span class="font-semibold text-green-600 dark:text-green-400 min-w-[120px]">{{ t('metadataTest.installInfo.fileSize') }}:</span>
                         <span class="flex-1">{{ value.file_size }}</span>
                       </div>
                       <div v-if="value.internet_required" class="flex items-start">
-                        <span class="font-semibold text-green-600 dark:text-green-400 min-w-[120px]">인터넷 필요:</span>
+                        <span class="font-semibold text-green-600 dark:text-green-400 min-w-[120px]">{{ t('metadataTest.installInfo.internet') }}:</span>
                         <span class="flex-1">{{ value.internet_required }}</span>
                       </div>
                     </div>
@@ -174,7 +174,7 @@
                       </div>
                     </div>
                     <span v-else-if="value === '' || value === null || value === undefined" class="text-gray-400 dark:text-gray-500">
-                      (비어있음)
+                      {{ t('metadataTest.empty') }}
                     </span>
                     <span v-else class="whitespace-pre-wrap">{{ value }}</span>
                   </td>
@@ -187,7 +187,7 @@
           <div v-if="metadata.ai_raw_response" class="mt-6">
             <details class="border border-indigo-200 dark:border-indigo-700 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
               <summary class="px-4 py-3 cursor-pointer font-medium text-gray-900 dark:text-white hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg transition-colors">
-                🔍 원본 AI 응답 보기
+                🔍 {{ t('metadataTest.viewOriginalResponse') }}
               </summary>
               <div class="p-4 border-t border-indigo-200 dark:border-indigo-700">
                 <pre class="p-4 bg-gray-900 dark:bg-black text-gray-100 rounded-lg overflow-x-auto text-xs leading-relaxed">{{ metadata.ai_raw_response }}</pre>
@@ -199,7 +199,7 @@
           <div class="mt-4">
             <details class="border border-gray-300 dark:border-gray-600 rounded-lg">
               <summary class="px-4 py-3 cursor-pointer font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                📋 전체 JSON 데이터
+                📋 {{ t('metadataTest.viewFullJson') }}
               </summary>
               <div class="p-4 border-t border-gray-300 dark:border-gray-600">
                 <pre class="p-4 bg-gray-900 dark:bg-black text-gray-100 rounded-lg overflow-x-auto text-xs">{{ JSON.stringify(metadata, null, 2) }}</pre>
@@ -228,12 +228,12 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div>
-                <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-400">로고 검색 테스트 모드</h3>
+                <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-400">{{ t('metadataTest.logoSearchMode') }}</h3>
                 <p class="text-sm text-blue-800 dark:text-blue-300 mt-1">
-                  검색어: <strong>{{ softwareName }}</strong>
+                  {{ t('metadataTest.searchKeyword') }}: <strong>{{ softwareName }}</strong>
                 </p>
                 <p class="text-xs text-blue-700 dark:text-blue-400 mt-1">
-                  Google 이미지 검색으로 로고를 찾아 선택하세요. (저장은 메타데이터 생성 후 가능)
+                  {{ t('metadataTest.logoSearchDesc') }}
                 </p>
               </div>
             </div>
@@ -260,12 +260,12 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div>
-                <h3 class="text-sm font-semibold text-purple-900 dark:text-purple-400">스크린샷 검색 테스트 모드</h3>
+                <h3 class="text-sm font-semibold text-purple-900 dark:text-purple-400">{{ t('metadataTest.screenshotSearchMode') }}</h3>
                 <p class="text-sm text-purple-800 dark:text-purple-300 mt-1">
-                  검색어: <strong>{{ softwareName }}</strong>
+                  {{ t('metadataTest.searchKeyword') }}: <strong>{{ softwareName }}</strong>
                 </p>
                 <p class="text-xs text-purple-700 dark:text-purple-400 mt-1">
-                  Google 이미지 검색으로 스크린샷을 찾아 선택하세요. 최대 10개까지 선택 가능합니다.
+                  {{ t('metadataTest.screenshotSearchDesc') }}
                 </p>
               </div>
             </div>
@@ -291,7 +291,7 @@
           @click="closeDialog"
           class="w-full px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
         >
-          닫기
+          {{ t('metadataTest.close') }}
         </button>
       </div>
     </div>
@@ -300,9 +300,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { metadataApi } from '../api/metadata'
 import { configApi } from '../api/config'
 import ImageManager from './ImageManager.vue'
+
+const { t } = useI18n({ useScope: 'global' })
 
 const props = defineProps({
   isOpen: {
@@ -367,7 +370,7 @@ const filteredMetadata = computed(() => {
 // 로고 검색만 표시
 const showLogoSearchOnly = () => {
   if (!softwareName.value.trim()) {
-    errorMessage.value = '소프트웨어 이름을 입력해주세요.'
+    errorMessage.value = t('metadataTest.errors.enterSoftwareName')
     return
   }
 
@@ -379,7 +382,7 @@ const showLogoSearchOnly = () => {
 // 스크린샷 검색만 표시
 const showScreenshotSearchOnly = () => {
   if (!softwareName.value.trim()) {
-    errorMessage.value = '소프트웨어 이름을 입력해주세요.'
+    errorMessage.value = t('metadataTest.errors.enterSoftwareName')
     return
   }
 
@@ -391,7 +394,7 @@ const showScreenshotSearchOnly = () => {
 // 메타데이터 생성
 const generateMetadata = async () => {
   if (!softwareName.value.trim()) {
-    errorMessage.value = '소프트웨어 이름을 입력해주세요.'
+    errorMessage.value = t('metadataTest.errors.enterSoftwareName')
     return
   }
 
@@ -433,17 +436,17 @@ const generateMetadata = async () => {
       if (response.data.metadata) {
         metadata.value = response.data.metadata
       } else {
-        errorMessage.value = '메타데이터를 찾을 수 없습니다.'
+        errorMessage.value = t('metadataTest.errors.metadataNotFound')
       }
     } else {
-      errorMessage.value = response.data.error || '메타데이터 생성에 실패했습니다.'
+      errorMessage.value = response.data.error || t('metadataTest.errors.generationFailed')
     }
   } catch (error) {
     console.error('메타데이터 생성 오류:', error)
     if (error.response?.status === 403) {
-      errorMessage.value = '권한이 없습니다. 관리자만 사용할 수 있습니다.'
+      errorMessage.value = t('metadataTest.errors.noPermission')
     } else {
-      errorMessage.value = '메타데이터 생성 중 오류가 발생했습니다. API 키가 설정되어 있는지 확인해주세요.'
+      errorMessage.value = t('metadataTest.errors.generationError')
     }
   } finally {
     loading.value = false

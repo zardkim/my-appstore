@@ -26,7 +26,7 @@ class ScanScheduler:
         }
         self.scheduler = AsyncIOScheduler(jobstores=jobstores)
         self.scan_paths: List[str] = []
-        self.cron_schedule: str = "0 2 * * *"  # 기본: 매일 새벽 2시
+        self.cron_schedule: str = "0 5,22 * * *"  # 기본: 매일 오전 5시, 오후 10시 (하루 2번)
         self.use_ai: bool = True
         self.is_running: bool = False
         self.last_scan_time: Optional[datetime] = None

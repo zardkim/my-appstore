@@ -5,7 +5,7 @@
       <div class="sticky top-0 bg-gradient-to-r from-orange-500 to-red-600 px-6 py-4 flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center">
           <span class="mr-2">⚠️</span>
-          불일치 항목 상세
+          {{ t('unmatchedDialog.title') }}
         </h2>
         <button
           @click="closeDialog"
@@ -21,22 +21,22 @@
       <div class="p-6 space-y-6" v-if="item">
         <!-- File Info -->
         <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-          <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">📁 파일 정보</h3>
+          <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">📁 {{ t('unmatchedDialog.fileInfo') }}</h3>
           <div class="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <p class="text-gray-500 dark:text-gray-400">파일명</p>
+              <p class="text-gray-500 dark:text-gray-400">{{ t('unmatchedDialog.fileName') }}</p>
               <p class="font-medium text-gray-900 dark:text-white">{{ item.file_name }}</p>
             </div>
             <div>
-              <p class="text-gray-500 dark:text-gray-400">경로</p>
+              <p class="text-gray-500 dark:text-gray-400">{{ t('unmatchedDialog.filePath') }}</p>
               <p class="font-medium text-gray-900 dark:text-white truncate" :title="item.file_path">{{ item.file_path }}</p>
             </div>
             <div>
-              <p class="text-gray-500 dark:text-gray-400">파싱된 이름</p>
+              <p class="text-gray-500 dark:text-gray-400">{{ t('unmatchedDialog.parsedName') }}</p>
               <p class="font-medium text-gray-900 dark:text-white">{{ item.parsed_name || 'N/A' }}</p>
             </div>
             <div>
-              <p class="text-gray-500 dark:text-gray-400">파싱된 버전</p>
+              <p class="text-gray-500 dark:text-gray-400">{{ t('unmatchedDialog.parsedVersion') }}</p>
               <p class="font-medium text-gray-900 dark:text-white">{{ item.parsed_version || 'N/A' }}</p>
             </div>
           </div>
@@ -45,7 +45,7 @@
         <!-- Confidence Score -->
         <div class="border-2 rounded-xl p-5" :class="getConfidenceBorderClass(item.confidence_score)">
           <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">정확도 점수</h3>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('unmatchedDialog.confidenceScore') }}</h3>
             <div class="text-right">
               <div class="text-2xl font-bold" :class="getConfidenceTextClass(item.confidence_score)">
                 {{ Math.round(item.confidence_score * 100) }}%
@@ -63,35 +63,35 @@
             ></div>
           </div>
           <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
-            90% 미만은 수동 검토가 필요합니다.
+            {{ t('unmatchedDialog.confidenceNote') }}
           </p>
         </div>
 
         <!-- AI Suggestion -->
         <div v-if="item.suggested_metadata" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-5">
-          <h3 class="text-sm font-medium text-blue-900 dark:text-blue-300 mb-3">🤖 AI 제안 메타데이터</h3>
+          <h3 class="text-sm font-medium text-blue-900 dark:text-blue-300 mb-3">🤖 {{ t('unmatchedDialog.aiSuggestion') }}</h3>
 
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">제품명</p>
+              <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">{{ t('unmatchedDialog.productName') }}</p>
               <p class="font-semibold text-blue-900 dark:text-blue-200">{{ item.suggested_metadata.title }}</p>
             </div>
             <div>
-              <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">제조사</p>
+              <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">{{ t('unmatchedDialog.manufacturer') }}</p>
               <p class="font-semibold text-blue-900 dark:text-blue-200">{{ item.suggested_metadata.vendor }}</p>
             </div>
             <div>
-              <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">카테고리</p>
+              <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">{{ t('unmatchedDialog.categoryLabel') }}</p>
               <p class="font-semibold text-blue-900 dark:text-blue-200">{{ item.suggested_metadata.category }}</p>
             </div>
             <div v-if="item.suggested_metadata.license_type">
-              <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">라이선스</p>
+              <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">{{ t('unmatchedDialog.license') }}</p>
               <p class="font-semibold text-blue-900 dark:text-blue-200">{{ item.suggested_metadata.license_type }}</p>
             </div>
           </div>
 
           <div v-if="item.suggested_metadata.description">
-            <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">설명</p>
+            <p class="text-xs text-blue-700 dark:text-blue-400 mb-1">{{ t('unmatchedDialog.descriptionLabel') }}</p>
             <p class="text-sm text-blue-900 dark:text-blue-200">{{ item.suggested_metadata.description }}</p>
           </div>
         </div>
@@ -118,7 +118,7 @@
           <div v-if="activeAction === 'approve'" class="space-y-4">
             <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
               <p class="text-sm text-green-800 dark:text-green-300">
-                AI가 제안한 메타데이터를 승인하고 제품으로 등록합니다.
+                {{ t('unmatchedDialog.approveDescription') }}
               </p>
             </div>
             <button
@@ -126,7 +126,7 @@
               :disabled="processing"
               class="w-full px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
-              {{ processing ? '처리 중...' : '✓ AI 제안 승인 및 등록' }}
+              {{ processing ? t('unmatchedDialog.processing') : t('unmatchedDialog.approveButton') }}
             </button>
           </div>
 
@@ -134,12 +134,12 @@
           <div v-if="activeAction === 'search'" class="space-y-4">
             <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
               <p class="text-sm text-purple-800 dark:text-purple-300 mb-3">
-                다른 소프트웨어 이름으로 AI에게 다시 검색합니다.
+                {{ t('unmatchedDialog.searchDescription') }}
               </p>
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="예: Adobe Photoshop 2024"
+                :placeholder="t('unmatchedDialog.searchPlaceholder')"
                 class="w-full px-4 py-2 border border-purple-300 dark:border-purple-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 @keyup.enter="searchMetadata"
               />
@@ -149,7 +149,7 @@
               :disabled="processing || !searchQuery.trim()"
               class="w-full px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
-              {{ processing ? '검색 중...' : '🔍 AI 재검색' }}
+              {{ processing ? t('unmatchedDialog.searching') : t('unmatchedDialog.searchButton') }}
             </button>
           </div>
 
@@ -157,14 +157,14 @@
           <div v-if="activeAction === 'manual'" class="space-y-4">
             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
               <p class="text-sm text-blue-800 dark:text-blue-300 mb-3">
-                메타데이터를 직접 입력합니다.
+                {{ t('unmatchedDialog.manualDescription') }}
               </p>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  제품명 <span class="text-red-500">*</span>
+                  {{ t('unmatchedDialog.productNameLabel') }} <span class="text-red-500">{{ t('unmatchedDialog.required') }}</span>
                 </label>
                 <input
                   v-model="manualData.title"
@@ -174,7 +174,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  제조사 <span class="text-red-500">*</span>
+                  {{ t('unmatchedDialog.manufacturerLabel') }} <span class="text-red-500">{{ t('unmatchedDialog.required') }}</span>
                 </label>
                 <input
                   v-model="manualData.vendor"
@@ -186,20 +186,20 @@
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                카테고리 <span class="text-red-500">*</span>
+                {{ t('unmatchedDialog.categorySelectLabel') }} <span class="text-red-500">{{ t('unmatchedDialog.required') }}</span>
               </label>
               <select
                 v-model="manualData.category"
                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
-                <option value="">선택하세요</option>
+                <option value="">{{ t('unmatchedDialog.selectPlaceholder') }}</option>
                 <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
               </select>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                설명 <span class="text-red-500">*</span>
+                {{ t('unmatchedDialog.descriptionLabelManual') }} <span class="text-red-500">{{ t('unmatchedDialog.required') }}</span>
               </label>
               <textarea
                 v-model="manualData.description"
@@ -211,7 +211,7 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  공식 웹사이트
+                  {{ t('unmatchedDialog.officialWebsite') }}
                 </label>
                 <input
                   v-model="manualData.official_website"
@@ -222,7 +222,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  아이콘 URL
+                  {{ t('unmatchedDialog.iconUrl') }}
                 </label>
                 <input
                   v-model="manualData.icon_url"
@@ -238,7 +238,7 @@
               :disabled="processing || !isManualDataValid"
               class="w-full px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
-              {{ processing ? '저장 중...' : '💾 수동 메타데이터 저장 및 등록' }}
+              {{ processing ? t('unmatchedDialog.saving') : t('unmatchedDialog.manualSaveButton') }}
             </button>
           </div>
 
@@ -246,7 +246,7 @@
           <div v-if="activeAction === 'ignore'" class="space-y-4">
             <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
               <p class="text-sm text-gray-700 dark:text-gray-300">
-                이 항목을 무시합니다. 나중에 다시 검토할 수 있습니다.
+                {{ t('unmatchedDialog.ignoreDescription') }}
               </p>
             </div>
             <button
@@ -254,7 +254,7 @@
               :disabled="processing"
               class="w-full px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
-              {{ processing ? '처리 중...' : '🚫 항목 무시' }}
+              {{ processing ? t('unmatchedDialog.processing') : t('unmatchedDialog.ignoreButton') }}
             </button>
           </div>
         </div>
@@ -276,7 +276,7 @@
           @click="closeDialog"
           class="w-full px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
         >
-          닫기
+          {{ t('unmatchedDialog.close') }}
         </button>
       </div>
     </div>
@@ -285,7 +285,10 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { unmatchedApi } from '../api/unmatched'
+
+const { t } = useI18n({ useScope: 'global' })
 
 const props = defineProps({
   isOpen: {
@@ -315,12 +318,12 @@ const manualData = ref({
   icon_url: ''
 })
 
-const actionTabs = [
-  { id: 'approve', label: '✓ 승인' },
-  { id: 'search', label: '🔍 재검색' },
-  { id: 'manual', label: '✏️ 수동입력' },
-  { id: 'ignore', label: '🚫 무시' }
-]
+const actionTabs = computed(() => [
+  { id: 'approve', label: `✓ ${t('unmatchedDialog.approve')}` },
+  { id: 'search', label: `🔍 ${t('unmatchedDialog.search')}` },
+  { id: 'manual', label: `✏️ ${t('unmatchedDialog.manual')}` },
+  { id: 'ignore', label: `🚫 ${t('unmatchedDialog.ignore')}` }
+])
 
 const categories = [
   'Graphics', 'Office', 'Development', 'Utility', 'Media',
@@ -346,13 +349,13 @@ const approveItem = async () => {
 
   try {
     const response = await unmatchedApi.approve(props.item.id)
-    successMessage.value = '승인되었습니다. 제품으로 등록되었습니다.'
+    successMessage.value = t('unmatchedDialog.approveSuccess')
     setTimeout(() => {
       emit('updated')
       closeDialog()
     }, 1500)
   } catch (error) {
-    errorMessage.value = error.response?.data?.detail || '승인 중 오류가 발생했습니다.'
+    errorMessage.value = error.response?.data?.detail || t('unmatchedDialog.approveError')
   } finally {
     processing.value = false
   }
@@ -367,7 +370,7 @@ const searchMetadata = async () => {
 
   try {
     const response = await unmatchedApi.search(props.item.id, searchQuery.value.trim())
-    successMessage.value = `재검색 완료! 정확도: ${response.data.confidence_percentage}%`
+    successMessage.value = t('unmatchedDialog.searchSuccess', { percentage: response.data.confidence_percentage })
 
     // 아이템 정보 업데이트
     if (response.data.metadata) {
@@ -377,7 +380,7 @@ const searchMetadata = async () => {
 
     emit('updated')
   } catch (error) {
-    errorMessage.value = error.response?.data?.detail || '검색 중 오류가 발생했습니다.'
+    errorMessage.value = error.response?.data?.detail || t('unmatchedDialog.searchError')
   } finally {
     processing.value = false
   }
@@ -392,14 +395,14 @@ const saveManualData = async () => {
 
   try {
     await unmatchedApi.saveManual(props.item.id, manualData.value)
-    successMessage.value = '수동 메타데이터가 저장되었습니다.'
+    successMessage.value = t('unmatchedDialog.manualSaveSuccess')
     setTimeout(() => {
       emit('updated')
       closeDialog()
     }, 1500)
   } catch (error) {
-    errorMessage.value = error.response?.data?.detail || '저장 중 오류가 발생했습니다.'
-  } finally {
+    errorMessage.value = error.response?.data?.detail || t('unmatchedDialog.manualSaveError')
+  } finally{
     processing.value = false
   }
 }
@@ -413,13 +416,13 @@ const ignoreItem = async () => {
 
   try {
     await unmatchedApi.ignore(props.item.id)
-    successMessage.value = '항목이 무시되었습니다.'
+    successMessage.value = t('unmatchedDialog.ignoreSuccess')
     setTimeout(() => {
       emit('updated')
       closeDialog()
     }, 1500)
   } catch (error) {
-    errorMessage.value = error.response?.data?.detail || '무시 처리 중 오류가 발생했습니다.'
+    errorMessage.value = error.response?.data?.detail || t('unmatchedDialog.ignoreError')
   } finally {
     processing.value = false
   }
@@ -443,9 +446,9 @@ const closeDialog = () => {
 
 // Helpers
 const getConfidenceLevel = (score) => {
-  if (score >= 0.9) return '높음'
-  if (score >= 0.7) return '보통'
-  return '낮음'
+  if (score >= 0.9) return t('unmatchedDialog.confidenceLevelHigh')
+  if (score >= 0.7) return t('unmatchedDialog.confidenceLevelMedium')
+  return t('unmatchedDialog.confidenceLevelLow')
 }
 
 const getConfidenceBorderClass = (score) => {
