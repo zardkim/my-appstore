@@ -4,8 +4,8 @@
     <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">비밀번호 변경</h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">보안을 위해 주기적으로 비밀번호를 변경해주세요</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('changePassword.title') }}</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('changePassword.description') }}</p>
         </div>
       </div>
     </div>
@@ -19,21 +19,21 @@
             <!-- Current Password -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                현재 비밀번호 *
+                {{ t('changePassword.currentPassword') }} *
               </label>
               <input
                 v-model="form.currentPassword"
                 type="password"
                 required
                 class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="현재 비밀번호를 입력하세요"
+                :placeholder="t('changePassword.currentPasswordPlaceholder')"
               />
             </div>
 
             <!-- New Password -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                새 비밀번호 *
+                {{ t('changePassword.newPassword') }} *
               </label>
               <input
                 v-model="form.newPassword"
@@ -41,22 +41,22 @@
                 required
                 minlength="8"
                 class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="새 비밀번호를 입력하세요 (최소 8자)"
+                :placeholder="t('changePassword.newPasswordPlaceholder')"
               />
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">비밀번호는 최소 8자 이상이어야 합니다</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ t('changePassword.newPasswordHint') }}</p>
             </div>
 
             <!-- Confirm New Password -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                새 비밀번호 확인 *
+                {{ t('changePassword.confirmPassword') }} *
               </label>
               <input
                 v-model="form.confirmPassword"
                 type="password"
                 required
                 class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="새 비밀번호를 다시 입력하세요"
+                :placeholder="t('changePassword.confirmPasswordPlaceholder')"
               />
             </div>
 
@@ -87,11 +87,11 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div class="text-sm text-blue-800 dark:text-blue-300">
-                  <p class="font-medium mb-1">비밀번호 보안 팁</p>
+                  <p class="font-medium mb-1">{{ t('changePassword.securityTipsTitle') }}</p>
                   <ul class="list-disc list-inside space-y-1 text-blue-700 dark:text-blue-300">
-                    <li>추측하기 어려운 비밀번호를 사용하세요</li>
-                    <li>다른 서비스와 다른 비밀번호를 사용하세요</li>
-                    <li>주기적으로 비밀번호를 변경하세요</li>
+                    <li>{{ t('changePassword.securityTip1') }}</li>
+                    <li>{{ t('changePassword.securityTip2') }}</li>
+                    <li>{{ t('changePassword.securityTip3') }}</li>
                   </ul>
                 </div>
               </div>
@@ -104,15 +104,15 @@
                 @click="goBack"
                 class="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
               >
-                취소
+                {{ t('changePassword.cancel') }}
               </button>
               <button
                 type="submit"
                 :disabled="loading"
                 class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span v-if="loading">변경 중...</span>
-                <span v-else>비밀번호 변경</span>
+                <span v-if="loading">{{ t('changePassword.changing') }}</span>
+                <span v-else>{{ t('changePassword.changeButton') }}</span>
               </button>
             </div>
           </form>
@@ -125,7 +125,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <p class="text-sm text-yellow-800 dark:text-yellow-300">
-              비밀번호를 변경하면 모든 디바이스에서 자동으로 로그아웃됩니다. 새로운 비밀번호로 다시 로그인해야 합니다.
+              {{ t('changePassword.logoutNotice') }}
             </p>
           </div>
         </div>
@@ -137,9 +137,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 
 const router = useRouter()
+const { t } = useI18n({ useScope: 'global' })
 
 const form = ref({
   currentPassword: '',
@@ -161,17 +163,17 @@ const handleChangePassword = async () => {
 
   // Validation
   if (form.value.newPassword !== form.value.confirmPassword) {
-    errorMessage.value = '새 비밀번호가 일치하지 않습니다.'
+    errorMessage.value = t('changePassword.passwordMismatch')
     return
   }
 
   if (form.value.newPassword.length < 8) {
-    errorMessage.value = '비밀번호는 최소 8자 이상이어야 합니다.'
+    errorMessage.value = t('changePassword.passwordTooShort')
     return
   }
 
   if (form.value.currentPassword === form.value.newPassword) {
-    errorMessage.value = '현재 비밀번호와 새 비밀번호가 동일합니다.'
+    errorMessage.value = t('changePassword.samePassword')
     return
   }
 
@@ -183,7 +185,7 @@ const handleChangePassword = async () => {
       new_password: form.value.newPassword
     })
 
-    successMessage.value = '비밀번호가 성공적으로 변경되었습니다.'
+    successMessage.value = t('changePassword.success')
 
     // Reset form
     form.value = {
@@ -198,9 +200,9 @@ const handleChangePassword = async () => {
     }, 2000)
   } catch (error) {
     if (error.response?.status === 401) {
-      errorMessage.value = '현재 비밀번호가 올바르지 않습니다.'
+      errorMessage.value = t('changePassword.wrongCurrentPassword')
     } else {
-      errorMessage.value = '비밀번호 변경에 실패했습니다. 다시 시도해주세요.'
+      errorMessage.value = t('changePassword.changeFailed')
     }
   } finally {
     loading.value = false

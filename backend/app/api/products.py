@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, func
 from typing import List, Optional
 import os
@@ -45,7 +45,7 @@ async def get_products(
         sort_by: Sort field (id, title, category, vendor)
         sort_order: Sort order (asc, desc)
     """
-    query = db.query(Product)
+    query = db.query(Product).options(joinedload(Product.versions))
 
     # 카테고리 필터
     if category:
@@ -86,7 +86,7 @@ async def get_recent_products(
     current_user = Depends(get_current_user)
 ):
     """Get recently added products"""
-    products = db.query(Product).order_by(Product.id.desc()).limit(limit).all()
+    products = db.query(Product).options(joinedload(Product.versions)).order_by(Product.id.desc()).limit(limit).all()
     return products
 
 
@@ -110,7 +110,7 @@ async def get_products_by_category(
 
     result = {}
     for category in categories:
-        products = db.query(Product).filter(
+        products = db.query(Product).options(joinedload(Product.versions)).filter(
             Product.category == category
         ).limit(10).all()
 
@@ -150,7 +150,7 @@ async def get_product(
     current_user = Depends(get_current_user)
 ):
     """Get single product by ID"""
-    product = db.query(Product).filter(Product.id == product_id).first()
+    product = db.query(Product).options(joinedload(Product.versions)).filter(Product.id == product_id).first()
 
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -168,9 +168,9 @@ async def get_stats(
     # 완료된 소프트웨어 수 (Product 수)
     total_products = db.query(Product).count()
 
-    # 미완료된 소프트웨어 수 (FilenameViolation에서 product_id가 null인 것들)
+    # 미완료된 소프트웨어 수 (미해결된 FilenameViolation 항목 수 - 검색된 목록과 동일)
     incomplete_count = db.query(FilenameViolation).filter(
-        FilenameViolation.product_id.is_(None)
+        FilenameViolation.is_resolved == False
     ).count()
 
     # 카테고리별 통계

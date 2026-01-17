@@ -7,7 +7,7 @@
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
-          목록으로
+          {{ t('tips.backToList') }}
         </button>
         <div class="flex items-center space-x-2">
           <!-- 스크랩 버튼 (인증된 사용자만) -->
@@ -20,11 +20,11 @@
             <svg class="w-5 h-5" :fill="isScraped ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
-            <span>{{ isScraped ? '스크랩됨' : '스크랩' }}</span>
+            <span>{{ isScraped ? t('tips.scraped') : t('tips.scrap') }}</span>
           </button>
           <!-- 수정/삭제 버튼 (본인 또는 관리자만) -->
-          <button v-if="canEditPost" @click="editPost" class="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium text-sm">수정</button>
-          <button v-if="canEditPost" @click="deletePost" class="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors font-medium text-sm">삭제</button>
+          <button v-if="canEditPost" @click="editPost" class="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium text-sm">{{ t('tips.edit') }}</button>
+          <button v-if="canEditPost" @click="deletePost" class="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors font-medium text-sm">{{ t('tips.delete') }}</button>
         </div>
       </div>
     </div>
@@ -35,7 +35,7 @@
       <div v-if="loading" class="flex items-center justify-center h-64">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p class="text-gray-500 dark:text-gray-400">로딩 중...</p>
+          <p class="text-gray-500 dark:text-gray-400">{{ t('tips.loading') }}</p>
         </div>
       </div>
 
@@ -45,7 +45,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 mb-6">
           <div class="mb-4">
             <span :class="getCategoryStyle(post.category)">{{ getCategoryLabel(post.category) }}</span>
-            <span v-if="post.is_notice" class="ml-2 inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-red-500 dark:bg-red-600 text-white">공지</span>
+            <span v-if="post.is_notice" class="ml-2 inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-red-500 dark:bg-red-600 text-white">{{ t('tips.notice') }}</span>
           </div>
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">{{ post.title }}</h1>
           <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -89,7 +89,7 @@
             <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
             </svg>
-            첨부파일 {{ attachments.length }}
+            {{ t('tips.attachments') }} {{ attachments.length }}
           </h3>
 
           <div class="space-y-2">
@@ -121,7 +121,7 @@
                 <button
                   @click="downloadAttachment(file)"
                   class="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                  title="다운로드"
+                  :title="t('tips.download')"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -133,7 +133,7 @@
                   v-if="canEditPost"
                   @click="deleteAttachment(index)"
                   class="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                  title="삭제"
+                  :title="t('tips.delete')"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -146,13 +146,13 @@
 
         <!-- Comments Section -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">댓글 {{ comments.length }}</h3>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ t('tips.comments') }} {{ comments.length }}</h3>
 
           <!-- Comment Input -->
           <div class="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
-            <textarea v-model="newComment" rows="4" class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="댓글을 입력하세요"></textarea>
+            <textarea v-model="newComment" rows="4" class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" :placeholder="t('tips.commentPlaceholder')"></textarea>
             <div class="flex justify-end mt-3">
-              <button @click="submitComment" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md font-medium">댓글 작성</button>
+              <button @click="submitComment" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md font-medium">{{ t('tips.submitComment') }}</button>
             </div>
           </div>
 
@@ -174,11 +174,11 @@
                       v-if="editingCommentId !== comment.id"
                       @click="startEditComment(comment)"
                       class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                    >수정</button>
+                    >{{ t('tips.edit') }}</button>
                     <button
                       @click="deleteComment(comment.id)"
                       class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                    >삭제</button>
+                    >{{ t('tips.delete') }}</button>
                   </div>
                 </div>
                 <!-- 수정 모드 -->
@@ -192,11 +192,11 @@
                     <button
                       @click="cancelEditComment"
                       class="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                    >취소</button>
+                    >{{ t('tips.cancel') }}</button>
                     <button
                       @click="saveEditComment(comment.id)"
                       class="px-4 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >저장</button>
+                    >{{ t('tips.save') }}</button>
                   </div>
                 </div>
                 <!-- 일반 모드 -->
@@ -210,8 +210,8 @@
             <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            <p class="text-lg font-medium">아직 댓글이 없습니다</p>
-            <p class="text-sm mt-2">첫 번째 댓글을 작성해보세요!</p>
+            <p class="text-lg font-medium">{{ t('tips.noComments') }}</p>
+            <p class="text-sm mt-2">{{ t('tips.noCommentsDesc') }}</p>
           </div>
         </div>
       </div>
@@ -222,12 +222,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../store/auth'
 import { scrapsApi } from '../api/scraps'
 import { postsApi } from '../api/posts'
 import { commentsApi } from '../api/comments'
 import { useDialog } from '../composables/useDialog'
 
+const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
@@ -284,7 +286,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Failed to load post:', error)
-    await alert.error('게시글을 불러오는데 실패했습니다.')
+    await alert.error(t('tips.postLoadFailed'))
     router.push('/tips')
   } finally {
     loading.value = false
@@ -293,11 +295,11 @@ onMounted(async () => {
 
 const getCategoryLabel = (category) => {
   const labels = {
-    tip: '팁',
-    tech: '기술',
-    tutorial: '튜토리얼',
-    qna: 'Q&A',
-    news: '뉴스'
+    tip: t('tips.categoryTip'),
+    tech: t('tips.categoryTech'),
+    tutorial: t('tips.categoryTutorial'),
+    qna: t('tips.categoryQna'),
+    news: t('tips.categoryNews')
   }
   return labels[category] || category
 }
@@ -317,21 +319,24 @@ const formatDate = (dateStr) => {
   const date = new Date(dateStr)
   const now = new Date()
   const diffTime = Math.abs(now - date)
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
   if (diffDays < 1) {
     const hours = Math.floor(diffTime / (1000 * 60 * 60))
     if (hours < 1) {
       const minutes = Math.floor(diffTime / (1000 * 60))
-      return `${minutes}분 전`
+      if (minutes < 1) {
+        return t('tips.justNow')
+      }
+      return t('tips.minutesAgo').replace('{n}', minutes)
     }
-    return `${hours}시간 전`
+    return t('tips.hoursAgo').replace('{n}', hours)
   } else if (diffDays < 2) {
-    return '어제'
+    return t('tips.yesterday')
   } else if (diffDays < 7) {
-    return `${diffDays}일 전`
+    return t('tips.daysAgo').replace('{n}', diffDays)
   } else {
-    return date.toLocaleDateString('ko-KR')
+    return date.toLocaleDateString()
   }
 }
 
@@ -344,19 +349,19 @@ const editPost = () => {
 }
 
 const deletePost = async () => {
-  const shouldDelete = await confirm.danger('정말 이 게시글을 삭제하시겠습니까?', '게시글 삭제')
+  const shouldDelete = await confirm.danger(t('tips.deletePostConfirm'), t('tips.deletePostTitle'))
   if (!shouldDelete) {
     return
   }
 
   try {
     await postsApi.deletePost(post.value.id)
-    await alert.success('게시글이 삭제되었습니다.')
+    await alert.success(t('tips.postDeleted'))
     router.push('/tips')
   } catch (error) {
     console.error('Failed to delete post:', error)
-    const errorMessage = error.response?.data?.detail || error.message || '게시글 삭제에 실패했습니다.'
-    await alert.error(`삭제 실패: ${errorMessage}`)
+    const errorMessage = error.response?.data?.detail || error.message || t('tips.postDeleteFailed')
+    await alert.error(`${t('tips.deleteFailed')}${errorMessage}`)
   }
 }
 
@@ -379,7 +384,7 @@ const loadComments = async () => {
 
 const submitComment = async () => {
   if (!newComment.value.trim()) {
-    await alert.warning('댓글 내용을 입력해주세요.')
+    await alert.warning(t('tips.enterCommentContent'))
     return
   }
 
@@ -403,9 +408,9 @@ const submitComment = async () => {
   } catch (error) {
     console.error('Failed to create comment:', error)
     if (error.response?.status === 401) {
-      await alert.warning('로그인이 필요합니다.')
+      await alert.warning(t('tips.loginRequired'))
     } else {
-      await alert.error('댓글 작성에 실패했습니다.')
+      await alert.error(t('tips.commentCreateFailed'))
     }
   }
 }
@@ -434,9 +439,9 @@ const toggleScrap = async () => {
   } catch (error) {
     console.error('Failed to toggle scrap:', error)
     if (error.response?.status === 401) {
-      await alert.warning('로그인이 필요합니다.')
+      await alert.warning(t('tips.loginRequired'))
     } else {
-      await alert.error('스크랩 처리에 실패했습니다.')
+      await alert.error(t('tips.scrapFailed'))
     }
   }
 }
@@ -461,7 +466,7 @@ const cancelEditComment = () => {
 // 댓글 수정 저장
 const saveEditComment = async (commentId) => {
   if (!editingCommentContent.value.trim()) {
-    await alert.warning('댓글 내용을 입력해주세요.')
+    await alert.warning(t('tips.enterCommentContent'))
     return
   }
 
@@ -477,18 +482,18 @@ const saveEditComment = async (commentId) => {
   } catch (error) {
     console.error('Failed to update comment:', error)
     if (error.response?.status === 401) {
-      await alert.warning('로그인이 필요합니다.')
+      await alert.warning(t('tips.loginRequired'))
     } else if (error.response?.status === 403) {
-      await alert.error('댓글을 수정할 권한이 없습니다.')
+      await alert.error(t('tips.noEditCommentPermission'))
     } else {
-      await alert.error('댓글 수정에 실패했습니다.')
+      await alert.error(t('tips.commentUpdateFailed'))
     }
   }
 }
 
 // 댓글 삭제
 const deleteComment = async (commentId) => {
-  const shouldDelete = await confirm.danger('정말 이 댓글을 삭제하시겠습니까?', '댓글 삭제')
+  const shouldDelete = await confirm.danger(t('tips.deleteCommentConfirm'), t('tips.deleteCommentTitle'))
   if (!shouldDelete) {
     return
   }
@@ -508,11 +513,11 @@ const deleteComment = async (commentId) => {
   } catch (error) {
     console.error('Failed to delete comment:', error)
     if (error.response?.status === 401) {
-      await alert.warning('로그인이 필요합니다.')
+      await alert.warning(t('tips.loginRequired'))
     } else if (error.response?.status === 403) {
-      await alert.error('댓글을 삭제할 권한이 없습니다.')
+      await alert.error(t('tips.noDeleteCommentPermission'))
     } else {
-      await alert.error('댓글 삭제에 실패했습니다.')
+      await alert.error(t('tips.commentDeleteFailed'))
     }
   }
 }
@@ -542,13 +547,13 @@ const downloadAttachment = async (file) => {
     document.body.removeChild(link)
   } catch (error) {
     console.error('Download error:', error)
-    await alert.error('파일 다운로드에 실패했습니다.')
+    await alert.error(t('tips.fileDownloadFailed'))
   }
 }
 
 // 첨부파일 삭제
 const deleteAttachment = async (index) => {
-  const shouldDelete = await confirm.danger('정말 이 첨부파일을 삭제하시겠습니까?', '첨부파일 삭제')
+  const shouldDelete = await confirm.danger(t('tips.deleteAttachmentConfirm'), t('tips.deleteAttachmentTitle'))
   if (!shouldDelete) {
     return
   }
@@ -558,6 +563,49 @@ const deleteAttachment = async (index) => {
   console.log('Deleting file:', file.name)
 
   attachments.value.splice(index, 1)
-  await alert.success('첨부파일이 삭제되었습니다.')
+  await alert.success(t('tips.attachmentDeleted'))
 }
 </script>
+
+<style scoped>
+/* 유튜브 및 비디오 iframe 반응형 처리 */
+:deep(.prose iframe) {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.75rem;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 640px) {
+  :deep(.prose iframe) {
+    aspect-ratio: 16 / 9;
+    height: auto;
+    min-height: 200px;
+  }
+}
+
+/* TinyMCE 또는 기타 에디터에서 삽입된 비디오 컨테이너 처리 */
+:deep(.prose .mce-object-iframe),
+:deep(.prose .video-container),
+:deep(.prose .embed-container) {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 비율 */
+  height: 0;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+:deep(.prose .mce-object-iframe iframe),
+:deep(.prose .video-container iframe),
+:deep(.prose .embed-container iframe) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.75rem;
+}
+</style>

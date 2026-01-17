@@ -302,3 +302,32 @@ class FilenameParser:
                 return True
 
         return False
+
+    @staticmethod
+    def is_split_archive(filename: str) -> bool:
+        """
+        분할 압축 파일 여부 확인
+
+        Args:
+            filename: 파일명
+
+        Returns:
+            분할 압축 파일이면 True, 아니면 False
+        """
+        # 분할 압축 파일 패턴
+        split_patterns = [
+            r'\.part\d+\.rar$',      # .part01.rar, .part001.rar
+            r'\.part\d+$',           # .part01, .part02
+            r'\.z\d{2,3}$',          # .z01, .z02, .z001
+            r'\.r\d{2,3}$',          # .r00, .r01, .r02 (WinRAR old format)
+            r'\.\d{3}$',             # .001, .002, .003
+            r'\.7z\.\d{3}$',         # .7z.001, .7z.002
+        ]
+
+        filename_lower = filename.lower()
+        for pattern in split_patterns:
+            if re.search(pattern, filename_lower):
+                return True
+
+        return False
+

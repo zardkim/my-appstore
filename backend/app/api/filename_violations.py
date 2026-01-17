@@ -18,6 +18,8 @@ from app.dependencies import get_current_admin_user
 from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
 from app.core.parser import FilenameParser
 from app.api.config import load_config
+from app.core.redis_cache import invalidate_cache
+from app.core.auto_matcher import match_violations_to_products
 
 
 router = APIRouter(prefix="/api/filename-violations", tags=["filename-violations"])
@@ -45,6 +47,10 @@ class RenameFileRequest(BaseModel):
 
 class BatchRenameRequest(BaseModel):
     violation_ids: List[int]
+
+
+class CreateProductWithMetadataRequest(BaseModel):
+    metadata: Dict
 
 
 @router.get("/", response_model=List[FilenameViolationResponse])
@@ -78,6 +84,7 @@ async def get_violation_stats(
 ):
     """
     파일명 규칙 위반 통계 조회 (관리자 전용)
+    미해결 항목만 집계 (목록 표시와 일치)
 
     Returns:
         {
@@ -91,20 +98,26 @@ async def get_violation_stats(
             }
         }
     """
-    total = db.query(FilenameViolation).count()
+    # 미해결 항목만 집계 (목록 표시와 일치하도록)
+    base_query = db.query(FilenameViolation).filter(
+        FilenameViolation.is_resolved == False
+    )
+
+    total = base_query.count()
 
     # 스캔된 항목 (정규식에 맞는 항목)
-    scanned = db.query(FilenameViolation).filter(
+    scanned = base_query.filter(
         FilenameViolation.violation_type == "scanned"
     ).count()
 
     # 불일치 항목 (비매칭 항목)
-    mismatched = db.query(FilenameViolation).filter(
+    mismatched = base_query.filter(
         FilenameViolation.violation_type != "scanned"
     ).count()
 
     # 위반 유형별 통계
     violations = db.query(FilenameViolation).filter(
+        FilenameViolation.is_resolved == False,
         FilenameViolation.violation_type != "scanned"
     ).all()
 
@@ -422,6 +435,7 @@ async def create_product_from_violation(
 ):
     """
     스캔된 파일로부터 Product 생성 (AI 매칭)
+    통합 매칭 로직(auto_matcher.py) 사용
 
     Args:
         violation_id: Violation ID
@@ -443,9 +457,9 @@ async def create_product_from_violation(
     config = load_config()
     metadata_config = config.get('metadata', {})
 
-    api_key = metadata_config.get('apiKey', '')
-    ai_model = metadata_config.get('aiModel', 'gpt-4o-mini')
     use_ai = metadata_config.get('useAI', False)
+    ai_provider = metadata_config.get('aiProvider', 'openai')
+    ai_model = metadata_config.get('aiModel', 'gpt-4o-mini')
 
     if not use_ai:
         raise HTTPException(
@@ -453,105 +467,129 @@ async def create_product_from_violation(
             detail="AI 메타데이터 생성이 비활성화되어 있습니다. 설정에서 활성화해주세요."
         )
 
-    if not api_key or not api_key.strip():
+    # AI Provider에 따라 적절한 API key 가져오기
+    if ai_provider == 'gemini':
+        api_key = metadata_config.get('geminiApiKey', '')
+        if not api_key or not api_key.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Gemini API 키가 설정되지 않았습니다. 설정 페이지에서 API 키를 입력해주세요."
+            )
+    elif ai_provider == 'openai':
+        api_key = metadata_config.get('openaiApiKey', '')
+        if not api_key or not api_key.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="OpenAI API 키가 설정되지 않았습니다. 설정 페이지에서 API 키를 입력해주세요."
+            )
+    else:
         raise HTTPException(
             status_code=400,
-            detail="OpenAI API 키가 설정되지 않았습니다."
+            detail=f"지원하지 않는 AI Provider입니다: {ai_provider}"
         )
 
     try:
-        # 이미 Product가 있는지 확인
-        existing_product = db.query(Product).filter(
-            Product.folder_path == violation.folder_path
-        ).first()
+        # 통합 매칭 로직 호출 (수동 매칭 모드: 명확성 검사 건너뜀, AI가 메타데이터 생성)
+        results = await match_violations_to_products(
+            db=db,
+            violations=[violation],
+            ai_provider=ai_provider,
+            ai_model=ai_model,
+            api_key=api_key,
+            skip_clarity_check=True,  # 수동 매칭: 명확성 검사 건너뜀
+            provided_metadata=None  # AI가 메타데이터 생성
+        )
 
-        if existing_product:
-            # Product가 이미 있으면 Version만 생성
-            product = existing_product
+        if results["matched"] > 0 and results["products"]:
+            product_info = results["products"][0]
+            return {
+                "success": True,
+                "message": "Product가 성공적으로 생성되었습니다.",
+                "product_id": product_info["id"],
+                "violation_id": violation_id,
+                "product": product_info
+            }
         else:
-            # Product 생성: folder_path에서 폴더 이름 추출
-            folder_name = os.path.basename(violation.folder_path)
-            parser = FilenameParser()
-            parsed_info = parser.parse_filename(folder_name)
-            software_name = parsed_info.get('software_name', folder_name)
-
-            # 포터블 여부 감지 (파일명에서)
-            is_portable = False
-            filename_lower = violation.file_name.lower()
-            if 'portable' in filename_lower or '무설치' in violation.file_name:
-                is_portable = True
-
-            # AI 메타데이터 생성
-            generator = AIMetadataGenerator()
-            generator.api_key = api_key
-            generator.model = ai_model
-
-            metadata = await generator.generate_metadata(software_name)
-
-            # Product 생성
-            product = Product(
-                title=metadata.get('title', software_name),
-                description=metadata.get('description', f"{software_name} 소프트웨어"),
-                vendor=metadata.get('vendor', ''),
-                category=metadata.get('category', 'Utility'),
-                icon_url=metadata.get('icon_url', ''),
-                folder_path=violation.folder_path,
-                is_portable=is_portable
+            raise HTTPException(
+                status_code=500,
+                detail=f"Product 생성 실패: {', '.join(results['errors']) if results['errors'] else 'Unknown error'}"
             )
 
-            db.add(product)
-            db.flush()  # Get product ID
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Product 생성 중 오류 발생: {str(e)}"
+        )
 
-        # Version 생성
-        file_path_str = os.path.join(violation.folder_path, violation.file_name)
 
-        # 이미 Version이 있는지 확인
-        existing_version = db.query(Version).filter(
-            Version.file_path == file_path_str
-        ).first()
+@router.post("/{violation_id}/create-product-with-metadata")
+async def create_product_from_violation_with_metadata(
+    violation_id: int,
+    request: CreateProductWithMetadataRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    스캔된 파일로부터 AI 메타데이터와 함께 Product 생성
+    통합 매칭 로직(auto_matcher.py) 사용
 
-        if not existing_version:
-            # Version 생성
-            parsed = parser.parse_filename(violation.file_name)
-            version_name = parsed.get('version', 'Unknown')
+    Args:
+        violation_id: Violation ID
+        request: Request body with metadata
+        db: Database session
+        current_user: Current admin user
 
-            # 파일 크기 가져오기
-            file_size = 0
-            if os.path.exists(file_path_str):
-                file_size = os.path.getsize(file_path_str)
+    Returns:
+        Created product with ID
+    """
+    # 위반 항목 조회
+    violation = db.query(FilenameViolation).filter(
+        FilenameViolation.id == violation_id
+    ).first()
 
-            version = Version(
-                product_id=product.id,
-                file_name=violation.file_name,
-                file_path=file_path_str,
-                file_size=file_size,
-                version_name=version_name
+    if not violation:
+        raise HTTPException(status_code=404, detail="Violation not found")
+
+    metadata = request.metadata
+
+    # 설정 로드 (API key는 필요 없지만 provider와 model 정보는 필요)
+    config = load_config()
+    metadata_config = config.get('metadata', {})
+    ai_provider = metadata_config.get('aiProvider', 'gemini')
+    ai_model = metadata_config.get('aiModel', 'gemini-2.5-flash')
+
+    try:
+        # 통합 매칭 로직 호출 (수동 매칭 모드: 사용자 제공 메타데이터 사용)
+        results = await match_violations_to_products(
+            db=db,
+            violations=[violation],
+            ai_provider=ai_provider,
+            ai_model=ai_model,
+            api_key="",  # 사용자 제공 메타데이터 사용 시 API key 불필요
+            skip_clarity_check=True,  # 수동 매칭: 명확성 검사 건너뜀
+            provided_metadata=metadata  # 사용자가 검토한 메타데이터 사용
+        )
+
+        if results["matched"] > 0 and results["products"]:
+            product_info = results["products"][0]
+            return {
+                "success": True,
+                "message": "Product가 성공적으로 생성되었습니다.",
+                "product_id": product_info["id"],
+                "violation_id": violation_id,
+                "product": product_info
+            }
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Product 생성 실패: {', '.join(results['errors']) if results['errors'] else 'Unknown error'}"
             )
 
-            db.add(version)
-            db.flush()  # Get version ID
-
-            # Violation에 매칭 정보 저장 (재스캔 시 중복 방지용)
-            violation.product_id = product.id
-            violation.version_id = version.id
-        else:
-            # 기존 Version이 있으면 해당 정보 연결
-            violation.product_id = existing_version.product_id
-            violation.version_id = existing_version.id
-
-        # Violation을 해결됨으로 표시
-        violation.is_resolved = True
-
-        db.commit()
-        db.refresh(product)
-
-        return {
-            "success": True,
-            "message": "Product가 성공적으로 생성되었습니다.",
-            "product_id": product.id,
-            "product": product
-        }
-
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(

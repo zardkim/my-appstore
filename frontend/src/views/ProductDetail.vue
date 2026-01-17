@@ -10,7 +10,7 @@
           <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
-          <span class="hidden sm:inline">뒤로 가기</span>
+          <span class="hidden sm:inline">{{ t('productDetail.back') }}</span>
         </button>
 
         <!-- 편집 모드 토글 버튼 -->
@@ -20,7 +20,7 @@
             v-if="isEditing"
             @click="showReferenceSitesDialog = true"
             class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-            title="참조사이트 보기"
+            :title="t('productDetail.viewReferences')"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -34,7 +34,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-            취소
+            {{ t('productDetail.cancel') }}
           </button>
           <button
             v-if="isEditing"
@@ -48,7 +48,7 @@
             <svg v-else class="animate-spin w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            {{ saving ? '저장 중...' : '저장' }}
+            {{ saving ? t('productDetail.saving') : t('productDetail.save') }}
           </button>
           <button
             v-if="!isEditing"
@@ -58,7 +58,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            편집
+            {{ t('productDetail.edit') }}
           </button>
         </div>
       </div>
@@ -67,6 +67,28 @@
     <!-- Loading -->
     <div v-if="loading" class="flex-1 flex items-center justify-center">
       <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+    </div>
+
+    <!-- Error -->
+    <div v-else-if="error" class="flex-1 flex items-center justify-center p-4">
+      <div class="text-center max-w-md">
+        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-red-100 to-red-50 dark:from-red-900 dark:to-red-800 rounded-3xl flex items-center justify-center">
+          <svg class="w-10 h-10 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ t('productDetail.cannotLoad') }}</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">{{ error }}</p>
+        <button
+          @click="$router.back()"
+          class="inline-flex items-center px-6 py-3 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-medium"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          {{ t('productDetail.back') }}
+        </button>
+      </div>
     </div>
 
     <!-- Content -->
@@ -146,13 +168,13 @@
                     v-model="editForm.vendor"
                     type="text"
                     class="w-full text-sm sm:text-base lg:text-lg bg-white/10 border-2 border-white/30 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-blue-100 placeholder-white/50 focus:outline-none focus:border-white/60"
-                    placeholder="개발사"
+                    :placeholder="t('productDetail.vendorPlaceholder')"
                   />
                   <input
                     v-model="editForm.official_website"
                     type="url"
                     class="w-full text-xs sm:text-sm bg-white/10 border-2 border-white/30 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-blue-100 placeholder-white/50 focus:outline-none focus:border-white/60"
-                    placeholder="공식 웹사이트 (https://example.com)"
+                    :placeholder="t('productDetail.officialWebsitePlaceholder')"
                   />
                 </div>
                 <div v-else class="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -165,12 +187,12 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     class="flex items-center px-2 sm:px-3 py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-lg text-xs sm:text-sm font-medium transition-colors"
-                    title="공식 웹사이트 방문"
+                    :title="t('productDetail.officialWebsiteTitle')"
                   >
                     <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                     </svg>
-                    <span class="hidden sm:inline">공식 사이트</span>
+                    <span class="hidden sm:inline">{{ t('productDetail.officialSite') }}</span>
                   </a>
                 </div>
               </div>
@@ -182,7 +204,7 @@
                   v-model="editForm.category"
                   class="px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white backdrop-blur-sm border border-white/30 text-gray-900 focus:outline-none focus:border-blue-500"
                 >
-                  <option value="" class="text-gray-900">카테고리 선택</option>
+                  <option value="" class="text-gray-900">{{ t('productDetail.selectCategory') }}</option>
                   <option v-for="cat in categories" :key="cat" :value="cat" class="text-gray-900">{{ getCategoryIcon(cat) }} {{ cat }}</option>
                 </select>
                 <span
@@ -193,7 +215,7 @@
                   <span class="hidden sm:inline">{{ product.category }}</span>
                 </span>
                 <span class="inline-flex items-center px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white/20 backdrop-blur-sm border border-white/30">
-                  {{ product.versions?.length || 0 }}개 버전
+                  {{ product.versions?.length || 0 }} {{ t('productDetail.versions') }}
                 </span>
               </div>
             </div>
@@ -605,7 +627,7 @@
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    수정
+                    {{ t('product.installation.edit') }}
                   </button>
                   <button
                     @click="deleteGuide"
@@ -615,7 +637,7 @@
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    <span class="hidden sm:inline">삭제</span>
+                    <span class="hidden sm:inline">{{ t('product.installation.delete') }}</span>
                   </button>
                 </div>
 
@@ -629,14 +651,14 @@
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    {{ saving ? '저장 중...' : '저장' }}
+                    {{ saving ? t('product.installation.saving') : t('product.installation.save') }}
                   </button>
                   <button
                     @click="cancelWritingGuide"
                     :disabled="saving"
                     class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 text-sm sm:text-base"
                   >
-                    취소
+                    {{ t('product.installation.cancel') }}
                   </button>
                 </div>
               </div>
@@ -648,8 +670,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1.5 sm:mb-2">설치 방법이 없습니다</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">위의 "가이드 작성" 버튼을 클릭하여 설치 방법을 작성할 수 있습니다</p>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1.5 sm:mb-2">{{ t('product.installation.noGuideTitle') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">{{ t('product.installation.noGuideDescAdmin') }}</p>
               </div>
 
               <!-- TinyMCE Editor (편집 모드 또는 작성 모드) -->
@@ -903,7 +925,7 @@
             <svg class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
-            <h3 class="text-xl font-bold text-white">참조사이트 (수동 수정 시 참고)</h3>
+            <h3 class="text-xl font-bold text-white">{{ t('productDetail.referenceSitesTitle') }}</h3>
           </div>
           <button
             @click="showReferenceSitesDialog = false"
@@ -918,7 +940,7 @@
         <!-- Dialog Content -->
         <div class="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
           <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            메타데이터를 수동으로 수정할 때 아래 사이트들을 참고하세요:
+            {{ t('productDetail.referenceSitesDescription') }}
           </p>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <a
@@ -958,14 +980,17 @@ import { useThemeStore } from '../store/theme'
 import { getDownloadUrl } from '../utils/env'
 import ProductLogoSearchDialog from '../components/product/ProductLogoSearchDialog.vue'
 import ProductImageSearchDialog from '../components/product/ProductImageSearchDialog.vue'
+import { useDialog } from '../composables/useDialog'
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+const { alert, confirm } = useDialog()
 const product = ref(null)
 const activeTab = ref('info')
 const loading = ref(true)
+const error = ref(null)
 const isEditing = ref(false)
 const saving = ref(false)
 const showReferenceSites = ref(false)
@@ -1104,12 +1129,12 @@ const handleIconUpload = async (event) => {
   if (!file) return
 
   if (file.size > 5 * 1024 * 1024) {
-    alert('파일 크기는 5MB를 초과할 수 없습니다.')
+    await alert.warning(t('productDetail.fileSizeExceeds'))
     return
   }
 
   if (!file.type.startsWith('image/')) {
-    alert('이미지 파일만 업로드 가능합니다.')
+    await alert.warning(t('productDetail.imageOnly'))
     return
   }
 
@@ -1173,7 +1198,7 @@ const initEditor = () => {
     relative_urls: false,
     remove_script_host: false,
     content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
-    language: 'ko_KR',
+    language: locale.value === 'ko' ? 'ko_KR' : 'en',
     branding: false,
     promotion: false,
     resize: false,
@@ -1181,7 +1206,7 @@ const initEditor = () => {
     elementpath: false,
     skin: themeStore.isDark ? 'oxide-dark' : 'oxide',
     content_css: themeStore.isDark ? 'dark' : 'default',
-    placeholder: '설치 방법을 입력하세요...',
+    placeholder: t('product.installation.placeholder'),
     setup: (editor) => {
       editorInstance = editor
       editor.on('init', () => {
@@ -1198,6 +1223,20 @@ const initEditor = () => {
 
 // 테마 변경 감지하여 에디터 재초기화
 watch(() => themeStore.isDark, () => {
+  if (editorInstance && (isEditing.value || isWritingGuide.value)) {
+    const currentContent = editorInstance.getContent()
+    editorInstance.remove()
+    initEditor()
+    setTimeout(() => {
+      if (window.tinymce.get('installation-guide-editor')) {
+        window.tinymce.get('installation-guide-editor').setContent(currentContent)
+      }
+    }, 100)
+  }
+})
+
+// 언어 변경 감지하여 에디터 재초기화
+watch(() => locale.value, () => {
   if (editorInstance && (isEditing.value || isWritingGuide.value)) {
     const currentContent = editorInstance.getContent()
     editorInstance.remove()
@@ -1311,10 +1350,10 @@ const saveGuide = async () => {
     }
     isWritingGuide.value = false
 
-    alert('설치 가이드가 저장되었습니다.')
+    await alert.success(t('productDetail.guideSaved'))
   } catch (error) {
     console.error('Failed to save guide:', error)
-    alert('저장에 실패했습니다: ' + (error.response?.data?.detail || error.message))
+    await alert.error(t('productDetail.saveFailed') + ': ' + (error.response?.data?.detail || error.message))
   } finally {
     saving.value = false
   }
@@ -1332,7 +1371,8 @@ const cancelWritingGuide = () => {
 
 // 가이드 삭제
 const deleteGuide = async () => {
-  if (!confirm('설치 가이드를 삭제하시겠습니까?')) {
+  const shouldDelete = await confirm.danger(t('productDetail.deleteGuide'))
+  if (!shouldDelete) {
     return
   }
 
@@ -1346,10 +1386,10 @@ const deleteGuide = async () => {
     // 제품 정보 업데이트
     product.value.installation_guide = ''
 
-    alert('설치 가이드가 삭제되었습니다.')
+    await alert.success(t('productDetail.guideDeleted'))
   } catch (error) {
     console.error('Failed to delete guide:', error)
-    alert('삭제에 실패했습니다: ' + (error.response?.data?.detail || error.message))
+    await alert.error(t('productDetail.deleteFailed') + ': ' + (error.response?.data?.detail || error.message))
   } finally {
     saving.value = false
   }
@@ -1383,7 +1423,7 @@ const cancelEdit = () => {
 // 편집 저장
 const saveEdit = async () => {
   if (!editForm.value.title.trim()) {
-    alert('제품명을 입력해주세요.')
+    await alert.warning(t('productDetail.enterProductName'))
     return
   }
 
@@ -1400,10 +1440,10 @@ const saveEdit = async () => {
     }
     isEditing.value = false
 
-    alert('저장되었습니다.')
+    await alert.success(t('productDetail.saved'))
   } catch (error) {
     console.error('Failed to save product:', error)
-    alert('저장에 실패했습니다: ' + (error.response?.data?.detail || error.message))
+    await alert.error(t('productDetail.saveFailed') + ': ' + (error.response?.data?.detail || error.message))
   } finally {
     saving.value = false
   }
@@ -1467,8 +1507,9 @@ const handleScreenshotsSaved = async () => {
 }
 
 // Delete screenshot
-const deleteScreenshot = (index) => {
-  if (!confirm('이 스크린샷을 삭제하시겠습니까?')) return
+const deleteScreenshot = async (index) => {
+  const shouldDelete = await confirm.danger(t('productDetail.deleteScreenshot'))
+  if (!shouldDelete) return
 
   // editForm.screenshots 배열에서 해당 인덱스 제거
   if (editForm.value && editForm.value.screenshots) {
@@ -1525,7 +1566,7 @@ const uploadScreenshot = async (event, index) => {
     }
   } catch (error) {
     console.error('Screenshot upload error:', error)
-    alert('스크린샷 업로드에 실패했습니다.')
+    await alert.error(t('productDetail.screenshotUploadFailed'))
   } finally {
     // input 초기화
     event.target.value = ''
@@ -1590,10 +1631,10 @@ const uploadFile = async () => {
     uploadForm.value.note = ''
     uploadForm.value.type = 'patch'
 
-    alert(t('product.patches.uploadSuccess'))
+    await alert.success(t('product.patches.uploadSuccess'))
   } catch (error) {
     console.error('File upload error:', error)
-    alert(t('product.patches.uploadFailed'))
+    await alert.error(t('product.patches.uploadFailed'))
   } finally {
     uploading.value = false
   }
@@ -1615,21 +1656,22 @@ const downloadPatchFile = async (attachmentId, filename) => {
     window.URL.revokeObjectURL(url)
   } catch (error) {
     console.error('File download error:', error)
-    alert(t('product.patches.downloadFailed'))
+    await alert.error(t('product.patches.downloadFailed'))
   }
 }
 
 // 패치 파일 삭제
 const deleteAttachment = async (attachmentId) => {
-  if (!confirm(t('product.patches.deleteConfirm'))) return
+  const shouldDelete = await confirm.danger(t('product.patches.deleteConfirm'))
+  if (!shouldDelete) return
 
   try {
     await attachmentsApi.deleteAttachment(attachmentId)
     await loadAttachments()
-    alert(t('product.patches.deleteSuccess'))
+    await alert.success(t('product.patches.deleteSuccess'))
   } catch (error) {
     console.error('File delete error:', error)
-    alert(t('product.patches.deleteFailed'))
+    await alert.error(t('product.patches.deleteFailed'))
   }
 }
 
@@ -1645,13 +1687,21 @@ const loadAttachments = async () => {
 
 onMounted(async () => {
   try {
+    console.log('Loading product with ID:', route.params.id)
     const response = await productsApi.getById(route.params.id)
+    console.log('Product loaded:', response.data)
     product.value = response.data
 
     // 패치 파일 목록 로드
     await loadAttachments()
-  } catch (error) {
-    console.error('Failed to load product:', error)
+  } catch (err) {
+    console.error('Failed to load product:', err)
+    console.error('Error details:', {
+      message: err.message,
+      response: err.response?.data,
+      status: err.response?.status
+    })
+    error.value = err.response?.data?.detail || err.message || '제품을 불러오는데 실패했습니다.'
   } finally {
     loading.value = false
   }

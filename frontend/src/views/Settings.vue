@@ -52,8 +52,8 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.general.language') }}</label>
                 <select v-model="language" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                  <option value="ko">{{ t('settings.general.korean') }}</option>
-                  <option value="en">{{ t('settings.general.english') }}</option>
+                  <option value="ko">🇰🇷 {{ t('settings.general.korean') }}</option>
+                  <option value="en">🇺🇸 {{ t('settings.general.english') }}</option>
                 </select>
               </div>
             </div>
@@ -256,13 +256,13 @@
                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
-                사용자 추가
+                {{ t('settings.users.addUser') }}
               </button>
               <button @click="showInviteModal = true" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-medium flex items-center justify-center text-sm sm:text-base">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                사용자 초대
+                {{ t('settings.users.inviteUser') }}
               </button>
             </div>
           </div>
@@ -271,8 +271,8 @@
             <div class="flex items-start">
               <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
               <div>
-                <h3 class="text-sm font-semibold text-yellow-800 dark:text-yellow-400">관리자 권한 필요</h3>
-                <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">사용자 관리는 관리자만 접근할 수 있습니다.</p>
+                <h3 class="text-sm font-semibold text-yellow-800 dark:text-yellow-400">{{ t('settings.users.adminRequired') }}</h3>
+                <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">{{ t('settings.users.adminOnlyAccess') }}</p>
               </div>
             </div>
           </div>
@@ -282,11 +282,11 @@
             <table class="w-full">
               <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">사용자명</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">역할</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">상태</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">생성일</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ t('settings.users.username') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ t('settings.users.role') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ t('settings.users.status') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ t('settings.users.createdAt') }}</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ t('settings.users.actions') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -302,9 +302,9 @@
                   <td class="px-6 py-4">
                     <span v-if="user.role === 'admin'" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-500 to-purple-600 text-white">
                       <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                      관리자
+                      {{ t('settings.users.admin') }}
                     </span>
-                    <span v-else class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">일반 사용자</span>
+                    <span v-else class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">{{ t('settings.users.normalUser') }}</span>
                   </td>
                   <td class="px-6 py-4">
                     <label class="relative inline-block w-12 h-6">
@@ -319,10 +319,10 @@
                   <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ formatDate(user.created_at) }}</td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end space-x-2">
-                      <button v-if="user.role !== 'admin'" @click="openEditUserModal(user)" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm">수정</button>
-                      <button v-if="user.role !== 'admin'" @click="openPasswordModal(user)" class="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium text-sm">비밀번호</button>
-                      <button v-if="user.role !== 'admin'" @click="deleteUser(user)" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium text-sm">삭제</button>
-                      <span v-else class="text-gray-400 dark:text-gray-500 text-sm">시스템 관리자</span>
+                      <button v-if="user.role !== 'admin'" @click="openEditUserModal(user)" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm">{{ t('settings.users.edit') }}</button>
+                      <button v-if="user.role !== 'admin'" @click="openPasswordModal(user)" class="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium text-sm">{{ t('settings.users.password') }}</button>
+                      <button v-if="user.role !== 'admin'" @click="deleteUser(user)" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium text-sm">{{ t('settings.users.delete') }}</button>
+                      <span v-else class="text-gray-400 dark:text-gray-500 text-sm">{{ t('settings.users.systemAdmin') }}</span>
                     </div>
                   </td>
                 </tr>
@@ -353,15 +353,15 @@
               <!-- Role & Status -->
               <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100 dark:border-gray-700">
                 <div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">역할</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('settings.users.role') }}</p>
                   <span v-if="user.role === 'admin'" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-500 to-purple-600 text-white">
                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                    관리자
+                    {{ t('settings.users.admin') }}
                   </span>
-                  <span v-else class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">일반 사용자</span>
+                  <span v-else class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">{{ t('settings.users.normalUser') }}</span>
                 </div>
                 <div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 text-right">상태</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 text-right">{{ t('settings.users.status') }}</p>
                   <label class="relative inline-block w-11 h-6">
                     <input type="checkbox" v-model="user.is_active" @change="toggleUserStatus(user)" class="sr-only peer" :disabled="user.role === 'admin'">
                     <div :class="[
@@ -375,12 +375,12 @@
 
               <!-- Actions -->
               <div v-if="user.role !== 'admin'" class="flex gap-2">
-                <button @click="openEditUserModal(user)" class="flex-1 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 font-medium transition-colors">수정</button>
-                <button @click="openPasswordModal(user)" class="flex-1 px-3 py-2 text-sm text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 font-medium transition-colors">비밀번호</button>
-                <button @click="deleteUser(user)" class="flex-1 px-3 py-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 font-medium transition-colors">삭제</button>
+                <button @click="openEditUserModal(user)" class="flex-1 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 font-medium transition-colors">{{ t('settings.users.edit') }}</button>
+                <button @click="openPasswordModal(user)" class="flex-1 px-3 py-2 text-sm text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 font-medium transition-colors">{{ t('settings.users.password') }}</button>
+                <button @click="deleteUser(user)" class="flex-1 px-3 py-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 font-medium transition-colors">{{ t('settings.users.delete') }}</button>
               </div>
               <div v-else class="text-center py-2">
-                <span class="text-xs text-gray-500 dark:text-gray-400">시스템 관리자</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ t('settings.users.systemAdmin') }}</span>
               </div>
             </div>
           </div>
@@ -498,6 +498,20 @@
           />
         </div>
 
+        <!-- Auto Scan Scheduler -->
+        <div v-show="activeSection === 'scheduler'" class="space-y-4 sm:space-y-6">
+          <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{{ t('settings.scheduler.title') }}</h1>
+            <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">{{ t('settings.scheduler.description') }}</p>
+          </div>
+
+          <div v-if="!isAdmin" class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-2xl p-6">
+            <p class="text-sm text-yellow-700 dark:text-yellow-300">{{ t('settings.scheduler.adminOnly') }}</p>
+          </div>
+
+          <AdminScheduler v-else />
+        </div>
+
         <!-- Categories -->
         <div v-show="activeSection === 'categories'" class="space-y-6">
           <div class="flex items-center justify-between">
@@ -524,7 +538,7 @@
                   </button>
                 </div>
               </div>
-              <p class="font-medium text-gray-900 dark:text-white">{{ category.label }}</p>
+              <p class="font-medium text-gray-900 dark:text-white">{{ getCategoryLabel(category) }}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">{{ category.name }}</p>
             </div>
           </div>
@@ -586,10 +600,10 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.postsPerPage') }}</label>
                 <select v-model="postsPerPage" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                  <option value="10">10개</option>
-                  <option value="20">20개</option>
-                  <option value="30">30개</option>
-                  <option value="50">50개</option>
+                  <option value="10">{{ t('settings.board.postsPerPageOption', { n: 10 }) }}</option>
+                  <option value="20">{{ t('settings.board.postsPerPageOption', { n: 20 }) }}</option>
+                  <option value="30">{{ t('settings.board.postsPerPageOption', { n: 30 }) }}</option>
+                  <option value="50">{{ t('settings.board.postsPerPageOption', { n: 50 }) }}</option>
                 </select>
               </div>
 
@@ -629,699 +643,275 @@
         </div>
 
         <!-- Filing Rules -->
+        <!-- Filing Rules -->
         <div v-show="activeSection === 'filing-rules'" class="space-y-6">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.filingRules.title') }}</h1>
             <p class="text-gray-500 dark:text-gray-400">{{ t('settings.filingRules.description') }}</p>
           </div>
 
-          <!-- 표준 형식 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <span class="mr-2">📐</span>
-              표준 형식
+          <!-- 개요 -->
+          <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center">
+              {{ t('settings.filingRules.overview') }}
             </h2>
+            <p class="text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.overviewDesc') }}</p>
+          </div>
 
-            <div class="space-y-6">
-              <div>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">기본 형식 (버전 있음)</h3>
-                <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 font-mono text-sm">
-                  <code class="text-blue-600 dark:text-blue-400">제품명.v버전-기타내용.확장자</code>
+          <!-- 규칙 1: 구분자 자동 인식 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.filingRules.rule1Title') }}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{{ t('settings.filingRules.rule1Desc') }}</p>
+
+            <div class="mb-4">
+              <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.filingRules.rule1Supported') }}</p>
+              <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 text-center">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule1Space') }}</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 text-center">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule1Underscore') }}</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 text-center">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule1Dot') }}</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 text-center">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule1Hyphen') }}</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 text-center">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule1Mixed') }}</span>
                 </div>
               </div>
+            </div>
 
-              <div>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">버전 없는 경우</h3>
-                <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 font-mono text-sm">
-                  <code class="text-blue-600 dark:text-blue-400">제품명-기타내용.확장자</code>
-                </div>
+            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-700">
+              <p class="text-sm font-semibold text-green-800 dark:text-green-300 mb-2">{{ t('settings.filingRules.rule1Examples') }}</p>
+              <div class="space-y-1 text-xs font-mono">
+                <div class="text-gray-700 dark:text-gray-300">✓ Total Commander 10.51.zip</div>
+                <div class="text-gray-700 dark:text-gray-300">✓ Total_Commander_10.51.zip</div>
+                <div class="text-gray-700 dark:text-gray-300">✓ EaseUS Partition Master 15.8 Multilingual.zip</div>
+                <div class="text-gray-700 dark:text-gray-300">✓ Macrium_Reflect_7.3.5854_Server_Plus_x64.rar</div>
               </div>
+            </div>
+          </div>
 
-              <div>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">최소 형식</h3>
-                <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 font-mono text-sm space-y-1">
-                  <div><code class="text-blue-600 dark:text-blue-400">제품명.v버전.확장자</code></div>
-                  <div><code class="text-blue-600 dark:text-blue-400">제품명.확장자</code></div>
-                </div>
+          <!-- 규칙 2: 버전 패턴 자동 인식 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.filingRules.rule2Title') }}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{{ t('settings.filingRules.rule2Desc') }}</p>
+
+            <div class="mb-4">
+              <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.filingRules.rule2Patterns') }}</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 font-mono text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule2Pattern1') }}</div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 font-mono text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule2Pattern2') }}</div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 font-mono text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule2Pattern3') }}</div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 font-mono text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule2Pattern4') }}</div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 font-mono text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule2Pattern5') }}</div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 font-mono text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule2Pattern6') }}</div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 font-mono text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule2Pattern7') }}</div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 font-mono text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule2Pattern8') }}</div>
               </div>
+            </div>
 
-              <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
-                <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-3 flex items-center">
-                  <span class="mr-2">💡</span>
-                  포터블/설치형 구분
-                </h3>
-                <div class="space-y-3 text-sm text-gray-700 dark:text-gray-300">
-                  <p><strong class="text-blue-700 dark:text-blue-400">포터블(Portable) 판별 규칙:</strong></p>
-                  <ul class="list-disc list-inside ml-4 space-y-1">
-                    <li>파일명에 <code class="bg-white dark:bg-gray-800 px-2 py-0.5 rounded text-blue-600 dark:text-blue-400">Portable</code> 또는 <code class="bg-white dark:bg-gray-800 px-2 py-0.5 rounded text-blue-600 dark:text-blue-400">무설치</code> 키워드가 포함된 경우</li>
-                    <li>대소문자 구분 없음 (portable, PORTABLE, Portable 모두 인식)</li>
-                    <li>제품 상세 페이지에 "포터블" 또는 "설치형" 뱃지로 표시됨</li>
-                  </ul>
-                  <p class="mt-3"><strong class="text-blue-700 dark:text-blue-400">예시:</strong></p>
-                  <div class="space-y-1 ml-4">
-                    <div class="bg-white dark:bg-gray-800 rounded p-2 font-mono text-xs">
-                      <span class="text-green-600 dark:text-green-400">✓</span> Total Commander.v10.51-Portable.zip
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded p-2 font-mono text-xs">
-                      <span class="text-green-600 dark:text-green-400">✓</span> Adobe Photoshop.v2024-무설치.exe
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded p-2 font-mono text-xs">
-                      <span class="text-green-600 dark:text-green-400">✓</span> 7-Zip-Portable Korean.exe
-                    </div>
-                  </div>
+            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-700">
+              <p class="text-sm font-semibold text-green-800 dark:text-green-300 mb-2">{{ t('settings.filingRules.rule2NasExamples') }}</p>
+              <div class="space-y-1 text-xs font-mono">
+                <div class="text-gray-700 dark:text-gray-300">Total Commander v10.51 → 버전: 10.51</div>
+                <div class="text-gray-700 dark:text-gray-300">Adobe Photoshop 2024 v25.0 → 제품년도: 2024, 버전: v25.0</div>
+                <div class="text-gray-700 dark:text-gray-300">Microsoft Office 2016-2019 → 버전: 2016-2019</div>
+                <div class="text-gray-700 dark:text-gray-300">Java Runtime Environment 7 Update 45 → 버전: 7 Update 45</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 규칙 3: 제품명 유연 추출 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.filingRules.rule3Title') }}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{{ t('settings.filingRules.rule3Desc') }}</p>
+
+            <div class="mb-4">
+              <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.filingRules.rule3Methods') }}</p>
+              <ul class="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                <li>{{ t('settings.filingRules.rule3Method1') }}</li>
+                <li>{{ t('settings.filingRules.rule3Method2') }}</li>
+                <li>{{ t('settings.filingRules.rule3Method3') }}</li>
+              </ul>
+            </div>
+
+            <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
+              <p class="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2">{{ t('settings.filingRules.rule3Example1') }}</p>
+              <div class="space-y-1 text-xs">
+                <div class="text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule3Example1Folder') }}</div>
+                <div class="text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule3Example1File') }}</div>
+                <div class="font-semibold text-purple-700 dark:text-purple-300">{{ t('settings.filingRules.rule3Example1Result') }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 규칙 4: 부가정보 자동 태깅 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.filingRules.rule4Title') }}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{{ t('settings.filingRules.rule4Desc') }}</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">🖥️ {{ t('settings.filingRules.rule4Architecture') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule4ArchKeywords') }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">⭐ {{ t('settings.filingRules.rule4Edition') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule4EditionKeywords') }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">🌐 {{ t('settings.filingRules.rule4Language') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule4LanguageKeywords') }}</p>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">📦 {{ t('settings.filingRules.rule4Packaging') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule4PackagingKeywords') }}</p>
+              </div>
+              <div class="md:col-span-2">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">🔖 {{ t('settings.filingRules.rule4Others') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule4OthersKeywords') }}</p>
+              </div>
+            </div>
+
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-700">
+              <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300 mb-2">{{ t('settings.filingRules.rule4Example') }}</p>
+              <div class="space-y-2 text-xs font-mono">
+                <div class="text-gray-700 dark:text-gray-300">
+                  Total_Commander_10.51_Final_with_Key_x64.zip<br>
+                  <span class="text-yellow-700 dark:text-yellow-400">→ 제품: Total Commander | 버전: 10.51 | 태그: Final, With Key, x64</span>
+                </div>
+                <div class="text-gray-700 dark:text-gray-300">
+                  Adobe Photoshop 2024 v25.0 x64 Multilingual Portable.exe<br>
+                  <span class="text-yellow-700 dark:text-yellow-400">→ 제품: Adobe Photoshop 2024 | 버전: v25.0 | 태그: x64, Multilingual, Portable</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 올바른 예시 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <span class="mr-2">✅</span>
-              올바른 예시
-            </h2>
+          <!-- 규칙 5: 불명확한 파일명 처리 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.filingRules.rule5Title') }}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{{ t('settings.filingRules.rule5Desc') }}</p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 class="text-sm font-semibold text-green-600 dark:text-green-400 mb-3">패턴 1: 완전한 정보</h3>
-                <div class="space-y-2">
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 font-mono text-xs text-gray-800 dark:text-gray-200">
-                    Total Commander.v10.51-Final.zip
-                  </div>
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 font-mono text-xs text-gray-800 dark:text-gray-200">
-                    ACDSee Photo Studio.v2024-Ultimate.exe
-                  </div>
-                </div>
+            <div class="space-y-3">
+              <div class="border-l-4 border-blue-500 pl-4">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule5Case1') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule5Case1Desc') }}</p>
               </div>
-
-              <div>
-                <h3 class="text-sm font-semibold text-green-600 dark:text-green-400 mb-3">패턴 2: 버전 없음</h3>
-                <div class="space-y-2">
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 font-mono text-xs text-gray-800 dark:text-gray-200">
-                    Adobe Photoshop-Portable.exe
-                  </div>
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 font-mono text-xs text-gray-800 dark:text-gray-200">
-                    Total Commander-Korean.zip
-                  </div>
-                </div>
+              <div class="border-l-4 border-green-500 pl-4">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule5Case2') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule5Case2Desc') }}</p>
               </div>
-
-              <div>
-                <h3 class="text-sm font-semibold text-green-600 dark:text-green-400 mb-3">패턴 3: 기본 정보만</h3>
-                <div class="space-y-2">
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 font-mono text-xs text-gray-800 dark:text-gray-200">
-                    Acronis True Image.v2019.exe
-                  </div>
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 font-mono text-xs text-gray-800 dark:text-gray-200">
-                    Microsoft Office.v2021.iso
-                  </div>
-                </div>
+              <div class="border-l-4 border-purple-500 pl-4">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule5Case3') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule5Case3Desc') }}</p>
               </div>
-
-              <div>
-                <h3 class="text-sm font-semibold text-green-600 dark:text-green-400 mb-3">패턴 4: 제품명만</h3>
-                <div class="space-y-2">
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 font-mono text-xs text-gray-800 dark:text-gray-200">
-                    VLC Media Player.exe
-                  </div>
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 font-mono text-xs text-gray-800 dark:text-gray-200">
-                    Notepad++.zip
-                  </div>
-                </div>
+              <div class="border-l-4 border-orange-500 pl-4">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.rule5Case4') }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('settings.filingRules.rule5Case4Desc') }}</p>
               </div>
             </div>
           </div>
 
-          <!-- 피해야 할 형식 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <span class="mr-2">❌</span>
-              피해야 할 형식
-            </h2>
-
-            <div class="space-y-4">
-              <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4">
-                <div class="font-mono text-sm text-gray-800 dark:text-gray-200 mb-2">
-                  Total_Commander_10.51_Final_with_Key_x64.zip
-                </div>
-                <p class="text-sm text-red-700 dark:text-red-400">→ 너무 복잡하고 언더스코어 과다 사용</p>
-              </div>
-
-              <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4">
-                <div class="font-mono text-sm text-gray-800 dark:text-gray-200 mb-2">
-                  TCMDv1051.zip
-                </div>
-                <p class="text-sm text-red-700 dark:text-red-400">→ 제품명이 불분명함</p>
-              </div>
-
-              <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4">
-                <div class="font-mono text-sm text-gray-800 dark:text-gray-200 mb-2">
-                  total-commander-v10-51-final.zip
-                </div>
-                <p class="text-sm text-red-700 dark:text-red-400">→ 소문자, 버전 구분자 혼란</p>
-              </div>
-
-              <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4">
-                <div class="font-mono text-sm text-gray-800 dark:text-gray-200 mb-2">
-                  [Total Commander] v10.51 - Final.zip
-                </div>
-                <p class="text-sm text-red-700 dark:text-red-400">→ 대괄호 입력 불편</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- 세부 규칙 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <span class="mr-2">📐</span>
-              세부 규칙
-            </h2>
-
-            <div class="space-y-6">
-              <!-- 제품명 -->
-              <div>
-                <h3 class="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">1. 제품명 (Product Name)</h3>
-                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 ml-4">
-                  <li><strong>공식 제품명</strong> 사용 (대소문자 구분)</li>
-                  <li>띄어쓰기 포함 가능</li>
-                  <li>특수문자는 피하기 (<code>.</code> <code>-</code> 제외)</li>
-                </ul>
-                <div class="mt-3 grid grid-cols-2 gap-3">
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                    <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">Total Commander</code>
-                  </div>
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                    <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">Adobe Photoshop CC</code>
-                  </div>
-                  <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                    <span class="text-red-600 dark:text-red-400 mr-2">❌</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">Total_Commander</code>
-                  </div>
-                  <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                    <span class="text-red-600 dark:text-red-400 mr-2">❌</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">TotalCommander</code>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 버전 -->
-              <div>
-                <h3 class="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">2. 버전 (Version)</h3>
-                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 ml-4">
-                  <li><code>.v</code> 접두사 사용 (필수)</li>
-                  <li>숫자와 점(<code>.</code>)만 사용</li>
-                  <li>연도도 버전으로 간주 (2023, 2024 등)</li>
-                </ul>
-                <div class="mt-3 grid grid-cols-2 gap-3">
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                    <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">.v10.51</code>
-                  </div>
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                    <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">.v2024</code>
-                  </div>
-                  <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                    <span class="text-red-600 dark:text-red-400 mr-2">❌</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">.10.51</code>
-                    <span class="text-xs text-red-600 dark:text-red-400"> (v 누락)</span>
-                  </div>
-                  <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                    <span class="text-red-600 dark:text-red-400 mr-2">❌</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">.vBuild14110</code>
-                    <span class="text-xs text-red-600 dark:text-red-400"> (숫자가 아님)</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 기타내용 -->
-              <div>
-                <h3 class="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">3. 기타내용 (Description)</h3>
-                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 ml-4">
-                  <li><code>-</code> 구분자 사용</li>
-                  <li>간단명료하게</li>
-                  <li>여러 정보는 쉼표 또는 띄어쓰기로 구분</li>
-                </ul>
-                <div class="mt-3 grid grid-cols-2 gap-3">
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                    <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">-Final</code>
-                  </div>
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                    <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">-Portable</code>
-                  </div>
-                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                    <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">-Multilingual</code>
-                  </div>
-                  <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                    <span class="text-red-600 dark:text-red-400 mr-2">❌</span>
-                    <code class="text-sm text-gray-800 dark:text-gray-200">-Final_with_Key</code>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 특수 카테고리 자동 인식 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-            <span class="mr-2">🏷️</span>
-            특수 카테고리 자동 인식
-          </h2>
-
-          <div class="space-y-6">
-            <!-- Portable 규칙 -->
-            <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6">
-              <h3 class="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-4 flex items-center">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Portable (포터블) 프로그램
-              </h3>
-
-              <div class="space-y-4">
-                <div>
-                  <p class="text-gray-700 dark:text-gray-300 mb-3">
-                    파일명이나 폴더명에 <code class="bg-white dark:bg-gray-800 px-2 py-1 rounded text-purple-600 dark:text-purple-400 font-semibold">Portable</code> 키워드가 포함되면 자동으로 <strong>"Portable"</strong> 카테고리로 분류됩니다.
-                  </p>
-
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">파일명 예시:</p>
-                      <div class="space-y-2">
-                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                          <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                          <code class="text-sm text-gray-800 dark:text-gray-200">Adobe Photoshop-Portable.exe</code>
-                        </div>
-                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                          <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                          <code class="text-sm text-gray-800 dark:text-gray-200">VLC Media Player.v3.0-Portable.zip</code>
-                        </div>
-                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                          <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                          <code class="text-sm text-gray-800 dark:text-gray-200">Notepad++ Portable.v8.5.exe</code>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">폴더명 예시:</p>
-                      <div class="space-y-2">
-                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                          <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                          <code class="text-sm text-gray-800 dark:text-gray-200">Adobe Photoshop Portable/</code>
-                        </div>
-                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                          <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                          <code class="text-sm text-gray-800 dark:text-gray-200">Total Commander-Portable/</code>
-                        </div>
-                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                          <span class="text-green-600 dark:text-green-400 mr-2">✅</span>
-                          <code class="text-sm text-gray-800 dark:text-gray-200">PortableApps/</code>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mt-4">
-                  <div class="flex">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div class="text-sm text-blue-700 dark:text-blue-300">
-                      <p class="font-semibold mb-1">💡 자동 인식 규칙</p>
-                      <ul class="list-disc list-inside space-y-1 ml-2">
-                        <li>대소문자 구분 없음 (portable, Portable, PORTABLE 모두 인식)</li>
-                        <li>파일명과 폴더명 모두 적용</li>
-                        <li>AI 스캔 시 자동으로 "Portable" 카테고리로 분류</li>
-                        <li>설치가 필요 없는 실행 파일 형식에 권장</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mt-4">
-                  <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">권장 파일명 형식:</p>
-                  <div class="space-y-2">
-                    <div class="flex items-center space-x-2">
-                      <code class="bg-white dark:bg-gray-800 px-3 py-2 rounded text-sm text-gray-800 dark:text-gray-200 flex-1 font-mono">
-                        제품명-Portable.확장자
-                      </code>
-                      <span class="text-xs text-gray-500 dark:text-gray-400">(버전 없음)</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                      <code class="bg-white dark:bg-gray-800 px-3 py-2 rounded text-sm text-gray-800 dark:text-gray-200 flex-1 font-mono">
-                        제품명.v버전-Portable.확장자
-                      </code>
-                      <span class="text-xs text-gray-500 dark:text-gray-400">(버전 있음)</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 향후 추가 가능한 특수 카테고리 안내 -->
-            <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                <strong>참고:</strong> 향후 Patch, Crack, Keygen 등 다른 특수 카테고리에 대한 자동 인식 규칙이 추가될 수 있습니다.
-              </p>
-            </div>
-          </div>
-          </div>
-
-          <!-- 자동 파싱 규칙 (TOP 4 패턴) -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <span class="mr-2">🔍</span>
-              자동 파싱 규칙 (AI 매칭 최적화)
-            </h2>
-
-            <div class="space-y-6">
-              <!-- 통계 안내 -->
-              <div class="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
-                <div class="flex items-start">
-                  <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  <div>
-                    <p class="text-gray-700 dark:text-gray-300 font-semibold mb-2">
-                      실제 파일 1,836개 분석 결과
-                    </p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                      NAS에 저장된 실제 소프트웨어 파일명을 통계 분석하여, 가장 빈도가 높은 <strong>4가지 핵심 패턴</strong>을 자동으로 처리합니다.
-                      이를 통해 파일명이 복잡하거나 불규칙해도 AI가 올바르게 매칭할 수 있습니다.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- TOP 4 패턴 -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- 패턴 1: 버전 추출 우선 처리 -->
-                <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6">
-                  <div class="flex items-center mb-4">
-                    <span class="text-2xl font-bold text-purple-600 dark:text-purple-400 mr-3">1</span>
-                    <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-purple-800 dark:text-purple-300">버전 추출 우선 처리</h3>
-                      <p class="text-sm text-purple-600 dark:text-purple-400 font-medium">빈도: 30.7%</p>
-                    </div>
-                  </div>
-                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                    노이즈 제거 전에 버전 정보를 먼저 추출하여 손실을 방지합니다.
-                  </p>
-                  <div class="space-y-2">
-                    <div class="bg-white dark:bg-gray-800 rounded p-3">
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Before:</p>
-                      <code class="text-xs text-gray-700 dark:text-gray-300">Pure Flat 2013 v2.1</code>
-                    </div>
-                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
-                      <p class="text-xs text-green-600 dark:text-green-400 mb-1">After:</p>
-                      <code class="text-xs text-green-700 dark:text-green-300">Pure Flat → v2.1 (2013이 아님)</code>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 패턴 2: x64/x86 아키텍처 제거 -->
-                <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-6">
-                  <div class="flex items-center mb-4">
-                    <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mr-3">2</span>
-                    <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-indigo-800 dark:text-indigo-300">x64/x86 아키텍처 제거</h3>
-                      <p class="text-sm text-indigo-600 dark:text-indigo-400 font-medium">빈도: 4.5%</p>
-                    </div>
-                  </div>
-                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                    _x64_, .x86., (x64) 등의 아키텍처 정보를 자동 제거합니다.
-                  </p>
-                  <div class="space-y-2">
-                    <div class="bg-white dark:bg-gray-800 rounded p-3">
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Before:</p>
-                      <code class="text-xs text-gray-700 dark:text-gray-300">EaseUS_Todo_Backup_13.5.0_x64.rar</code>
-                    </div>
-                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
-                      <p class="text-xs text-green-600 dark:text-green-400 mb-1">After:</p>
-                      <code class="text-xs text-green-700 dark:text-green-300">EaseUS Todo Backup 13.5.0</code>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 패턴 3: 대괄호 패턴 제거 -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
-                  <div class="flex items-center mb-4">
-                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400 mr-3">3</span>
-                    <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-300">[대괄호] 패턴 제거</h3>
-                      <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">빈도: 2.3%</p>
-                    </div>
-                  </div>
-                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                    릴리즈 그룹이나 추가 정보가 포함된 [대괄호]를 자동 제거합니다.
-                  </p>
-                  <div class="space-y-2">
-                    <div class="bg-white dark:bg-gray-800 rounded p-3">
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Before:</p>
-                      <code class="text-xs text-gray-700 dark:text-gray-300">MiniTool Partition [SadeemPC].zip</code>
-                    </div>
-                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
-                      <p class="text-xs text-green-600 dark:text-green-400 mb-1">After:</p>
-                      <code class="text-xs text-green-700 dark:text-green-300">MiniTool Partition</code>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 패턴 4: 구분자 정규화 -->
-                <div class="bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-700 rounded-lg p-6">
-                  <div class="flex items-center mb-4">
-                    <span class="text-2xl font-bold text-cyan-600 dark:text-cyan-400 mr-3">4</span>
-                    <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-cyan-800 dark:text-cyan-300">구분자 정규화</h3>
-                      <p class="text-sm text-cyan-600 dark:text-cyan-400 font-medium">빈도: 36.8%</p>
-                    </div>
-                  </div>
-                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                    언더스코어(_), 하이픈(-), 점(.) 등을 공백으로 통일합니다.
-                  </p>
-                  <div class="space-y-2">
-                    <div class="bg-white dark:bg-gray-800 rounded p-3">
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Before:</p>
-                      <code class="text-xs text-gray-700 dark:text-gray-300">EaseUS_Todo_Backup_13.5.0.rar</code>
-                    </div>
-                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
-                      <p class="text-xs text-green-600 dark:text-green-400 mb-1">After:</p>
-                      <code class="text-xs text-green-700 dark:text-green-300">EaseUS Todo Backup 13.5.0</code>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 종합 개선 효과 -->
-              <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-green-800 dark:text-green-300 mb-4 flex items-center">
-                  <span class="mr-2">📈</span>
-                  종합 개선 효과
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div class="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">30% → 70%</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">파싱 정확도</p>
-                  </div>
-                  <div class="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
-                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">40% → 80%</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">AI 매칭 성공률</p>
-                  </div>
-                  <div class="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
-                    <p class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">-50%</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">불필요한 API 호출</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 실제 적용 예시 -->
-              <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
-                  <span class="mr-2">✨</span>
-                  실제 적용 예시
-                </h3>
-                <div class="space-y-4">
-                  <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">복잡한 파일명:</p>
-                    <div class="bg-white dark:bg-gray-900 rounded p-3 mb-2">
-                      <code class="text-xs text-gray-700 dark:text-gray-300 break-all">
-                        EaseUS_Todo_Backup_13.5.0_Build_20210129_Enterprise_Technician_WinPE_x64_Downloadly.ir.rar
-                      </code>
-                    </div>
-                    <div class="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
-                      4가지 패턴 자동 처리
-                    </div>
-                    <div class="bg-green-50 dark:bg-green-900/30 rounded p-3">
-                      <code class="text-xs text-green-700 dark:text-green-300">
-                        <strong>EaseUS Todo Backup Enterprise Technician</strong> v13.5.0
-                      </code>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 참고 사항 -->
-              <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4">
-                <div class="flex">
-                  <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div class="text-sm text-yellow-700 dark:text-yellow-300">
-                    <p class="font-semibold mb-1">💡 자동 파싱 규칙 작동 방식</p>
-                    <ul class="list-disc list-inside space-y-1 ml-2">
-                      <li>파일 스캔 시 자동으로 적용되며 별도 설정이 필요 없습니다</li>
-                      <li>복잡한 파일명도 AI가 이해하기 쉬운 형태로 자동 변환됩니다</li>
-                      <li>기존 파일명을 변경하지 않아도 AI 매칭이 정확하게 작동합니다</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 변환 예시 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <span class="mr-2">📊</span>
-              변환 예시
-            </h2>
+          <!-- 인식 예제 모음 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.filingRules.recognitionExamples') }}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{{ t('settings.filingRules.recognitionExamplesDesc') }}</p>
 
             <div class="overflow-x-auto">
-              <table class="w-full">
+              <table class="w-full text-sm">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">기존 파일명</th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">표준 형식</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.beforeLabel') }}</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.afterLabel') }}</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
                   <tr>
-                    <td class="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">Total_Commander_10.51_Final.zip</td>
-                    <td class="px-4 py-3 font-mono text-sm text-green-600 dark:text-green-400 font-semibold">Total Commander.v10.51-Final.zip</td>
+                    <td class="px-4 py-2 font-mono text-xs text-gray-700 dark:text-gray-300">Total_Commander_10.51_Final_with_Key_x64.zip</td>
+                    <td class="px-4 py-2 text-xs text-green-700 dark:text-green-400">Total Commander v10.51 x64 Final</td>
                   </tr>
                   <tr>
-                    <td class="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">ACDSee_2024_Ultimate.exe</td>
-                    <td class="px-4 py-3 font-mono text-sm text-green-600 dark:text-green-400 font-semibold">ACDSee Photo Studio.v2024-Ultimate.exe</td>
+                    <td class="px-4 py-2 font-mono text-xs text-gray-700 dark:text-gray-300">EaseUS_Partition_Master_15.8_Multilingual.zip</td>
+                    <td class="px-4 py-2 text-xs text-green-700 dark:text-green-400">EaseUS Partition Master v15.8 Multilingual</td>
                   </tr>
                   <tr>
-                    <td class="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">adobe_photoshop_cc_2023_portable.zip</td>
-                    <td class="px-4 py-3 font-mono text-sm text-green-600 dark:text-green-400 font-semibold">Adobe Photoshop CC.v2023-Portable.zip</td>
+                    <td class="px-4 py-2 font-mono text-xs text-gray-700 dark:text-gray-300">Macrium_Reflect_7.3.5854_Server_Plus_x64.rar</td>
+                    <td class="px-4 py-2 text-xs text-green-700 dark:text-green-400">Macrium Reflect v7.3 x64 Server Plus</td>
                   </tr>
                   <tr>
-                    <td class="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">vlc-media-player-portable.exe</td>
-                    <td class="px-4 py-3 font-mono text-sm text-green-600 dark:text-green-400 font-semibold">VLC Media Player-Portable.exe</td>
+                    <td class="px-4 py-2 font-mono text-xs text-gray-700 dark:text-gray-300">Microsoft.Office.2016-2019x64.v2020.10.iso</td>
+                    <td class="px-4 py-2 text-xs text-green-700 dark:text-green-400">Microsoft Office 2016-2019 x64 v2020.10</td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-2 font-mono text-xs text-gray-700 dark:text-gray-300">ko_office_professional_plus_2013_x64.iso</td>
+                    <td class="px-4 py-2 text-xs text-green-700 dark:text-green-400">Office Professional Plus 2013 x64 Korean</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- 체크리스트 -->
-          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl shadow-sm p-8 border border-blue-200 dark:border-blue-700">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <span class="mr-2">📝</span>
-              파일 업로드 전 체크리스트
-            </h2>
+          <!-- 권장사항 -->
+          <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-700">
+            <h2 class="text-xl font-bold text-blue-900 dark:text-blue-300 mb-4">{{ t('settings.filingRules.recommendations') }}</h2>
+            <p class="text-gray-700 dark:text-gray-300 mb-4">{{ t('settings.filingRules.recommendationsDesc') }}</p>
 
-            <div class="space-y-3">
-              <div class="flex items-start space-x-3">
-                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-gray-700 dark:text-gray-300">제품명이 공식 명칭인가?</span>
+            <ul class="list-disc list-inside space-y-2 mb-4 text-sm text-gray-700 dark:text-gray-300">
+              <li>{{ t('settings.filingRules.rec1') }}</li>
+              <li>{{ t('settings.filingRules.rec2') }}</li>
+              <li>{{ t('settings.filingRules.rec3') }}</li>
+              <li>{{ t('settings.filingRules.rec4') }}</li>
+            </ul>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+              <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.filingRules.recExample') }}</p>
+              <div class="space-y-1 text-xs font-mono">
+                <div class="text-green-600 dark:text-green-400">{{ t('settings.filingRules.recExampleGood') }}</div>
+                <div class="text-red-600 dark:text-red-400">{{ t('settings.filingRules.recExampleBad') }}</div>
               </div>
-              <div class="flex items-start space-x-3">
-                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-gray-700 dark:text-gray-300">버전이 있다면 <code class="bg-white dark:bg-gray-800 px-2 py-1 rounded">.v</code> 형식인가?</span>
-              </div>
-              <div class="flex items-start space-x-3">
-                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-gray-700 dark:text-gray-300">기타내용이 있다면 <code class="bg-white dark:bg-gray-800 px-2 py-1 rounded">-</code>로 시작하는가?</span>
-              </div>
-              <div class="flex items-start space-x-3">
-                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-gray-700 dark:text-gray-300">언더스코어(<code class="bg-white dark:bg-gray-800 px-2 py-1 rounded">_</code>)를 띄어쓰기로 변경했는가?</span>
-              </div>
-              <div class="flex items-start space-x-3">
-                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-gray-700 dark:text-gray-300">확장자가 소문자인가?</span>
-              </div>
-              <div class="flex items-start space-x-3">
-                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-gray-700 dark:text-gray-300">파일명이 간결한가? (불필요한 정보 제거)</span>
-              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">{{ t('settings.filingRules.recNote') }}</p>
             </div>
           </div>
 
-          <!-- 빠른 참조 -->
-          <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl shadow-sm p-8 border border-purple-200 dark:border-purple-700">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <span class="mr-2">📌</span>
-              빠른 참조
-            </h2>
+          <!-- 문제 해결 -->
+          <div class="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-6 border border-orange-200 dark:border-orange-700">
+            <h2 class="text-xl font-bold text-orange-900 dark:text-orange-300 mb-4">{{ t('settings.filingRules.troubleshooting') }}</h2>
+            <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+              <li>• {{ t('settings.filingRules.trouble1') }}</li>
+              <li>• {{ t('settings.filingRules.trouble2') }}</li>
+              <li>• {{ t('settings.filingRules.trouble3') }}</li>
+              <li>• {{ t('settings.filingRules.trouble4') }}</li>
+            </ul>
+          </div>
 
-            <div class="space-y-4">
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">완전한 형식:</p>
-                    <code class="text-blue-600 dark:text-blue-400 font-mono">제품명.v버전-기타내용.확장자</code>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">버전 없음:</p>
-                    <code class="text-blue-600 dark:text-blue-400 font-mono">제품명-기타내용.확장자</code>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">기본 형식:</p>
-                    <code class="text-blue-600 dark:text-blue-400 font-mono">제품명.v버전.확장자</code>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">최소 형식:</p>
-                    <code class="text-blue-600 dark:text-blue-400 font-mono">제품명.확장자</code>
-                  </div>
-                </div>
+          <!-- 요약 -->
+          <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.filingRules.summary') }}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div class="flex items-start">
+                <span class="text-green-600 dark:text-green-400 mr-2">✓</span>
+                <span class="text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.summaryPoint1') }}</span>
               </div>
-
-              <div class="space-y-2">
-                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">예시:</p>
-                <div class="space-y-2">
-                  <div class="flex items-center space-x-2">
-                    <span class="text-green-600 dark:text-green-400">✅</span>
-                    <code class="font-mono text-sm text-gray-800 dark:text-gray-200">Total Commander.v10.51-Final.zip</code>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <span class="text-green-600 dark:text-green-400">✅</span>
-                    <code class="font-mono text-sm text-gray-800 dark:text-gray-200">ACDSee Photo Studio.v2024-Ultimate.exe</code>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <span class="text-green-600 dark:text-green-400">✅</span>
-                    <code class="font-mono text-sm text-gray-800 dark:text-gray-200">Adobe Photoshop-Portable.exe</code>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <span class="text-green-600 dark:text-green-400">✅</span>
-                    <code class="font-mono text-sm text-gray-800 dark:text-gray-200">Notepad++.exe</code>
-                  </div>
-                </div>
+              <div class="flex items-start">
+                <span class="text-green-600 dark:text-green-400 mr-2">✓</span>
+                <span class="text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.summaryPoint2') }}</span>
+              </div>
+              <div class="flex items-start">
+                <span class="text-green-600 dark:text-green-400 mr-2">✓</span>
+                <span class="text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.summaryPoint3') }}</span>
+              </div>
+              <div class="flex items-start">
+                <span class="text-green-600 dark:text-green-400 mr-2">✓</span>
+                <span class="text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.summaryPoint4') }}</span>
+              </div>
+              <div class="flex items-start md:col-span-2">
+                <span class="text-green-600 dark:text-green-400 mr-2">✓</span>
+                <span class="text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.summaryPoint5') }}</span>
               </div>
             </div>
           </div>
@@ -1372,30 +962,30 @@
               <div v-if="aiProvider === 'openai'">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.metadata.openaiModel') }}</label>
                 <select v-model="aiModel" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                  <optgroup label="o1 시리즈 (최신 추론 모델)">
-                    <option value="o1">o1 (유료 - 최신 추론)</option>
-                    <option value="o1-preview">o1 Preview (유료 - 미리보기)</option>
-                    <option value="o1-mini">o1 Mini (유료 - 빠름)</option>
+                  <optgroup :label="t('settings.metadata.openaiGroupO1')">
+                    <option value="o1">{{ t('settings.metadata.openaiO1') }}</option>
+                    <option value="o1-preview">{{ t('settings.metadata.openaiO1Preview') }}</option>
+                    <option value="o1-mini">{{ t('settings.metadata.openaiO1Mini') }}</option>
                   </optgroup>
-                  <optgroup label="GPT-4o (추천)">
-                    <option value="gpt-4o-mini">GPT-4o Mini (유료 - 저렴, 추천)</option>
-                    <option value="gpt-4o">GPT-4o (유료 - 최신)</option>
-                    <option value="gpt-4o-2024-11-20">GPT-4o (2024-11-20) (유료)</option>
-                    <option value="gpt-4o-2024-08-06">GPT-4o (2024-08-06) (유료)</option>
-                    <option value="gpt-4o-2024-05-13">GPT-4o (2024-05-13) (유료)</option>
+                  <optgroup :label="t('settings.metadata.openaiGroupGpt4o')">
+                    <option value="gpt-4o-mini">{{ t('settings.metadata.openaiGpt4oMini') }}</option>
+                    <option value="gpt-4o">{{ t('settings.metadata.openaiGpt4o') }}</option>
+                    <option value="gpt-4o-2024-11-20">{{ t('settings.metadata.openaiGpt4oDate1') }}</option>
+                    <option value="gpt-4o-2024-08-06">{{ t('settings.metadata.openaiGpt4oDate2') }}</option>
+                    <option value="gpt-4o-2024-05-13">{{ t('settings.metadata.openaiGpt4oDate3') }}</option>
                   </optgroup>
-                  <optgroup label="GPT-4 Turbo">
-                    <option value="gpt-4-turbo">GPT-4 Turbo (유료)</option>
-                    <option value="gpt-4-turbo-2024-04-09">GPT-4 Turbo (2024-04-09) (유료)</option>
-                    <option value="gpt-4-turbo-preview">GPT-4 Turbo Preview (유료)</option>
+                  <optgroup :label="t('settings.metadata.openaiGroupGpt4Turbo')">
+                    <option value="gpt-4-turbo">{{ t('settings.metadata.openaiGpt4Turbo') }}</option>
+                    <option value="gpt-4-turbo-2024-04-09">{{ t('settings.metadata.openaiGpt4TurboDate') }}</option>
+                    <option value="gpt-4-turbo-preview">{{ t('settings.metadata.openaiGpt4TurboPreview') }}</option>
                   </optgroup>
-                  <optgroup label="GPT-4">
-                    <option value="gpt-4">GPT-4 (유료)</option>
-                    <option value="gpt-4-0613">GPT-4 (0613) (유료)</option>
+                  <optgroup :label="t('settings.metadata.openaiGroupGpt4')">
+                    <option value="gpt-4">{{ t('settings.metadata.openaiGpt4') }}</option>
+                    <option value="gpt-4-0613">{{ t('settings.metadata.openaiGpt4Date') }}</option>
                   </optgroup>
                 </select>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  💡 GPT-4o Mini가 가격 대비 성능이 좋아 추천됩니다. o1은 복잡한 추론 작업에 적합합니다.
+                  {{ t('settings.metadata.openaiModelTip') }}
                 </p>
               </div>
 
@@ -1403,26 +993,26 @@
               <div v-if="aiProvider === 'gemini'">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.metadata.geminiModel') }}</label>
                 <select v-model="aiModel" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                  <optgroup label="Gemini 3 (최신 Preview) 🚀">
-                    <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                    <option value="gemini-3-pro-preview">Gemini 3 Pro Preview (고성능)</option>
+                  <optgroup :label="t('settings.metadata.geminiGroup3')">
+                    <option value="gemini-3-flash-preview">{{ t('settings.metadata.gemini3FlashPreview') }}</option>
+                    <option value="gemini-3-pro-preview">{{ t('settings.metadata.gemini3ProPreview') }}</option>
                   </optgroup>
-                  <optgroup label="Gemini 2.5 (안정 버전) ⭐ 추천">
-                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (무료 - 안정)</option>
-                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (무료 - 고성능)</option>
-                    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (경량)</option>
+                  <optgroup :label="t('settings.metadata.geminiGroup25')">
+                    <option value="gemini-2.5-flash">{{ t('settings.metadata.gemini25Flash') }}</option>
+                    <option value="gemini-2.5-pro">{{ t('settings.metadata.gemini25Pro') }}</option>
+                    <option value="gemini-2.5-flash-lite">{{ t('settings.metadata.gemini25FlashLite') }}</option>
                   </optgroup>
-                  <optgroup label="Gemini 2.0">
-                    <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
-                    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                    <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite (경량)</option>
+                  <optgroup :label="t('settings.metadata.geminiGroup20')">
+                    <option value="gemini-2.0-flash-exp">{{ t('settings.metadata.gemini20FlashExp') }}</option>
+                    <option value="gemini-2.0-flash">{{ t('settings.metadata.gemini20Flash') }}</option>
+                    <option value="gemini-2.0-flash-lite">{{ t('settings.metadata.gemini20FlashLite') }}</option>
                   </optgroup>
                 </select>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  💡 <strong>Gemini 2.5 Flash</strong>가 안정적이며 할당량이 넉넉합니다. (추천)
+                  {{ t('settings.metadata.geminiModelTip') }}
                 </p>
                 <p class="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                  ⚠️ 무료 할당량 초과 시 429 에러가 발생할 수 있습니다.
+                  {{ t('settings.metadata.geminiQuotaWarning') }}
                 </p>
               </div>
 
@@ -1496,22 +1086,22 @@
 
               <!-- Pricing Info -->
               <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-                <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">💰 요금 정보</h4>
+                <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">{{ t('settings.metadata.pricingInfo') }}</h4>
                 <div class="text-xs text-blue-800 dark:text-blue-400 space-y-1">
                   <p v-if="aiProvider === 'openai'">
-                    <strong>OpenAI (모두 유료):</strong><br>
-                    • o1: $15/1M 입력, $60/1M 출력 (고급 추론)<br>
-                    • GPT-4o Mini: $0.15/1M 입력, $0.60/1M 출력 (가장 저렴, 추천)<br>
-                    • GPT-4o: $2.50/1M 입력, $10.00/1M 출력<br>
-                    • GPT-4 Turbo: $10/1M 입력, $30/1M 출력<br>
-                    • GPT-4: $30/1M 입력, $60/1M 출력
+                    <strong>{{ t('settings.metadata.openaiPricingTitle') }}</strong><br>
+                    • {{ t('settings.metadata.openaiO1') }}<br>
+                    • {{ t('settings.metadata.openaiGpt4oMini') }}<br>
+                    • {{ t('settings.metadata.openaiGpt4o') }}<br>
+                    • {{ t('settings.metadata.openaiGpt4Turbo') }}<br>
+                    • {{ t('settings.metadata.openaiGpt4') }}
                   </p>
                   <p v-if="aiProvider === 'gemini'">
-                    <strong>Gemini (무료 할당량 제공 ⭐):</strong><br>
-                    • <strong class="text-green-600 dark:text-green-400">무료 할당량: 분당 15회, 일일 1,500회</strong><br>
-                    • Gemini 3.0 Flash Exp: 무료 (최신)<br>
-                    • Gemini 2.5 Flash Exp: 무료 (안정적, 추천)<br>
-                    • Gemini 2.5 Pro Exp: 무료 (고성능)
+                    <strong>{{ t('settings.metadata.geminiPricingTitle') }}</strong><br>
+                    • <strong class="text-green-600 dark:text-green-400">{{ t('settings.metadata.geminiFreeQuota') }}</strong><br>
+                    • {{ t('settings.metadata.gemini30FlashExp') }}<br>
+                    • {{ t('settings.metadata.gemini25FlashExp') }}<br>
+                    • {{ t('settings.metadata.gemini25ProExp') }}
                   </p>
                 </div>
               </div>
@@ -1520,17 +1110,17 @@
 
           <!-- Google Custom Search API Settings -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">🔍 Google Custom Search API 설정</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.metadata.googleCustomSearchTitle') }}</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              이미지 검색 기능을 사용하려면 Google Custom Search API 키와 Search Engine ID가 필요합니다.
+              {{ t('settings.metadata.googleCustomSearchDesc') }}
             </p>
 
             <div class="space-y-4">
               <!-- Google API Key -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Google Custom Search API 키
-                  <span class="text-xs text-gray-500">(Custom Search JSON API)</span>
+                  {{ t('settings.metadata.googleApiKeyLabel') }}
+                  <span class="text-xs text-gray-500">{{ t('settings.metadata.googleApiKeySubLabel') }}</span>
                 </label>
                 <div class="relative">
                   <input
@@ -1556,9 +1146,9 @@
                   </button>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Google Cloud Console에서 Custom Search JSON API를 활성화하고 API 키를 발급받으세요.
+                  {{ t('settings.metadata.googleApiKeyHelper') }}
                   <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
-                    API 키 발급받기 →
+                    {{ t('settings.metadata.googleApiKeyLink') }}
                   </a>
                 </p>
               </div>
@@ -1566,8 +1156,8 @@
               <!-- Search Engine ID -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Programmable Search Engine ID
-                  <span class="text-xs text-gray-500">(cx 파라미터)</span>
+                  {{ t('settings.metadata.searchEngineIdLabel') }}
+                  <span class="text-xs text-gray-500">{{ t('settings.metadata.searchEngineIdSubLabel') }}</span>
                 </label>
                 <input
                   v-model="googleSearchEngineId"
@@ -1576,32 +1166,32 @@
                   class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Programmable Search Engine에서 이미지 검색을 활성화한 검색 엔진을 만들고 ID를 복사하세요.
+                  {{ t('settings.metadata.searchEngineIdHelper') }}
                   <a href="https://programmablesearchengine.google.com/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
-                    Search Engine 만들기 →
+                    {{ t('settings.metadata.searchEngineIdLink') }}
                   </a>
                 </p>
               </div>
 
               <!-- Info Box -->
               <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4">
-                <h4 class="text-sm font-semibold text-green-900 dark:text-green-300 mb-2">💡 설정 가이드</h4>
+                <h4 class="text-sm font-semibold text-green-900 dark:text-green-300 mb-2">{{ t('settings.metadata.setupGuideTitle') }}</h4>
                 <div class="text-xs text-green-800 dark:text-green-400 space-y-2">
-                  <p><strong>1. API 키 발급:</strong></p>
+                  <p><strong>{{ t('settings.metadata.setupGuideStep1') }}</strong></p>
                   <ul class="list-disc ml-5 space-y-1">
-                    <li>Google Cloud Console → API 및 서비스 → 사용자 인증 정보</li>
-                    <li>"Custom Search JSON API" 활성화</li>
-                    <li>API 키 생성</li>
+                    <li>{{ t('settings.metadata.step1Item1') }}</li>
+                    <li>{{ t('settings.metadata.step1Item2') }}</li>
+                    <li>{{ t('settings.metadata.step1Item3') }}</li>
                   </ul>
-                  <p class="mt-2"><strong>2. Search Engine 생성:</strong></p>
+                  <p class="mt-2"><strong>{{ t('settings.metadata.setupGuideStep2') }}</strong></p>
                   <ul class="list-disc ml-5 space-y-1">
-                    <li>Programmable Search Engine 페이지 접속</li>
-                    <li>새 검색 엔진 만들기 (전체 웹 검색)</li>
-                    <li>"이미지 검색" 활성화</li>
-                    <li>검색 엔진 ID 복사 (cx 파라미터)</li>
+                    <li>{{ t('settings.metadata.step2Item1') }}</li>
+                    <li>{{ t('settings.metadata.step2Item2') }}</li>
+                    <li>{{ t('settings.metadata.step2Item3') }}</li>
+                    <li>{{ t('settings.metadata.step2Item4') }}</li>
                   </ul>
                   <p class="mt-2">
-                    <strong>무료 할당량:</strong> 일일 100회 검색 가능
+                    <strong>{{ t('settings.metadata.freeQuotaLabel') }}</strong> {{ t('settings.metadata.freeQuotaValue') }}
                   </p>
                 </div>
               </div>
@@ -1612,12 +1202,12 @@
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
               <div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">📝 커스텀 프롬프트</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">AI에게 질문할 프롬프트를 커스터마이징할 수 있습니다</p>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.metadata.customPromptTitle') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('settings.metadata.customPromptDescription') }}</p>
               </div>
               <label class="flex items-center cursor-pointer">
                 <input type="checkbox" v-model="useCustomPrompt" class="w-5 h-5 text-blue-600 rounded" />
-                <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">사용</span>
+                <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('settings.metadata.useCustomPrompt') }}</span>
               </label>
             </div>
 
@@ -1625,62 +1215,62 @@
               <!-- Info Box -->
               <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4">
                 <p class="text-sm text-amber-800 dark:text-amber-300">
-                  💡 <strong>사용 가능한 변수:</strong><br>
-                  <code class="bg-amber-100 dark:bg-amber-800 px-2 py-0.5 rounded">{software_name}</code> - 소프트웨어 이름으로 자동 치환됩니다<br>
+                  <strong>{{ t('settings.metadata.availableVariables') }}</strong><br>
+                  <code class="bg-amber-100 dark:bg-amber-800 px-2 py-0.5 rounded">{software_name}</code> {{ t('settings.metadata.softwareNameVariable') }}<br>
                   <br>
-                  <strong>팁:</strong> 더 상세하고 구체적인 질문을 하면 AI가 더 정확한 정보를 제공합니다.
+                  <strong>{{ t('settings.metadata.customPromptTip') }}</strong> {{ t('settings.metadata.customPromptTipText') }}
                 </p>
               </div>
 
               <!-- OpenAI Prompt -->
               <div v-if="aiProvider === 'openai'">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  OpenAI 프롬프트
+                  {{ t('settings.metadata.openaiPromptLabel') }}
                   <button
                     @click="customPromptOpenai = defaultPromptOpenai"
                     type="button"
                     class="ml-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
                   >
-                    기본값으로 복원
+                    {{ t('settings.metadata.restoreDefault') }}
                   </button>
                 </label>
                 <textarea
                   v-model="customPromptOpenai"
                   rows="15"
                   class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
-                  placeholder="OpenAI에게 질문할 프롬프트를 입력하세요..."
+                  :placeholder="t('settings.metadata.openaiPromptPlaceholder')"
                 ></textarea>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  현재 문자 수: {{ customPromptOpenai.length }}
+                  {{ t('settings.metadata.currentCharCount') }} {{ customPromptOpenai.length }}
                 </p>
               </div>
 
               <!-- Gemini Prompt -->
               <div v-if="aiProvider === 'gemini'">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Gemini 프롬프트
+                  {{ t('settings.metadata.geminiPromptLabel') }}
                   <button
                     @click="customPromptGemini = defaultPromptGemini"
                     type="button"
                     class="ml-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
                   >
-                    기본값으로 복원
+                    {{ t('settings.metadata.restoreDefault') }}
                   </button>
                 </label>
                 <textarea
                   v-model="customPromptGemini"
                   rows="15"
                   class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
-                  placeholder="Gemini에게 질문할 프롬프트를 입력하세요..."
+                  :placeholder="t('settings.metadata.geminiPromptPlaceholder')"
                 ></textarea>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  현재 문자 수: {{ customPromptGemini.length }}
+                  {{ t('settings.metadata.currentCharCount') }} {{ customPromptGemini.length }}
                 </p>
               </div>
             </div>
 
             <div v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-              커스텀 프롬프트를 사용하려면 위의 '사용' 체크박스를 선택하세요.
+              {{ t('settings.metadata.customPromptInstruction') }}
             </div>
           </div>
 
@@ -1690,7 +1280,7 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              적용
+              {{ t('settings.metadata.apply') }}
             </button>
           </div>
         </div>
@@ -1746,9 +1336,9 @@
 
           <!-- Folder Names -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📁 폴더명</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.exceptions.folderNamesTitle') }}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              제외할 폴더명을 입력하세요. 경로의 어느 부분에서라도 이 이름이 포함되면 제외됩니다.
+              {{ t('settings.exceptions.folderNamesDescription') }}
             </p>
 
             <div class="mb-4">
@@ -1756,7 +1346,7 @@
                 <input
                   v-model="newExceptionFolder"
                   type="text"
-                  placeholder="예: .git, node_modules, __MACOSX"
+                  :placeholder="t('settings.exceptions.folderNamePlaceholder')"
                   class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   @keyup.enter="addExceptionFolder"
                 />
@@ -1764,7 +1354,7 @@
                   @click="addExceptionFolder"
                   class="px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors whitespace-nowrap"
                 >
-                  추가
+                  {{ t('settings.exceptions.add') }}
                 </button>
               </div>
             </div>
@@ -1780,7 +1370,7 @@
                   @click="exceptionFolders.splice(index, 1)"
                   class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
                 >
-                  삭제
+                  {{ t('settings.exceptions.delete') }}
                 </button>
               </div>
             </div>
@@ -1788,9 +1378,9 @@
 
           <!-- Specific Paths -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">🗂️ 특정 경로</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.exceptions.specificPathsTitle') }}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              전체 경로를 입력하여 특정 폴더를 제외합니다.
+              {{ t('settings.exceptions.specificPathsDescription') }}
             </p>
 
             <div class="mb-4">
@@ -1798,7 +1388,7 @@
                 <input
                   v-model="newExceptionPath"
                   type="text"
-                  placeholder="예: /library/temp, /library/backup"
+                  :placeholder="t('settings.exceptions.specificPathPlaceholder')"
                   class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   @keyup.enter="addExceptionPath"
                 />
@@ -1806,13 +1396,13 @@
                   @click="addExceptionPath"
                   class="px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors whitespace-nowrap"
                 >
-                  추가
+                  {{ t('settings.exceptions.add') }}
                 </button>
               </div>
             </div>
 
             <div v-if="exceptionPaths.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500">
-              추가된 경로가 없습니다
+              {{ t('settings.exceptions.noPathsAdded') }}
             </div>
 
             <div v-else class="space-y-2">
@@ -1826,7 +1416,7 @@
                   @click="exceptionPaths.splice(index, 1)"
                   class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
                 >
-                  삭제
+                  {{ t('settings.exceptions.delete') }}
                 </button>
               </div>
             </div>
@@ -1834,12 +1424,12 @@
 
           <!-- Info Box -->
           <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-            <h4 class="text-sm font-bold text-blue-900 dark:text-blue-300 mb-2">ℹ️ 예외 설정 안내</h4>
+            <h4 class="text-sm font-bold text-blue-900 dark:text-blue-300 mb-2">{{ t('settings.exceptions.exceptionGuideTitle') }}</h4>
             <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-              <li>• 파일 패턴: 파일명 매칭에 사용됩니다 (예: *.txt는 모든 텍스트 파일 제외)</li>
-              <li>• 폴더명: 경로의 어느 부분에서든 해당 이름이 포함되면 제외됩니다</li>
-              <li>• 특정 경로: 정확한 전체 경로로 시작하는 모든 파일/폴더를 제외합니다</li>
-              <li>• 변경 사항은 다음 스캔부터 적용됩니다</li>
+              <li>{{ t('settings.exceptions.exceptionGuide1') }}</li>
+              <li>{{ t('settings.exceptions.exceptionGuide2') }}</li>
+              <li>{{ t('settings.exceptions.exceptionGuide3') }}</li>
+              <li>{{ t('settings.exceptions.exceptionGuide4') }}</li>
             </ul>
           </div>
 
@@ -1852,7 +1442,7 @@
               <svg v-else class="animate-spin w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              {{ savingExceptions ? '저장 중...' : '적용' }}
+              {{ savingExceptions ? t('settings.exceptions.saving') : t('settings.exceptions.apply') }}
             </button>
           </div>
         </div>
@@ -1916,15 +1506,15 @@
           </div>
 
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">리소스</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.system.resources') }}</h3>
             <a href="https://github.com/zardkim/my-appstore" target="_blank" class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-200 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
               <div class="flex items-center">
                 <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                 </svg>
                 <div>
-                  <p class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">GitHub 저장소</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">소스 코드 및 이슈 트래킹</p>
+                  <p class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">{{ t('settings.system.githubRepository') }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('settings.system.sourceCodeAndIssues') }}</p>
                 </div>
               </div>
               <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
@@ -1944,46 +1534,46 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
           </div>
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">사용자 추가</h3>
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.users.addUserTitle') }}</h3>
         </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">새 사용자를 직접 생성합니다. 일반 사용자 권한으로 추가됩니다.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ t('settings.users.addUserDescription') }}</p>
         <form @submit.prevent="addUser" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">사용자명</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.users.username') }}</label>
             <input
               v-model="newUser.username"
               type="text"
               required
               minlength="3"
-              placeholder="사용자명 (최소 3자)"
+              :placeholder="t('settings.users.usernamePlaceholder')"
               class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비밀번호</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.users.password') }}</label>
             <input
               v-model="newUser.password"
               type="password"
               required
               minlength="8"
-              placeholder="비밀번호 (최소 8자)"
+              :placeholder="t('settings.users.passwordPlaceholder')"
               class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비밀번호 확인</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.users.passwordConfirm') }}</label>
             <input
               v-model="newUser.passwordConfirm"
               type="password"
               required
               minlength="8"
-              placeholder="비밀번호 재입력"
+              :placeholder="t('settings.users.passwordConfirmPlaceholder')"
               class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
           <div class="flex space-x-3">
-            <button type="button" @click="showAddUserModal = false" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">취소</button>
-            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 shadow-md">추가</button>
+            <button type="button" @click="showAddUserModal = false" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.users.cancel') }}</button>
+            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 shadow-md">{{ t('settings.users.add') }}</button>
           </div>
         </form>
       </div>
@@ -1998,12 +1588,12 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">사용자 초대</h3>
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.users.inviteUserTitle') }}</h3>
         </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">이메일 주소를 입력하면 회원가입 링크가 포함된 초대 이메일이 발송됩니다.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ t('settings.users.inviteUserDescription') }}</p>
         <form @submit.prevent="sendInvitation" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">이메일 주소</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.users.emailAddress') }}</label>
             <input
               v-model="inviteEmail"
               type="email"
@@ -2011,11 +1601,11 @@
               placeholder="user@example.com"
               class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">초대 링크는 7일간 유효하며, 한 번만 사용할 수 있습니다.</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ t('settings.users.inviteLinkValidity') }}</p>
           </div>
           <div class="flex space-x-3">
-            <button type="button" @click="showInviteModal = false" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">취소</button>
-            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">초대 보내기</button>
+            <button type="button" @click="showInviteModal = false" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.users.cancel') }}</button>
+            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">{{ t('settings.users.sendInvite') }}</button>
           </div>
         </form>
       </div>
@@ -2024,33 +1614,33 @@
     <!-- Add Category Modal -->
     <div v-if="showAddCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click.self="showAddCategoryModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">카테고리 추가</h3>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.categoriesManagement.addCategoryTitle') }}</h3>
         <form @submit.prevent="addCategory" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">카테고리명 (영문)</label>
-            <input v-model="newCategory.name" @input="autoSuggestIcon('add')" type="text" required placeholder="Graphics" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.categoryNameEn') }}</label>
+            <input v-model="newCategory.name" @input="autoSuggestIcon('add')" type="text" required :placeholder="t('settings.categoriesManagement.categoryNameEnPlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">한글명</label>
-            <input v-model="newCategory.label" type="text" required placeholder="그래픽" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.koreanName') }}</label>
+            <input v-model="newCategory.label" type="text" required :placeholder="t('settings.categoriesManagement.koreanNamePlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">아이콘 (이모지)</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.iconEmoji') }}</label>
             <div class="flex items-center space-x-2 mb-2">
               <div class="flex-shrink-0 w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-2xl border-2 border-blue-500">
                 {{ newCategory.icon || '❓' }}
               </div>
-              <input v-model="newCategory.icon" type="text" required placeholder="🎨" maxlength="2" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+              <input v-model="newCategory.icon" type="text" required :placeholder="t('settings.categoriesManagement.iconEmojiPlaceholder')" maxlength="2" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
             </div>
 
             <!-- Emoji Picker -->
             <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-3">자주 사용하는 이모지</p>
+              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-3">{{ t('settings.categoriesManagement.frequentEmojis') }}</p>
 
               <!-- Emoji Categories -->
               <div class="space-y-3">
                 <div v-for="(group, groupName) in emojiGroups" :key="groupName">
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ groupName }}</p>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ t('settings.categoriesManagement.emojiGroups.' + groupName) }}</p>
                   <div class="grid grid-cols-10 gap-2">
                     <button
                       v-for="emoji in group"
@@ -2068,8 +1658,8 @@
             </div>
           </div>
           <div class="flex space-x-3">
-            <button type="button" @click="closeAddCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">취소</button>
-            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">추가</button>
+            <button type="button" @click="closeAddCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.categoriesManagement.cancel') }}</button>
+            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">{{ t('settings.categoriesManagement.add') }}</button>
           </div>
         </form>
       </div>
@@ -2078,18 +1668,18 @@
     <!-- Add Board Category Modal -->
     <div v-if="showAddBoardCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click.self="showAddBoardCategoryModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">게시판 카테고리 추가</h3>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.board.addBoardCategoryTitle') }}</h3>
         <form @submit.prevent="addBoardCategory" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">카테고리값 (영문)</label>
-            <input v-model="newBoardCategory.value" type="text" required placeholder="tutorial" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.categoryValueEn') }}</label>
+            <input v-model="newBoardCategory.value" type="text" required :placeholder="t('settings.board.categoryValueEnPlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">한글명</label>
-            <input v-model="newBoardCategory.label" type="text" required placeholder="튜토리얼" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.koreanName') }}</label>
+            <input v-model="newBoardCategory.label" type="text" required :placeholder="t('settings.board.koreanNamePlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">색상</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.color') }}</label>
             <div class="grid grid-cols-4 gap-2">
               <button
                 v-for="colorOption in categoryColorOptions"
@@ -2110,8 +1700,8 @@
             </div>
           </div>
           <div class="flex space-x-3">
-            <button type="button" @click="closeAddBoardCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">취소</button>
-            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">추가</button>
+            <button type="button" @click="closeAddBoardCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.board.cancel') }}</button>
+            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">{{ t('settings.board.add') }}</button>
           </div>
         </form>
       </div>
@@ -2120,18 +1710,18 @@
     <!-- Edit Board Category Modal -->
     <div v-if="showEditBoardCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click.self="showEditBoardCategoryModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">게시판 카테고리 수정</h3>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.board.editBoardCategoryTitle') }}</h3>
         <form @submit.prevent="updateBoardCategory" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">카테고리값 (영문)</label>
-            <input v-model="editingBoardCategory.value" type="text" required placeholder="tutorial" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.categoryValueEn') }}</label>
+            <input v-model="editingBoardCategory.value" type="text" required :placeholder="t('settings.board.categoryValueEnPlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">한글명</label>
-            <input v-model="editingBoardCategory.label" type="text" required placeholder="튜토리얼" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.koreanName') }}</label>
+            <input v-model="editingBoardCategory.label" type="text" required :placeholder="t('settings.board.koreanNamePlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">색상</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.color') }}</label>
             <div class="grid grid-cols-4 gap-2">
               <button
                 v-for="colorOption in categoryColorOptions"
@@ -2152,8 +1742,8 @@
             </div>
           </div>
           <div class="flex space-x-3">
-            <button type="button" @click="closeEditBoardCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">취소</button>
-            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">저장</button>
+            <button type="button" @click="closeEditBoardCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.board.cancel') }}</button>
+            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">{{ t('settings.board.save') }}</button>
           </div>
         </form>
       </div>
@@ -2162,18 +1752,18 @@
     <!-- Edit Category Modal -->
     <div v-if="showEditCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click.self="showEditCategoryModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">카테고리 수정</h3>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.categoriesManagement.editCategoryTitle') }}</h3>
         <form @submit.prevent="updateCategory" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">카테고리명 (영문)</label>
-            <input v-model="editingCategory.name" @input="autoSuggestIcon('edit')" type="text" required placeholder="Graphics" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.categoryNameEn') }}</label>
+            <input v-model="editingCategory.name" @input="autoSuggestIcon('edit')" type="text" required :placeholder="t('settings.categoriesManagement.categoryNameEnPlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">한글명</label>
-            <input v-model="editingCategory.label" type="text" required placeholder="그래픽" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.koreanName') }}</label>
+            <input v-model="editingCategory.label" type="text" required :placeholder="t('settings.categoriesManagement.koreanNamePlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">아이콘 (이모지)</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.iconEmoji') }}</label>
             <div class="flex items-center space-x-2 mb-2">
               <div class="flex-shrink-0 w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-2xl border-2 border-blue-500">
                 {{ editingCategory.icon || '❓' }}
@@ -2183,12 +1773,12 @@
 
             <!-- Emoji Picker -->
             <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-3">자주 사용하는 이모지</p>
+              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-3">{{ t('settings.categoriesManagement.frequentEmojis') }}</p>
 
               <!-- Emoji Categories -->
               <div class="space-y-3">
                 <div v-for="(group, groupName) in emojiGroups" :key="groupName">
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ groupName }}</p>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ t('settings.categoriesManagement.emojiGroups.' + groupName) }}</p>
                   <div class="grid grid-cols-10 gap-2">
                     <button
                       v-for="emoji in group"
@@ -2206,8 +1796,8 @@
             </div>
           </div>
           <div class="flex space-x-3">
-            <button type="button" @click="closeEditCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">취소</button>
-            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">저장</button>
+            <button type="button" @click="closeEditCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.categoriesManagement.cancel') }}</button>
+            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">{{ t('settings.categoriesManagement.save') }}</button>
           </div>
         </form>
       </div>
@@ -2275,6 +1865,7 @@ import { useLocaleStore } from '../store/locale'
 import axios from 'axios'
 import FolderBrowser from '../components/FolderBrowser.vue'
 import MetadataTestDialog from '../components/MetadataTestDialog.vue'
+import AdminScheduler from './AdminScheduler.vue'
 import { configApi } from '../api/config'
 import { scanApi } from '../api/scan'
 import { usersApi } from '../api/users'
@@ -2284,7 +1875,7 @@ import { ENV } from '../utils/env'
 import { useDialog } from '../composables/useDialog'
 import { version } from '../version.js'
 
-const { t } = useI18n()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -2298,6 +1889,7 @@ const sections = computed(() => [
   { id: 'cache', label: t('settings.sections.cache'), icon: '⚡' },
   { id: 'users', label: t('settings.sections.users'), icon: '👥' },
   { id: 'folders', label: t('settings.sections.folders'), icon: '📁' },
+  { id: 'scheduler', label: t('settings.sections.scheduler'), icon: '⏰' },
   { id: 'categories', label: t('settings.sections.categories'), icon: '🏷️' },
   { id: 'board', label: t('settings.sections.board'), icon: '📋' },
   { id: 'filing-rules', label: t('settings.sections.filingRules'), icon: '📄' },
@@ -2309,11 +1901,30 @@ const sections = computed(() => [
 const activeSection = ref('general')
 const userInfo = computed(() => authStore.user || { username: '', role: 'user' })
 const isAdmin = computed(() => authStore.user?.role === 'admin')
+const isLoadingConfig = ref(false) // config 로딩 중 플래그
 
 // General
 const language = computed({
   get: () => localeStore.locale,
-  set: (value) => localeStore.setLocale(value)
+  set: async (value) => {
+    // 언어 변경 즉시 적용
+    await localeStore.setLocale(value)
+
+    // config 로딩 중이 아닐 때만 저장 (loadConfig에서 설정할 때는 저장 스킵)
+    if (!isLoadingConfig.value) {
+      // 즉시 config.json에 저장하여 새로고침 후에도 유지
+      try {
+        await configApi.updateSection('general', {
+          language: value,
+          accessUrl: accessUrl.value,
+          apiUrl: apiUrl.value
+        })
+        console.log('언어 설정 즉시 저장 완료:', value)
+      } catch (error) {
+        console.error('언어 설정 저장 실패:', error)
+      }
+    }
+  }
 })
 const accessUrl = ref(ENV.APP_URL)
 const apiUrl = ref('http://localhost:8100')
@@ -2337,26 +1948,26 @@ const loadCacheStats = async () => {
     const response = await cacheApi.getStats()
     cacheStats.value = response.data
   } catch (error) {
-    console.error('캐쉬 통계 로드 실패:', error)
-    await alert.error('캐쉬 통계를 불러올 수 없습니다.')
+    console.error('Cache stats load failed:', error)
+    await alert.error(t('settings.cache.loadFailed'))
   } finally {
     cacheLoading.value = false
   }
 }
 
 const clearAllCache = async () => {
-  const shouldClear = await confirm.warning('모든 캐쉬를 삭제하시겠습니까?\\n\\n삭제 후 다음 요청 시 데이터가 다시 캐쉬됩니다.')
+  const shouldClear = await confirm.warning(t('settings.cache.clearAllConfirm'))
 
   if (!shouldClear) return
 
   try {
     cacheLoading.value = true
     await cacheApi.clearCache('*')
-    await alert.success('모든 캐쉬가 삭제되었습니다.')
+    await alert.success(t('settings.cache.allCleared'))
     await loadCacheStats()
   } catch (error) {
-    console.error('캐쉬 삭제 실패:', error)
-    await alert.error('캐쉬 삭제 중 오류가 발생했습니다.')
+    console.error('Cache clear failed:', error)
+    await alert.error(t('settings.cache.clearError'))
   } finally {
     cacheLoading.value = false
   }
@@ -2366,11 +1977,11 @@ const clearProductsCache = async () => {
   try {
     cacheLoading.value = true
     await cacheApi.clearCache('products*')
-    await alert.success('제품 캐쉬가 삭제되었습니다.')
+    await alert.success(t('settings.cache.productsCleared'))
     await loadCacheStats()
   } catch (error) {
-    console.error('제품 캐쉬 삭제 실패:', error)
-    await alert.error('제품 캐쉬 삭제 중 오류가 발생했습니다.')
+    console.error('Products cache clear failed:', error)
+    await alert.error(t('settings.cache.productsClearError'))
   } finally {
     cacheLoading.value = false
   }
@@ -2380,11 +1991,11 @@ const clearStatsCache = async () => {
   try {
     cacheLoading.value = true
     await cacheApi.clearCache('stats*')
-    await alert.success('통계 캐쉬가 삭제되었습니다.')
+    await alert.success(t('settings.cache.statsCleared'))
     await loadCacheStats()
   } catch (error) {
-    console.error('통계 캐쉬 삭제 실패:', error)
-    await alert.error('통계 캐쉬 삭제 중 오류가 발생했습니다.')
+    console.error('Stats cache clear failed:', error)
+    await alert.error(t('settings.cache.statsClearError'))
   } finally {
     cacheLoading.value = false
   }
@@ -2437,6 +2048,17 @@ const showAddCategoryModal = ref(false)
 const showEditCategoryModal = ref(false)
 const newCategory = ref({ name: '', label: '', icon: '' })
 const editingCategory = ref({ oldName: '', name: '', label: '', icon: '' })
+
+// 카테고리 라벨 가져오기 (번역키 우선, 없으면 label 사용)
+const getCategoryLabel = (category) => {
+  const translationKey = `categories.${category.name}`
+  const translated = t(translationKey)
+  // 번역키가 없으면 키 자체가 반환되므로, 이 경우 label 사용
+  if (translated === translationKey || translated === category.name) {
+    return category.label || category.name
+  }
+  return translated
+}
 
 // 카테고리명에 따른 이모지 매핑
 const categoryIconMap = {
@@ -2510,16 +2132,16 @@ const newBoardCategory = ref({ value: '', label: '', color: 'blue' })
 const editingBoardCategory = ref({ oldValue: '', value: '', label: '', color: 'blue' })
 
 // 게시판 카테고리 색상 옵션
-const categoryColorOptions = [
-  { value: 'green', label: '초록색', bg: 'bg-green-100 dark:bg-green-900/50', text: 'text-green-800 dark:text-green-300' },
-  { value: 'blue', label: '파란색', bg: 'bg-blue-100 dark:bg-blue-900/50', text: 'text-blue-800 dark:text-blue-300' },
-  { value: 'purple', label: '보라색', bg: 'bg-purple-100 dark:bg-purple-900/50', text: 'text-purple-800 dark:text-purple-300' },
-  { value: 'yellow', label: '노란색', bg: 'bg-yellow-100 dark:bg-yellow-900/50', text: 'text-yellow-800 dark:text-yellow-300' },
-  { value: 'red', label: '빨간색', bg: 'bg-red-100 dark:bg-red-900/50', text: 'text-red-800 dark:text-red-300' },
-  { value: 'pink', label: '분홍색', bg: 'bg-pink-100 dark:bg-pink-900/50', text: 'text-pink-800 dark:text-pink-300' },
-  { value: 'orange', label: '주황색', bg: 'bg-orange-100 dark:bg-orange-900/50', text: 'text-orange-800 dark:text-orange-300' },
-  { value: 'indigo', label: '남색', bg: 'bg-indigo-100 dark:bg-indigo-900/50', text: 'text-indigo-800 dark:text-indigo-300' }
-]
+const categoryColorOptions = computed(() => [
+  { value: 'green', label: t('settings.board.colors.green'), bg: 'bg-green-100 dark:bg-green-900/50', text: 'text-green-800 dark:text-green-300' },
+  { value: 'blue', label: t('settings.board.colors.blue'), bg: 'bg-blue-100 dark:bg-blue-900/50', text: 'text-blue-800 dark:text-blue-300' },
+  { value: 'purple', label: t('settings.board.colors.purple'), bg: 'bg-purple-100 dark:bg-purple-900/50', text: 'text-purple-800 dark:text-purple-300' },
+  { value: 'yellow', label: t('settings.board.colors.yellow'), bg: 'bg-yellow-100 dark:bg-yellow-900/50', text: 'text-yellow-800 dark:text-yellow-300' },
+  { value: 'red', label: t('settings.board.colors.red'), bg: 'bg-red-100 dark:bg-red-900/50', text: 'text-red-800 dark:text-red-300' },
+  { value: 'pink', label: t('settings.board.colors.pink'), bg: 'bg-pink-100 dark:bg-pink-900/50', text: 'text-pink-800 dark:text-pink-300' },
+  { value: 'orange', label: t('settings.board.colors.orange'), bg: 'bg-orange-100 dark:bg-orange-900/50', text: 'text-orange-800 dark:text-orange-300' },
+  { value: 'indigo', label: t('settings.board.colors.indigo'), bg: 'bg-indigo-100 dark:bg-indigo-900/50', text: 'text-indigo-800 dark:text-indigo-300' }
+])
 
 const postsPerPage = ref('20')
 const allowComments = ref(true)
@@ -2527,17 +2149,17 @@ const allowAttachments = ref(true)
 
 // 이모지 그룹
 const emojiGroups = {
-  '소프트웨어': ['💻', '🖥️', '⌨️', '🖱️', '💾', '💿', '📀', '🔌', '🖨️', '⚙️'],
-  '작업 & 도구': ['🛠️', '🔧', '🔨', '⚒️', '🪛', '🗜️', '⛏️', '🪚', '📐', '📏'],
-  '문서 & 오피스': ['📊', '📈', '📉', '📝', '📋', '📄', '📃', '📑', '🗂️', '📁'],
-  '미디어': ['🎬', '🎥', '📹', '🎞️', '📷', '📸', '🎨', '🖼️', '🎭', '🎪'],
-  '음악 & 사운드': ['🎵', '🎶', '🎼', '🎤', '🎧', '📻', '🎸', '🎹', '🎺', '🎷'],
-  '통신 & 네트워크': ['🌐', '🌍', '🌎', '🌏', '💬', '📱', '📞', '☎️', '📡', '📶'],
-  '보안 & 시스템': ['🔒', '🔐', '🔑', '🛡️', '🔓', '🔏', '⚠️', '🚨', '🆘', '⛔'],
-  '게임 & 엔터': ['🎮', '🕹️', '🎯', '🎲', '🧩', '♠️', '♥️', '♦️', '♣️', '🃏'],
-  '비즈니스': ['💼', '🏢', '🏦', '💰', '💵', '💴', '💶', '💷', '💳', '📊'],
-  '교육 & 학습': ['📚', '📖', '📕', '📗', '📘', '📙', '📓', '📔', '📒', '🎓'],
-  '기타': ['📦', '📮', '📫', '📪', '📬', '📭', '🎒', '💾', '🗄️', '☁️']
+  'software': ['💻', '🖥️', '⌨️', '🖱️', '💾', '💿', '📀', '🔌', '🖨️', '⚙️'],
+  'tools': ['🛠️', '🔧', '🔨', '⚒️', '🪛', '🗜️', '⛏️', '🪚', '📐', '📏'],
+  'documents': ['📊', '📈', '📉', '📝', '📋', '📄', '📃', '📑', '🗂️', '📁'],
+  'media': ['🎬', '🎥', '📹', '🎞️', '📷', '📸', '🎨', '🖼️', '🎭', '🎪'],
+  'music': ['🎵', '🎶', '🎼', '🎤', '🎧', '📻', '🎸', '🎹', '🎺', '🎷'],
+  'network': ['🌐', '🌍', '🌎', '🌏', '💬', '📱', '📞', '☎️', '📡', '📶'],
+  'security': ['🔒', '🔐', '🔑', '🛡️', '🔓', '🔏', '⚠️', '🚨', '🆘', '⛔'],
+  'games': ['🎮', '🕹️', '🎯', '🎲', '🧩', '♠️', '♥️', '♦️', '♣️', '🃏'],
+  'business': ['💼', '🏢', '🏦', '💰', '💵', '💴', '💶', '💷', '💳', '📊'],
+  'education': ['📚', '📖', '📕', '📗', '📘', '📙', '📓', '📔', '📒', '🎓'],
+  'other': ['📦', '📮', '📫', '📪', '📬', '📭', '🎒', '💾', '🗄️', '☁️']
 }
 
 // Metadata
@@ -2555,106 +2177,9 @@ const useCustomPrompt = ref(false)
 const customPromptOpenai = ref('')
 const customPromptGemini = ref('')
 
-// 기본 프롬프트 템플릿
-const defaultPromptOpenai = `다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요.
-
-소프트웨어: {software_name}
-
-**반드시 아래 모든 필드를 포함한 JSON을 작성하세요:**
-
-{
-  "title": "정확한 공식 소프트웨어 이름",
-  "version": "버전 정보 (파일명에서 추출)",
-  "platform": "Windows/macOS/Linux/Cross-platform",
-  "developer": "개발사/제조사 공식 이름",
-  "category": "Graphics/Office/Development/Utility/Media/OS/Security/Network/Mac/Mobile 등",
-  "official_website": "공식 웹사이트 전체 URL (https://...)",
-  "license_type": "Commercial/Free/Freemium/Trial/Open Source",
-  "language": "지원 언어 (예: 영어, 한국어, 일본어 또는 다국어)",
-  "description_short": "50-100자 이내의 간결한 한 줄 설명",
-  "description_detailed": "200-300자의 상세 설명. 주요 특징, 용도, 워크플로우, 장점을 구체적으로 설명",
-  "features": [
-    "주요 기능 1 (구체적으로)",
-    "주요 기능 2",
-    "주요 기능 3",
-    "주요 기능 4",
-    "주요 기능 5"
-  ],
-  "supported_formats": ["포맷1", "포맷2", "포맷3"],
-  "system_requirements": {
-    "os": "Windows XP/Vista/7/8/10/11 (32/64비트) 등 구체적으로",
-    "cpu": "프로세서 요구사항 (예: Intel Core 2 Duo 2.0GHz 이상)",
-    "ram": "최소 2GB, 권장 4GB 이상",
-    "disk_space": "500MB ~ 1GB 등",
-    "gpu": "GPU 요구사항 (있으면 작성, 없으면 빈 문자열)",
-    "additional": "DirectX, .NET Framework 등 추가 요구사항"
-  },
-  "installation_info": {
-    "installer_type": "EXE 설치 파일/MSI/Portable/ZIP 압축",
-    "file_size": "약 XXX MB",
-    "internet_required": "필요/불필요/라이선스 인증 시 필요"
-  },
-  "release_notes": "이 버전의 주요 특징이나 변경사항 (2-3줄)"
-}
-
-**필수 지침:**
-1. 위 JSON 구조를 정확히 따르세요
-2. 모든 필드를 반드시 포함하세요 (알 수 없으면 빈 문자열 "" 또는 빈 배열 [])
-3. features는 최소 5개 이상 작성
-4. 공식 웹사이트는 정확한 URL (https://... 형태)
-5. JSON만 응답하고 추가 설명 금지
-6. 정확한 정보만 제공하고 추측 금지`
-
-
-const defaultPromptGemini = `다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요.
-
-소프트웨어: {software_name}
-
-**반드시 아래 모든 필드를 포함한 JSON을 작성하세요:**
-
-{
-  "title": "정확한 공식 소프트웨어 이름",
-  "version": "버전 정보 (파일명에서 추출)",
-  "platform": "Windows/macOS/Linux/Cross-platform",
-  "developer": "개발사/제조사 공식 이름",
-  "category": "Graphics/Office/Development/Utility/Media/OS/Security/Network/Mac/Mobile 등",
-  "official_website": "공식 웹사이트 전체 URL (https://...)",
-  "license_type": "Commercial/Free/Freemium/Trial/Open Source",
-  "language": "지원 언어 (예: 영어, 한국어, 일본어 또는 다국어)",
-  "description_short": "50-100자 이내의 간결한 한 줄 설명",
-  "description_detailed": "200-300자의 상세 설명. 주요 특징, 용도, 워크플로우, 장점을 구체적으로 설명",
-  "features": [
-    "주요 기능 1 (구체적으로)",
-    "주요 기능 2",
-    "주요 기능 3",
-    "주요 기능 4",
-    "주요 기능 5",
-    "주요 기능 6"
-  ],
-  "supported_formats": ["포맷1", "포맷2", "포맷3"],
-  "system_requirements": {
-    "os": "Windows XP/Vista/7/8/10/11 (32/64비트) 등 구체적으로",
-    "cpu": "프로세서 요구사항 (예: Intel Core 2 Duo 2.0GHz 이상)",
-    "ram": "최소 2GB, 권장 4GB 이상",
-    "disk_space": "500MB ~ 1GB 등",
-    "gpu": "GPU 요구사항 (있으면 작성, 없으면 빈 문자열)",
-    "additional": "DirectX, .NET Framework 등 추가 요구사항"
-  },
-  "installation_info": {
-    "installer_type": "EXE 설치 파일/MSI/Portable/ZIP 압축",
-    "file_size": "약 XXX MB",
-    "internet_required": "필요/불필요/라이선스 인증 시 필요"
-  },
-  "release_notes": "이 버전의 주요 특징이나 변경사항 (2-3줄)"
-}
-
-**필수 지침:**
-1. 위 JSON 구조를 정확히 따르세요
-2. 모든 필드를 반드시 포함하세요 (알 수 없으면 빈 문자열 "" 또는 빈 배열 [])
-3. features는 최소 5개 이상 작성
-4. 공식 웹사이트는 정확한 URL (https://... 형태)
-5. JSON만 응답하고 추가 설명이나 마크다운 코드블록 사용 금지
-6. 정확한 정보만 제공하고 추측 금지`
+// 기본 프롬프트 템플릿 (i18n으로부터 가져오기)
+const defaultPromptOpenai = computed(() => t('settings.metadata.defaultPromptOpenai'))
+const defaultPromptGemini = computed(() => t('settings.metadata.defaultPromptGemini'))
 const showMetadataDialog = ref(false)
 
 // 커스텀 프롬프트 활성화 시 기본값으로 초기화
@@ -2662,12 +2187,34 @@ watch(useCustomPrompt, (newValue) => {
   if (newValue) {
     // 커스텀 프롬프트가 활성화되었는데 비어있으면 기본값으로 채움
     if (!customPromptOpenai.value || customPromptOpenai.value.trim() === '') {
-      customPromptOpenai.value = defaultPromptOpenai
+      customPromptOpenai.value = defaultPromptOpenai.value
     }
     if (!customPromptGemini.value || customPromptGemini.value.trim() === '') {
-      customPromptGemini.value = defaultPromptGemini
+      customPromptGemini.value = defaultPromptGemini.value
     }
   }
+})
+
+// 이전 언어의 기본 프롬프트 저장 (언어 변경 감지용)
+let prevDefaultPromptOpenai = ''
+let prevDefaultPromptGemini = ''
+
+// 언어 변경 시 기본 프롬프트 자동 업데이트
+watch(locale, () => {
+  // 현재 프롬프트가 이전 언어의 기본 프롬프트와 같거나 비어있으면 새 언어의 기본 프롬프트로 업데이트
+  if (!customPromptOpenai.value ||
+      customPromptOpenai.value.trim() === '' ||
+      customPromptOpenai.value === prevDefaultPromptOpenai) {
+    customPromptOpenai.value = defaultPromptOpenai.value
+  }
+  if (!customPromptGemini.value ||
+      customPromptGemini.value.trim() === '' ||
+      customPromptGemini.value === prevDefaultPromptGemini) {
+    customPromptGemini.value = defaultPromptGemini.value
+  }
+  // 현재 기본 프롬프트를 저장
+  prevDefaultPromptOpenai = defaultPromptOpenai.value
+  prevDefaultPromptGemini = defaultPromptGemini.value
 })
 
 // AI 제공자 변경 시 기본 모델 설정
@@ -2748,10 +2295,10 @@ const saveExceptionSettings = async () => {
   savingExceptions.value = true
   try {
     await scanApi.saveScanExclusions(exceptionFolders.value)
-    await alert.success('스캔 예외 설정이 저장되었습니다.')
+    await alert.success(t('settings.exceptions.saved'))
   } catch (error) {
-    console.error('스캔 예외 설정 저장 오류:', error)
-    await alert.error('스캔 예외 설정 저장에 실패했습니다.')
+    console.error('Scan exception settings save error:', error)
+    await alert.error(t('settings.exceptions.saveFailed'))
   } finally {
     savingExceptions.value = false
   }
@@ -2804,56 +2351,56 @@ const loadUsers = async () => {
 const addUser = async () => {
   // 사용자명 검증
   if (!newUser.value.username || newUser.value.username.trim().length < 3) {
-    await alert.warning('사용자명은 최소 3자 이상이어야 합니다.')
+    await alert.warning(t('settings.users.usernameMinLength'))
     return
   }
 
   // 비밀번호 길이 검증
   if (newUser.value.password.length < 8) {
-    await alert.warning('비밀번호는 최소 8자 이상이어야 합니다.')
+    await alert.warning(t('settings.users.passwordMinLength'))
     return
   }
 
   // 비밀번호 일치 검증
   if (newUser.value.password !== newUser.value.passwordConfirm) {
-    await alert.warning('비밀번호가 일치하지 않습니다.')
+    await alert.warning(t('settings.users.passwordMismatch'))
     return
   }
 
   try {
     await usersApi.create(newUser.value.username, newUser.value.password, 'user')
     await loadUsers() // 사용자 목록 새로고침
-    await alert.success('사용자가 추가되었습니다.')
+    await alert.success(t('settings.users.userAdded'))
     showAddUserModal.value = false
     newUser.value = { username: '', password: '', passwordConfirm: '' }
   } catch (error) {
-    console.error('사용자 추가 오류:', error)
-    const errorMessage = error.response?.data?.detail || '사용자 추가에 실패했습니다.'
+    console.error('User add error:', error)
+    const errorMessage = error.response?.data?.detail || t('settings.users.addFailed')
     await alert.error(errorMessage)
   }
 }
 
 const sendInvitation = async () => {
   if (!inviteEmail.value) {
-    await alert.warning('이메일 주소를 입력해주세요.')
+    await alert.warning(t('settings.users.enterEmail'))
     return
   }
 
   // 이메일 형식 검증
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(inviteEmail.value)) {
-    await alert.warning('올바른 이메일 주소를 입력해주세요.')
+    await alert.warning(t('settings.users.invalidEmail'))
     return
   }
 
   try {
     await invitationsApi.send(inviteEmail.value)
-    await alert.success('초대 이메일이 발송되었습니다.')
+    await alert.success(t('settings.users.inviteSent'))
     showInviteModal.value = false
     inviteEmail.value = ''
   } catch (error) {
-    console.error('초대 발송 오류:', error)
-    const errorMessage = error.response?.data?.detail || '초대 이메일 발송에 실패했습니다.'
+    console.error('Invitation send error:', error)
+    const errorMessage = error.response?.data?.detail || t('settings.users.inviteFailed')
     await alert.error(errorMessage)
   }
 }
@@ -2870,12 +2417,12 @@ const changeUserPassword = async () => {
   passwordError.value = ''
 
   if (newPassword.value !== confirmPassword.value) {
-    passwordError.value = '새 비밀번호가 일치하지 않습니다.'
+    passwordError.value = t('settings.users.newPasswordMismatch')
     return
   }
 
   if (newPassword.value.length < 8) {
-    passwordError.value = '비밀번호는 최소 8자 이상이어야 합니다.'
+    passwordError.value = t('settings.users.passwordMinLength')
     return
   }
 
@@ -2885,10 +2432,10 @@ const changeUserPassword = async () => {
     editingUser.value = { id: null, username: '' }
     newPassword.value = ''
     confirmPassword.value = ''
-    await alert.success('비밀번호가 변경되었습니다.')
+    await alert.success(t('settings.users.passwordChanged'))
   } catch (error) {
-    console.error('비밀번호 변경 오류:', error)
-    passwordError.value = error.response?.data?.detail || '비밀번호 변경에 실패했습니다.'
+    console.error('Password change error:', error)
+    passwordError.value = error.response?.data?.detail || t('settings.users.passwordChangeFailed')
   }
 }
 
@@ -2896,24 +2443,24 @@ const toggleUserStatus = async (user) => {
   try {
     await usersApi.toggleStatus(user.id, user.is_active)
   } catch (error) {
-    console.error('상태 변경 오류:', error)
+    console.error('Status change error:', error)
     // Revert status on error
     user.is_active = !user.is_active
-    await alert.error('사용자 상태 변경에 실패했습니다.')
+    await alert.error(t('settings.users.statusChangeFailed'))
   }
 }
 
 const deleteUser = async (user) => {
-  const shouldDelete = await confirm.danger(`${user.username} 사용자를 삭제하시겠습니까?`, '사용자 삭제')
+  const shouldDelete = await confirm.danger(t('settings.users.deleteConfirm', { username: user.username }), t('settings.users.deleteTitle'))
   if (!shouldDelete) return
 
   try {
     await usersApi.delete(user.id)
     await loadUsers() // Reload users list
-    await alert.success('사용자가 삭제되었습니다.')
+    await alert.success(t('settings.users.userDeleted'))
   } catch (error) {
-    console.error('사용자 삭제 오류:', error)
-    const errorMessage = error.response?.data?.detail || '사용자 삭제에 실패했습니다.'
+    console.error('User delete error:', error)
+    const errorMessage = error.response?.data?.detail || t('settings.users.deleteFailed')
     await alert.error(errorMessage)
   }
 }
@@ -2926,7 +2473,7 @@ const addFolder = () => {
 const editFolder = async (index) => {
   // 기본 폴더는 수정 불가
   if (scanFolders.value[index].path === defaultLibraryPath) {
-    await alert.warning('기본 폴더는 수정할 수 없습니다.')
+    await alert.warning(t('settings.folders.cannotEditDefault'))
     return
   }
 
@@ -2943,7 +2490,7 @@ const onFolderSelected = async (path) => {
     )
 
     if (isDuplicate) {
-      await alert.warning('이미 추가된 폴더입니다.')
+      await alert.warning(t('settings.folders.duplicateFolder'))
       return
     }
 
@@ -2953,7 +2500,7 @@ const onFolderSelected = async (path) => {
     const isDuplicate = scanFolders.value.some(folder => folder.path === path)
 
     if (isDuplicate) {
-      await alert.warning('이미 추가된 폴더입니다.')
+      await alert.warning(t('settings.folders.duplicateFolder'))
       return
     }
 
@@ -2966,11 +2513,11 @@ const onFolderSelected = async (path) => {
 const removeFolder = async (index) => {
   // 기본 폴더는 삭제 불가
   if (scanFolders.value[index].path === defaultLibraryPath) {
-    await alert.warning('기본 폴더는 삭제할 수 없습니다.')
+    await alert.warning(t('settings.folders.cannotDeleteDefault'))
     return
   }
 
-  const shouldConfirm = await confirm.warning('이 폴더를 삭제하시겠습니까?')
+  const shouldConfirm = await confirm.warning(t('settings.folders.deleteConfirm'))
   if (shouldConfirm) {
     scanFolders.value.splice(index, 1)
   }
@@ -2980,7 +2527,7 @@ const scanFolder = async (path) => {
   const folder = scanFolders.value.find(f => f.path === path)
   if (!folder) return
 
-  const shouldScan = await confirm.info(`${path} 폴더를 스캔하시겠습니까?`)
+  const shouldScan = await confirm.info(t('settings.folders.scanConfirm', { path }))
   if (!shouldScan) {
     return
   }
@@ -2995,12 +2542,16 @@ const scanFolder = async (path) => {
 
     if (response.data) {
       const result = response.data
-      await alert.success(`스캔 완료!\n\n새 프로그램: ${result.new_products || 0}개\n새 버전: ${result.new_versions || 0}개\n업데이트: ${result.updated_products || 0}개`)
+      await alert.success(t('settings.folders.scanComplete', {
+        newProducts: result.new_products || 0,
+        newVersions: result.new_versions || 0,
+        updates: result.updated_products || 0
+      }))
     }
   } catch (error) {
-    console.error('폴더 스캔 오류:', error)
-    const errorMessage = error.response?.data?.detail || error.message || '스캔 중 오류가 발생했습니다.'
-    await alert.error(`스캔 실패: ${errorMessage}`)
+    console.error('Folder scan error:', error)
+    const errorMessage = error.response?.data?.detail || error.message || t('settings.folders.scanError')
+    await alert.error(t('settings.folders.scanFailed') + ': ' + errorMessage)
   } finally {
     folder.scanning = false
   }
@@ -3010,7 +2561,7 @@ const saveFolders = async () => {
   try {
     // 최소 1개 이상의 폴더가 필요
     if (scanFolders.value.length === 0) {
-      await alert.warning(' 최소 1개 이상의 폴더를 추가해주세요.')
+      await alert.warning(t('settings.folders.minFolderRequired'))
       return
     }
 
@@ -3022,11 +2573,11 @@ const saveFolders = async () => {
       scanFolders: folderPaths
     })
 
-    await alert.success('폴더 설정이 저장되었습니다.')
+    await alert.success(t('settings.folders.saved'))
   } catch (error) {
-    console.error('폴더 저장 오류:', error)
-    const errorMessage = error.response?.data?.detail || error.message || '폴더 설정 저장에 실패했습니다.'
-    await alert.error(`저장 실패: ${errorMessage}`)
+    console.error('Folder save error:', error)
+    const errorMessage = error.response?.data?.detail || error.message || t('settings.folders.saveFailed')
+    await alert.error(t('settings.folders.saveFailed') + ': ' + errorMessage)
   }
 }
 
@@ -3079,7 +2630,7 @@ const autoSuggestIcon = (mode) => {
 const addCategory = async () => {
   // 중복 체크
   if (categories.value.some(c => c.name === newCategory.value.name)) {
-    await alert.warning('이미 존재하는 카테고리명입니다.')
+    await alert.warning(t('settings.categoriesManagement.categoryDuplicateWarning'))
     return
   }
 
@@ -3107,7 +2658,7 @@ const updateCategory = async () => {
   // 중복 체크 (자신 제외)
   if (editingCategory.value.name !== editingCategory.value.oldName) {
     if (categories.value.some(c => c.name === editingCategory.value.name)) {
-      await alert.warning('이미 존재하는 카테고리명입니다.')
+      await alert.warning(t('settings.categoriesManagement.categoryDuplicateWarning'))
       return
     }
   }
@@ -3129,7 +2680,10 @@ const closeEditCategoryModal = () => {
 }
 
 const deleteCategory = async (category) => {
-  const shouldDelete = await confirm.danger(`${category.label} 카테고리를 삭제하시겠습니까?`, '카테고리 삭제')
+  const shouldDelete = await confirm.danger(
+    t('settings.categoriesManagement.categoryDeleteConfirm', { name: getCategoryLabel(category) }),
+    t('settings.categoriesManagement.categoryDeleteTitle')
+  )
   if (shouldDelete) {
     categories.value = categories.value.filter(c => c.name !== category.name)
   }
@@ -3145,11 +2699,11 @@ const saveGeneralSettings = async () => {
     }
 
     await configApi.updateSection('general', data)
-    await alert.success('일반 설정이 저장되었습니다.')
-    console.log('일반 설정 저장 성공:', data)
+    await alert.success(t('settings.general.saved'))
+    console.log('General settings saved:', data)
   } catch (error) {
-    console.error('일반 설정 저장 실패:', error)
-    await alert.error('일반 설정 저장에 실패했습니다.')
+    console.error('General settings save failed:', error)
+    await alert.error(t('settings.general.saveFailed'))
   }
 }
 
@@ -3157,11 +2711,11 @@ const saveGeneralSettings = async () => {
 const saveCategories = async () => {
   try {
     await configApi.updateSection('categories', categories.value)
-    await alert.success('카테고리 설정이 저장되었습니다.')
-    console.log('카테고리 설정 저장 성공:', categories.value)
+    await alert.success(t('settings.categoriesManagement.categorySaved'))
+    console.log('Category settings saved:', categories.value)
   } catch (error) {
-    console.error('카테고리 설정 저장 실패:', error)
-    await alert.error('카테고리 설정 저장에 실패했습니다.')
+    console.error('Category settings save failed:', error)
+    await alert.error(t('settings.categoriesManagement.categorySaveFailed'))
   }
 }
 
@@ -3182,11 +2736,11 @@ const saveMetadataSettings = async () => {
     }
 
     await configApi.updateSection('metadata', data)
-    await alert.success('메타데이터 설정이 저장되었습니다.')
-    console.log('메타데이터 설정 저장 성공')
+    await alert.success(t('settings.metadata.saved'))
+    console.log('Metadata settings saved')
   } catch (error) {
-    console.error('메타데이터 설정 저장 실패:', error)
-    await alert.error('메타데이터 설정 저장에 실패했습니다.')
+    console.error('Metadata settings save failed:', error)
+    await alert.error(t('settings.metadata.saveFailed'))
   }
 }
 
@@ -3221,7 +2775,7 @@ const getBoardCategoryColor = (value) => {
 const addBoardCategory = async () => {
   // 중복 체크
   if (boardCategories.value.some(c => c.value === newBoardCategory.value.value)) {
-    await alert.warning('이미 존재하는 카테고리값입니다.')
+    await alert.warning(t('settings.board.boardCategoryDuplicateWarning'))
     return
   }
 
@@ -3249,7 +2803,7 @@ const updateBoardCategory = async () => {
   // 중복 체크 (자신 제외)
   if (editingBoardCategory.value.value !== editingBoardCategory.value.oldValue) {
     if (boardCategories.value.some(c => c.value === editingBoardCategory.value.value)) {
-      await alert.warning('이미 존재하는 카테고리값입니다.')
+      await alert.warning(t('settings.board.boardCategoryDuplicateWarning'))
       return
     }
   }
@@ -3272,7 +2826,10 @@ const closeEditBoardCategoryModal = () => {
 
 // 게시판 카테고리 삭제
 const deleteBoardCategory = async (category) => {
-  const shouldDelete = await confirm.danger(`${category.label} 카테고리를 삭제하시겠습니까?`, '카테고리 삭제')
+  const shouldDelete = await confirm.danger(
+    t('settings.board.boardCategoryDeleteConfirm', { name: category.label }),
+    t('settings.board.boardCategoryDeleteTitle')
+  )
   if (shouldDelete) {
     boardCategories.value = boardCategories.value.filter(c => c.value !== category.value)
   }
@@ -3293,11 +2850,11 @@ const saveBoardSettings = async () => {
     // localStorage에도 저장 (TipsWrite, TipsDetail에서 사용)
     localStorage.setItem('boardSettings', JSON.stringify(data))
 
-    await alert.success('게시판 설정이 저장되었습니다.')
-    console.log('게시판 설정 저장 성공:', data)
+    await alert.success(t('settings.board.saved'))
+    console.log('Board settings saved:', data)
   } catch (error) {
-    console.error('게시판 설정 저장 실패:', error)
-    await alert.error('게시판 설정 저장에 실패했습니다.')
+    console.error('Board settings save failed:', error)
+    await alert.error(t('settings.board.saveFailed'))
   }
 }
 
@@ -3317,15 +2874,19 @@ onMounted(async () => {
     await loadExceptionSettings()
 
     // config.json에서 모든 설정 로드
+    isLoadingConfig.value = true
     const response = await configApi.getConfig()
     const config = response.data
 
     // 일반 설정
     if (config.general) {
-      language.value = config.general.language || 'ko'
+      // 언어 설정: language는 computed로 localeStore.locale을 자동 반영하므로 별도 설정 불필요
+      // localeStore는 초기화 시 localStorage에서 값을 읽어옴
+
       accessUrl.value = config.general.accessUrl || 'http://localhost:5900'
       apiUrl.value = config.general.apiUrl || 'http://localhost:8100'
     }
+    isLoadingConfig.value = false
 
     // 폴더 설정
     if (config.folders && config.folders.scanFolders && config.folders.scanFolders.length > 0) {
@@ -3362,8 +2923,11 @@ onMounted(async () => {
       googleApiKey.value = config.metadata.googleApiKey || ''
       googleSearchEngineId.value = config.metadata.googleSearchEngineId || ''
       useCustomPrompt.value = config.metadata.useCustomPrompt || false
-      customPromptOpenai.value = config.metadata.customPromptOpenai || defaultPromptOpenai
-      customPromptGemini.value = config.metadata.customPromptGemini || defaultPromptGemini
+      customPromptOpenai.value = config.metadata.customPromptOpenai || defaultPromptOpenai.value
+      customPromptGemini.value = config.metadata.customPromptGemini || defaultPromptGemini.value
+      // 이전 기본 프롬프트 초기화 (언어 변경 감지용)
+      prevDefaultPromptOpenai = defaultPromptOpenai.value
+      prevDefaultPromptGemini = defaultPromptGemini.value
     }
 
     // 게시판 설정
@@ -3378,8 +2942,17 @@ onMounted(async () => {
     }
 
     console.log('설정 로드 완료:', config)
+
+    // 이전 기본 프롬프트 초기화 (언어 변경 감지용) - config.metadata가 없는 경우 대비
+    if (!prevDefaultPromptOpenai) {
+      prevDefaultPromptOpenai = defaultPromptOpenai.value
+    }
+    if (!prevDefaultPromptGemini) {
+      prevDefaultPromptGemini = defaultPromptGemini.value
+    }
   } catch (error) {
     console.error('설정 로드 실패:', error)
+    isLoadingConfig.value = false // 에러 발생 시에도 플래그 해제
 
     // Fallback: localStorage에서 게시판 설정 로드
     const savedSettings = localStorage.getItem('boardSettings')

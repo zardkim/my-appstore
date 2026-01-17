@@ -7,7 +7,7 @@
  */
 
 import { defineStore } from 'pinia'
-import i18n from '../i18n'
+import i18n from '../locales'
 
 export const useLocaleStore = defineStore('locale', {
   state: () => ({
@@ -56,7 +56,7 @@ export const useLocaleStore = defineStore('locale', {
       // localStorage에 저장
       localStorage.setItem('locale', newLocale)
 
-      // vue-i18n 글로벌 locale 변경
+      // vue-i18n 글로벌 locale 변경 (즉시 적용)
       i18n.global.locale.value = newLocale
 
       // 선택적: 백엔드 API에 저장

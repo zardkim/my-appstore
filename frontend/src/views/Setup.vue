@@ -4,7 +4,6 @@
     <div class="absolute top-4 right-4 sm:top-6 sm:right-6">
       <select
         v-model="selectedLanguage"
-        @change="changeLanguage"
         class="px-3 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-white/20 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-white/50 focus:border-transparent cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-all shadow-lg"
       >
         <option value="auto">🌐 {{ t('auth.languageAuto') }}</option>
@@ -69,50 +68,36 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { authApi } from '../api/auth'
 import { useDialog } from '../composables/useDialog'
+import { useLocaleStore } from '../store/locale'
 
-const { t, locale } = useI18n()
+const { t } = useI18n({ useScope: 'global' })
 
 const router = useRouter()
 const { alert } = useDialog()
+const localeStore = useLocaleStore()
 
 const username = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
 const error = ref('')
 const loading = ref(false)
-const selectedLanguage = ref('auto')
 
-// Detect browser language
-const detectBrowserLanguage = () => {
-  const browserLang = navigator.language || navigator.userLanguage
-  return browserLang.startsWith('ko') ? 'ko' : 'en'
-}
+// Selected language (synced with localeStore)
+const selectedLanguage = ref(localeStore.locale)
 
-// Apply language setting
-const applyLanguage = (lang) => {
-  if (lang === 'auto') {
-    locale.value = detectBrowserLanguage()
-  } else {
-    locale.value = lang
-  }
-}
-
-// Change language
-const changeLanguage = () => {
-  localStorage.setItem('language', selectedLanguage.value)
-  applyLanguage(selectedLanguage.value)
-}
+// Watch for language changes and apply immediately
+watch(selectedLanguage, (newLocale) => {
+  localeStore.setLocale(newLocale)
+})
 
 onMounted(() => {
-  // Load saved language preference (default to 'auto')
-  const savedLanguage = localStorage.getItem('language') || 'auto'
-  selectedLanguage.value = savedLanguage
-  applyLanguage(savedLanguage)
+  // Apply saved language preference from localeStore
+  localeStore.setLocale(localeStore.locale)
 })
 
 const handleSetup = async () => {

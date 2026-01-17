@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="bg-gradient-to-r from-pink-500 to-rose-600 dark:from-pink-700 dark:to-rose-800 px-8 py-12 text-white">
       <div class="max-w-7xl">
-        <h1 class="text-4xl font-bold mb-2">❤️ 즐겨찾기</h1>
-        <p class="text-pink-100 dark:text-pink-200">내가 즐겨찾기한 프로그램 목록입니다</p>
+        <h1 class="text-4xl font-bold mb-2">❤️ {{ t('favorites.title') }}</h1>
+        <p class="text-pink-100 dark:text-pink-200">{{ t('favorites.description') }}</p>
       </div>
     </div>
 
@@ -23,10 +23,10 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">즐겨찾기가 비어있습니다</h3>
-          <p class="text-gray-500 dark:text-gray-400 mb-6">스토어에서 마음에 드는 프로그램을 즐겨찾기에 추가해보세요</p>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ t('favorites.emptyTitle') }}</h3>
+          <p class="text-gray-500 dark:text-gray-400 mb-6">{{ t('favorites.emptyDescription') }}</p>
           <button @click="$router.push('/discover')" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-xl hover:from-pink-600 hover:to-rose-700 shadow-md font-medium">
-            스토어로 이동
+            {{ t('favorites.goToStore') }}
           </button>
         </div>
 
@@ -60,18 +60,18 @@
 
               <!-- Title -->
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white text-center mb-2 line-clamp-2 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
-                {{ favorite.product?.title || 'Unknown' }}
+                {{ favorite.product?.title || t('favorites.unknown') }}
               </h3>
 
               <!-- Vendor -->
               <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-3">
-                {{ favorite.product?.vendor || 'Unknown Vendor' }}
+                {{ favorite.product?.vendor || t('favorites.unknownVendor') }}
               </p>
 
               <!-- Category -->
               <div class="flex items-center justify-center mb-4">
                 <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
-                  {{ favorite.product?.category || 'Uncategorized' }}
+                  {{ favorite.product?.category || t('favorites.uncategorized') }}
                 </span>
               </div>
 
@@ -80,7 +80,7 @@
                 @click.stop="removeFavorite(favorite.product_id)"
                 class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 hover:text-red-600 dark:hover:text-red-400 transition-all text-sm font-medium"
               >
-                즐겨찾기 해제
+                {{ t('favorites.removeButton') }}
               </button>
             </div>
           </div>
@@ -93,10 +93,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { favoritesApi } from '../api/favorites'
 import { useDialog } from '../composables/useDialog'
 
 const router = useRouter()
+const { t } = useI18n({ useScope: 'global' })
 const { alert, confirm } = useDialog()
 
 const favorites = ref([])
@@ -123,7 +125,7 @@ const goToProduct = (productId) => {
 }
 
 const removeFavorite = async (productId) => {
-  const shouldRemove = await confirm.warning('즐겨찾기에서 제거하시겠습니까?')
+  const shouldRemove = await confirm.warning(t('favorites.removeConfirm'))
   if (!shouldRemove) return
 
   try {
@@ -131,7 +133,7 @@ const removeFavorite = async (productId) => {
     await loadFavorites()
   } catch (error) {
     console.error('Failed to remove favorite:', error)
-    await alert.error('즐겨찾기 제거에 실패했습니다.')
+    await alert.error(t('favorites.removeFailed'))
   }
 }
 </script>

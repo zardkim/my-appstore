@@ -410,6 +410,151 @@ class AIMetadataGeneratorV2:
 
         return text.strip()
 
+    async def is_filename_clear_for_matching(
+        self,
+        filename: str,
+        parent_folder: str = ""
+    ) -> bool:
+        """
+        AI를 사용하여 파일명이 자동 매칭에 충분히 명확한지 판단
+
+        Args:
+            filename: 파일명
+            parent_folder: 부모 폴더명
+
+        Returns:
+            True: 명확한 파일명 (자동 AI 매칭 가능)
+            False: 불명확한 파일명 (검색된 목록에 표시)
+        """
+        # API 키가 없으면 기본적으로 True 반환 (기존 동작 유지)
+        if not self.api_key or not self.api_key.strip():
+            return True
+
+        # 파일명 파싱
+        parsed = self.parser.parse(filename, parent_folder)
+        software_name = parsed['software_name']
+        version = parsed.get('version', '')
+
+        # 컨텍스트 구성
+        context = f"파일명: {filename}"
+        if parent_folder:
+            context += f"\n폴더명: {parent_folder}"
+        context += f"\n파싱 결과: {software_name}"
+        if version:
+            context += f" (버전: {version})"
+
+        # 간단한 프롬프트 (Yes/No 답변만 요청)
+        prompt = f"""{context}
+
+위 파일명이 소프트웨어를 명확하게 식별할 수 있는지 판단해주세요.
+
+**명확한 파일명의 조건:**
+- 소프트웨어의 정확한 이름을 포함
+- 제조사나 브랜드명이 포함되어 있으면 더 좋음
+- 버전 정보가 있으면 더 명확함
+- 예: "Adobe Photoshop 2024 v25.0.iso", "Visual Studio Code 1.85.exe"
+
+**불명확한 파일명의 예:**
+- 너무 일반적인 이름: "setup.exe", "installer.zip", "patch.exe"
+- 의미 없는 숫자/문자 조합: "abc123.exe", "tmp_file.zip"
+- 파일명만으로는 어떤 소프트웨어인지 알 수 없는 경우
+
+다음 중 하나로만 답변해주세요:
+- CLEAR: 파일명이 명확하여 자동 AI 매칭 가능
+- UNCLEAR: 파일명이 불명확하여 사용자 확인 필요
+
+답변:"""
+
+        try:
+            if self.provider == 'openai':
+                return await self._judge_clarity_openai(prompt)
+            elif self.provider == 'gemini':
+                return await self._judge_clarity_gemini(prompt)
+            else:
+                # 알 수 없는 제공자는 기본값 True
+                return True
+        except Exception as e:
+            logger.debug(f"파일명 명확성 판단 실패: {e}")
+            # 에러 시 안전하게 True 반환 (기존 동작 유지)
+            return True
+
+    async def _judge_clarity_openai(self, prompt: str) -> bool:
+        """OpenAI로 파일명 명확성 판단"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": self.model,
+                        "messages": [
+                            {
+                                "role": "system",
+                                "content": "You are a software filename analyzer. Answer only with CLEAR or UNCLEAR."
+                            },
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ],
+                        "temperature": 0.1,
+                        "max_tokens": 10
+                    }
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    answer = result['choices'][0]['message']['content'].strip().upper()
+                    is_clear = 'CLEAR' in answer
+                    logger.debug(f"파일명 명확성 판단 (OpenAI): {answer} → {is_clear}")
+                    return is_clear
+                else:
+                    logger.debug(f"OpenAI clarity check failed: {response.status_code}")
+                    return True
+        except Exception as e:
+            logger.debug(f"OpenAI clarity check error: {e}")
+            return True
+
+    async def _judge_clarity_gemini(self, prompt: str) -> bool:
+        """Gemini로 파일명 명확성 판단"""
+        try:
+            api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    api_url,
+                    headers={"Content-Type": "application/json"},
+                    json={
+                        "contents": [{
+                            "parts": [{"text": prompt}]
+                        }],
+                        "generationConfig": {
+                            "temperature": 0.1,
+                            "maxOutputTokens": 10
+                        }
+                    }
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    if 'candidates' in result and len(result['candidates']) > 0:
+                        answer = result['candidates'][0]['content']['parts'][0]['text'].strip().upper()
+                        is_clear = 'CLEAR' in answer
+                        logger.debug(f"파일명 명확성 판단 (Gemini): {answer} → {is_clear}")
+                        return is_clear
+                    else:
+                        logger.debug(f"Gemini clarity check: unexpected response")
+                        return True
+                else:
+                    logger.debug(f"Gemini clarity check failed: {response.status_code}")
+                    return True
+        except Exception as e:
+            logger.debug(f"Gemini clarity check error: {e}")
+            return True
+
     def _fallback_metadata(self, parsed_info: Dict) -> Dict:
         """AI 실패 시 기본 메타데이터"""
         software_name = parsed_info['software_name']

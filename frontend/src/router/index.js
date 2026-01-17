@@ -66,12 +66,6 @@ const routes = [
         component: () => import('../views/Settings.vue')
       },
       {
-        path: 'admin',
-        name: 'Admin',
-        component: () => import('../views/Admin.vue'),
-        meta: { requiresAdmin: true }
-      },
-      {
         path: 'favorites',
         name: 'Favorites',
         component: () => import('../views/Favorites.vue')

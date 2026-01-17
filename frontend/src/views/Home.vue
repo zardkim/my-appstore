@@ -74,7 +74,7 @@
             @click="goToCategory(category)"
           >
             <span class="text-2xl sm:text-3xl mb-1 sm:mb-2 transform group-hover:scale-110 transition-transform">{{ getCategoryIcon(category) }}</span>
-            <p class="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center">{{ t(`category.${category}`) }}</p>
+            <p class="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center">{{ t(`categories.${category}`) }}</p>
             <p class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ count }}</p>
           </button>
         </div>
@@ -116,7 +116,7 @@
           <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-6">{{ t('home.noProductsDesc') }}</p>
           <router-link
             v-if="isAdmin"
-            to="/admin"
+            to="/settings"
             class="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-medium"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,10 +132,28 @@
             v-for="product in recentProducts"
             :key="product.id"
             :product="product"
+            @ai-search="handleAISearch"
+            @manual-edit="handleManualEdit"
           />
         </div>
       </div>
     </div>
+
+    <!-- AI Search Dialog -->
+    <ProductAISearchDialog
+      :is-open="aiSearchDialogOpen"
+      :product="selectedProduct"
+      @close="closeAISearchDialog"
+      @saved="handleMetadataSaved"
+    />
+
+    <!-- Manual Edit Dialog -->
+    <ProductManualEditDialog
+      :is-open="manualEditDialogOpen"
+      :product="selectedProduct"
+      @close="closeManualEditDialog"
+      @saved="handleManualEditSaved"
+    />
   </div>
 </template>
 
@@ -146,10 +164,12 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../store/auth'
 import { productsApi } from '../api/products'
 import ProductCard from '../components/product/ProductCard.vue'
+import ProductAISearchDialog from '../components/product/ProductAISearchDialog.vue'
+import ProductManualEditDialog from '../components/product/ProductManualEditDialog.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const { t } = useI18n()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 const loading = ref(true)
 const stats = ref({
@@ -160,13 +180,19 @@ const stats = ref({
 })
 const recentProducts = ref([])
 
+// Dialog state
+const aiSearchDialogOpen = ref(false)
+const manualEditDialogOpen = ref(false)
+const selectedProduct = ref(null)
+
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 
 const lastScanFormatted = computed(() => {
-  if (stats.value.last_scan === 'Never') return '없음'
+  if (stats.value.last_scan === 'Never') return t('home.never')
   try {
     const date = new Date(stats.value.last_scan)
-    return date.toLocaleDateString('ko-KR', {
+    const dateLocale = locale.value === 'ko' ? 'ko-KR' : 'en-US'
+    return date.toLocaleDateString(dateLocale, {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -230,6 +256,37 @@ const fetchRecentProducts = async () => {
 
 const goToCategory = (category) => {
   router.push(`/discover?category=${category}`)
+}
+
+// Dialog handlers
+const handleAISearch = (product) => {
+  selectedProduct.value = product
+  aiSearchDialogOpen.value = true
+}
+
+const handleManualEdit = (product) => {
+  selectedProduct.value = product
+  manualEditDialogOpen.value = true
+}
+
+const closeAISearchDialog = () => {
+  aiSearchDialogOpen.value = false
+  selectedProduct.value = null
+}
+
+const closeManualEditDialog = () => {
+  manualEditDialogOpen.value = false
+  selectedProduct.value = null
+}
+
+const handleMetadataSaved = async () => {
+  // Refresh the product list to show updated data
+  await fetchRecentProducts()
+}
+
+const handleManualEditSaved = async () => {
+  // Refresh the product list to show updated data
+  await fetchRecentProducts()
 }
 
 onMounted(async () => {

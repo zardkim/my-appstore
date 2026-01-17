@@ -58,6 +58,22 @@
         <span v-if="!isCollapsed" class="menu-text">{{ $t('nav.discover') }}</span>
       </router-link>
 
+      <!-- Detected List (Admin Only) -->
+      <router-link
+        v-if="isAdmin"
+        to="/filename-violations"
+        class="menu-item group"
+        :class="isCollapsed ? 'justify-center' : ''"
+      >
+        <div class="menu-icon">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <span v-if="!isCollapsed" class="menu-text">{{ $t('nav.detectedList') }}</span>
+      </router-link>
+
       <!-- Tips & Tech -->
       <router-link
         to="/tips"
@@ -168,6 +184,17 @@
           <div class="border-t border-gray-200 dark:border-gray-700"></div>
 
           <button
+            @click="toggleLanguage"
+            class="flex items-center w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+          >
+            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            </svg>
+            <span class="text-sm font-medium">{{ localeStore.locale === 'ko' ? 'English' : '한국어' }}</span>
+          </button>
+
+          <button
             @click="toggleTheme"
             class="flex items-center w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
           >
@@ -252,6 +279,17 @@
           <div class="border-t border-gray-200 dark:border-gray-700"></div>
 
           <button
+            @click="toggleLanguage"
+            class="flex items-center w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+          >
+            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            </svg>
+            <span class="text-sm font-medium">{{ localeStore.locale === 'ko' ? 'English' : '한국어' }}</span>
+          </button>
+
+          <button
             @click="toggleTheme"
             class="flex items-center w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
           >
@@ -289,11 +327,13 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
+import { useLocaleStore } from '../../store/locale'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+const localeStore = useLocaleStore()
 
 const isCollapsed = ref(false)
 const showUserMenu = ref(false)
@@ -326,6 +366,11 @@ const logout = () => {
 
 const toggleTheme = () => {
   themeStore.toggleTheme()
+}
+
+const toggleLanguage = () => {
+  const newLocale = localeStore.locale === 'ko' ? 'en' : 'ko'
+  localeStore.setLocale(newLocale)
 }
 
 // 외부 클릭 시 드롭다운 닫기

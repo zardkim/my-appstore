@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from pathlib import Path
 from datetime import datetime
+import os
 
 from app.database import get_db
 from app.core.scanner import FileScanner
@@ -11,6 +12,13 @@ from app.dependencies import get_current_admin_user
 from app.config import settings
 from app.models.setting import Setting
 from app.core.redis_cache import invalidate_cache
+from app.models.filename_violation import FilenameViolation
+from app.models.product import Product
+from app.models.version import Version
+from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
+from app.core.parser import FilenameParser
+from app.api.config import load_config
+from app.core.auto_matcher import match_violations_to_products
 
 router = APIRouter()
 
@@ -35,6 +43,60 @@ class ScanExclusionsResponse(BaseModel):
 
 class ScanExclusionsRequest(BaseModel):
     exclusions: List[str]
+
+
+async def auto_match_scanned_files(db: Session) -> dict:
+    """
+    스캔된 파일들에 대해 자동으로 AI 매칭 수행
+    통합 매칭 로직(auto_matcher.py) 사용
+
+    Returns:
+        {"matched": int, "failed": int, "errors": list}
+    """
+    # config에서 autoMatch 설정 확인
+    config = load_config()
+    metadata_config = config.get('metadata', {})
+    auto_match = metadata_config.get('autoMatch', False)
+
+    if not auto_match:
+        return {"matched": 0, "failed": 0, "errors": [], "message": "Auto-match is disabled"}
+
+    use_ai = metadata_config.get('useAI', False)
+    ai_provider = metadata_config.get('aiProvider', 'openai')
+    ai_model = metadata_config.get('aiModel', 'gpt-4o-mini')
+
+    if not use_ai:
+        return {"matched": 0, "failed": 0, "errors": [], "message": "AI is disabled"}
+
+    # AI Provider에 따라 적절한 API key 가져오기
+    if ai_provider == 'gemini':
+        api_key = metadata_config.get('geminiApiKey', '')
+    elif ai_provider == 'openai':
+        api_key = metadata_config.get('openaiApiKey', '')
+    else:
+        return {"matched": 0, "failed": 0, "errors": [f"Unsupported AI provider: {ai_provider}"]}
+
+    if not api_key or not api_key.strip():
+        return {"matched": 0, "failed": 0, "errors": ["API key not configured"]}
+
+    # violation_type이 "scanned"이고 is_resolved가 False인 항목들 조회
+    unmatched_violations = db.query(FilenameViolation).filter(
+        FilenameViolation.violation_type == "scanned",
+        FilenameViolation.is_resolved == False
+    ).all()
+
+    # 통합 매칭 로직 호출 (자동 매칭 모드: 명확성 검사 수행)
+    results = await match_violations_to_products(
+        db=db,
+        violations=unmatched_violations,
+        ai_provider=ai_provider,
+        ai_model=ai_model,
+        api_key=api_key,
+        skip_clarity_check=False,  # 자동 매칭: 명확성 검사 수행
+        provided_metadata=None  # 자동 매칭: AI가 메타데이터 생성
+    )
+
+    return results
 
 
 @router.post("/start", response_model=ScanResponse)
@@ -78,6 +140,15 @@ async def start_scan(
             db.add(last_scan_setting)
 
         db.commit()
+
+        # 스캔 완료 후 자동 매칭 수행
+        match_results = await auto_match_scanned_files(db)
+
+        # 매칭 결과를 results에 반영
+        if match_results.get("matched", 0) > 0:
+            results["new_products"] = match_results["matched"]
+            if match_results.get("errors"):
+                results["errors"].extend(match_results["errors"])
 
         # 캐시 무효화 (새 제품이 추가되었을 수 있음)
         invalidate_cache([

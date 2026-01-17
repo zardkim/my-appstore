@@ -33,21 +33,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_metadata_cache_id'), 'metadata_cache', ['id'], unique=False)
     op.create_index(op.f('ix_metadata_cache_software_name'), 'metadata_cache', ['software_name'], unique=True)
-    op.create_table('invitations',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('email', sa.String(), nullable=False),
-    sa.Column('code', sa.String(), nullable=False),
-    sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('used', sa.Boolean(), nullable=False),
-    sa.Column('used_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('created_by', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_invitations_code'), 'invitations', ['code'], unique=True)
-    op.create_index(op.f('ix_invitations_email'), 'invitations', ['email'], unique=False)
-    op.create_index(op.f('ix_invitations_id'), 'invitations', ['id'], unique=False)
+    # Removed invitations table creation as it's already created in 70a1b2c3d4e5 migration
     op.create_table('unmatched_items',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('file_path', sa.String(), nullable=False),
@@ -77,10 +63,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_unmatched_items_status'), table_name='unmatched_items')
     op.drop_index(op.f('ix_unmatched_items_id'), table_name='unmatched_items')
     op.drop_table('unmatched_items')
-    op.drop_index(op.f('ix_invitations_id'), table_name='invitations')
-    op.drop_index(op.f('ix_invitations_email'), table_name='invitations')
-    op.drop_index(op.f('ix_invitations_code'), table_name='invitations')
-    op.drop_table('invitations')
+    # Removed invitations table drop as it should be handled by 70a1b2c3d4e5 migration
     op.drop_index(op.f('ix_metadata_cache_software_name'), table_name='metadata_cache')
     op.drop_index(op.f('ix_metadata_cache_id'), table_name='metadata_cache')
     op.drop_table('metadata_cache')

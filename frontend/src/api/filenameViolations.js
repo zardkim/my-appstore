@@ -67,5 +67,16 @@ export const filenameViolationsApi = {
    */
   createProduct(violationId) {
     return client.post(`/filename-violations/${violationId}/create-product`)
+  },
+
+  /**
+   * 스캔된 파일로부터 AI 메타데이터와 함께 Product 생성
+   * @param {number} violationId - Violation ID
+   * @param {object} metadata - AI generated metadata
+   */
+  createProductWithMetadata(violationId, metadata) {
+    return client.post(`/filename-violations/${violationId}/create-product-with-metadata`, {
+      metadata: metadata
+    })
   }
 }
