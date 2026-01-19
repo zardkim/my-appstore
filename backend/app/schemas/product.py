@@ -75,6 +75,22 @@ class ProductResponse(ProductBase):
             return [item.get('url') if isinstance(item, dict) else item for item in v]
         return v
 
+    @field_validator('patch_links', mode='before')
+    @classmethod
+    def convert_patch_links(cls, v):
+        """DB에서 읽을 때 딕셔너리 배열을 PatchLink 객체로 변환"""
+        if v is None:
+            return None
+        if isinstance(v, list):
+            result = []
+            for item in v:
+                if isinstance(item, dict):
+                    result.append(PatchLink(**item))
+                elif isinstance(item, PatchLink):
+                    result.append(item)
+            return result
+        return v
+
     class Config:
         from_attributes = True
 
