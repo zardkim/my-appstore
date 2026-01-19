@@ -33,6 +33,12 @@ class ProductCreate(ProductBase):
     folder_path: str
 
 
+class PatchLink(BaseModel):
+    """패치/크랙 관련 링크"""
+    title: str
+    url: str
+
+
 class ProductResponse(ProductBase):
     id: int
     folder_path: str
@@ -53,6 +59,7 @@ class ProductResponse(ProductBase):
     last_crawled_at: Optional[datetime] = None
     screenshots: Optional[List[str]] = None  # 문자열 배열로 변경 (URL 직접 저장)
     installation_guide: Optional[str] = None
+    patch_links: Optional[List[PatchLink]] = None  # 패치/크랙 관련 링크 (최대 5개)
 
     @field_validator('screenshots', mode='before')
     @classmethod
@@ -99,6 +106,7 @@ class ProductUpdateRequest(BaseModel):
     release_notes: Optional[str] = None
     release_date: Optional[str] = None
     screenshots: Optional[List[str]] = None  # 문자열 배열로 변경
+    patch_links: Optional[List[PatchLink]] = None  # 패치/크랙 관련 링크 (최대 5개)
 
 
 class VersionUpdateRequest(BaseModel):

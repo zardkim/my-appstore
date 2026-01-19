@@ -257,6 +257,14 @@ async def update_product(
     if "title" in update_dict and not update_dict["title"]:
         raise HTTPException(status_code=400, detail="Title cannot be empty")
 
+    # patch_links 최대 5개 제한
+    if "patch_links" in update_dict and update_dict["patch_links"] is not None:
+        if len(update_dict["patch_links"]) > 5:
+            raise HTTPException(
+                status_code=400,
+                detail="Maximum 5 patch links allowed"
+            )
+
     # 업데이트 적용
     for field, value in update_dict.items():
         setattr(product, field, value)

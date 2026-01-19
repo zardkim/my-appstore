@@ -225,7 +225,18 @@ export default {
         crack: '크랙',
         manual: '매뉴얼',
         other: '기타',
-      }
+      },
+      // 링크 관련
+      linksTitle: '관련 링크',
+      addLink: '링크 추가',
+      linkTitle: '링크 제목',
+      linkTitlePlaceholder: '예: 공식 다운로드 페이지',
+      linkUrl: '링크 주소',
+      linkUrlPlaceholder: 'https://example.com',
+      saveLinks: '링크 저장',
+      linksSaved: '링크가 성공적으로 저장되었습니다',
+      linksSaveFailed: '링크 저장에 실패했습니다',
+      maxLinksReached: '최대 5개의 링크만 추가할 수 있습니다',
     }
   },
 
