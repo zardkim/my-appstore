@@ -257,13 +257,18 @@ async def update_product(
     if "title" in update_dict and not update_dict["title"]:
         raise HTTPException(status_code=400, detail="Title cannot be empty")
 
-    # patch_links 최대 5개 제한
+    # patch_links 최대 5개 제한 및 딕셔너리 변환
     if "patch_links" in update_dict and update_dict["patch_links"] is not None:
         if len(update_dict["patch_links"]) > 5:
             raise HTTPException(
                 status_code=400,
                 detail="Maximum 5 patch links allowed"
             )
+        # PatchLink 객체를 딕셔너리로 변환하여 JSON 저장
+        update_dict["patch_links"] = [
+            link.model_dump() if hasattr(link, 'model_dump') else link
+            for link in update_dict["patch_links"]
+        ]
 
     # 업데이트 적용
     for field, value in update_dict.items():
