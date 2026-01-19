@@ -9,6 +9,31 @@ MyApp Store를 Synology NAS의 Container Manager를 사용하여 쉽게 설치�
 - ✅ 최소 2GB RAM (권장 4GB)
 - ✅ 최소 10GB 여유 공간
 
+## 📁 폴더 구조
+
+설치 후 다음과 같은 폴더 구조가 생성됩니다:
+
+```
+/volume1/docker/myappstore/
+├── docker-compose.yml          # Docker Compose 설정 파일
+├── .env                        # 환경 변수 파일 (직접 생성)
+├── .env.example                # 환경 변수 템플릿
+├── backend/                    # 백엔드 소스 코드
+│   ├── app/                    # FastAPI 애플리케이션
+│   ├── alembic/                # 데이터베이스 마이그레이션
+│   └── requirements.txt        # Python 패키지 목록
+├── frontend/                   # 프론트엔드 소스 코드
+│   ├── src/                    # Vue.js 소스
+│   └── package.json            # Node.js 패키지 목록
+├── data/                       # 데이터 저장 폴더
+│   ├── db/                     # PostgreSQL 데이터
+│   ├── redis/                  # Redis 데이터
+│   ├── icons/                  # 아이콘 캐시
+│   ├── library/                # 소프트웨어 라이브러리
+│   └── logs/                   # 로그 파일
+└── [기타 프로젝트 파일]
+```
+
 ---
 
 ## 🚀 빠른 설치 (3단계)
@@ -34,7 +59,31 @@ ssh admin@YOUR_NAS_IP
 # 프로젝트 다운로드
 cd /volume1/docker
 git clone https://github.com/zardkim/my-appstore.git myappstore
+cd myappstore
+
+# .env 파일 생성
+cp .env.example .env
 ```
+
+#### 필수 폴더 확인
+
+프로젝트에는 다음 데이터 폴더들이 포함되어야 합니다 (Git에서 자동으로 포함됨):
+
+```
+data/
+├── attachments/    # 첨부 파일 저장소
+├── config/         # 설정 파일 저장소
+├── db/             # PostgreSQL 데이터 (빌드 시 자동 생성)
+├── eximage/        # 외부 이미지 캐시
+├── icons/          # 아이콘 캐시
+├── library/        # 소프트웨어 라이브러리
+├── logs/           # 로그 파일
+├── patches/        # 패치 파일 저장소
+├── redis/          # Redis 데이터 (빌드 시 자동 생성)
+└── screenshots/    # 스크린샷 저장소
+```
+
+> **💡 참고**: 폴더가 없으면 Docker 빌드 시 경로 오류가 발생할 수 있습니다. Git clone 시 자동으로 포함되지만, 수동으로 업로드한 경우 폴더 구조를 확인하세요.
 
 ---
 
@@ -57,27 +106,54 @@ git clone https://github.com/zardkim/my-appstore.git myappstore
 
 ### 3단계: 환경 변수 설정
 
-**웹 서비스 포털 설정** 화면에서:
+#### .env 파일 생성 (권장)
 
-#### 필수 환경 변수
+프로젝트를 시작하기 전에 환경 변수를 설정해야 합니다.
 
-| 변수명 | 값 | 설명 |
-|--------|-----|------|
-| `SECRET_KEY` | `your-secret-key-change-this` | 보안 키 (변경 필수!) |
-| `NAS_IP` | `192.168.0.100` | 자신의 NAS IP |
-| `VITE_API_BASE_URL` | `http://192.168.0.100:8100/api` | API URL |
-| `VITE_BACKEND_URL` | `http://192.168.0.100:8100` | 백엔드 URL |
-| `VITE_APP_URL` | `http://192.168.0.100:5900` | 프론트엔드 URL |
+**File Station 사용**:
+1. `/docker/myappstore/` 폴더로 이동
+2. `.env.example` 파일을 찾아 복사
+3. 복사한 파일 이름을 `.env`로 변경
+4. `.env` 파일을 열어 다음 값들을 수정:
+
+```bash
+# 보안 설정 (필수 변경!)
+SECRET_KEY=your-secret-key-change-this-in-production
+
+# 데이터베이스 설정
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_DB=myappstore
+
+# NAS IP 주소 (자신의 NAS IP로 변경)
+NAS_IP=192.168.0.100
+
+# API 및 프론트엔드 URL (NAS_IP를 실제 IP로 변경)
+VITE_API_BASE_URL=http://192.168.0.100:8100/api
+VITE_BACKEND_URL=http://192.168.0.100:8100
+VITE_APP_URL=http://192.168.0.100:5900
+
+# AI 설정 (선택사항)
+OPENAI_API_KEY=
+
+# CORS 설정
+CORS_ORIGINS=*
+```
 
 > **💡 팁**: NAS IP를 모르겠다면 `제어판` → `네트워크` → `네트워크 인터페이스`에서 확인
 
-#### 선택 환경 변수
+#### SSH 사용 (대안)
 
-| 변수명 | 값 | 설명 |
-|--------|-----|------|
-| `OPENAI_API_KEY` | `sk-your-api-key` | AI 메타데이터 생성 (선택) |
+```bash
+# .env 파일 생성
+cd /volume1/docker/myappstore
+cp .env.example .env
 
-**완료** 버튼 클릭하여 컨테이너 시작
+# nano 또는 vi로 편집
+nano .env
+```
+
+저장 후 Container Manager에서 프로젝트를 시작하면 자동으로 `.env` 파일을 읽습니다.
 
 ---
 

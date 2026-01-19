@@ -5,14 +5,14 @@ services:
     image: postgres:15-alpine
     container_name: myapp-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: myappstore
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-myappstore}
       # PostgreSQL 로깅 설정
       POSTGRES_INITDB_ARGS: "-c logging_collector=on"
     volumes:
-      - ./data/db/postgres_data:/var/lib/postgresql/data
-      - ./data/logs/postgresql:/var/log/postgresql
+      - ./data/db:/var/lib/postgresql/data
+      - ./data/logs:/var/log/postgresql
     ports:
       - "5432:5432"
     command:
@@ -63,7 +63,7 @@ services:
       # - /volume1/Software:/library/NAS:ro
     environment:
       # Database
-      - DATABASE_URL=postgresql://postgres:password@db:5432/myappstore
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-myappstore}
 
       # Redis
       - REDIS_URL=redis://redis:6379/0
@@ -84,7 +84,7 @@ services:
 
       # CORS - comma-separated origins
       # 개발/내부 NAS 환경: "*"로 모든 origin 허용 (프로덕션에서는 구체적인 도메인 지정 권장)
-      - CORS_ORIGINS=*
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
 
       # Server
       - HOST=0.0.0.0
@@ -108,7 +108,7 @@ services:
     environment:
       # 브라우저에서 실행되므로 실제 접속 IP 주소 사용 권장
       # localhost: 호스트 머신에서만 접속
-      # 192.168.0.X: 같은 네트워크의 다른 기기에서도 접속 가능
+      # 192.168.x.x 또는 NAS_IP: 같은 네트워크의 다른 기기에서도 접속 가능
       - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8100/api}
       - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8100}
       - VITE_APP_URL=${VITE_APP_URL:-http://localhost:5900}
