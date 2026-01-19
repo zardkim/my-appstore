@@ -2021,43 +2021,27 @@ const scanFolders = ref([
 const showFolderBrowser = ref(false)
 const editingFolderIndex = ref(null)
 
-// Categories
-const categories = ref([
-  { name: 'Graphics', label: '그래픽', icon: '🎨' },
-  { name: 'Office', label: '오피스', icon: '📊' },
-  { name: 'Development', label: '개발', icon: '💻' },
-  { name: 'Utility', label: '유틸리티', icon: '🛠️' },
-  { name: 'Media', label: '미디어', icon: '🎬' },
-  { name: 'OS', label: '운영체제', icon: '💿' },
-  { name: 'Security', label: '보안', icon: '🔒' },
-  { name: 'Network', label: '네트워크', icon: '🌐' },
-  { name: 'Mac', label: '맥', icon: '🍎' },
-  { name: 'Mobile', label: '모바일', icon: '📱' },
-  { name: 'Patch', label: '패치', icon: '🔧' },
-  { name: 'Driver', label: '드라이버', icon: '⚙️' },
-  { name: 'Source', label: '소스', icon: '📦' },
-  { name: 'Backup', label: '백업&복구', icon: '💾' },
-  { name: 'Business', label: '업무용', icon: '💼' },
-  { name: 'Engineering', label: '공학용', icon: '📐' },
-  { name: 'Theme', label: '테마&스킨', icon: '🎭' },
-  { name: 'Hardware', label: '하드웨어', icon: '🔌' },
-  { name: 'Font', label: '글꼴', icon: '🔤' },
-  { name: 'Uncategorized', label: '미분류', icon: '📂' }
-])
+// Categories - config.json에서 로드됨 (단일 소스)
+const categories = ref([])
 const showAddCategoryModal = ref(false)
 const showEditCategoryModal = ref(false)
 const newCategory = ref({ name: '', label: '', icon: '' })
 const editingCategory = ref({ oldName: '', name: '', label: '', icon: '' })
 
-// 카테고리 라벨 가져오기 (번역키 우선, 없으면 label 사용)
+// 카테고리 라벨 가져오기 (config.json의 label 우선 사용)
+// 카테고리 관리에서는 config.json이 단일 소스이므로 저장된 label을 직접 표시
 const getCategoryLabel = (category) => {
+  // config.json의 label이 있으면 그것을 사용
+  if (category.label) {
+    return category.label
+  }
+  // label이 없는 경우에만 번역 시도
   const translationKey = `categories.${category.name}`
   const translated = t(translationKey)
-  // 번역키가 없으면 키 자체가 반환되므로, 이 경우 label 사용
-  if (translated === translationKey || translated === category.name) {
-    return category.label || category.name
+  if (translated !== translationKey && translated !== category.name) {
+    return translated
   }
-  return translated
+  return category.name
 }
 
 // 카테고리명에 따른 이모지 매핑
@@ -2899,18 +2883,6 @@ onMounted(async () => {
     // 카테고리 설정
     if (config.categories && Array.isArray(config.categories)) {
       categories.value = config.categories
-
-      // Font 카테고리가 없으면 추가 (신규 카테고리)
-      if (!categories.value.find(c => c.name === 'Font')) {
-        const uncategorizedIndex = categories.value.findIndex(c => c.name === 'Uncategorized')
-        if (uncategorizedIndex !== -1) {
-          // Uncategorized 앞에 삽입
-          categories.value.splice(uncategorizedIndex, 0, { name: 'Font', label: '글꼴', icon: '🔤' })
-        } else {
-          // Uncategorized가 없으면 끝에 추가
-          categories.value.push({ name: 'Font', label: '글꼴', icon: '🔤' })
-        }
-      }
     }
 
     // 메타데이터 설정

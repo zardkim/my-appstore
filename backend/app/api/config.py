@@ -3,7 +3,7 @@ Config API for managing application settings
 """
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 import json
 import os
 from pathlib import Path
@@ -22,7 +22,13 @@ CONFIG_DIR = Path(settings.CONFIG_DATA_DIR)
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
 def get_default_config() -> Dict[str, Any]:
-    """Generate default config with environment-aware values"""
+    """
+    Generate default config with environment-aware values.
+
+    NOTE: This is only used when config.json doesn't exist (first run).
+    config.json is the single source of truth for all settings.
+    Changes should be made in config.json, not here.
+    """
     # VITE_APP_URL 환경변수가 있으면 사용, 없으면 기본값
     default_access_url = os.getenv("VITE_APP_URL", "http://localhost:5900")
 
@@ -47,13 +53,14 @@ def get_default_config() -> Dict[str, Any]:
         {"name": "Mobile", "label": "모바일", "icon": "📱"},
         {"name": "Patch", "label": "패치", "icon": "🔧"},
         {"name": "Driver", "label": "드라이버", "icon": "⚙️"},
-        {"name": "Source", "label": "소스", "icon": "📦"},
+        {"name": "Source", "label": "소스코드", "icon": "📦"},
         {"name": "Backup", "label": "백업&복구", "icon": "💾"},
         {"name": "Portable", "label": "포터블", "icon": "🎒"},
         {"name": "Business", "label": "업무용", "icon": "💼"},
         {"name": "Engineering", "label": "공학용", "icon": "📐"},
         {"name": "Theme", "label": "테마&스킨", "icon": "🎭"},
         {"name": "Hardware", "label": "하드웨어", "icon": "🔌"},
+        {"name": "Font", "label": "글꼴", "icon": "🔤"},
         {"name": "Uncategorized", "label": "미분류", "icon": "📂"}
     ],
         "metadata": {
@@ -162,12 +169,13 @@ async def get_config_section(
 @router.put("/{section}")
 async def update_config_section(
     section: str,
-    data: Dict[str, Any],
+    data: Any,
     current_user: User = Depends(get_current_admin_user)
 ):
     """
     Update specific configuration section
     Requires admin authentication
+    Data can be dict (most sections) or list (categories)
     """
     config = load_config()
 

@@ -72,7 +72,7 @@
     },
     {
       "name": "Source",
-      "label": "소스",
+      "label": "소스코드",
       "icon": "📦"
     },
     {
@@ -106,6 +106,11 @@
       "icon": "🔌"
     },
     {
+      "name": "Font",
+      "label": "글꼴",
+      "icon": "🔤"
+    },
+    {
       "name": "Uncategorized",
       "label": "미분류",
       "icon": "📂"
@@ -113,8 +118,6 @@
   ],
   "metadata": {
     "scanMethod": "ai",
-    "useAI": true,
-    "autoMatch": true,
     "aiProvider": "gemini",
     "aiModel": "gemini-3-flash-preview",
     "geminiApiKey": "",
@@ -123,7 +126,7 @@
     "googleSearchEngineId": "",
     "useCustomPrompt": true,
     "customPromptOpenai": "다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요:\n\n소프트웨어: {software_name}\n\n다음 정보를 자세히 조사하여 JSON으로 응답해주세요:\n\n**기본 정보:**\n- title: 정확한 공식 소프트웨어 이름\n- version: 버전 정보 (파일명에서 추출 가능하면)\n- platform: 플랫폼 (Windows, macOS, Linux, Cross-platform 등)\n- developer: 개발사/제조사 공식 이름\n- category: 적절한 카테고리 (Graphics, Office, Development, Utility, Media, OS, Security, Network 등)\n- official_website: 공식 웹사이트 URL (정확한 URL 필수)\n- license_type: 라이선스 종류 (Free, Freemium, Trial, Commercial, Open Source 등)\n- language: 지원 언어 (예: \"영어, 한국어, 일본어\" 또는 \"다국어\")\n\n**프로그램 설명:**\n- description_short: 50-100자 이내의 간결한 한 줄 설명\n- description_detailed: 200-300자 이내의 상세 설명 (주요 특징, 용도, 워크플로우 포함)\n\n**주요 기능:**\n- features: 주요 기능 리스트 배열 (5-10개, 구체적으로)\n\n**지원 파일 포맷:**\n- supported_formats: 지원하는 파일 포맷 배열 (해당되는 경우)\n\n**시스템 요구사양:**\n- system_requirements: {\n    \"os\": \"운영체제 요구사항 (구체적 버전 포함)\",\n    \"cpu\": \"CPU 요구사항\",\n    \"ram\": \"RAM 요구사항 (최소/권장 명시)\",\n    \"disk_space\": \"디스크 공간\",\n    \"gpu\": \"GPU 요구사항 (있는 경우)\",\n    \"additional\": \"추가 요구사항 (있는 경우)\"\n  }\n\n**설치 정보:**\n- installation_info: {\n    \"installer_type\": \"설치 방식 (예: MSI, EXE, Portable, DMG 등)\",\n    \"file_size\": \"예상 파일 크기\",\n    \"internet_required\": \"인터넷 필요 여부 (예: 필요/불필요/선택사항)\"\n  }\n\n**릴리즈 정보:**\n- release_notes: 주요 릴리즈 노트 또는 버전 히스토리 (2-3줄)\n\n**중요:**\n1. 반드시 실제로 조사한 정확한 정보만 제공하세요.\n2. 모르는 정보는 빈 문자열(\"\")이나 빈 배열([])로 남겨두세요.\n3. 추측하지 말고 확실한 정보만 제공하세요.\n4. JSON 형식만 응답하고, 추가 설명은 하지 마세요.",
-    "customPromptGemini": "다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요:\n\n소프트웨어: {software_name}\n\n다음 정보를 자세히 조사하여 JSON으로 응답해주세요:\n\n**기본 정보:**\n- title: 정확한 공식 소프트웨어 이름\n- version: 버전 정보 (파일명에서 추출 가능하면)\n- platform: 플랫폼 (Windows, macOS, Linux, Cross-platform 등)\n- developer: 개발사/제조사 공식 이름\n- category: 적절한 카테고리 (Graphics, Office, Development, Utility, Media, OS, Security, Network 등)\n- official_website: 공식 웹사이트 URL (정확한 URL 필수)\n- license_type: 라이선스 종류 (Free, Freemium, Trial, Commercial, Open Source 등)\n- language: 지원 언어 (예: \"영어, 한국어, 일본어\" 또는 \"다국어\")\n\n**프로그램 설명:**\n- description_short: 50-100자 이내의 간결한 한 줄 설명\n- description_detailed: 200-300자 이내의 상세 설명 (주요 특징, 용도, 워크플로우, 장점 등을 자세히)\n\n**주요 기능:**\n- features: 주요 기능 리스트 배열 (5-10개, 구체적이고 상세하게)\n\n**지원 파일 포맷:**\n- supported_formats: 지원하는 파일 포맷 배열 (해당되는 경우)\n\n**시스템 요구사양:**\n- system_requirements: {\n    \"os\": \"운영체제 요구사항 (구체적 버전 포함)\",\n    \"cpu\": \"CPU 요구사항\",\n    \"ram\": \"RAM 요구사항 (최소/권장 명시)\",\n    \"disk_space\": \"디스크 공간\",\n    \"gpu\": \"GPU 요구사항 (있는 경우)\",\n    \"additional\": \"추가 요구사항 (DirectX, .NET Framework 등)\"\n  }\n\n**설치 정보:**\n- installation_info: {\n    \"installer_type\": \"설치 방식 (예: MSI, EXE, Portable, DMG 등)\",\n    \"file_size\": \"예상 파일 크기\",\n    \"internet_required\": \"인터넷 필요 여부 (예: 필요/불필요/선택사항)\"\n  }\n\n**릴리즈 정보:**\n- release_notes: 주요 릴리즈 노트 또는 버전 히스토리 (2-3줄, 이 버전의 특징)\n\n**중요:**\n1. 반드시 실제로 조사한 정확한 정보만 제공하세요.\n2. 특히 공식 웹사이트 URL, 시스템 요구사양, 지원 언어는 정확해야 합니다.\n3. 모르는 정보는 빈 문자열(\"\")이나 빈 배열([])로 남겨두세요.\n4. 추측하지 말고 확실한 정보만 제공하세요.\n5. JSON 형식만 응답하고, 추가 설명이나 마크다운은 사용하지 마세요."
+    "customPromptGemini": "Please provide detailed metadata for the following software in JSON format.\n\nSoftware: {software_name}\n\n**You must create a JSON that includes all the fields below:**\n\n{\n  \"title\": \"Official software name\",\n  \"version\": \"Version information (extracted from filename)\",\n  \"platform\": \"Windows/macOS/Linux/Cross-platform\",\n  \"developer\": \"Official developer/manufacturer name\",\n  \"category\": \"Graphics/Office/Development/Utility/Media/OS/Security/Network/Mac/Mobile etc.\",\n  \"official_website\": \"Full URL of official website (https://...)\",\n  \"license_type\": \"Commercial/Free/Freemium/Trial/Open Source\",\n  \"language\": \"Supported languages (e.g., English, Korean, Japanese, or Multilingual)\",\n  \"description_short\": \"Brief one-line description within 50-100 characters\",\n  \"description_detailed\": \"Detailed description of 200-300 characters. Specifically explain key features, usage, workflow, and advantages\",\n  \"features\": [\n    \"Main feature 1 (specific)\",\n    \"Main feature 2\",\n    \"Main feature 3\",\n    \"Main feature 4\",\n    \"Main feature 5\",\n    \"Main feature 6\"\n  ],\n  \"supported_formats\": [\"format1\", \"format2\", \"format3\"],\n  \"system_requirements\": {\n    \"os\": \"Windows XP/Vista/7/8/10/11 (32/64-bit) etc. specifically\",\n    \"cpu\": \"Processor requirements (e.g., Intel Core 2 Duo 2.0GHz or higher)\",\n    \"ram\": \"Minimum 2GB, recommended 4GB or more\",\n    \"disk_space\": \"500MB ~ 1GB etc.\",\n    \"gpu\": \"GPU requirements (write if any, otherwise empty string)\",\n    \"additional\": \"Additional requirements such as DirectX, .NET Framework\"\n  },\n  \"installation_info\": {\n    \"installer_type\": \"EXE installer/MSI/Portable/ZIP archive\",\n    \"file_size\": \"Approximately XXX MB\",\n    \"internet_required\": \"Required/Not required/Required for license activation\"\n  },\n  \"release_notes\": \"Key features or changes in this version (2-3 lines)\"\n}\n\n**Required instructions:**\n1. Follow the JSON structure above exactly\n2. Include all fields (use empty string \"\" or empty array [] if unknown)\n3. Write at least 6 features\n4. Official website must be exact URL (https://... format)\n5. Respond only with JSON, no additional explanations\n6. Provide only accurate information, no guessing"
   },
   "board": {
     "categories": [
