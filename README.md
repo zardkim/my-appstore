@@ -108,6 +108,11 @@
 
 ## 🚀 빠른 시작
 
+> **💡 Synology NAS 사용자**
+>
+> Synology NAS에서 설치하시려면 자세한 단계별 가이드를 확인하세요:
+> **[📘 Synology NAS 설치 가이드](docs/SYNOLOGY_INSTALLATION.md)**
+
 ### 전제 조건
 
 - Docker 20.10+
@@ -374,6 +379,8 @@ npm run dev
 
 ### 사용자 가이드
 - [빠른 시작 가이드](QUICKSTART.md) - 5분 안에 시작하기
+- [Synology NAS 설치 가이드](docs/SYNOLOGY_INSTALLATION.md) - Synology 전용 Docker 설치 가이드
+- [테스트 방법](docs/테스트방법.md) - 다양한 환경에서의 테스트 가이드
 - [배포 가이드](DEPLOYMENT_GUIDE.md) - 프로덕션 배포 상세 가이드
 
 ### API 문서
@@ -382,6 +389,7 @@ npm run dev
 
 ### 개발자 가이드
 - [CLAUDE.md](CLAUDE.md) - 프로젝트 개요 및 아키텍처
+- [CHANGELOG.md](CHANGELOG.md) - 버전별 변경사항
 - Database Schema - CLAUDE.md 참조
 - API Endpoints - Swagger UI 참조
 
