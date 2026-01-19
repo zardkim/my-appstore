@@ -130,45 +130,58 @@ cd my-appstore
 ### 2. 환경변수 설정
 
 ```bash
-# 환경변수 파일 생성
-cp .env.production.example .env.production
+# .env 파일 생성
+cp .env.example .env
 
-# 환경변수 파일 편집
-nano .env.production
+# .env 파일 편집
+nano .env
 ```
 
 **필수 변경 항목:**
 ```bash
-# 강력한 SECRET_KEY 생성
-SECRET_KEY=$(openssl rand -hex 32)
+# 보안 키 (필수 변경!)
+SECRET_KEY=your-secret-key-change-this-in-production
 
-# 데이터베이스 비밀번호
-POSTGRES_PASSWORD=your-strong-password
+# 데이터베이스 설정
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_DB=myappstore
 
-# 실제 서버 IP로 변경
-CORS_ORIGINS=http://your-server-ip:5900
-VITE_API_BASE_URL=http://your-server-ip:8100/api
-VITE_APP_URL=http://your-server-ip:5900
+# NAS 또는 서버 IP 주소 (실제 IP로 변경)
+NAS_IP=192.168.0.100
+
+# API 및 프론트엔드 URL
+VITE_API_BASE_URL=http://192.168.0.100:8100/api
+VITE_BACKEND_URL=http://192.168.0.100:8100
+VITE_APP_URL=http://192.168.0.100:5900
+
+# AI 설정 (선택사항)
+OPENAI_API_KEY=
+
+# CORS 설정
+CORS_ORIGINS=*
 ```
+
+> **💡 팁**: `SECRET_KEY`는 강력한 랜덤 문자열로 변경하세요.
+> ```bash
+> # 자동 생성 예시
+> SECRET_KEY=$(openssl rand -hex 32)
+> ```
 
 ### 3. Docker Compose로 실행
 
-#### 개발 환경
-
 ```bash
+# Docker Compose로 빌드 및 실행
 docker-compose up -d
+
+# 로그 확인
+docker-compose logs -f
+
+# 중지
+docker-compose down
 ```
 
-#### 프로덕션 환경
-
-```bash
-# 빌드 및 실행
-docker-compose -f docker-compose.prod.yml --env-file .env.production build
-docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
-
-# 또는 자동 빌드 스크립트 사용 (권장)
-./build-and-test.sh
-```
+> **💡 참고**: `.env` 파일이 `docker-compose.yml`과 같은 폴더에 있으면 자동으로 읽힙니다.
 
 ### 4. 접속
 

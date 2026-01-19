@@ -62,10 +62,15 @@ data/config/*
 data/attachments/*
 !data/attachments/.gitkeep
 
+# Patches
+data/patches/*
+!data/patches/.gitkeep
+
 # Logs
-data/logs/
+data/logs/*
+!data/logs/.gitkeep
 *.log
-logs/
+/logs/
 
 # IDE
 .vscode/
