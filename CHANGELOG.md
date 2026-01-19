@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2-beta] - 2026-01-19
+
+### Added
+- **Patch Links Feature**: Added ability to add up to 5 related links in product detail page patches/cracks section
+  - Admin can add/edit/delete links with title and URL
+  - Links are displayed for all users with click-to-open functionality
+  - Added translation keys for link feature in Korean and English
+  - Added database migration for `patch_links` JSON field in products table
+
+### Fixed
+- **Scrap Date Localization**: Fixed hardcoded 'ko-KR' locale in Scraps page date formatting
+  - Date format now follows current language setting (localStorage or browser language)
+- **Database Migration**: Added Alembic migration and field validators for patch_links feature
+  - Fixed "Exception in ASGI application" error
+  - Added conversion logic between PatchLink objects and database JSON storage
+
+### Technical Changes
+- `backend/app/models/product.py`: Added `patch_links` JSON column
+- `backend/app/schemas/product.py`: Added `PatchLink` schema and field validator
+- `backend/app/api/products.py`: Added validation for max 5 links and object-to-dict conversion
+- `frontend/src/views/ProductDetail.vue`: Added link management UI (183+ lines)
+- `frontend/src/views/Scraps.vue`: Dynamic locale support for date formatting
+
+## [1.2.1-beta] - 2026-01-19
+
+### Fixed
+- **Category Label Display**: Fixed category labels to display from config.json instead of translation system
+  - Settings - Category Management now shows Korean labels correctly
+  - Changed `getCategoryLabel()` function to prioritize config.json labels
+  - Updated "Source" category label from "소스" to "소스코드"
+  - Synchronized default config across backend and config.json
+
+### Technical Changes
+- `frontend/src/views/Settings.vue`: Modified `getCategoryLabel()` to use config.json labels first
+- `data/config.json`: Updated Source category label
+- `backend/app/api/config.py`: Synced default config
+
+## [1.2.0-beta] - 2026-01-03
+
+### Added
+- **Complete i18n Support**: Full internationalization with auto language detection
+  - Korean and English language support
+  - Automatic language detection from browser settings
+  - Language switcher in UI
+  - All UI elements translated (2000+ translation keys)
+
+### Changed
+- Enhanced filename parsing rules for better AI matching
+- Improved documentation with parsing patterns analysis (1,836 files analyzed)
+- Simplified CORS settings in documentation
+
 ## [1.0.0] - 2025-12-29
 
 ### Features
