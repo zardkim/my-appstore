@@ -117,26 +117,29 @@ data/
 4. `.env` 파일을 열어 다음 값들을 수정:
 
 ```bash
-# 보안 설정 (필수 변경!)
-SECRET_KEY=your-secret-key-change-this-in-production
-
-# 데이터베이스 설정
+# ==================== 데이터베이스 설정 ====================
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=password
 POSTGRES_DB=myappstore
 
-# NAS IP 주소 (자신의 NAS IP로 변경)
+# ==================== 보안 설정 ====================
+# 중요: 강력한 SECRET_KEY를 생성하세요
+SECRET_KEY=your-secret-key-change-this-in-production
+
+# ==================== NAS IP 주소 ====================
+# 자신의 NAS IP 주소로 변경하세요
 NAS_IP=192.168.0.100
 
-# API 및 프론트엔드 URL (NAS_IP를 실제 IP로 변경)
+# ==================== 프론트엔드 환경변수 ====================
+# NAS_IP를 실제 IP로 변경하세요
 VITE_API_BASE_URL=http://192.168.0.100:8100/api
 VITE_BACKEND_URL=http://192.168.0.100:8100
 VITE_APP_URL=http://192.168.0.100:5900
 
-# AI 설정 (선택사항)
+# ==================== AI 설정 (선택사항) ====================
 OPENAI_API_KEY=
 
-# CORS 설정
+# ==================== CORS 설정 ====================
 CORS_ORIGINS=*
 ```
 
