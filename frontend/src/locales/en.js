@@ -225,7 +225,18 @@ export default {
         crack: 'Crack',
         manual: 'Manual',
         other: 'Other',
-      }
+      },
+      // Links
+      linksTitle: 'Related Links',
+      addLink: 'Add Link',
+      linkTitle: 'Link Title',
+      linkTitlePlaceholder: 'e.g., Official Download Page',
+      linkUrl: 'Link URL',
+      linkUrlPlaceholder: 'https://example.com',
+      saveLinks: 'Save Links',
+      linksSaved: 'Links saved successfully',
+      linksSaveFailed: 'Failed to save links',
+      maxLinksReached: 'Maximum 5 links allowed',
     }
   },
 

@@ -41,6 +41,9 @@ class Product(Base):
     # 설치 방법 (사용자 작성)
     installation_guide = Column(Text)  # 설치 방법 (HTML 형식)
 
+    # 패치/크랙 관련 링크 (최대 5개)
+    patch_links = Column(JSON, nullable=True)  # [{"title": "...", "url": "..."}, ...]
+
     # Relationships
     versions = relationship("Version", back_populates="product", cascade="all, delete-orphan")
     attachments = relationship("Attachment", back_populates="product", cascade="all, delete-orphan")

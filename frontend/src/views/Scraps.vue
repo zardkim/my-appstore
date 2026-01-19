@@ -128,7 +128,9 @@ const formatDate = (dateStr) => {
   if (!dateStr) return t('scraps.notAvailable')
   try {
     const date = new Date(dateStr)
-    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
+    // 현재 언어 설정에 따라 로케일 결정
+    const locale = localStorage.getItem('app-language') || navigator.language || 'ko-KR'
+    return date.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' })
   } catch {
     return dateStr
   }
