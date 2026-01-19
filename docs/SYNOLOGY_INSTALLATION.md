@@ -1,161 +1,147 @@
-# Synology NAS Docker 설치 가이드
+# Synology NAS 설치 가이드 (Container Manager)
 
-이 문서는 Synology NAS에서 MyApp Store를 Docker를 통해 설치하고 실행하는 방법을 안내합니다.
+MyApp Store를 Synology NAS의 Container Manager를 사용하여 쉽게 설치하는 방법입니다.
 
-## 목차
-1. [사전 요구사항](#사전-요구사항)
-2. [설치 준비](#설치-준비)
-3. [Docker Compose 설치](#docker-compose-설치)
-4. [환경 설정](#환경-설정)
-5. [빌드 및 실행](#빌드-및-실행)
-6. [데이터베이스 초기화](#데이터베이스-초기화)
-7. [접속 및 테스트](#접속-및-테스트)
-8. [NAS 소프트웨어 폴더 연동](#nas-소프트웨어-폴더-연동)
-9. [문제 해결](#문제-해결)
+## 📋 사전 요구사항
+
+- ✅ Synology DSM 7.0 이상
+- ✅ Container Manager 패키지 설치됨
+- ✅ 최소 2GB RAM (권장 4GB)
+- ✅ 최소 10GB 여유 공간
 
 ---
 
-## 사전 요구사항
+## 🚀 빠른 설치 (3단계)
 
-### 1. Synology NAS 요구사항
-- DSM 7.0 이상
-- Docker 패키지 설치됨
-- 최소 2GB RAM (권장 4GB 이상)
-- 최소 10GB 여유 공간
+### 1단계: 프로젝트 파일 준비
 
-### 2. 필수 패키지 설치
-Synology 패키지 센터에서 다음 패키지를 설치하세요:
+#### 방법 A: File Station 사용 (권장)
 
-1. **Docker** - Container Manager
-2. **Git Server** (선택사항, 코드 업데이트용)
+1. **DSM File Station** 열기
+2. `docker` 폴더로 이동 (없으면 생성)
+3. `myappstore` 폴더 생성
+4. 로컬 컴퓨터에서 프로젝트 파일을 압축 (zip)
+5. File Station에 업로드 후 압축 해제
 
-설치 방법:
-- `패키지 센터` → `모두` → `Docker` 검색 → 설치
-- 또는 `Container Manager` 검색 → 설치
+최종 경로: `/volume1/docker/myappstore/`
 
----
+#### 방법 B: Git 사용 (SSH 필요)
 
-## 설치 준비
-
-### 1. SSH 접속 활성화
-
-**DSM 설정:**
-1. `제어판` → `터미널 및 SNMP`
-2. `터미널` 탭에서 `SSH 서비스 활성화` 체크
-3. 포트: 기본값 22 (또는 보안을 위해 변경)
-4. `적용` 클릭
-
-**SSH 접속:**
 ```bash
-# Windows: PowerShell 또는 PuTTY 사용
-# Mac/Linux: 터미널 사용
+# SSH 접속
 ssh admin@YOUR_NAS_IP
 
-# 예시
-ssh admin@192.168.0.100
-```
-
-### 2. 프로젝트 디렉토리 생성
-
-SSH 접속 후:
-```bash
-# Docker 프로젝트 디렉토리 생성
-sudo mkdir -p /volume1/docker/myappstore
-cd /volume1/docker/myappstore
-
-# 권한 설정
-sudo chown -R $(whoami):users /volume1/docker/myappstore
-```
-
-### 3. 프로젝트 파일 업로드
-
-**방법 1: Git 사용 (권장)**
-```bash
-cd /volume1/docker/myappstore
-git clone https://github.com/zardkim/my-appstore.git .
-```
-
-**방법 2: File Station 사용**
-1. DSM에서 `File Station` 열기
-2. `docker/myappstore` 폴더로 이동
-3. 로컬에서 프로젝트 파일을 압축 (zip)
-4. 압축 파일을 업로드하고 압축 해제
-
-**방법 3: SFTP 사용**
-- FileZilla, WinSCP 등의 SFTP 클라이언트 사용
-- 호스트: NAS IP 주소
-- 포트: 22
-- 사용자: admin
-- 디렉토리: `/volume1/docker/myappstore`
-
----
-
-## Docker Compose 설치
-
-Synology Docker에는 기본적으로 Docker Compose가 포함되어 있지 않습니다.
-
-### 설치 방법
-
-```bash
-# Docker Compose 다운로드 (v2.24.0)
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-
-# 실행 권한 부여
-sudo chmod +x /usr/local/bin/docker-compose
-
-# 설치 확인
-docker-compose --version
-```
-
-출력 예시:
-```
-Docker Compose version v2.24.0
+# 프로젝트 다운로드
+cd /volume1/docker
+git clone https://github.com/zardkim/my-appstore.git myappstore
 ```
 
 ---
 
-## 환경 설정
+### 2단계: Container Manager에서 프로젝트 추가
 
-### 1. 환경 변수 파일 생성
+1. **Container Manager** 앱 열기
+2. 왼쪽 메뉴에서 **프로젝트** 클릭
+3. **생성** 버튼 클릭
 
-프로젝트 루트에 `.env` 파일을 생성합니다:
+![Container Manager 프로젝트](https://via.placeholder.com/800x400?text=Container+Manager+Project)
 
-```bash
-cd /volume1/docker/myappstore
-nano .env
+**프로젝트 설정:**
+- **프로젝트 이름**: `myappstore`
+- **경로**: `/docker/myappstore` 선택
+- **소스**: `docker-compose.yml 파일 사용`
+
+4. **다음** 클릭
+
+---
+
+### 3단계: 환경 변수 설정
+
+**웹 서비스 포털 설정** 화면에서:
+
+#### 필수 환경 변수
+
+| 변수명 | 값 | 설명 |
+|--------|-----|------|
+| `SECRET_KEY` | `your-secret-key-change-this` | 보안 키 (변경 필수!) |
+| `NAS_IP` | `192.168.0.100` | 자신의 NAS IP |
+| `VITE_API_BASE_URL` | `http://192.168.0.100:8100/api` | API URL |
+| `VITE_BACKEND_URL` | `http://192.168.0.100:8100` | 백엔드 URL |
+| `VITE_APP_URL` | `http://192.168.0.100:5900` | 프론트엔드 URL |
+
+> **💡 팁**: NAS IP를 모르겠다면 `제어판` → `네트워크` → `네트워크 인터페이스`에서 확인
+
+#### 선택 환경 변수
+
+| 변수명 | 값 | 설명 |
+|--------|-----|------|
+| `OPENAI_API_KEY` | `sk-your-api-key` | AI 메타데이터 생성 (선택) |
+
+**완료** 버튼 클릭하여 컨테이너 시작
+
+---
+
+## ✅ 설치 완료 확인
+
+### 1. Container Manager에서 상태 확인
+
+1. **Container Manager** → **프로젝트**
+2. `myappstore` 프로젝트 상태가 **실행 중**인지 확인
+3. 컨테이너 4개가 모두 실행 중이어야 함:
+   - `myapp-db` (PostgreSQL)
+   - `myapp-redis` (Redis)
+   - `myapp-backend` (FastAPI)
+   - `myapp-frontend` (Vue.js)
+
+### 2. 웹 브라우저에서 접속
+
+```
+http://YOUR_NAS_IP:5900
 ```
 
-`.env` 파일 내용:
-```bash
-# 보안 키 (반드시 변경하세요!)
-SECRET_KEY=your-very-secure-secret-key-change-this-123456
+예: `http://192.168.0.100:5900`
 
-# OpenAI API 키 (선택사항, AI 메타데이터 생성용)
-OPENAI_API_KEY=sk-your-openai-api-key
+### 3. 초기 설정
 
-# NAS IP 주소 (자신의 NAS IP로 변경)
-NAS_IP=192.168.0.100
+1. 자동으로 **설정 페이지**로 이동
+2. **관리자 계정 생성**:
+   - 사용자명: `admin`
+   - 비밀번호: 강력한 비밀번호 입력
+3. **계정 생성** 클릭
+4. 로그인 후 대시보드 확인
 
-# API 및 프론트엔드 URL 설정
-VITE_API_BASE_URL=http://${NAS_IP}:8100/api
-VITE_BACKEND_URL=http://${NAS_IP}:8100
-VITE_APP_URL=http://${NAS_IP}:5900
+---
+
+## 🔧 추가 설정
+
+### NAS 소프트웨어 폴더 연동
+
+기존 NAS에 저장된 소프트웨어 폴더를 MyApp Store에 연동하려면:
+
+#### 1. Container Manager에서 프로젝트 중지
+
+1. **Container Manager** → **프로젝트**
+2. `myappstore` 선택 → **작업** → **중지**
+
+#### 2. docker-compose.yml 수정
+
+**File Station**에서:
+1. `/docker/myappstore/docker-compose.yml` 파일 열기
+2. `backend` 서비스의 `volumes` 섹션 찾기 (약 55~63줄)
+3. 다음 줄의 주석 제거:
+
+**수정 전:**
+```yaml
+volumes:
+  - ./backend:/app
+  - ./data/icons:/app/static/icons
+  - ./data/library:/library
+  - ./data:/app/data
+  # 아래 줄의 주석 제거하고 경로 수정
+  # - /volume1/Software:/library/NAS:ro
 ```
 
-**저장 방법 (nano):**
-- `Ctrl + O` (저장)
-- `Enter` (파일명 확인)
-- `Ctrl + X` (종료)
-
-### 2. docker-compose.yml 수정 (선택사항)
-
-NAS의 기존 소프트웨어 폴더를 연동하려면:
-
-```bash
-nano docker-compose.yml
-```
-
-63번 줄 근처의 주석을 해제하고 경로를 수정:
+**수정 후:**
 ```yaml
 volumes:
   - ./backend:/app
@@ -163,449 +149,261 @@ volumes:
   - ./data/library:/library
   - ./data:/app/data
   # NAS 소프트웨어 폴더 연동 (읽기 전용)
-  - /volume1/Software:/library/NAS:ro  # 이 줄의 주석 해제 및 경로 수정
-```
-
----
-
-## 빌드 및 실행
-
-### 1. 데이터 디렉토리 생성
-
-```bash
-# 프로젝트 루트에서
-mkdir -p data/db/postgres_data
-mkdir -p data/redis
-mkdir -p data/icons
-mkdir -p data/screenshots
-mkdir -p data/library
-mkdir -p data/logs/postgresql
-
-# 권한 설정
-chmod -R 755 data
-```
-
-### 2. Docker 이미지 빌드
-
-```bash
-# 프로젝트 루트에서
-docker-compose build
-
-# 또는 캐시 없이 빌드 (문제 발생 시)
-docker-compose build --no-cache
-```
-
-빌드 시간: 약 5-10분 소요 (NAS 성능에 따라 다름)
-
-### 3. 컨테이너 시작
-
-```bash
-# 백그라운드에서 실행
-docker-compose up -d
-
-# 로그 확인 (실시간)
-docker-compose logs -f
-
-# 특정 서비스 로그만 확인
-docker-compose logs -f backend
-docker-compose logs -f frontend
-```
-
-### 4. 컨테이너 상태 확인
-
-```bash
-docker-compose ps
-```
-
-정상 출력 예시:
-```
-NAME              IMAGE                    STATUS         PORTS
-myapp-backend     myappstore_backend       Up 2 minutes   0.0.0.0:8100->8100/tcp
-myapp-db          postgres:15-alpine       Up 2 minutes   0.0.0.0:5432->5432/tcp
-myapp-frontend    myappstore_frontend      Up 2 minutes   0.0.0.0:5900->5900/tcp
-myapp-redis       redis:7-alpine           Up 2 minutes   0.0.0.0:6379->6379/tcp
-```
-
----
-
-## 데이터베이스 초기화
-
-### 1. 데이터베이스 마이그레이션
-
-```bash
-# 백엔드 컨테이너 접속
-docker exec -it myapp-backend /bin/sh
-
-# 컨테이너 내부에서
-alembic upgrade head
-
-# 종료
-exit
-```
-
-### 2. 초기 관리자 계정 생성
-
-웹 브라우저에서 처음 접속하면 자동으로 설정 페이지로 리다이렉트됩니다.
-
----
-
-## 접속 및 테스트
-
-### 1. 서비스 접속
-
-**프론트엔드:**
-```
-http://YOUR_NAS_IP:5900
-예: http://192.168.0.100:5900
-```
-
-**백엔드 API (헬스체크):**
-```
-http://YOUR_NAS_IP:8100/api/health
-예: http://192.168.0.100:8100/api/health
-```
-
-**API 문서 (Swagger):**
-```
-http://YOUR_NAS_IP:8100/docs
-```
-
-### 2. 초기 설정
-
-1. 웹 브라우저에서 `http://YOUR_NAS_IP:5900` 접속
-2. 자동으로 `/setup` 페이지로 이동
-3. 관리자 계정 생성:
-   - 사용자명: admin (또는 원하는 이름)
-   - 비밀번호: 안전한 비밀번호 입력
-4. `계정 생성` 클릭
-5. 로그인 페이지로 이동하여 로그인
-
-### 3. 기본 테스트 시나리오
-
-#### 테스트 1: 수동 스캔
-1. 관리자로 로그인
-2. `관리자` 메뉴 선택
-3. `스캔` 탭에서 스캔 경로 설정: `/library`
-4. `스캔 시작` 클릭
-5. 스캔 결과 확인
-
-#### 테스트 2: 제품 조회
-1. `스토어` 메뉴 선택
-2. 스캔된 제품 목록 확인
-3. 제품 클릭하여 상세 정보 확인
-
-#### 테스트 3: 설정
-1. `설정` 메뉴 선택
-2. 카테고리 관리
-3. 일반 설정 (언어 변경)
-
----
-
-## NAS 소프트웨어 폴더 연동
-
-### 1. 기존 소프트웨어 폴더 연동
-
-Synology NAS에 이미 소프트웨어가 저장되어 있는 경우:
-
-```bash
-# docker-compose.yml 수정
-nano docker-compose.yml
-```
-
-backend 서비스의 volumes 섹션에 추가:
-```yaml
-volumes:
-  - ./backend:/app
-  - ./data/icons:/app/static/icons
-  - ./data/library:/library
-  - ./data:/app/data
-  # 기존 소프트웨어 폴더 연동 (읽기 전용)
   - /volume1/Software:/library/NAS:ro
 ```
 
-### 2. 컨테이너 재시작
+> **💡 팁**: `/volume1/Software`를 실제 소프트웨어가 저장된 폴더 경로로 변경하세요
 
-```bash
-docker-compose down
-docker-compose up -d
-```
+#### 3. 프로젝트 재시작
 
-### 3. NAS 폴더 스캔
+1. **Container Manager** → **프로젝트**
+2. `myappstore` 선택 → **작업** → **빌드**
+3. 빌드 완료 후 자동으로 시작됨
 
-1. 웹 UI → `관리자` → `스캔`
-2. 스캔 경로: `/library/NAS`
-3. `스캔 시작` 클릭
+#### 4. 웹 UI에서 스캔
+
+1. 웹 브라우저에서 MyApp Store 접속
+2. **관리자** 메뉴 → **스캔** 탭
+3. 스캔 경로: `/library/NAS` 입력
+4. **스캔 시작** 클릭
 
 ---
 
-## 문제 해결
+## 📱 외부 접속 설정 (선택)
 
-### 컨테이너가 시작되지 않는 경우
+### 1. 포트 포워딩 설정
 
+**라우터 설정:**
+- 외부 포트: 5900 → NAS IP:5900
+- 외부 포트: 8100 → NAS IP:8100
+
+### 2. DDNS 설정 (권장)
+
+1. **제어판** → **외부 액세스** → **DDNS**
+2. Synology DDNS 또는 다른 DDNS 서비스 설정
+3. 도메인 주소로 접속: `http://your-domain.synology.me:5900`
+
+### 3. Reverse Proxy + HTTPS (권장)
+
+Synology의 Reverse Proxy를 사용하여 HTTPS 설정:
+
+1. **제어판** → **로그인 포털** → **고급** 탭
+2. **Reverse Proxy** 클릭
+3. **생성** 클릭
+
+**Reverse Proxy 규칙:**
+
+| 프로토콜 | 호스트 이름 | 포트 | 대상 호스트 | 포트 |
+|---------|-----------|------|------------|------|
+| HTTPS | myappstore.your-domain.me | 443 | localhost | 5900 |
+
+---
+
+## 🛠️ 문제 해결
+
+### 컨테이너가 시작되지 않을 때
+
+#### 1. 로그 확인
+
+1. **Container Manager** → **프로젝트**
+2. `myappstore` 선택 → **작업** → **로그 보기**
+3. 에러 메시지 확인
+
+#### 2. 포트 충돌 확인
+
+다른 서비스가 포트를 사용 중일 수 있습니다.
+
+**SSH에서 확인:**
 ```bash
-# 로그 확인
-docker-compose logs
-
-# 특정 서비스 로그
-docker-compose logs backend
-docker-compose logs frontend
-docker-compose logs db
-
-# 컨테이너 재시작
-docker-compose restart
-
-# 완전히 재시작 (데이터 유지)
-docker-compose down
-docker-compose up -d
+netstat -tuln | grep -E '5900|8100|5432|6379'
 ```
 
-### 포트 충돌 해결
+**해결 방법: 포트 변경**
 
-기본 포트가 이미 사용 중인 경우 `docker-compose.yml`에서 포트 변경:
-
+`docker-compose.yml` 수정:
 ```yaml
-# 예: 프론트엔드 포트 변경
-ports:
-  - "5901:5900"  # 5900 대신 5901 사용
-```
-
-### 데이터베이스 연결 오류
-
-```bash
-# PostgreSQL 컨테이너 상태 확인
-docker-compose ps db
-
-# PostgreSQL 로그 확인
-docker-compose logs db
-
-# 데이터베이스 재시작
-docker-compose restart db
-```
-
-### 권한 오류
-
-```bash
-# 데이터 폴더 권한 재설정
-sudo chown -R 999:999 data/db/postgres_data
-sudo chmod -R 755 data
-```
-
-### 빌드 오류
-
-```bash
-# 캐시 없이 재빌드
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-### 메모리 부족
-
-Synology NAS의 메모리가 부족한 경우:
-
-1. DSM → `리소스 모니터` → 메모리 사용량 확인
-2. 다른 서비스 중지
-3. Docker 메모리 제한 설정:
-
-```yaml
-# docker-compose.yml에 추가
 services:
-  backend:
-    mem_limit: 512m
   frontend:
-    mem_limit: 512m
+    ports:
+      - "5901:5900"  # 5900 대신 5901 사용
+  backend:
+    ports:
+      - "8101:8100"  # 8100 대신 8101 사용
 ```
 
-### 네트워크 접속 불가
+#### 3. 권한 문제
 
-1. **방화벽 확인:**
-   - DSM → `제어판` → `보안` → `방화벽`
-   - 포트 5900, 8100 허용
-
-2. **Docker 네트워크 재생성:**
-   ```bash
-   docker-compose down
-   docker network prune
-   docker-compose up -d
-   ```
-
----
-
-## 유용한 명령어
-
-### Docker Compose 명령어
-
+**SSH에서 권한 재설정:**
 ```bash
-# 서비스 시작
-docker-compose up -d
-
-# 서비스 중지
-docker-compose down
-
-# 서비스 재시작
-docker-compose restart
-
-# 로그 실시간 확인
-docker-compose logs -f
-
-# 특정 서비스만 재시작
-docker-compose restart backend
-
-# 컨테이너 상태 확인
-docker-compose ps
-
-# 리소스 사용량 확인
-docker stats
+sudo chown -R 999:999 /volume1/docker/myappstore/data/db
+sudo chmod -R 755 /volume1/docker/myappstore/data
 ```
 
-### 데이터베이스 명령어
+### 접속이 안 될 때
+
+#### 1. 방화벽 확인
+
+1. **제어판** → **보안** → **방화벽**
+2. 포트 5900, 8100 허용 확인
+
+#### 2. Container Manager에서 재시작
+
+1. **Container Manager** → **프로젝트**
+2. `myappstore` 선택 → **작업** → **재설정**
+
+### 데이터베이스 오류
+
+#### 마이그레이션 실행
+
+1. **Container Manager** → **컨테이너**
+2. `myapp-backend` 선택 → **세부 정보**
+3. **터미널** 탭 → **bash로 생성** 클릭
+4. 다음 명령 실행:
 
 ```bash
-# PostgreSQL 접속
-docker exec -it myapp-db psql -U postgres -d myappstore
-
-# 백업
-docker exec myapp-db pg_dump -U postgres myappstore > backup.sql
-
-# 복원
-docker exec -i myapp-db psql -U postgres myappstore < backup.sql
-```
-
-### 컨테이너 관리
-
-```bash
-# 컨테이너 접속
-docker exec -it myapp-backend /bin/sh
-docker exec -it myapp-frontend /bin/sh
-
-# 컨테이너 리소스 확인
-docker stats myapp-backend myapp-frontend
-
-# 미사용 리소스 정리
-docker system prune -a
+alembic upgrade head
 ```
 
 ---
 
-## 업데이트
+## 🔄 업데이트
 
-### 코드 업데이트
+### 1. 프로젝트 파일 업데이트
+
+#### Git 사용 (SSH)
 
 ```bash
 cd /volume1/docker/myappstore
-
-# Git 업데이트
 git pull origin main
+```
 
-# 컨테이너 재빌드 및 재시작
-docker-compose down
-docker-compose build
-docker-compose up -d
+#### 수동 업데이트
 
-# 마이그레이션 실행
-docker exec -it myapp-backend alembic upgrade head
+1. 로컬에서 최신 파일 다운로드
+2. File Station으로 기존 파일 백업
+3. 새 파일로 교체 (data 폴더 제외)
+
+### 2. Container Manager에서 재빌드
+
+1. **Container Manager** → **프로젝트**
+2. `myappstore` 선택 → **작업** → **중지**
+3. **작업** → **빌드** (캐시 사용 안 함 체크)
+4. 빌드 완료 후 자동 시작
+
+### 3. 데이터베이스 마이그레이션
+
+백엔드 컨테이너 터미널에서:
+```bash
+alembic upgrade head
 ```
 
 ---
 
-## 백업 및 복원
+## 💾 백업 및 복원
 
-### 백업
+### 자동 백업 (Hyper Backup 사용)
 
+1. **Hyper Backup** 앱 설치
+2. 백업 작업 생성
+3. 백업 대상: `/docker/myappstore/data`
+4. 스케줄 설정 (예: 매일 새벽 2시)
+
+### 수동 백업
+
+#### 1. 데이터베이스 백업
+
+**Container Manager** → **컨테이너** → `myapp-db` → **터미널**:
 ```bash
-# 전체 백업 스크립트
-#!/bin/bash
-BACKUP_DIR="/volume1/docker/myappstore_backup_$(date +%Y%m%d)"
-mkdir -p $BACKUP_DIR
-
-# 데이터베이스 백업
-docker exec myapp-db pg_dump -U postgres myappstore > $BACKUP_DIR/database.sql
-
-# 데이터 폴더 백업
-cp -r /volume1/docker/myappstore/data $BACKUP_DIR/
-
-echo "Backup completed: $BACKUP_DIR"
+pg_dump -U postgres myappstore > /var/lib/postgresql/data/backup.sql
 ```
+
+File Station에서 백업 파일 다운로드:
+`/docker/myappstore/data/db/postgres_data/backup.sql`
+
+#### 2. 데이터 폴더 백업
+
+File Station에서 다음 폴더를 백업:
+- `/docker/myappstore/data/icons`
+- `/docker/myappstore/data/library`
+- `/docker/myappstore/data/db`
 
 ### 복원
 
-```bash
-# 데이터베이스 복원
-docker exec -i myapp-db psql -U postgres myappstore < backup/database.sql
-
-# 데이터 폴더 복원
-cp -r backup/data/* /volume1/docker/myappstore/data/
-```
-
----
-
-## 성능 최적화
-
-### 1. Redis 메모리 제한 설정
-
-```yaml
-# docker-compose.yml
-redis:
-  command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
-```
-
-### 2. PostgreSQL 튜닝
-
-```yaml
-# docker-compose.yml
-db:
-  command:
-    - "postgres"
-    - "-c"
-    - "shared_buffers=256MB"
-    - "-c"
-    - "effective_cache_size=1GB"
-```
-
-### 3. 로그 로테이션
-
-```bash
-# /volume1/docker/myappstore/docker-compose.yml
-services:
-  backend:
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-```
+1. Container Manager에서 프로젝트 중지
+2. 백업된 `data` 폴더로 교체
+3. 데이터베이스 복원 (필요시):
+   ```bash
+   psql -U postgres myappstore < backup.sql
+   ```
+4. 프로젝트 재시작
 
 ---
 
-## 보안 권장사항
+## 📊 성능 모니터링
 
-1. **기본 비밀번호 변경**
-   - `.env` 파일의 `SECRET_KEY` 변경
-   - PostgreSQL 비밀번호 변경
+### Container Manager 리소스 모니터
 
-2. **HTTPS 설정**
-   - Synology Reverse Proxy 사용
-   - Let's Encrypt 인증서 적용
+1. **Container Manager** → **프로젝트**
+2. `myappstore` 선택 → **메트릭** 탭
+3. CPU, 메모리, 네트워크 사용량 확인
 
-3. **방화벽 설정**
-   - 외부 접속이 필요한 경우만 포트 개방
-   - 내부 네트워크 전용 권장
+### DSM 리소스 모니터
 
-4. **정기 백업**
-   - 주간 자동 백업 설정
-   - Hyper Backup 활용
+1. **제어판** → **작업 관리자**
+2. **성능** 탭에서 전체 시스템 리소스 확인
 
 ---
 
-## 추가 리소스
+## 🔐 보안 권장사항
 
-- **프로젝트 GitHub**: https://github.com/zardkim/my-appstore
-- **이슈 리포트**: https://github.com/zardkim/my-appstore/issues
-- **CLAUDE.md**: 프로젝트 아키텍처 및 개발 가이드
-- **QUICKSTART.md**: 빠른 시작 가이드
+### 1. 기본 비밀번호 변경
+
+- ✅ `.env` 파일의 `SECRET_KEY` 변경
+- ✅ PostgreSQL 비밀번호 변경
+- ✅ 관리자 계정 강력한 비밀번호 사용
+
+### 2. 외부 접속 제한
+
+- ✅ 방화벽 규칙 설정 (신뢰할 수 있는 IP만 허용)
+- ✅ VPN 사용 권장
+- ✅ HTTPS 설정 (Let's Encrypt)
+
+### 3. 정기 업데이트
+
+- ✅ 주기적으로 프로젝트 업데이트
+- ✅ Container Manager 최신 버전 유지
+- ✅ DSM 보안 업데이트 적용
 
 ---
 
-## 라이선스
+## 📞 지원 및 문서
 
-이 프로젝트는 MIT 라이선스를 따릅니다.
+### 추가 문서
+- **테스트 가이드**: [테스트방법.md](./테스트방법.md)
+- **프로젝트 아키텍처**: [CLAUDE.md](../CLAUDE.md)
+- **변경 이력**: [CHANGELOG.md](../CHANGELOG.md)
+
+### 문제 발생 시
+- **GitHub Issues**: https://github.com/zardkim/my-appstore/issues
+- **API 문서**: `http://YOUR_NAS_IP:8100/docs`
+
+### 버전 정보
+- **현재 버전**: v1.2.2-beta
+- **최신 릴리스**: https://github.com/zardkim/my-appstore/releases
+
+---
+
+## ✅ 설치 완료 체크리스트
+
+- [ ] Container Manager에서 프로젝트 생성 완료
+- [ ] 컨테이너 4개 모두 실행 중
+- [ ] 웹 브라우저에서 접속 성공 (`http://NAS_IP:5900`)
+- [ ] 관리자 계정 생성 완료
+- [ ] 첫 스캔 테스트 완료
+- [ ] (선택) NAS 소프트웨어 폴더 연동 완료
+- [ ] (선택) 외부 접속 설정 완료
+- [ ] (선택) 백업 설정 완료
+
+---
+
+**🎉 설치 완료!** MyApp Store를 즐기세요!
