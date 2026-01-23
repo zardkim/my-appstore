@@ -1,0 +1,84 @@
+{
+  "title": "Movavi Business Suite",
+  "version": "20.0.0",
+  "platform": "Windows",
+  "developer": "Movavi Software Limited",
+  "category": "Media",
+  "official_website": "https://www.movavi.com/",
+  "license_type": "Commercial",
+  "language": "Multilingual (영어, 한국어, 일본어, 중국어, 독일어 등 포함)",
+  "description_short": "비즈니스 마케팅, 교육용 튜토리얼 및 프레젠테이션 제작을 위한 올인원 멀티미디어 편집 솔루션입니다.",
+  "description_detailed": "Movavi Business Suite는 기업용 영상 제작에 최적화된 도구 모음입니다. 전문적인 영상 편집기, 고성능 화면 녹화 프로그램, 180개 이상의 포맷을 지원하는 미디어 컨버터가 포함되어 있습니다. 기업 로고 삽입, 인터랙티브 퀴즈 추가, 화면과 웹캠 동시 녹화 기능을 통해 마케팅 영상이나 사내 교육 자료를 효율적으로 제작할 수 있으며, 직관적인 UI로 초보자도 쉽게 숙련된 결과물을 만들어낼 수 있습니다.",
+  "features": [
+    "비즈니스 전용 스티커, 타이틀, 전환 효과 및 배경 음악 라이브러리 제공",
+    "화면 녹화 기능: 마우스 강조, 키보드 입력 표시, 스케줄 녹화 지원",
+    "SuperSpeed 모드를 활용한 손실 없는 초고속 미디어 포맷 변환",
+    "영상 내 인터랙티브 퀴즈 및 설문 조사 삽입을 통한 시청자 참여 유도",
+    "크로마키, 슬로 모션, 로고/워터마크 삽입 등 전문 편집 도구",
+    "웹캠, 마이크, 시스템 사운드 동시 캡처 및 개별 트랙 편집",
+    "YouTube, Google Drive, Vimeo로의 즉시 공유 및 배포 기능",
+    "CD, DVD, Blu-ray 디스크 굽기 및 VHS/TV 튜너 영상 캡처 지원"
+  ],
+  "supported_formats": [
+    "MP4", "AVI", "MOV", "MKV", "WMV", "MP3", "WAV", "JPG", "PNG", "GIF", "FLAC", "180+ Multimedia Formats"
+  ],
+  "system_requirements": {
+    "os": "Microsoft Windows 7/8/10 (최신 서비스 팩 설치 권장)",
+    "cpu": "Intel, AMD 또는 호환 가능한 듀얼 코어 프로세서 (1.5GHz 이상)",
+    "ram": "최소 2GB (HD 영상 작업 시 8GB 권장)",
+    "disk_space": "설치 시 830MB, 작업 공간을 위해 2GB 이상 권장",
+    "gpu": "Intel HD Graphics 2000, NVIDIA GeForce 8 시리즈, AMD Radeon R600 이상",
+    "additional": "1280 × 768 화면 해상도, 32비트 컬러 이상 지원"
+  },
+  "installation_info": {
+    "installer_type": "EXE (RePack 버전은 무설치/자동 설치 형태 포함)",
+    "file_size": "약 130MB - 170MB",
+    "internet_required": "선택사항 (정품 인증 및 외부 공유 기능 사용 시 필요)"
+  },
+  "release_notes": "20.0 버전은 사용자 정의가 가능한 완전히 새로운 인터페이스를 도입하였으며, 시청자 참여를 위한 인터랙티브 퀴즈 기능과 시각 효과(패럴랙스 전환 등)가 대거 추가되었습니다."
+}
+
+실제 메타데이터 테스트에 표시되고 있는 항목
+
+{
+  "title": "Movavi Business Suite",
+  "version": null,
+  "platform": "Windows",
+  "developer": "Movavi",
+  "category": "Utility",
+  "official_website": "",
+  "license_type": "",
+  "language": "",
+  "description_short": "Movavi Business Suite 소프트웨어",
+  "description_detailed": "",
+  "features": [],
+  "supported_formats": [],
+  "system_requirements": {
+    "os": "",
+    "cpu": "",
+    "ram": "",
+    "disk_space": "",
+    "gpu": "",
+    "additional": ""
+  },
+  "installation_info": {
+    "installer_type": "",
+    "file_size": "",
+    "internet_required": ""
+  },
+  "release_notes": "",
+  "parsed_info": {
+    "original_input": "Movavi Business Suite 20.0.0 RePack",
+    "parsed_name": "Movavi Business Suite",
+    "version": null,
+    "year": null,
+    "vendor": "Movavi"
+  },
+  "confidence": {
+    "score": 0.45,
+    "percentage": 45,
+    "level": "low",
+    "auto_register": false,
+    "threshold": 0.9
+  }
+}

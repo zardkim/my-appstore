@@ -45,8 +45,8 @@ class Settings(BaseSettings):
 
     # Server
     HOST: str = "0.0.0.0"
-    PORT: int = 8100
-    BACKEND_URL: str = "http://localhost:8100"  # Backend URL for image paths
+    PORT: int = 8110
+    BACKEND_URL: str = "http://localhost:8110"  # Backend URL for image paths
 
     # Logging
     LOG_LEVEL: str = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
