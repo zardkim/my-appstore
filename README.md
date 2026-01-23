@@ -151,8 +151,8 @@ POSTGRES_DB=myappstore
 NAS_IP=192.168.0.100
 
 # API 및 프론트엔드 URL
-VITE_API_BASE_URL=http://192.168.0.100:8100/api
-VITE_BACKEND_URL=http://192.168.0.100:8100
+VITE_API_BASE_URL=http://192.168.0.100:8110/api
+VITE_BACKEND_URL=http://192.168.0.100:8110
 VITE_APP_URL=http://192.168.0.100:5900
 
 # AI 설정 (선택사항)
@@ -186,8 +186,8 @@ docker-compose down
 ### 4. 접속
 
 - **프론트엔드**: http://localhost:5900
-- **백엔드 API**: http://localhost:8100
-- **API 문서**: http://localhost:8100/docs
+- **백엔드 API**: http://localhost:8110
+- **API 문서**: http://localhost:8110/docs
 
 ### 5. 초기 설정
 
@@ -237,8 +237,9 @@ services:
       - DATABASE_URL=postgresql://postgres:password@db:5432/myappstore
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=your-secret-key-change-this
+      - PORT=8110
     ports:
-      - "8100:8100"
+      - "8110:8110"
     depends_on:
       - db
       - redis
@@ -352,8 +353,8 @@ backend:
 
 | 변수 | 설명 | 필수 | 기본값 | 예시 |
 |------|------|------|--------|------|
-| `VITE_API_BASE_URL` | 백엔드 API URL | ✅ | - | `http://localhost:8100/api` |
-| `VITE_BACKEND_URL` | 백엔드 기본 URL | ✅ | - | `http://localhost:8100` |
+| `VITE_API_BASE_URL` | 백엔드 API URL | ✅ | - | `http://localhost:8110/api` |
+| `VITE_BACKEND_URL` | 백엔드 기본 URL | ✅ | - | `http://localhost:8110` |
 | `VITE_APP_URL` | 프론트엔드 URL | ✅ | - | `http://localhost:5900` |
 
 **전체 환경변수 목록**: [.env.production.example](.env.production.example) 참조
@@ -397,8 +398,8 @@ npm run dev
 - [배포 가이드](DEPLOYMENT_GUIDE.md) - 프로덕션 배포 상세 가이드
 
 ### API 문서
-- **Swagger UI**: http://localhost:8100/docs
-- **ReDoc**: http://localhost:8100/redoc
+- **Swagger UI**: http://localhost:8110/docs
+- **ReDoc**: http://localhost:8110/redoc
 
 ### 개발자 가이드
 - [CLAUDE.md](CLAUDE.md) - 프로젝트 개요 및 아키텍처
@@ -491,7 +492,7 @@ docker-compose exec backend env | grep DATABASE_URL
 
 ```bash
 # CORS 설정 확인
-curl http://localhost:8100/debug-cors
+curl http://localhost:8110/debug-cors
 
 # 브라우저 개발자 도구에서 네트워크 탭 확인
 ```

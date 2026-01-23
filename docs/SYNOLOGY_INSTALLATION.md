@@ -116,12 +116,9 @@ data/
 3. 복사한 파일 이름을 `.env`로 변경
 4. `.env` 파일을 열어 다음 값들을 수정:
 
-```bash
-# ==================== 데이터베이스 설정 ====================
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=password
-POSTGRES_DB=myappstore
+**주요 수정 항목:**
 
+```bash
 # ==================== 보안 설정 ====================
 # 중요: 강력한 SECRET_KEY를 생성하세요
 SECRET_KEY=your-secret-key-change-this-in-production
@@ -131,19 +128,20 @@ SECRET_KEY=your-secret-key-change-this-in-production
 NAS_IP=192.168.0.100
 
 # ==================== 프론트엔드 환경변수 ====================
-# NAS_IP를 실제 IP로 변경하세요
+# ⚠️ 중요: localhost를 실제 NAS IP로 변경하세요!
+# 다른 기기에서 접속하려면 반드시 실제 IP 주소를 사용해야 합니다.
 VITE_API_BASE_URL=http://192.168.0.100:8100/api
 VITE_BACKEND_URL=http://192.168.0.100:8100
 VITE_APP_URL=http://192.168.0.100:5900
 
 # ==================== AI 설정 (선택사항) ====================
 OPENAI_API_KEY=
-
-# ==================== CORS 설정 ====================
-CORS_ORIGINS=*
 ```
 
-> **💡 팁**: NAS IP를 모르겠다면 `제어판` → `네트워크` → `네트워크 인터페이스`에서 확인
+> **💡 팁**:
+> - NAS IP 확인 방법: `제어판` → `네트워크` → `네트워크 인터페이스`
+> - `.env.example`의 기본값은 `localhost`로 되어 있으므로, NAS 환경에서는 **반드시 실제 IP로 변경**해야 합니다.
+> - 위 예시의 `192.168.0.100`을 자신의 NAS IP로 변경하세요.
 
 #### SSH 사용 (대안)
 

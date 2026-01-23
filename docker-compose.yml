@@ -88,9 +88,9 @@ services:
 
       # Server
       - HOST=0.0.0.0
-      - PORT=8100
+      - PORT=8110
     ports:
-      - "8100:8100"
+      - "8110:8110"
     depends_on:
       db:
         condition: service_healthy
@@ -109,8 +109,8 @@ services:
       # 브라우저에서 실행되므로 실제 접속 IP 주소 사용 권장
       # localhost: 호스트 머신에서만 접속
       # 192.168.x.x 또는 NAS_IP: 같은 네트워크의 다른 기기에서도 접속 가능
-      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8100/api}
-      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8100}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8110/api}
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8110}
       - VITE_APP_URL=${VITE_APP_URL:-http://localhost:5900}
     depends_on:
       - backend
