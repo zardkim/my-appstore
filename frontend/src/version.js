@@ -5,12 +5,11 @@
  * Do not edit manually.
  */
 
-export const version = "1.3.0-beta"
+export const version = "1.3.1"
 export const versionInfo = {
   major: 1,
   minor: 3,
-  patch: 0,
-  prerelease: "beta"
+  patch: 1
 }
 
 export const buildInfo = {
