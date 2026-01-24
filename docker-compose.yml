@@ -65,10 +65,8 @@ services:
     ports:
       - "${BACKEND_PORT:-8110}:8110"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - db
+      - redis
 
   frontend:
     image: zardkim/myappstore-frontend:latest
