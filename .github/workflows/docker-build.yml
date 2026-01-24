@@ -47,15 +47,31 @@ jobs:
             echo "version=1.3.0-beta" >> $GITHUB_OUTPUT
           fi
 
+      - name: Generate Backend image tags
+        id: backend_tags
+        run: |
+          TAGS="${{ env.BACKEND_IMAGE }}:${{ steps.version.outputs.version }}"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            TAGS="${TAGS},${{ env.BACKEND_IMAGE }}:latest"
+          fi
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
+      - name: Generate Frontend image tags
+        id: frontend_tags
+        run: |
+          TAGS="${{ env.FRONTEND_IMAGE }}:${{ steps.version.outputs.version }}"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            TAGS="${TAGS},${{ env.FRONTEND_IMAGE }}:latest"
+          fi
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
       - name: Build and push Backend image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: |
-            ${{ env.BACKEND_IMAGE }}:${{ steps.version.outputs.version }}
-            ${{ env.BACKEND_IMAGE }}:latest
+          tags: ${{ steps.backend_tags.outputs.tags }}
           cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
 
@@ -65,9 +81,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: |
-            ${{ env.FRONTEND_IMAGE }}:${{ steps.version.outputs.version }}
-            ${{ env.FRONTEND_IMAGE }}:latest
+          tags: ${{ steps.frontend_tags.outputs.tags }}
           cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
 
