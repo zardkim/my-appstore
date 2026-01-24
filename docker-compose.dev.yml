@@ -10,9 +10,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-myappstore}
     volumes:
+      # Synology NAS: /volume1/docker/myappstore/db
       - ./db:/var/lib/postgresql/data
     ports:
-      - "${POSTGRES_PORT:-5433}:5432"
+      - "${POSTGRES_PORT:-5433}:5432"  # 외부 포트 5433 사용 (Synology 기본 PostgreSQL 충돌 방지)
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -24,9 +25,10 @@ services:
     container_name: myapp-redis
     restart: unless-stopped
     volumes:
+      # Synology NAS: /volume1/docker/myappstore/redis
       - ./redis:/data
     ports:
-      - "${REDIS_PORT:-6380}:6379"
+      - "${REDIS_PORT:-6380}:6379"  # 외부 포트 6380 사용 (충돌 방지)
     command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -35,19 +37,39 @@ services:
       retries: 5
 
   backend:
-    image: zardkim/myappstore-backend:1.3.0-beta
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: myappstore-backend:latest
     container_name: myapp-backend
     restart: unless-stopped
     volumes:
+      # Synology NAS: /volume1/docker/myappstore/data
       - ./data:/app/data
+      # 하위 폴더는 백엔드가 자동 생성:
+      # - data/icons, data/screenshots, data/eximage
+      # - data/patches, data/logs, data/attachments, data/config
+      # - data/library (사용자가 수동 생성)
+
+      # 선택사항: NAS의 기존 소프트웨어 폴더 마운트 (읽기 전용)
+      # - /volume1/Software:/library/NAS:ro
     environment:
+      # Database
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-myappstore}
+
+      # Redis
       - REDIS_URL=redis://redis:6379/0
+
+      # Security
       - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-this-in-production}
       - ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+
+      # AI (선택사항 - 웹 UI에서도 설정 가능)
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+
+      # Paths (컨테이너 내부 경로)
       - SCAN_BASE_PATH=/app/data/library
       - ICON_CACHE_DIR=/app/data/icons
       - SCREENSHOT_CACHE_DIR=/app/data/screenshots
@@ -56,10 +78,16 @@ services:
       - CONFIG_DATA_DIR=/app/data
       - LOG_DIR=/app/data/logs
       - SCAN_EXCLUSIONS_FILE=/app/data/scan_exclusions.txt
+
+      # CORS (개발: "*", 프로덕션: 실제 도메인)
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
+
+      # Server
       - HOST=0.0.0.0
       - PORT=${BACKEND_PORT:-8110}
       - BACKEND_URL=http://localhost:${BACKEND_PORT:-8110}
+
+      # Logging
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - ENVIRONMENT=${ENVIRONMENT:-production}
     ports:
@@ -71,12 +99,17 @@ services:
         condition: service_healthy
 
   frontend:
-    image: zardkim/myappstore-frontend:1.3.0-beta
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: myappstore-frontend:latest
     container_name: myapp-frontend
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-5900}:5900"
     environment:
+      # 브라우저에서 접근할 URL (기본값: localhost)
+      # 다른 기기에서 접속하려면 .env 파일에서 직접 수정하세요
       - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8110/api}
       - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8110}
       - VITE_APP_URL=${VITE_APP_URL:-http://localhost:5900}

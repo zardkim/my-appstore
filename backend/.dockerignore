@@ -1,31 +1,16 @@
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-
-# Virtual environments
-venv/
 env/
+venv/
 ENV/
-.venv
-
-# Testing
-tests/
-test_*.py
-*_test.py
+*.egg-info/
 .pytest_cache/
 .coverage
 htmlcov/
-.tox/
-
-# Development files
-.env
-.env.local
-.env.*.local
-*.log
-*.pot
 
 # IDE
 .vscode/
@@ -33,30 +18,31 @@ htmlcov/
 *.swp
 *.swo
 *~
+
+# OS
 .DS_Store
-
-# Documentation
-*.md
-!README.md
-docs/
-
-# Data directories (will be mounted as volumes)
-data/
-static/icons/*
-alembic/versions/__pycache__/
+Thumbs.db
 
 # Git
 .git/
 .gitignore
 
-# CI/CD
-.github/
-.gitlab-ci.yml
+# Alembic
+alembic/versions/__pycache__/
 
-# Old files
-*_old.py
-*.backup
+# Local data
+data/
+*.db
+*.sqlite
 
 # Logs
 logs/
 *.log
+
+# Environment
+.env
+.env.local
+
+# Documentation
+README.md
+docs/
