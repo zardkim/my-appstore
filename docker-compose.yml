@@ -4,33 +4,18 @@ services:
   db:
     image: postgres:15-alpine
     container_name: myapp-db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-myappstore}
-      # PostgreSQL 로깅 설정
-      POSTGRES_INITDB_ARGS: "-c logging_collector=on"
     volumes:
-      - ./data/db:/var/lib/postgresql/data
-      - ./data/logs:/var/log/postgresql
+      # Synology NAS: /volume1/docker/myappstore/db
+      - ./db:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
-    command:
-      - "postgres"
-      - "-c"
-      - "log_statement=all"              # 모든 SQL 문 로깅
-      - "-c"
-      - "log_duration=on"                # 쿼리 실행 시간 로깅
-      - "-c"
-      - "log_min_duration_statement=1000" # 1초 이상 쿼리만 별도 로깅
-      - "-c"
-      - "log_line_prefix=%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h "
-      - "-c"
-      - "log_connections=on"             # 연결 로깅
-      - "-c"
-      - "log_disconnections=on"          # 연결 해제 로깅
+      - "${POSTGRES_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,10 +23,12 @@ services:
   redis:
     image: redis:7-alpine
     container_name: myapp-redis
+    restart: unless-stopped
     volumes:
-      - ./data/redis:/data
+      # Synology NAS: /volume1/docker/myappstore/redis
+      - ./redis:/data
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -50,16 +37,21 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: myappstore-backend:latest
     container_name: myapp-backend
+    restart: unless-stopped
     volumes:
-      - ./backend:/app
-      - ./data/icons:/app/static/icons
-      # Library folder - main storage for software files
-      - ./data/library:/library
-      # Config data directory
+      # Synology NAS: /volume1/docker/myappstore/data
       - ./data:/app/data
-      # Optional: Mount your NAS software folder here (adjust path as needed)
+      # 하위 폴더는 백엔드가 자동 생성:
+      # - data/icons, data/screenshots, data/eximage
+      # - data/patches, data/logs, data/attachments, data/config
+      # - data/library (사용자가 수동 생성)
+
+      # 선택사항: NAS의 기존 소프트웨어 폴더 마운트 (읽기 전용)
       # - /volume1/Software:/library/NAS:ro
     environment:
       # Database
@@ -71,26 +63,35 @@ services:
       # Security
       - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-this-in-production}
       - ALGORITHM=HS256
-      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
 
-      # AI
+      # AI (선택사항 - 웹 UI에서도 설정 가능)
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
 
-      # Paths
-      - SCAN_BASE_PATH=/library
-      - ICON_CACHE_DIR=/app/static/icons
+      # Paths (컨테이너 내부 경로)
+      - SCAN_BASE_PATH=/app/data/library
+      - ICON_CACHE_DIR=/app/data/icons
+      - SCREENSHOT_CACHE_DIR=/app/data/screenshots
+      - EXIMAGE_DIR=/app/data/eximage
+      - PATCHES_DIR=/app/data/patches
       - CONFIG_DATA_DIR=/app/data
+      - LOG_DIR=/app/data/logs
       - SCAN_EXCLUSIONS_FILE=/app/data/scan_exclusions.txt
 
-      # CORS - comma-separated origins
-      # 개발/내부 NAS 환경: "*"로 모든 origin 허용 (프로덕션에서는 구체적인 도메인 지정 권장)
+      # CORS (개발: "*", 프로덕션: 실제 도메인)
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
 
       # Server
       - HOST=0.0.0.0
-      - PORT=8110
+      - PORT=${BACKEND_PORT:-8110}
+      - BACKEND_URL=http://${NAS_IP:-localhost}:${BACKEND_PORT:-8110}
+
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
     ports:
-      - "8110:8110"
+      - "${BACKEND_PORT:-8110}:8110"
     depends_on:
       db:
         condition: service_healthy
@@ -98,19 +99,20 @@ services:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: myappstore-frontend:latest
     container_name: myapp-frontend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    restart: unless-stopped
     ports:
-      - "5900:5900"
+      - "${FRONTEND_PORT:-5900}:5900"
     environment:
-      # 브라우저에서 실행되므로 실제 접속 IP 주소 사용 권장
+      # 브라우저에서 접근할 실제 URL (NAS IP 주소 사용 권장)
       # localhost: 호스트 머신에서만 접속
-      # 192.168.x.x 또는 NAS_IP: 같은 네트워크의 다른 기기에서도 접속 가능
-      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8110/api}
-      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8110}
-      - VITE_APP_URL=${VITE_APP_URL:-http://localhost:5900}
+      # NAS_IP: 같은 네트워크의 다른 기기에서도 접속
+      - VITE_API_BASE_URL=http://${NAS_IP:-localhost}:${BACKEND_PORT:-8110}/api
+      - VITE_BACKEND_URL=http://${NAS_IP:-localhost}:${BACKEND_PORT:-8110}
+      - VITE_APP_URL=http://${NAS_IP:-localhost}:${FRONTEND_PORT:-5900}
     depends_on:
       - backend
