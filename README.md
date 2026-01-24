@@ -456,7 +456,24 @@ npm run dev
 
 ### 이미지 빌드 및 Docker Hub 푸시
 
-개발자가 새 버전의 이미지를 빌드하고 Docker Hub에 푸시하려면:
+#### 방법 1: GitHub Actions 사용 (권장)
+
+GitHub Actions를 통해 자동으로 이미지를 빌드하고 푸시합니다:
+
+```bash
+# 새 버전 태그 생성 및 푸시
+git tag v1.3.0-beta
+git push origin v1.3.0-beta
+
+# 또는 main 브랜치에 푸시하면 자동 빌드
+git push origin main
+```
+
+**설정 가이드**: [GitHub Actions 설정 가이드](docs/GITHUB_ACTIONS_SETUP.md)
+
+#### 방법 2: 로컬에서 수동 빌드
+
+Docker가 실행 중인 환경에서:
 
 ```bash
 # 빌드 및 푸시 스크립트 실행
@@ -479,6 +496,7 @@ npm run dev
 
 ### 개발자 가이드
 - [CLAUDE.md](CLAUDE.md) - 프로젝트 개요 및 아키텍처
+- [GitHub Actions 설정](docs/GITHUB_ACTIONS_SETUP.md) - 자동 빌드 및 배포 설정
 - [CHANGELOG.md](CHANGELOG.md) - 버전별 변경사항
 - Database Schema - CLAUDE.md 참조
 - API Endpoints - Swagger UI 참조
