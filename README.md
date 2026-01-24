@@ -117,12 +117,23 @@
 
 - Docker 20.10+
 - Docker Compose 2.0+
-- 4GB+ RAM
+- 4GB+ RAM (권장: 8GB)
 - 20GB+ 디스크 여유 공간
 
-### 1. 필수 파일 다운로드
+### 설치 방법
 
-프로덕션 환경에서는 소스 코드 없이 Docker Hub 이미지만으로 실행할 수 있습니다.
+MyApp Store는 **Docker Hub에서 제공하는 사전 빌드된 이미지**를 사용하므로 소스 코드를 다운로드하거나 빌드할 필요가 없습니다.
+
+#### 🐳 사용되는 Docker 이미지
+
+- **Backend**: `zardkim/myappstore-backend:1.3.0-beta`
+- **Frontend**: `zardkim/myappstore-frontend:1.3.0-beta`
+- **Database**: `postgres:15-alpine`
+- **Cache**: `redis:7-alpine`
+
+---
+
+### 1. 필수 파일 다운로드
 
 ```bash
 # 작업 디렉토리 생성
@@ -132,6 +143,13 @@ cd myappstore
 # docker-compose.yml과 .env.example 다운로드
 wget https://raw.githubusercontent.com/zardkim/my-appstore/main/docker-compose.yml
 wget https://raw.githubusercontent.com/zardkim/my-appstore/main/.env.example
+```
+
+또는 `curl` 사용:
+
+```bash
+curl -O https://raw.githubusercontent.com/zardkim/my-appstore/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/zardkim/my-appstore/main/.env.example
 ```
 
 ### 2. 환경변수 설정
@@ -183,17 +201,47 @@ mkdir -p db redis data/library
 ### 4. Docker Compose로 실행
 
 ```bash
-# Docker Hub에서 이미지를 Pull하고 실행
+# Docker Hub에서 이미지 Pull 및 컨테이너 시작
 docker-compose up -d
 
-# 로그 확인
+# 컨테이너 상태 확인
+docker-compose ps
+
+# 실시간 로그 확인
 docker-compose logs -f
 
-# 중지
-docker-compose down
+# 특정 서비스 로그만 확인
+docker-compose logs -f backend
+docker-compose logs -f frontend
 ```
 
-> **💡 참고**: `.env` 파일이 `docker-compose.yml`과 같은 폴더에 있으면 자동으로 읽힙니다.
+**첫 실행 시 발생하는 일:**
+
+1. 📥 Docker Hub에서 이미지 다운로드:
+   - `zardkim/myappstore-backend:1.3.0-beta` (~500MB)
+   - `zardkim/myappstore-frontend:1.3.0-beta` (~200MB)
+   - `postgres:15-alpine` (~200MB)
+   - `redis:7-alpine` (~30MB)
+
+2. 🗄️ PostgreSQL 데이터베이스 초기화
+3. 🚀 모든 서비스 시작 (약 30초 소요)
+
+**컨테이너 중지 및 제거:**
+
+```bash
+# 중지
+docker-compose stop
+
+# 중지 및 컨테이너 제거 (데이터는 유지)
+docker-compose down
+
+# 모든 데이터 포함 완전 제거
+docker-compose down -v
+```
+
+> **💡 참고**:
+> - `.env` 파일이 `docker-compose.yml`과 같은 폴더에 있으면 자동으로 읽힙니다
+> - 데이터는 `./db`, `./redis`, `./data` 폴더에 저장되므로 컨테이너를 삭제해도 유지됩니다
 
 ### 5. 접속
 
