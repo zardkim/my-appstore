@@ -120,11 +120,18 @@
 - 4GB+ RAM
 - 20GB+ 디스크 여유 공간
 
-### 1. 저장소 클론
+### 1. 필수 파일 다운로드
+
+프로덕션 환경에서는 소스 코드 없이 Docker Hub 이미지만으로 실행할 수 있습니다.
 
 ```bash
-git clone https://github.com/zardkim/my-appstore.git
-cd my-appstore
+# 작업 디렉토리 생성
+mkdir myappstore
+cd myappstore
+
+# docker-compose.yml과 .env.example 다운로드
+wget https://raw.githubusercontent.com/zardkim/my-appstore/main/docker-compose.yml
+wget https://raw.githubusercontent.com/zardkim/my-appstore/main/.env.example
 ```
 
 ### 2. 환경변수 설정
@@ -166,10 +173,17 @@ VITE_APP_URL=http://192.168.0.100:5900
 > SECRET_KEY=$(openssl rand -hex 32)
 > ```
 
-### 3. Docker Compose로 실행
+### 3. 폴더 구조 생성
 
 ```bash
-# Docker Compose로 빌드 및 실행
+# 필수 폴더 생성
+mkdir -p db redis data/library
+```
+
+### 4. Docker Compose로 실행
+
+```bash
+# Docker Hub에서 이미지를 Pull하고 실행
 docker-compose up -d
 
 # 로그 확인
@@ -181,13 +195,13 @@ docker-compose down
 
 > **💡 참고**: `.env` 파일이 `docker-compose.yml`과 같은 폴더에 있으면 자동으로 읽힙니다.
 
-### 4. 접속
+### 5. 접속
 
 - **프론트엔드**: http://localhost:5900
 - **백엔드 API**: http://localhost:8110
 - **API 문서**: http://localhost:8110/docs
 
-### 5. 초기 설정
+### 6. 초기 설정
 
 1. 브라우저에서 http://localhost:5900 접속
 2. 관리자 계정 생성
@@ -234,7 +248,7 @@ mkdir -p db redis data/library
 
 ### docker-compose.yml (프로덕션)
 
-간소화된 프로덕션 환경 설정:
+Docker Hub 이미지를 사용하는 프로덕션 환경 설정:
 
 ```yaml
 version: '3.8'
@@ -249,43 +263,59 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-myappstore}
     volumes:
-      - ./db:/var/lib/postgresql/data    # 단순화된 경로
+      - ./db:/var/lib/postgresql/data
     ports:
-      - "5433:5432"  # Synology PostgreSQL 충돌 방지
+      - "${POSTGRES_PORT:-5433}:5432"  # Synology PostgreSQL 충돌 방지
 
   redis:
     image: redis:7-alpine
     container_name: myapp-redis
     restart: unless-stopped
     volumes:
-      - ./redis:/data                     # 단순화된 경로
+      - ./redis:/data
     ports:
-      - "6380:6379"  # 충돌 방지
+      - "${REDIS_PORT:-6380}:6379"  # 충돌 방지
+    command: redis-server --appendonly yes
 
   backend:
-    build: ./backend
-    image: myappstore-backend:latest
+    image: zardkim/myappstore-backend:1.3.0-beta  # Docker Hub 이미지
     container_name: myapp-backend
     restart: unless-stopped
     volumes:
-      - ./data:/app/data                  # 모든 앱 데이터
+      - ./data:/app/data
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-myappstore}
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-this-in-production}
+      # ... 기타 환경변수
     ports:
-      - "8110:8110"
+      - "${BACKEND_PORT:-8110}:8110"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   frontend:
-    build: ./frontend
-    image: myappstore-frontend:latest
+    image: zardkim/myappstore-frontend:1.3.0-beta  # Docker Hub 이미지
     container_name: myapp-frontend
     restart: unless-stopped
     environment:
       - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8110/api}
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8110}
+      - VITE_APP_URL=${VITE_APP_URL:-http://localhost:5900}
     ports:
-      - "5900:5900"
+      - "${FRONTEND_PORT:-5900}:5900"
+    depends_on:
+      - backend
 ```
+
+> **💡 개발자를 위한 안내**
+>
+> 소스 코드를 수정하고 로컬에서 빌드하려면 `docker-compose.dev.yml`을 사용하세요:
+> ```bash
+> docker-compose -f docker-compose.dev.yml up -d
+> ```
 
 ### NAS 소프트웨어 폴더 추가 마운트 (선택사항)
 
@@ -401,21 +431,36 @@ backend:
 
 ### 개발 모드 실행
 
-```bash
-# 개발 환경 실행
-docker-compose up -d
+개발자가 소스 코드를 수정하고 빌드하려면:
 
-# 백엔드만 실행 (로컬 개발)
+```bash
+# 저장소 클론
+git clone https://github.com/zardkim/my-appstore.git
+cd my-appstore
+
+# 개발 환경 실행 (로컬 빌드)
+docker-compose -f docker-compose.dev.yml up -d
+
+# 또는 백엔드만 로컬에서 실행
 cd backend
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8100
+uvicorn app.main:app --reload --port 8110
 
-# 프론트엔드만 실행 (로컬 개발)
+# 또는 프론트엔드만 로컬에서 실행
 cd frontend
 npm install
 npm run dev
+```
+
+### 이미지 빌드 및 Docker Hub 푸시
+
+개발자가 새 버전의 이미지를 빌드하고 Docker Hub에 푸시하려면:
+
+```bash
+# 빌드 및 푸시 스크립트 실행
+./scripts/build-and-push.sh
 ```
 
 ---

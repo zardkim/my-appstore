@@ -13,7 +13,7 @@ RUN mkdir -p /app/static/icons
 COPY ./app ./app
 
 # Expose port
-EXPOSE 8100
+EXPOSE 8110
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8100"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8110"]
