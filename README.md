@@ -126,8 +126,8 @@ MyApp Store는 **Docker Hub에서 제공하는 사전 빌드된 이미지**를 �
 
 #### 🐳 사용되는 Docker 이미지
 
-- **Backend**: `zardkim/myappstore-backend:1.3.0-beta`
-- **Frontend**: `zardkim/myappstore-frontend:1.3.0-beta`
+- **Backend**: `zardkim/myappstore-backend:1.3.1`
+- **Frontend**: `zardkim/myappstore-frontend:1.3.1`
 - **Database**: `postgres:15-alpine`
 - **Cache**: `redis:7-alpine`
 
@@ -218,8 +218,8 @@ docker-compose logs -f frontend
 **첫 실행 시 발생하는 일:**
 
 1. 📥 Docker Hub에서 이미지 다운로드:
-   - `zardkim/myappstore-backend:1.3.0-beta` (~500MB)
-   - `zardkim/myappstore-frontend:1.3.0-beta` (~200MB)
+   - `zardkim/myappstore-backend:1.3.1` (~500MB)
+   - `zardkim/myappstore-frontend:1.3.1` (~200MB)
    - `postgres:15-alpine` (~200MB)
    - `redis:7-alpine` (~30MB)
 
@@ -510,8 +510,8 @@ GitHub Actions를 통해 자동으로 이미지를 빌드하고 푸시합니다:
 
 ```bash
 # 새 버전 태그 생성 및 푸시
-git tag v1.3.0-beta
-git push origin v1.3.0-beta
+git tag v1.3.1
+git push origin v1.3.1
 
 # 또는 main 브랜치에 푸시하면 자동 빌드
 git push origin main

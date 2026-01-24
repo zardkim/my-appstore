@@ -44,7 +44,7 @@ jobs:
           elif [[ "${{ github.event.inputs.version }}" != "" && "${{ github.event.inputs.version }}" != "latest" ]]; then
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
           else
-            echo "version=1.3.0-beta" >> $GITHUB_OUTPUT
+            echo "version=1.3.1" >> $GITHUB_OUTPUT
           fi
 
       - name: Generate Backend image tags
