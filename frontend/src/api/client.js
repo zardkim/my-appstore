@@ -15,10 +15,9 @@ function getApiBaseUrl() {
     return envUrl
   }
 
-  // 환경 변수가 없으면 현재 호스트 기준으로 API URL 생성
-  const hostname = window.location.hostname
-  const protocol = window.location.protocol
-  return `${protocol}//${hostname}:8100/api`
+  // 환경 변수가 없으면 상대 경로 사용 (역방향 프록시 환경 지원)
+  // 이렇게 하면 https://app.nuripc.kr에서 접속하면 https://app.nuripc.kr/api를 사용
+  return '/api'
 }
 
 const apiClient = axios.create({

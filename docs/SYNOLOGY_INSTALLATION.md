@@ -262,12 +262,38 @@ Synology의 Reverse Proxy를 사용하여 HTTPS 설정:
 2. **Reverse Proxy** 클릭
 3. **생성** 클릭
 
-**Reverse Proxy 규칙:**
+**규칙 1: 프론트엔드**
 
-| 프로토콜 | 호스트 이름 | 포트 | 대상 호스트 | 포트 |
-|---------|-----------|------|------------|------|
-| HTTPS | myappstore.your-domain.me | 443 | localhost | 5900 |
-| HTTP | api.myappstore.your-domain.me | 80 | localhost | 8110 |
+| 항목 | 값 |
+|------|-----|
+| 설명 | MyApp Store Frontend |
+| 소스 프로토콜 | HTTPS |
+| 소스 호스트 이름 | app.nuripc.kr |
+| 소스 포트 | 443 |
+| 소스 경로 | / |
+| 대상 프로토콜 | HTTP |
+| 대상 호스트 이름 | localhost |
+| 대상 포트 | 5900 |
+
+**규칙 2: 백엔드 API (중요!)**
+
+| 항목 | 값 |
+|------|-----|
+| 설명 | MyApp Store Backend API |
+| 소스 프로토콜 | HTTPS |
+| 소스 호스트 이름 | app.nuripc.kr |
+| 소스 포트 | 443 |
+| 소스 경로 | /api |
+| 대상 프로토콜 | HTTP |
+| 대상 호스트 이름 | localhost |
+| 대상 포트 | 8110 |
+| 대상 경로 | /api |
+
+**고급 설정 (두 규칙 모두):**
+- ✅ **WebSocket 지원** 활성화
+- ✅ **HSTS** 활성화 (선택사항)
+
+**중요:** `/api` 규칙을 먼저 생성하고, `/` 규칙을 나중에 생성하세요. 규칙 순서가 중요합니다!
 
 ---
 
