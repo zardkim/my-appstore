@@ -147,19 +147,17 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=password
 POSTGRES_DB=myappstore
 
-# NAS 또는 서버 IP 주소 (실제 IP로 변경)
-NAS_IP=192.168.0.100
+# CORS 설정
+CORS_ORIGINS=*
+```
 
-# API 및 프론트엔드 URL
+**선택 변경 항목** (다른 기기에서 접속하려면):
+```bash
+# 프론트엔드 환경변수 (기본값: localhost)
+# NAS IP 주소로 변경하여 같은 네트워크의 다른 기기에서도 접속 가능
 VITE_API_BASE_URL=http://192.168.0.100:8110/api
 VITE_BACKEND_URL=http://192.168.0.100:8110
 VITE_APP_URL=http://192.168.0.100:5900
-
-# AI 설정 (선택사항)
-OPENAI_API_KEY=
-
-# CORS 설정
-CORS_ORIGINS=*
 ```
 
 > **💡 팁**: `SECRET_KEY`는 강력한 랜덤 문자열로 변경하세요.
@@ -275,7 +273,6 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-myappstore}
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${SECRET_KEY}
-      - NAS_IP=${NAS_IP:-localhost}
     ports:
       - "8110:8110"
 
@@ -285,7 +282,7 @@ services:
     container_name: myapp-frontend
     restart: unless-stopped
     environment:
-      - VITE_API_BASE_URL=http://${NAS_IP:-localhost}:8110/api
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8110/api}
     ports:
       - "5900:5900"
 ```

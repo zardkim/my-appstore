@@ -85,7 +85,7 @@ services:
       # Server
       - HOST=0.0.0.0
       - PORT=${BACKEND_PORT:-8110}
-      - BACKEND_URL=http://${NAS_IP:-localhost}:${BACKEND_PORT:-8110}
+      - BACKEND_URL=http://localhost:${BACKEND_PORT:-8110}
 
       # Logging
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -108,11 +108,10 @@ services:
     ports:
       - "${FRONTEND_PORT:-5900}:5900"
     environment:
-      # 브라우저에서 접근할 실제 URL (NAS IP 주소 사용 권장)
-      # localhost: 호스트 머신에서만 접속
-      # NAS_IP: 같은 네트워크의 다른 기기에서도 접속
-      - VITE_API_BASE_URL=http://${NAS_IP:-localhost}:${BACKEND_PORT:-8110}/api
-      - VITE_BACKEND_URL=http://${NAS_IP:-localhost}:${BACKEND_PORT:-8110}
-      - VITE_APP_URL=http://${NAS_IP:-localhost}:${FRONTEND_PORT:-5900}
+      # 브라우저에서 접근할 URL (기본값: localhost)
+      # 다른 기기에서 접속하려면 .env 파일에서 직접 수정하세요
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8110/api}
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8110}
+      - VITE_APP_URL=${VITE_APP_URL:-http://localhost:5900}
     depends_on:
       - backend
