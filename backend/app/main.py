@@ -19,7 +19,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 # Create database tables
-# Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 # Ensure required directories exist before app initialization
 required_directories = [
