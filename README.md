@@ -200,7 +200,43 @@ docker-compose down
 
 ## 🐳 Docker Compose 설정
 
-### docker-compose.yml (개발 환경)
+### 폴더 구조 (Synology NAS 기준)
+
+Docker Compose 실행 전, 다음 폴더 구조를 먼저 생성하세요:
+
+```
+/volume1/docker/myappstore/          # 프로젝트 루트 (git clone한 위치)
+├── db/                              # PostgreSQL 데이터 (수동 생성)
+├── redis/                           # Redis 데이터 (수동 생성)
+├── data/                            # 앱 데이터 (수동 생성)
+│   ├── library/                     # 소프트웨어 파일 (수동 생성)
+│   ├── icons/                       # 자동 생성: 아이콘 캐시
+│   ├── screenshots/                 # 자동 생성: 스크린샷
+│   ├── eximage/                     # 자동 생성: 게시판 이미지
+│   ├── patches/                     # 자동 생성: 패치 파일
+│   ├── logs/                        # 자동 생성: 로그
+│   ├── attachments/                 # 자동 생성: 첨부 파일
+│   └── config/                      # 자동 생성: 설정 파일
+├── backend/                         # 소스 코드 (git clone)
+├── frontend/                        # 소스 코드 (git clone)
+├── docker-compose.yml               # Docker Compose 설정
+└── .env                             # 환경 변수
+
+```
+
+**초기 폴더 생성** (SSH 또는 File Station):
+
+```bash
+# Synology NAS SSH 접속 후
+cd /volume1/docker/myappstore
+mkdir -p db redis data/library
+```
+
+> 📘 **자세한 폴더 구조 설명**: [Docker 폴더 구조 가이드](docs/docker%20폴더구조.md)
+
+### docker-compose.yml (프로덕션)
+
+간소화된 프로덕션 환경 설정:
 
 ```yaml
 version: '3.8'
@@ -209,66 +245,64 @@ services:
   db:
     image: postgres:15-alpine
     container_name: myapp-db
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: myappstore
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-myappstore}
     volumes:
-      - ./data/db/postgres_data:/var/lib/postgresql/data
+      - ./db:/var/lib/postgresql/data    # 단순화된 경로
     ports:
       - "5432:5432"
 
   redis:
     image: redis:7-alpine
     container_name: myapp-redis
+    restart: unless-stopped
     volumes:
-      - ./data/redis:/data
+      - ./redis:/data                     # 단순화된 경로
     ports:
       - "6379:6379"
 
   backend:
     build: ./backend
+    image: myappstore-backend:latest
     container_name: myapp-backend
+    restart: unless-stopped
     volumes:
-      - ./backend:/app
-      - ./data/icons:/app/static/icons
-      - ./data/library:/library
+      - ./data:/app/data                  # 모든 앱 데이터
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/myappstore
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-myappstore}
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=your-secret-key-change-this
-      - PORT=8110
+      - SECRET_KEY=${SECRET_KEY}
+      - NAS_IP=${NAS_IP:-localhost}
     ports:
       - "8110:8110"
-    depends_on:
-      - db
-      - redis
 
   frontend:
     build: ./frontend
+    image: myappstore-frontend:latest
     container_name: myapp-frontend
-    volumes:
-      - ./frontend:/app
+    restart: unless-stopped
+    environment:
+      - VITE_API_BASE_URL=http://${NAS_IP:-localhost}:8110/api
     ports:
       - "5900:5900"
-    depends_on:
-      - backend
 ```
 
-### NAS 폴더 마운트 예시
+### NAS 소프트웨어 폴더 추가 마운트 (선택사항)
 
-NAS의 소프트웨어 폴더를 컨테이너에 마운트하려면:
+기존 NAS의 소프트웨어 폴더를 읽기 전용으로 마운트:
 
 ```yaml
 backend:
   volumes:
-    # 기존 볼륨
-    - ./backend:/app
-    - ./data/icons:/app/static/icons
-    - ./data/library:/library
-    # NAS 폴더 추가 (읽기 전용 권장)
+    - ./data:/app/data
+    # 기존 NAS 소프트웨어 폴더 추가 (읽기 전용)
     - /volume1/Software:/library/NAS:ro
 ```
+
+이렇게 하면 스캔 경로로 `/library/NAS`를 추가할 수 있습니다.
 
 ---
 
