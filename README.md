@@ -126,10 +126,12 @@ MyApp Store는 **Docker Hub에서 제공하는 사전 빌드된 이미지**를 �
 
 #### 🐳 사용되는 Docker 이미지
 
-- **Backend**: `zardkim/myappstore-backend:1.3.1`
-- **Frontend**: `zardkim/myappstore-frontend:1.3.1`
+- **Backend**: `zardkim/myappstore-backend:latest`
+- **Frontend**: `zardkim/myappstore-frontend:latest`
 - **Database**: `postgres:15-alpine`
 - **Cache**: `redis:7-alpine`
+
+> **💡 참고**: `latest` 태그는 항상 최신 안정 버전을 가리킵니다. 특정 버전을 고정하려면 `1.3.1`과 같은 버전 태그를 사용하세요.
 
 ---
 
@@ -218,8 +220,8 @@ docker-compose logs -f frontend
 **첫 실행 시 발생하는 일:**
 
 1. 📥 Docker Hub에서 이미지 다운로드:
-   - `zardkim/myappstore-backend:1.3.1` (~500MB)
-   - `zardkim/myappstore-frontend:1.3.1` (~200MB)
+   - `zardkim/myappstore-backend:latest` (~500MB)
+   - `zardkim/myappstore-frontend:latest` (~200MB)
    - `postgres:15-alpine` (~200MB)
    - `redis:7-alpine` (~30MB)
 
@@ -255,6 +257,35 @@ docker-compose down -v
 2. 관리자 계정 생성
 3. 스캔 경로 설정 (예: `/library`)
 4. AI API 키 입력 (선택사항)
+
+---
+
+## 🔄 업데이트 방법
+
+`latest` 태그를 사용하므로 새 버전이 출시되면 간단하게 업데이트할 수 있습니다:
+
+```bash
+# 최신 이미지 다운로드
+docker-compose pull
+
+# 컨테이너 재시작 (다운타임 최소화)
+docker-compose up -d
+
+# 또는 한 번에 실행
+docker-compose pull && docker-compose up -d
+```
+
+**업데이트 확인:**
+
+```bash
+# 컨테이너 로그 확인
+docker-compose logs -f
+
+# 버전 확인 (푸터에 표시됨)
+# http://localhost:5900 접속 후 하단 확인
+```
+
+> **💡 참고**: 데이터는 `./db`, `./redis`, `./data` 폴더에 저장되므로 업데이트해도 유지됩니다.
 
 ---
 
