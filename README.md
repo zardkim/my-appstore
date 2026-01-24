@@ -251,7 +251,7 @@ services:
     volumes:
       - ./db:/var/lib/postgresql/data    # 단순화된 경로
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Synology PostgreSQL 충돌 방지
 
   redis:
     image: redis:7-alpine
@@ -260,7 +260,7 @@ services:
     volumes:
       - ./redis:/data                     # 단순화된 경로
     ports:
-      - "6379:6379"
+      - "6380:6379"  # 충돌 방지
 
   backend:
     build: ./backend

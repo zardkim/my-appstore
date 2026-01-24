@@ -292,7 +292,7 @@ Synology의 Reverse Proxy를 사용하여 HTTPS 설정:
 
 **SSH에서 확인:**
 ```bash
-netstat -tuln | grep -E '5900|8100|5432|6379'
+netstat -tuln | grep -E '5900|8110|5433|6380'
 ```
 
 **해결 방법: 포트 변경**
