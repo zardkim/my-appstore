@@ -38,12 +38,28 @@ apiClient.interceptors.request.use((config) => {
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Check if we received HTML instead of JSON (indicates reverse proxy misconfiguration)
+    const contentType = response.headers['content-type']
+    if (contentType && contentType.includes('text/html')) {
+      const error = new Error('Received HTML instead of JSON - check reverse proxy configuration')
+      error.response = response
+      return Promise.reject(error)
+    }
+    return response
+  },
   (error) => {
+    // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       localStorage.removeItem('access_token')
       window.location.href = '/login'
     }
+
+    // Suppress console logging for HTML responses (reverse proxy misconfiguration)
+    if (error.response?.headers?.['content-type']?.includes('text/html')) {
+      error.silent = true
+    }
+
     return Promise.reject(error)
   }
 )

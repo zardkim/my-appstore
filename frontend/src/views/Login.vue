@@ -90,16 +90,12 @@ onMounted(async () => {
   // Check if setup is needed
   try {
     const response = await authApi.checkSetup()
-    console.log('Setup check response:', response.data)
     if (response.data.needs_setup) {
-      console.log('Redirecting to setup page...')
       router.push('/setup')
     }
   } catch (err) {
-    console.error('Setup check failed:', err)
-    // If it's a network error, might be initial setup - redirect to setup
-    if (err.code === 'ERR_NETWORK' || err.message.includes('Network Error')) {
-      console.log('Network error detected, redirecting to setup...')
+    // If it's a network error or HTML response, might be initial setup - redirect to setup
+    if (err.code === 'ERR_NETWORK' || err.message.includes('Network Error') || err.response?.headers?.['content-type']?.includes('text/html')) {
       router.push('/setup')
     }
   }
