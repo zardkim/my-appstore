@@ -117,7 +117,7 @@ const handleSetup = async () => {
 
   try {
     await authApi.setup(username.value, password.value)
-    await alert.success(t('setup.setupSuccess'))
+    // 계정 생성 성공 시 바로 로그인 페이지로 이동
     router.push('/login')
   } catch (err) {
     error.value = err.response?.data?.detail || t('setup.setupFailed')
