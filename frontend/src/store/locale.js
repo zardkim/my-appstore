@@ -65,8 +65,6 @@ export const useLocaleStore = defineStore('locale', {
       // } catch (error) {
       //   console.error('Failed to save locale to backend:', error)
       // }
-
-      console.log(`Locale changed to: ${newLocale}`)
     },
 
     /**
