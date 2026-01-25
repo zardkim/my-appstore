@@ -59,9 +59,9 @@ for i in range(max_retries):
         sys.exit(1)
 END
 
-# Run database migrations
-echo "Running database migrations..."
-alembic upgrade head || echo "Warning: Migration failed or no migrations to run"
+# Database tables will be created automatically by SQLAlchemy
+echo "Database tables will be created by SQLAlchemy Base.metadata.create_all()"
+echo "Note: For future migrations, Alembic configuration can be added to the Docker image"
 
 # Execute the main command (passed as arguments)
 echo "Starting application..."
