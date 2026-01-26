@@ -38,6 +38,18 @@
           </button>
 
           <button
+            v-if="selectedIds.length > 0"
+            @click="batchDeleteSelected"
+            class="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center text-xs sm:text-sm"
+          >
+            <svg class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span class="hidden sm:inline">{{ t('detectedList.batchDelete') }}</span>
+            <span>({{ selectedIds.length }})</span>
+          </button>
+
+          <button
             @click="loadViolations"
             class="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center text-xs sm:text-sm"
           >
@@ -496,6 +508,40 @@ const batchRenameSelected = async () => {
   } catch (error) {
     console.error('Failed to batch rename:', error)
     await alert.error(t('detectedList.batchRenameFailed'))
+  }
+}
+
+const batchDeleteSelected = async () => {
+  if (selectedIds.value.length === 0) {
+    await alert.warning(t('detectedList.selectItems'))
+    return
+  }
+
+  const shouldDelete = await confirm.danger(
+    t('detectedList.batchDeleteConfirm', { count: selectedIds.value.length })
+  )
+  if (!shouldDelete) {
+    return
+  }
+
+  try {
+    const response = await filenameViolationsApi.batchDelete(selectedIds.value)
+    await loadViolations()
+
+    const result = response.data
+    if (result.failed_count > 0 && result.errors) {
+      let message = result.message + '\n\n'
+      message += t('detectedList.errors') + ':\n'
+      result.errors.forEach(error => {
+        message += `- ${error}\n`
+      })
+      await alert.warning(message)
+    } else {
+      await alert.success(result.message)
+    }
+  } catch (error) {
+    console.error('Failed to batch delete:', error)
+    await alert.error(t('detectedList.batchDeleteFailed'))
   }
 }
 

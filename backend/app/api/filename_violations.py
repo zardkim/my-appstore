@@ -49,6 +49,10 @@ class BatchRenameRequest(BaseModel):
     violation_ids: List[int]
 
 
+class BatchDeleteRequest(BaseModel):
+    violation_ids: List[int]
+
+
 class CreateProductWithMetadataRequest(BaseModel):
     metadata: Dict
 
@@ -424,6 +428,58 @@ async def batch_rename_files(
     return {
         "message": f"성공: {len(results['success'])}개, 실패: {len(results['failed'])}개",
         "results": results
+    }
+
+
+@router.post("/batch-delete")
+async def batch_delete_violations(
+    request: BatchDeleteRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    선택한 violation 항목들을 일괄 삭제 (관리자 전용)
+
+    Args:
+        request: 삭제할 violation ID 목록
+        db: Database session
+        current_user: Current admin user
+
+    Returns:
+        삭제 결과
+    """
+    deleted_count = 0
+    failed_count = 0
+    errors = []
+
+    for violation_id in request.violation_ids:
+        try:
+            violation = db.query(FilenameViolation).filter(
+                FilenameViolation.id == violation_id
+            ).first()
+
+            if not violation:
+                failed_count += 1
+                errors.append(f"ID {violation_id}: Violation not found")
+                continue
+
+            db.delete(violation)
+            deleted_count += 1
+
+        except Exception as e:
+            failed_count += 1
+            errors.append(f"ID {violation_id}: {str(e)}")
+            db.rollback()
+
+    # 성공한 항목이 있으면 커밋
+    if deleted_count > 0:
+        db.commit()
+
+    return {
+        "message": f"삭제 완료: {deleted_count}개 성공, {failed_count}개 실패",
+        "deleted_count": deleted_count,
+        "failed_count": failed_count,
+        "errors": errors if errors else None
     }
 
 
