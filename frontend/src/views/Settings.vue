@@ -2295,7 +2295,11 @@ const addExceptionPath = () => {
 const saveExceptionSettings = async () => {
   savingExceptions.value = true
   try {
-    await scanApi.saveScanExclusions(exceptionFolders.value)
+    await scanApi.saveScanExclusions({
+      folders: exceptionFolders.value,
+      patterns: exceptionPatterns.value,
+      paths: exceptionPaths.value
+    })
     await alert.success(t('settings.exceptions.saved'))
   } catch (error) {
     console.error('Scan exception settings save error:', error)
@@ -2309,20 +2313,37 @@ const saveExceptionSettings = async () => {
 const loadExceptionSettings = async () => {
   try {
     const response = await scanApi.getScanExclusions()
-    if (response && response.data && response.data.exclusions) {
-      exceptionFolders.value = response.data.exclusions
+    if (response && response.data) {
+      // 폴더 예외
+      if (response.data.folders && response.data.folders.length > 0) {
+        exceptionFolders.value = response.data.folders
+      } else if (response.data.exclusions) {
+        // 하위 호환성을 위한 처리
+        exceptionFolders.value = response.data.exclusions
+      } else {
+        exceptionFolders.value = ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash']
+      }
+
+      // 파일 패턴 예외
+      if (response.data.patterns && response.data.patterns.length > 0) {
+        exceptionPatterns.value = response.data.patterns
+      } else {
+        exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini']
+      }
+
+      // 경로 예외
+      if (response.data.paths && response.data.paths.length > 0) {
+        exceptionPaths.value = response.data.paths
+      }
     } else {
       // 기본값 설정
       exceptionFolders.value = ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash']
+      exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini']
     }
   } catch (error) {
     console.error('스캔 예외 설정 불러오기 오류:', error)
     // 기본값 설정
     exceptionFolders.value = ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash']
-  }
-
-  // 파일 패턴 기본값 설정
-  if (exceptionPatterns.value.length === 0) {
     exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini']
   }
 }

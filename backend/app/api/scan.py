@@ -38,11 +38,17 @@ class ScanResponse(BaseModel):
 
 
 class ScanExclusionsResponse(BaseModel):
-    exclusions: List[str]
+    folders: Optional[List[str]] = []
+    patterns: Optional[List[str]] = []
+    paths: Optional[List[str]] = []
+    # 하위 호환성을 위해 유지
+    exclusions: Optional[List[str]] = []
 
 
 class ScanExclusionsRequest(BaseModel):
-    exclusions: List[str]
+    folders: Optional[List[str]] = []
+    patterns: Optional[List[str]] = []
+    paths: Optional[List[str]] = []
 
 
 async def auto_match_scanned_files(db: Session) -> dict:
@@ -237,31 +243,55 @@ async def get_scan_exclusions(
     Get current scan exclusion list
     Admin only
     """
+    import json
+
     try:
         exclusions_file = Path(settings.SCAN_EXCLUSIONS_FILE)
 
         # 파일이 없으면 기본값 반환
         if not exclusions_file.exists():
-            default_exclusions = [
-                '.git',
-                'node_modules',
-                '__MACOSX',
-                '$RECYCLE.BIN',
-                '.Trash',
-                'System Volume Information',
-                '.DS_Store',
-                'Thumbs.db'
-            ]
-            return {"exclusions": default_exclusions}
+            return {
+                "folders": ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash',
+                           'System Volume Information', '.DS_Store', 'Thumbs.db',
+                           'desktop.ini', '._.DS_Store', 'Icon\r', '@eaDir'],
+                "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                "paths": [],
+                "exclusions": []  # 하위 호환성
+            }
 
-        # 파일에서 읽기
+        # JSON 파일에서 읽기
         with open(exclusions_file, 'r', encoding='utf-8') as f:
-            exclusions = [
-                line.strip()
-                for line in f.readlines()
-                if line.strip() and not line.strip().startswith('#')
-            ]
-            return {"exclusions": exclusions}
+            content = f.read().strip()
+            if not content:
+                # 빈 파일인 경우 기본값 반환
+                return {
+                    "folders": ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash'],
+                    "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                    "paths": [],
+                    "exclusions": []
+                }
+
+            try:
+                data = json.loads(content)
+                return {
+                    "folders": data.get("folders", []),
+                    "patterns": data.get("patterns", []),
+                    "paths": data.get("paths", []),
+                    "exclusions": data.get("folders", [])  # 하위 호환성
+                }
+            except json.JSONDecodeError:
+                # 구 형식(줄바꿈으로 구분)인 경우 폴더 목록으로 간주
+                exclusions = [
+                    line.strip()
+                    for line in content.split('\n')
+                    if line.strip() and not line.strip().startswith('#')
+                ]
+                return {
+                    "folders": exclusions,
+                    "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                    "paths": [],
+                    "exclusions": exclusions
+                }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load scan exclusions: {str(e)}")
 
@@ -275,17 +305,23 @@ async def save_scan_exclusions(
     Save scan exclusion list to file
     Admin only
     """
+    import json
+
     try:
         exclusions_file = Path(settings.SCAN_EXCLUSIONS_FILE)
 
         # 디렉토리가 없으면 생성
         exclusions_file.parent.mkdir(parents=True, exist_ok=True)
 
-        # 파일에 저장 (한 줄씩)
+        # JSON 형식으로 저장
+        data = {
+            "folders": request.folders or [],
+            "patterns": request.patterns or [],
+            "paths": request.paths or []
+        }
+
         with open(exclusions_file, 'w', encoding='utf-8') as f:
-            f.write('# 스캔 예외 폴더 목록\n')
-            f.write('# 한 줄에 하나씩 입력하세요\n\n')
-            f.write('\n'.join(request.exclusions))
+            json.dump(data, f, ensure_ascii=False, indent=2)
 
         return {"success": True, "message": "Scan exclusions saved successfully"}
     except Exception as e:

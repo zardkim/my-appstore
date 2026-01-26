@@ -40,53 +40,88 @@ class FileScanner:
         self.enricher = MetadataEnricher(ai_provider=ai_provider, use_ai=use_ai) if use_ai else None
         self.icon_cache = IconCache()
         self.parser = FilenameParser()
-        self.scan_exclusions = self._load_scan_exclusions()
+        exclusions_data = self._load_scan_exclusions()
+        self.scan_exclusions = exclusions_data.get("folders", [])
+        self.scan_patterns = exclusions_data.get("patterns", [])
+        self.scan_paths = exclusions_data.get("paths", [])
 
-    def _load_scan_exclusions(self) -> List[str]:
+    def _load_scan_exclusions(self) -> dict:
         """파일에서 스캔 예외 목록 로드"""
+        import json
+
         try:
             exclusions_file = Path(settings.SCAN_EXCLUSIONS_FILE)
 
             # 파일이 없으면 기본 예외 목록으로 생성
             if not exclusions_file.exists():
-                default_exclusions = [
-                    '.git',
-                    'node_modules',
-                    '__MACOSX',
-                    '$RECYCLE.BIN',
-                    '.Trash',
-                    'System Volume Information',
-                    '.DS_Store',
-                    'Thumbs.db',
-                    'desktop.ini',
-                    '._.DS_Store',
-                    'Icon\r',
-                    '@eaDir'
-                ]
+                default_data = {
+                    "folders": [
+                        '.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash',
+                        'System Volume Information', '.DS_Store', 'Thumbs.db',
+                        'desktop.ini', '._.DS_Store', 'Icon\r', '@eaDir'
+                    ],
+                    "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                    "paths": []
+                }
                 exclusions_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(exclusions_file, 'w', encoding='utf-8') as f:
-                    f.write('\n'.join(default_exclusions))
-                return default_exclusions
+                    json.dump(default_data, f, ensure_ascii=False, indent=2)
+                return default_data
 
-            # 파일에서 읽기 (줄 단위로 읽고 빈 줄과 주석 제외)
+            # JSON 파일에서 읽기
             with open(exclusions_file, 'r', encoding='utf-8') as f:
-                exclusions = [
-                    line.strip()
-                    for line in f.readlines()
-                    if line.strip() and not line.strip().startswith('#')
-                ]
-                return exclusions
+                content = f.read().strip()
+                if not content:
+                    return {
+                        "folders": ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash'],
+                        "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                        "paths": []
+                    }
+
+                try:
+                    data = json.loads(content)
+                    return {
+                        "folders": data.get("folders", []),
+                        "patterns": data.get("patterns", []),
+                        "paths": data.get("paths", [])
+                    }
+                except json.JSONDecodeError:
+                    # 구 형식(줄바꿈)인 경우 폴더 목록으로 간주
+                    exclusions = [
+                        line.strip()
+                        for line in content.split('\n')
+                        if line.strip() and not line.strip().startswith('#')
+                    ]
+                    return {
+                        "folders": exclusions,
+                        "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                        "paths": []
+                    }
         except Exception as e:
             logger.error(f"Failed to load scan exclusions: {e}")
-            return []
+            return {"folders": [], "patterns": [], "paths": []}
 
     def _is_excluded(self, folder_name: str) -> bool:
         """폴더가 스캔 예외 목록에 있는지 확인"""
         return folder_name.lower() in [ex.lower() for ex in self.scan_exclusions]
 
     def _is_excluded_file(self, file_name: str) -> bool:
-        """파일이 스캔 예외 목록에 있는지 확인"""
-        return file_name.lower() in [ex.lower() for ex in self.scan_exclusions]
+        """파일이 스캔 예외 목록에 있는지 확인 (와일드카드 패턴 지원)"""
+        import fnmatch
+
+        file_name_lower = file_name.lower()
+
+        # 정확한 파일명 매칭 (폴더 예외 목록에서)
+        if file_name_lower in [ex.lower() for ex in self.scan_exclusions]:
+            return True
+
+        # 와일드카드 패턴 매칭
+        for pattern in self.scan_patterns:
+            if fnmatch.fnmatch(file_name_lower, pattern.lower()):
+                logger.debug(f"File {file_name} matches exclusion pattern {pattern}")
+                return True
+
+        return False
 
     def _validate_filename(self, filename: str, folder_path: str):
         """
