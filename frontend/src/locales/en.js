@@ -787,7 +787,8 @@ export default {
       // Custom prompt
       customPromptTitle: '📝 Custom Prompt',
       customPromptDescription: 'Customize the prompt to ask AI',
-      useCustomPrompt: 'Use',
+      useDefaultPrompt: 'Use Default',
+      defaultPromptTitle: '📋 Current Default Prompt Example:',
       availableVariables: '💡 Available Variables:',
       softwareNameVariable: '- Automatically replaced with software name',
       customPromptTip: 'Tip:',
