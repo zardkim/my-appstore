@@ -787,7 +787,8 @@ export default {
       // 커스텀 프롬프트
       customPromptTitle: '📝 커스텀 프롬프트',
       customPromptDescription: 'AI에게 질문할 프롬프트를 커스터마이징할 수 있습니다',
-      useCustomPrompt: '사용',
+      useDefaultPrompt: '기본값 사용',
+      defaultPromptTitle: '📋 현재 사용 중인 기본 프롬프트 예시:',
       availableVariables: '💡 사용 가능한 변수:',
       softwareNameVariable: '- 소프트웨어 이름으로 자동 치환됩니다',
       customPromptTip: '팁:',

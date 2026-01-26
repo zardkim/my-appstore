@@ -1206,12 +1206,24 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('settings.metadata.customPromptDescription') }}</p>
               </div>
               <label class="flex items-center cursor-pointer">
-                <input type="checkbox" v-model="useCustomPrompt" class="w-5 h-5 text-blue-600 rounded" />
-                <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('settings.metadata.useCustomPrompt') }}</span>
+                <input type="checkbox" v-model="useDefaultPrompt" class="w-5 h-5 text-blue-600 rounded" />
+                <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('settings.metadata.useDefaultPrompt') }}</span>
               </label>
             </div>
 
-            <div v-if="useCustomPrompt" class="space-y-4">
+            <!-- 기본값 사용 시 예시 프롬프트 표시 -->
+            <div v-if="useDefaultPrompt" class="space-y-4">
+              <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+                <p class="text-sm text-blue-800 dark:text-blue-300 mb-2">
+                  <strong>{{ t('settings.metadata.defaultPromptTitle') }}</strong>
+                </p>
+                <div v-if="aiProvider === 'openai'" class="bg-white dark:bg-gray-800 rounded-lg p-4 font-mono text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ defaultPromptOpenai }}</div>
+                <div v-if="aiProvider === 'gemini'" class="bg-white dark:bg-gray-800 rounded-lg p-4 font-mono text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ defaultPromptGemini }}</div>
+              </div>
+            </div>
+
+            <!-- 커스텀 프롬프트 입력 -->
+            <div v-if="!useDefaultPrompt" class="space-y-4">
               <!-- Info Box -->
               <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4">
                 <p class="text-sm text-amber-800 dark:text-amber-300">
@@ -1267,10 +1279,6 @@
                   {{ t('settings.metadata.currentCharCount') }} {{ customPromptGemini.length }}
                 </p>
               </div>
-            </div>
-
-            <div v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-              {{ t('settings.metadata.customPromptInstruction') }}
             </div>
           </div>
 
@@ -1884,19 +1892,28 @@ const { alert, confirm } = useDialog()
 
 const appVersion = version
 
-const sections = computed(() => [
-  { id: 'general', label: t('settings.sections.general'), icon: '⚙️' },
-  { id: 'cache', label: t('settings.sections.cache'), icon: '⚡' },
-  { id: 'users', label: t('settings.sections.users'), icon: '👥' },
-  { id: 'folders', label: t('settings.sections.folders'), icon: '📁' },
-  { id: 'scheduler', label: t('settings.sections.scheduler'), icon: '⏰' },
-  { id: 'categories', label: t('settings.sections.categories'), icon: '🏷️' },
-  { id: 'board', label: t('settings.sections.board'), icon: '📋' },
-  { id: 'filing-rules', label: t('settings.sections.filingRules'), icon: '📄' },
-  { id: 'metadata', label: t('settings.sections.metadata'), icon: '🤖' },
-  { id: 'exceptions', label: t('settings.sections.exceptions'), icon: '🚫' },
-  { id: 'system', label: t('settings.sections.system'), icon: 'ℹ️' }
-])
+const sections = computed(() => {
+  const allSections = [
+    { id: 'general', label: t('settings.sections.general'), icon: '⚙️' },
+    { id: 'cache', label: t('settings.sections.cache'), icon: '⚡' },
+    { id: 'users', label: t('settings.sections.users'), icon: '👥' },
+    { id: 'folders', label: t('settings.sections.folders'), icon: '📁' },
+    { id: 'scheduler', label: t('settings.sections.scheduler'), icon: '⏰' },
+    { id: 'categories', label: t('settings.sections.categories'), icon: '🏷️' },
+    { id: 'board', label: t('settings.sections.board'), icon: '📋' },
+    { id: 'filing-rules', label: t('settings.sections.filingRules'), icon: '📄' },
+    { id: 'metadata', label: t('settings.sections.metadata'), icon: '🤖' },
+    { id: 'exceptions', label: t('settings.sections.exceptions'), icon: '🚫' },
+    { id: 'system', label: t('settings.sections.system'), icon: 'ℹ️' }
+  ]
+
+  // 일반 사용자는 general 섹션만 표시
+  if (!isAdmin.value) {
+    return allSections.filter(section => section.id === 'general')
+  }
+
+  return allSections
+})
 
 const activeSection = ref('general')
 const userInfo = computed(() => authStore.user || { username: '', role: 'user' })
@@ -2157,7 +2174,7 @@ const showOpenaiApiKey = ref(false)
 const googleApiKey = ref('')
 const googleSearchEngineId = ref('')
 const showGoogleApiKey = ref(false)
-const useCustomPrompt = ref(false)
+const useDefaultPrompt = ref(true) // 기본값 사용 체크박스 (기본적으로 체크됨)
 const customPromptOpenai = ref('')
 const customPromptGemini = ref('')
 
@@ -2166,10 +2183,10 @@ const defaultPromptOpenai = computed(() => t('settings.metadata.defaultPromptOpe
 const defaultPromptGemini = computed(() => t('settings.metadata.defaultPromptGemini'))
 const showMetadataDialog = ref(false)
 
-// 커스텀 프롬프트 활성화 시 기본값으로 초기화
-watch(useCustomPrompt, (newValue) => {
-  if (newValue) {
-    // 커스텀 프롬프트가 활성화되었는데 비어있으면 기본값으로 채움
+// 기본값 사용 체크박스 해제 시 커스텀 프롬프트를 기본값으로 초기화
+watch(useDefaultPrompt, (newValue) => {
+  if (!newValue) {
+    // 커스텀 프롬프트로 전환 시 비어있으면 기본값으로 채움
     if (!customPromptOpenai.value || customPromptOpenai.value.trim() === '') {
       customPromptOpenai.value = defaultPromptOpenai.value
     }
@@ -2302,6 +2319,11 @@ const loadExceptionSettings = async () => {
     console.error('스캔 예외 설정 불러오기 오류:', error)
     // 기본값 설정
     exceptionFolders.value = ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash']
+  }
+
+  // 파일 패턴 기본값 설정
+  if (exceptionPatterns.value.length === 0) {
+    exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini']
   }
 }
 
@@ -2714,7 +2736,7 @@ const saveMetadataSettings = async () => {
       openaiApiKey: openaiApiKey.value,
       googleApiKey: googleApiKey.value,
       googleSearchEngineId: googleSearchEngineId.value,
-      useCustomPrompt: useCustomPrompt.value,
+      useDefaultPrompt: useDefaultPrompt.value,
       customPromptOpenai: customPromptOpenai.value,
       customPromptGemini: customPromptGemini.value
     }
@@ -2894,7 +2916,10 @@ onMounted(async () => {
       openaiApiKey.value = config.metadata.openaiApiKey || ''
       googleApiKey.value = config.metadata.googleApiKey || ''
       googleSearchEngineId.value = config.metadata.googleSearchEngineId || ''
-      useCustomPrompt.value = config.metadata.useCustomPrompt || false
+      // useDefaultPrompt가 설정되어 있으면 그 값을 사용, 없으면 true (기본값)
+      useDefaultPrompt.value = config.metadata.useDefaultPrompt !== undefined
+        ? config.metadata.useDefaultPrompt
+        : (config.metadata.useCustomPrompt !== undefined ? !config.metadata.useCustomPrompt : true)
       customPromptOpenai.value = config.metadata.customPromptOpenai || defaultPromptOpenai.value
       customPromptGemini.value = config.metadata.customPromptGemini || defaultPromptGemini.value
       // 이전 기본 프롬프트 초기화 (언어 변경 감지용)
