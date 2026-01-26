@@ -113,13 +113,19 @@ class FileScanner:
 
         # 정확한 파일명 매칭 (폴더 예외 목록에서)
         if file_name_lower in [ex.lower() for ex in self.scan_exclusions]:
+            logger.info(f"File {file_name} excluded by exact match in folders list")
             return True
 
         # 와일드카드 패턴 매칭
         for pattern in self.scan_patterns:
-            if fnmatch.fnmatch(file_name_lower, pattern.lower()):
-                logger.debug(f"File {file_name} matches exclusion pattern {pattern}")
+            pattern_lower = pattern.lower()
+            if fnmatch.fnmatch(file_name_lower, pattern_lower):
+                logger.info(f"File {file_name} excluded by pattern match: {pattern}")
                 return True
+
+        # 디버그: 매칭 실패 시 로그
+        if file_name_lower in ['.gitkeep', 'readme.md'] or file_name_lower.endswith('.md'):
+            logger.warning(f"File {file_name} NOT excluded. Patterns: {self.scan_patterns}, Folders: {self.scan_exclusions}")
 
         return False
 

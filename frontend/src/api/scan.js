@@ -13,7 +13,11 @@ export const scanApi = {
     return apiClient.get('scan/exclusions')
   },
 
-  async saveScanExclusions(exclusions) {
-    return apiClient.post('scan/exclusions', { exclusions })
+  async saveScanExclusions(data) {
+    return apiClient.post('scan/exclusions', data)
+  },
+
+  async addScanExclusion(pattern, type) {
+    return apiClient.post('scan/exclusions/add', { pattern, type })
   }
 }
