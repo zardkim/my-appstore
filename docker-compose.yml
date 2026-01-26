@@ -40,6 +40,13 @@ services:
     restart: unless-stopped
     volumes:
       - ./data:/app/data
+      # 시놀로지 추가 폴더 마운트 (선택 사항)
+      # 형식: /시놀로지경로:/app/data/library/표시될이름[:ro]
+      # :ro를 추가하면 읽기 전용으로 마운트 (권장)
+      # 예시:
+      # - /volume1/Software:/app/data/library/Software:ro
+      # - /volume2/App:/app/data/library/App:ro
+      # - /volume1/Games:/app/data/library/Games:ro
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-myappstore}
       - REDIS_URL=redis://redis:6379/0
