@@ -62,6 +62,16 @@ export const filenameViolationsApi = {
   },
 
   /**
+   * 선택한 항목들을 일괄 삭제
+   * @param {number[]} violationIds - Violation ID 목록
+   */
+  batchDelete(violationIds) {
+    return client.post('/filename-violations/batch-delete', {
+      violation_ids: violationIds
+    })
+  },
+
+  /**
    * 스캔된 파일로부터 Product 생성 (AI 매칭)
    * @param {number} violationId - Violation ID
    */

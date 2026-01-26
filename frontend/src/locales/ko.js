@@ -1182,6 +1182,7 @@ export default {
     selectAll: '전체 선택',
     deselectAll: '전체 해제',
     batchRename: '선택 항목 일괄 변경',
+    batchDelete: '선택 항목 일괄 삭제',
     refresh: '새로고침',
 
     // Title
@@ -1246,6 +1247,9 @@ export default {
     batchRenameConfirm: '선택한 {count}개 항목을 제안된 파일명으로 변경하시겠습니까?',
     batchRenameFailed: '일괄 변경에 실패했습니다.',
     batchRenamePartialSuccess: '\n실패한 항목:\n',
+    batchDeleteConfirm: '선택한 {count}개 항목을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.',
+    batchDeleteFailed: '일괄 삭제에 실패했습니다.',
+    errors: '오류',
     aiMatchConfirm: 'AI로 메타데이터를 생성하고 스토어에 등록하시겠습니까?',
     productCreateSuccess: 'Product가 성공적으로 생성되었습니다.\n스토어 페이지로 이동합니다.',
     productCreateFailed: 'Product 생성에 실패했습니다.',

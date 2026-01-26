@@ -1232,6 +1232,7 @@ Software: {software_name}
     selectAll: 'Select All',
     deselectAll: 'Deselect All',
     batchRename: 'Batch Rename Selected',
+    batchDelete: 'Batch Delete Selected',
     refresh: 'Refresh',
 
     // Title
@@ -1296,6 +1297,9 @@ Software: {software_name}
     batchRenameConfirm: 'Change {count} selected items to suggested filenames?',
     batchRenameFailed: 'Failed to batch rename.',
     batchRenamePartialSuccess: '\nFailed items:\n',
+    batchDeleteConfirm: 'Delete {count} selected items?\n\nThis action cannot be undone.',
+    batchDeleteFailed: 'Failed to batch delete.',
+    errors: 'Errors',
     aiMatchConfirm: 'Generate metadata with AI and register to store?',
     productCreateSuccess: 'Product created successfully.\nRedirecting to store page.',
     productCreateFailed: 'Failed to create product.',
