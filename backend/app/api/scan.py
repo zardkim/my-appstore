@@ -51,6 +51,11 @@ class ScanExclusionsRequest(BaseModel):
     paths: Optional[List[str]] = []
 
 
+class AddExclusionRequest(BaseModel):
+    pattern: str
+    type: str  # 'folder', 'pattern', or 'path'
+
+
 async def auto_match_scanned_files(db: Session) -> dict:
     """
     스캔된 파일들에 대해 자동으로 AI 매칭 수행
@@ -326,3 +331,55 @@ async def save_scan_exclusions(
         return {"success": True, "message": "Scan exclusions saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save scan exclusions: {str(e)}")
+
+
+@router.post("/exclusions/add")
+async def add_scan_exclusion(
+    request: AddExclusionRequest,
+    current_user = Depends(get_current_admin_user)
+):
+    """
+    Add a single pattern to scan exclusion list
+    Admin only
+    """
+    import json
+
+    try:
+        exclusions_file = Path(settings.SCAN_EXCLUSIONS_FILE)
+
+        # 기존 설정 로드
+        if exclusions_file.exists():
+            with open(exclusions_file, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                try:
+                    data = json.loads(content)
+                except json.JSONDecodeError:
+                    data = {"folders": [], "patterns": [], "paths": []}
+        else:
+            data = {"folders": [], "patterns": [], "paths": []}
+
+        # 패턴 추가
+        if request.type == 'folder':
+            if request.pattern not in data.get("folders", []):
+                data.setdefault("folders", []).append(request.pattern)
+        elif request.type == 'pattern':
+            if request.pattern not in data.get("patterns", []):
+                data.setdefault("patterns", []).append(request.pattern)
+        elif request.type == 'path':
+            if request.pattern not in data.get("paths", []):
+                data.setdefault("paths", []).append(request.pattern)
+        else:
+            raise HTTPException(status_code=400, detail=f"Invalid type: {request.type}")
+
+        # 저장
+        exclusions_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(exclusions_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        return {
+            "success": True,
+            "message": f"Pattern '{request.pattern}' added to exclusion list",
+            "data": data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add exclusion: {str(e)}")

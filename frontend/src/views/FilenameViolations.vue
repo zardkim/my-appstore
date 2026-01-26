@@ -283,6 +283,15 @@
                   </svg>
                 </button>
                 <button
+                  @click="addToExclusions(violation)"
+                  :title="t('detectedList.addToExclusions')"
+                  class="p-1.5 sm:p-2 lg:p-3 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
+                >
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                  </svg>
+                </button>
+                <button
                   @click="resolveViolation(violation.id)"
                   :title="t('detectedList.markResolved')"
                   class="p-1.5 sm:p-2 lg:p-3 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
@@ -323,6 +332,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { filenameViolationsApi } from '../api/filenameViolations'
 import { productsApi } from '../api/products'
+import { scanApi } from '../api/scan'
 import ViolationAISearchDialog from '../components/violation/ViolationAISearchDialog.vue'
 import { useDialog } from '../composables/useDialog'
 
@@ -421,6 +431,41 @@ const deleteViolation = async (id) => {
   } catch (error) {
     console.error('Failed to delete violation:', error)
     await alert.error(t('detectedList.deleteFailed'))
+  }
+}
+
+const addToExclusions = async (violation) => {
+  const fileName = violation.file_name
+  const fileExt = fileName.includes('.') ? fileName.substring(fileName.lastIndexOf('.')) : ''
+
+  let selectedPattern = fileName
+
+  // 확장자가 있으면 패턴 선택 옵션 제공
+  if (fileExt) {
+    const useExtension = await confirm.info(
+      t('detectedList.selectExclusionPattern', { fileName, extension: `*${fileExt}` })
+    )
+
+    if (useExtension === null) {
+      // 취소됨
+      return
+    }
+
+    selectedPattern = useExtension ? `*${fileExt}` : fileName
+  }
+
+  try {
+    await scanApi.addScanExclusion(selectedPattern, 'pattern')
+    await alert.success(t('detectedList.addedToExclusions', { pattern: selectedPattern }))
+
+    // 설정 페이지로 이동할지 물어봄
+    const shouldGoToSettings = await confirm.info(t('detectedList.goToSettings'))
+    if (shouldGoToSettings) {
+      router.push('/settings?section=exceptions')
+    }
+  } catch (error) {
+    console.error('Failed to add to exclusions:', error)
+    await alert.error(t('detectedList.addToExclusionsFailed'))
   }
 }
 
