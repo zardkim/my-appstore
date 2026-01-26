@@ -57,7 +57,11 @@ class FileScanner:
                     '.Trash',
                     'System Volume Information',
                     '.DS_Store',
-                    'Thumbs.db'
+                    'Thumbs.db',
+                    'desktop.ini',
+                    '._.DS_Store',
+                    'Icon\r',
+                    '@eaDir'
                 ]
                 exclusions_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(exclusions_file, 'w', encoding='utf-8') as f:
@@ -79,6 +83,10 @@ class FileScanner:
     def _is_excluded(self, folder_name: str) -> bool:
         """폴더가 스캔 예외 목록에 있는지 확인"""
         return folder_name.lower() in [ex.lower() for ex in self.scan_exclusions]
+
+    def _is_excluded_file(self, file_name: str) -> bool:
+        """파일이 스캔 예외 목록에 있는지 확인"""
+        return file_name.lower() in [ex.lower() for ex in self.scan_exclusions]
 
     def _validate_filename(self, filename: str, folder_path: str):
         """
@@ -114,7 +122,7 @@ class FileScanner:
 
     async def scan_directory_async(self, base_path: str) -> Dict:
         """
-        Scan a directory for software files (async version with AI)
+        Scan a directory for software files recursively (async version with AI)
 
         Args:
             base_path: Root path to scan
@@ -136,27 +144,40 @@ class FileScanner:
             "errors": []
         }
 
-        # Scan each subdirectory as a potential product
-        for folder in base_path.iterdir():
-            if not folder.is_dir():
-                continue
-
-            # 스캔 예외 목록에 있는 폴더는 건너뛰기
-            if self._is_excluded(folder.name):
-                logger.debug(f"Skipping excluded folder: {folder.name}")
-                continue
-
-            try:
-                await self._process_folder_async(folder, results)
-            except Exception as e:
-                results["errors"].append(f"Error processing {folder.name}: {str(e)}")
+        # 재귀적으로 모든 하위 폴더 스캔
+        await self._scan_folder_recursive_async(base_path, results)
 
         self.db.commit()
         return results
 
+    async def _scan_folder_recursive_async(self, folder: Path, results: Dict):
+        """
+        재귀적으로 폴더를 스캔 (하위 폴더 포함)
+
+        Args:
+            folder: 스캔할 폴더
+            results: 결과 딕셔너리
+        """
+        # 스캔 예외 목록에 있는 폴더는 건너뛰기
+        if self._is_excluded(folder.name):
+            logger.debug(f"Skipping excluded folder: {folder.name}")
+            return
+
+        try:
+            # 현재 폴더의 파일들 처리
+            await self._process_folder_async(folder, results)
+
+            # 하위 폴더 재귀 스캔
+            for subfolder in folder.iterdir():
+                if subfolder.is_dir():
+                    await self._scan_folder_recursive_async(subfolder, results)
+
+        except Exception as e:
+            results["errors"].append(f"Error processing {folder.name}: {str(e)}")
+
     def scan_directory(self, base_path: str) -> Dict:
         """
-        Scan a directory for software files (sync version without AI)
+        Scan a directory for software files recursively (sync version without AI)
 
         Args:
             base_path: Root path to scan
@@ -176,23 +197,36 @@ class FileScanner:
             "errors": []
         }
 
-        # Scan each subdirectory as a potential product
-        for folder in base_path.iterdir():
-            if not folder.is_dir():
-                continue
-
-            # 스캔 예외 목록에 있는 폴더는 건너뛰기
-            if self._is_excluded(folder.name):
-                logger.debug(f"Skipping excluded folder: {folder.name}")
-                continue
-
-            try:
-                self._process_folder(folder, results)
-            except Exception as e:
-                results["errors"].append(f"Error processing {folder.name}: {str(e)}")
+        # 재귀적으로 모든 하위 폴더 스캔
+        self._scan_folder_recursive(base_path, results)
 
         self.db.commit()
         return results
+
+    def _scan_folder_recursive(self, folder: Path, results: Dict):
+        """
+        재귀적으로 폴더를 스캔 (하위 폴더 포함)
+
+        Args:
+            folder: 스캔할 폴더
+            results: 결과 딕셔너리
+        """
+        # 스캔 예외 목록에 있는 폴더는 건너뛰기
+        if self._is_excluded(folder.name):
+            logger.debug(f"Skipping excluded folder: {folder.name}")
+            return
+
+        try:
+            # 현재 폴더의 파일들 처리
+            self._process_folder(folder, results)
+
+            # 하위 폴더 재귀 스캔
+            for subfolder in folder.iterdir():
+                if subfolder.is_dir():
+                    self._scan_folder_recursive(subfolder, results)
+
+        except Exception as e:
+            results["errors"].append(f"Error processing {folder.name}: {str(e)}")
 
     async def _process_folder_async(self, folder: Path, results: Dict):
         """
@@ -208,6 +242,10 @@ class FileScanner:
         # Scan files in the folder and add them to FilenameViolation
         for file_path in folder.iterdir():
             if file_path.is_file():
+                # 예외 파일 건너뛰기 (desktop.ini, .DS_Store 등)
+                if self._is_excluded_file(file_path.name):
+                    logger.debug(f"Skipping excluded file: {file_path.name}")
+                    continue
                 self._add_scanned_file(file_path, folder_path_str, results)
 
     def _process_folder(self, folder: Path, results: Dict):
@@ -224,6 +262,10 @@ class FileScanner:
         # Scan files in the folder and add them to FilenameViolation
         for file_path in folder.iterdir():
             if file_path.is_file():
+                # 예외 파일 건너뛰기 (desktop.ini, .DS_Store 등)
+                if self._is_excluded_file(file_path.name):
+                    logger.debug(f"Skipping excluded file: {file_path.name}")
+                    continue
                 self._add_scanned_file(file_path, folder_path_str, results)
 
     def _process_file(self, file_path: Path, product: Product, results: Dict):
