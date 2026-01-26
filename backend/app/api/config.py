@@ -179,6 +179,44 @@ async def update_config_section(
     """
     config = load_config()
 
+    # 폴더 설정인 경우 경로 검증
+    if section == "folders":
+        if not isinstance(data, dict):
+            raise HTTPException(
+                status_code=422,
+                detail="Folders config must be a dictionary"
+            )
+        if "scanFolders" not in data:
+            raise HTTPException(
+                status_code=422,
+                detail="scanFolders field is required"
+            )
+        if not isinstance(data["scanFolders"], list):
+            raise HTTPException(
+                status_code=422,
+                detail="scanFolders must be a list"
+            )
+
+        # 경로 존재 여부 확인 (경고만 하고 저장은 허용)
+        invalid_paths = []
+        for folder_path in data["scanFolders"]:
+            if not isinstance(folder_path, str):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Folder path must be a string: {folder_path}"
+                )
+            path_obj = Path(folder_path)
+            if not path_obj.exists():
+                invalid_paths.append(folder_path)
+                logger.warning(f"Folder path does not exist: {folder_path}")
+
+        # 존재하지 않는 경로가 있으면 에러 반환
+        if invalid_paths:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Following paths do not exist: {', '.join(invalid_paths)}"
+            )
+
     # Update the section
     config[section] = data
 
