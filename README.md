@@ -262,7 +262,26 @@ docker-compose down -v
 
 ## 🔄 업데이트 방법
 
-`latest` 태그를 사용하므로 새 버전이 출시되면 간단하게 업데이트할 수 있습니다:
+### 자동 버전 관리
+
+모든 커밋마다 자동으로 버전이 생성됩니다:
+- **형식**: `YYYYMMDD-HHMM-CommitSHA` (예: `20260126-1530-abc123d`)
+- **태그**:
+  - `latest` - 항상 최신 버전
+  - `20260126-1530-abc123d` - 특정 빌드 버전
+
+### 버전 확인
+
+```bash
+# 버전 확인 스크립트 다운로드 (한 번만)
+wget https://raw.githubusercontent.com/zardkim/my-appstore/main/check-version.sh
+chmod +x check-version.sh
+
+# 현재 버전 확인
+./check-version.sh
+```
+
+### 최신 버전으로 업데이트
 
 ```bash
 # 최신 이미지 다운로드
@@ -275,14 +294,21 @@ docker-compose up -d
 docker-compose pull && docker-compose up -d
 ```
 
-**업데이트 확인:**
+### 특정 버전으로 롤백
+
+문제 발생 시 이전 버전으로 돌아갈 수 있습니다:
 
 ```bash
-# 컨테이너 로그 확인
-docker-compose logs -f
+# Docker Hub에서 사용 가능한 버전 확인
+# https://hub.docker.com/r/zardkim/myappstore-backend/tags
+# https://hub.docker.com/r/zardkim/myappstore-frontend/tags
 
-# 버전 확인 (푸터에 표시됨)
-# http://localhost:5900 접속 후 하단 확인
+# docker-compose.yml에서 이미지 태그 변경
+# image: zardkim/myappstore-backend:20260126-1530-abc123d
+# image: zardkim/myappstore-frontend:20260126-1530-abc123d
+
+# 컨테이너 재시작
+docker-compose up -d
 ```
 
 > **💡 참고**: 데이터는 `./db`, `./redis`, `./data` 폴더에 저장되므로 업데이트해도 유지됩니다.
