@@ -64,16 +64,17 @@ class FilenameValidator:
             })
 
         # 3. 버전 형식 검증 (.v 누락)
-        # 버전처럼 보이는 패턴 찾기 (숫자.숫자 형태)
-        version_pattern = re.compile(r'[\._](\d+[\.\d]+)', re.IGNORECASE)
+        # 버전처럼 보이는 패턴 찾기 (숫자.숫자 형태, 공백/언더스코어/점 뒤)
+        # 전체 버전 번호를 찾기 위해 패턴 개선
+        version_pattern = re.compile(r'(?:[\s\._]|^)(\d+(?:\.\d+)+)(?:\s|_|\.|\-|$)', re.IGNORECASE)
         matches = version_pattern.findall(base_name)
 
         # .v 형식이 있는지 확인
-        has_v_format = re.search(r'\.v\d+', base_name, re.IGNORECASE)
+        has_v_format = re.search(r'[\s\._]v\d+', base_name, re.IGNORECASE)
 
         if matches and not has_v_format:
-            # 버전처럼 보이는데 .v 형식이 아님
-            version_num = matches[0]
+            # 버전처럼 보이는데 .v 형식이 아님 (가장 긴 버전 번호 선택)
+            version_num = max(matches, key=len)
             violations.append({
                 "type": FilenameValidator.VIOLATION_VERSION_FORMAT,
                 "details": f"버전 '{version_num}'이 .v 형식이 아닙니다.",
@@ -125,11 +126,23 @@ class FilenameValidator:
     @staticmethod
     def _suggest_version_fix(base_name: str, version_num: str) -> str:
         """버전 형식을 .v로 수정"""
-        # 버전 번호 앞에 .v 추가
-        # 예: Total Commander 10.51 → Total Commander.v10.51
-        fixed = base_name.replace(f"_{version_num}", f".v{version_num}")
-        fixed = fixed.replace(f".{version_num}", f".v{version_num}")
-        fixed = fixed.replace(f" {version_num}", f".v{version_num}")
+        # 버전 번호 앞의 구분자와 함께 .v로 교체
+        # 예: VMware Workstation Pro 16.0.0 → VMware Workstation Pro v16.0.0
+        # 예: Total_Commander_10.51 → Total Commander v10.51
+
+        # 버전 앞의 구분자 패턴 (공백, 언더스코어, 점)
+        patterns = [
+            (f"_{version_num}", f" v{version_num}"),  # 언더스코어 → 공백 v
+            (f".{version_num}", f" v{version_num}"),  # 점 → 공백 v
+            (f" {version_num}", f" v{version_num}"),  # 공백 → 공백 v
+        ]
+
+        fixed = base_name
+        for old_pattern, new_pattern in patterns:
+            if old_pattern in fixed:
+                fixed = fixed.replace(old_pattern, new_pattern)
+                break
+
         return fixed
 
     @staticmethod
