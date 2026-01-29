@@ -5,21 +5,31 @@ echo "========================================="
 echo "MyApp Store Backend - Starting up..."
 echo "========================================="
 
+# Create necessary directories first (as root)
+echo "Creating directories..."
+mkdir -p /app/data/logs /app/data/icons /app/data/screenshots /app/data/library /app/static/icons
+
 # Fix permissions for mounted /app/data directory (run as root)
 echo "Fixing permissions for /app/data..."
-chown -R appuser:appuser /app/data 2>/dev/null || true
-chmod -R u+rwX /app/data 2>/dev/null || true
+if [ -d "/app/data" ]; then
+  chown -R appuser:appuser /app/data 2>/dev/null || echo "Warning: Could not change ownership"
+  chmod -R u+rwX /app/data 2>/dev/null || echo "Warning: Could not change permissions"
+fi
 
 echo "✓ Permissions fixed"
 
 # Wait for PostgreSQL to be ready
 echo "Waiting for PostgreSQL..."
-until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$DB_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c '\q' 2>/dev/null; do
-  echo "PostgreSQL is unavailable - sleeping"
-  sleep 2
-done
-
-echo "✓ PostgreSQL is ready!"
+if [ -n "$DB_HOST" ] && [ -n "$POSTGRES_USER" ] && [ -n "$POSTGRES_DB" ]; then
+  until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$DB_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c '\q' 2>/dev/null; do
+    echo "PostgreSQL is unavailable - sleeping"
+    sleep 2
+  done
+  echo "✓ PostgreSQL is ready!"
+else
+  echo "WARNING: Database environment variables not set properly"
+  echo "DB_HOST=$DB_HOST, POSTGRES_USER=$POSTGRES_USER, POSTGRES_DB=$POSTGRES_DB"
+fi
 
 # Run database migrations (as appuser)
 echo "Running database migrations..."
@@ -28,9 +38,6 @@ gosu appuser alembic upgrade head || {
 }
 
 echo "✓ Database migrations complete"
-
-# Create necessary directories (as appuser)
-gosu appuser mkdir -p /app/data/logs /app/static/icons
 
 echo "========================================="
 echo "Starting FastAPI application..."
