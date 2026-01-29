@@ -27,6 +27,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     curl \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Python dependencies from builder
@@ -43,8 +44,11 @@ COPY --chown=appuser:appuser ./app ./app
 COPY --chown=appuser:appuser ./alembic ./alembic
 COPY --chown=appuser:appuser ./alembic.ini ./alembic.ini
 
-# Switch to non-root user
-USER appuser
+# Startup script (needs to run as root first to fix permissions)
+COPY --chown=root:root docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Note: We don't switch to appuser here - entrypoint script will do it after fixing permissions
 
 # Add user's local bin to PATH
 ENV PATH=/home/appuser/.local/bin:$PATH
@@ -61,10 +65,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 # Expose port
 EXPOSE 8110
-
-# Startup script
-COPY --chown=appuser:appuser docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8110", "--workers", "4"]
