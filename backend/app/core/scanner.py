@@ -176,24 +176,33 @@ class FileScanner:
             "new_products": 0,
             "new_versions": 0,
             "updated_products": 0,
+            "deleted_versions": 0,
+            "deleted_products": 0,
             "ai_generated": 0,
             "icons_cached": 0,
             "errors": []
         }
 
+        # 스캔 경로 내의 기존 파일들 추적
+        scanned_files = set()
+
         # 재귀적으로 모든 하위 폴더 스캔
-        await self._scan_folder_recursive_async(base_path, results)
+        await self._scan_folder_recursive_async(base_path, results, scanned_files)
+
+        # 삭제된 파일 정리
+        self._cleanup_deleted_files(str(base_path.absolute()), scanned_files, results)
 
         self.db.commit()
         return results
 
-    async def _scan_folder_recursive_async(self, folder: Path, results: Dict):
+    async def _scan_folder_recursive_async(self, folder: Path, results: Dict, scanned_files: set):
         """
         재귀적으로 폴더를 스캔 (하위 폴더 포함)
 
         Args:
             folder: 스캔할 폴더
             results: 결과 딕셔너리
+            scanned_files: 스캔된 파일 경로 추적용 Set
         """
         # 스캔 예외 목록에 있는 폴더는 건너뛰기
         if self._is_excluded(folder.name):
@@ -202,12 +211,12 @@ class FileScanner:
 
         try:
             # 현재 폴더의 파일들 처리
-            await self._process_folder_async(folder, results)
+            await self._process_folder_async(folder, results, scanned_files)
 
             # 하위 폴더 재귀 스캔
             for subfolder in folder.iterdir():
                 if subfolder.is_dir():
-                    await self._scan_folder_recursive_async(subfolder, results)
+                    await self._scan_folder_recursive_async(subfolder, results, scanned_files)
 
         except Exception as e:
             results["errors"].append(f"Error processing {folder.name}: {str(e)}")
@@ -231,22 +240,31 @@ class FileScanner:
             "new_products": 0,
             "new_versions": 0,
             "updated_products": 0,
+            "deleted_versions": 0,
+            "deleted_products": 0,
             "errors": []
         }
 
+        # 스캔 경로 내의 기존 파일들 추적
+        scanned_files = set()
+
         # 재귀적으로 모든 하위 폴더 스캔
-        self._scan_folder_recursive(base_path, results)
+        self._scan_folder_recursive(base_path, results, scanned_files)
+
+        # 삭제된 파일 정리
+        self._cleanup_deleted_files(str(base_path.absolute()), scanned_files, results)
 
         self.db.commit()
         return results
 
-    def _scan_folder_recursive(self, folder: Path, results: Dict):
+    def _scan_folder_recursive(self, folder: Path, results: Dict, scanned_files: set):
         """
         재귀적으로 폴더를 스캔 (하위 폴더 포함)
 
         Args:
             folder: 스캔할 폴더
             results: 결과 딕셔너리
+            scanned_files: 스캔된 파일 경로 추적용 Set
         """
         # 스캔 예외 목록에 있는 폴더는 건너뛰기
         if self._is_excluded(folder.name):
@@ -255,17 +273,17 @@ class FileScanner:
 
         try:
             # 현재 폴더의 파일들 처리
-            self._process_folder(folder, results)
+            self._process_folder(folder, results, scanned_files)
 
             # 하위 폴더 재귀 스캔
             for subfolder in folder.iterdir():
                 if subfolder.is_dir():
-                    self._scan_folder_recursive(subfolder, results)
+                    self._scan_folder_recursive(subfolder, results, scanned_files)
 
         except Exception as e:
             results["errors"].append(f"Error processing {folder.name}: {str(e)}")
 
-    async def _process_folder_async(self, folder: Path, results: Dict):
+    async def _process_folder_async(self, folder: Path, results: Dict, scanned_files: set):
         """
         Process a single folder - add all files to FilenameViolation as "scanned"
         (Product will be created later when user clicks AI matching)
@@ -273,6 +291,7 @@ class FileScanner:
         Args:
             folder: Path to the product folder
             results: Results dictionary to update
+            scanned_files: Set to track scanned file paths
         """
         folder_path_str = str(folder.absolute())
 
@@ -284,8 +303,10 @@ class FileScanner:
                     logger.debug(f"Skipping excluded file: {file_path.name}")
                     continue
                 self._add_scanned_file(file_path, folder_path_str, results)
+                # 스캔된 파일 추적
+                scanned_files.add(str(file_path.absolute()))
 
-    def _process_folder(self, folder: Path, results: Dict):
+    def _process_folder(self, folder: Path, results: Dict, scanned_files: set):
         """
         Process a single folder - add all files to FilenameViolation as "scanned"
         (Product will be created later when user clicks AI matching)
@@ -293,6 +314,7 @@ class FileScanner:
         Args:
             folder: Path to the product folder
             results: Results dictionary to update
+            scanned_files: Set to track scanned file paths
         """
         folder_path_str = str(folder.absolute())
 
@@ -304,6 +326,8 @@ class FileScanner:
                     logger.debug(f"Skipping excluded file: {file_path.name}")
                     continue
                 self._add_scanned_file(file_path, folder_path_str, results)
+                # 스캔된 파일 추적
+                scanned_files.add(str(file_path.absolute()))
 
     def _process_file(self, file_path: Path, product: Product, results: Dict):
         """
@@ -405,3 +429,50 @@ class FileScanner:
 
         self.db.add(violation)
         results["new_products"] += 1  # Count scanned files as new products
+
+    def _cleanup_deleted_files(self, base_path: str, scanned_files: set, results: Dict):
+        """
+        스캔 경로 내에서 삭제된 파일의 Version과 Product를 DB에서 제거
+
+        Args:
+            base_path: 스캔 경로
+            scanned_files: 스캔된 파일 경로 Set
+            results: 결과 딕셔너리
+        """
+        try:
+            # 스캔 경로 내의 모든 Version 조회
+            versions = self.db.query(Version).join(Product).filter(
+                Product.folder_path.like(f"{base_path}%")
+            ).all()
+
+            deleted_version_ids = []
+            product_ids_to_check = set()
+
+            # 파일이 존재하지 않는 Version 찾기
+            for version in versions:
+                if version.file_path not in scanned_files:
+                    logger.info(f"Deleted file detected: {version.file_path}")
+                    deleted_version_ids.append(version.id)
+                    product_ids_to_check.add(version.product_id)
+
+            # Version 삭제
+            if deleted_version_ids:
+                self.db.query(Version).filter(Version.id.in_(deleted_version_ids)).delete(synchronize_session=False)
+                results["deleted_versions"] = len(deleted_version_ids)
+                logger.info(f"Deleted {len(deleted_version_ids)} versions")
+
+            # Version이 없는 Product 삭제
+            deleted_product_ids = []
+            for product_id in product_ids_to_check:
+                version_count = self.db.query(Version).filter(Version.product_id == product_id).count()
+                if version_count == 0:
+                    deleted_product_ids.append(product_id)
+
+            if deleted_product_ids:
+                self.db.query(Product).filter(Product.id.in_(deleted_product_ids)).delete(synchronize_session=False)
+                results["deleted_products"] = len(deleted_product_ids)
+                logger.info(f"Deleted {len(deleted_product_ids)} products with no versions")
+
+        except Exception as e:
+            logger.error(f"Error cleaning up deleted files: {e}")
+            results["errors"].append(f"Cleanup error: {str(e)}")
