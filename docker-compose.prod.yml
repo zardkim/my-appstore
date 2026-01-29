@@ -71,7 +71,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: zardkim/myappstore-frontend:1.4.0
+    image: zardkim/myappstore-frontend:1.4.1
     container_name: myapp-frontend
     restart: unless-stopped
     ports:

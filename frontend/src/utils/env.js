@@ -27,6 +27,11 @@ function getBackendBaseUrl() {
     const currentHostname = window.location.hostname
     if (envUrl.includes('localhost') && currentHostname !== 'localhost' && currentHostname !== '127.0.0.1') {
       const protocol = window.location.protocol
+      // HTTPS 프로덕션 환경에서는 포트 명시하지 않음 (리버스 프록시 사용)
+      if (protocol === 'https:') {
+        return `${protocol}//${currentHostname}`
+      }
+      // HTTP 개발 환경에서는 포트 명시
       const port = getBackendPort()
       return `${protocol}//${currentHostname}:${port}`
     }
@@ -36,6 +41,13 @@ function getBackendBaseUrl() {
   // 환경 변수가 없으면 현재 호스트 기준으로 생성
   const hostname = window.location.hostname
   const protocol = window.location.protocol
+
+  // HTTPS 환경에서는 포트 명시하지 않음 (리버스 프록시 또는 기본 443 포트 사용)
+  if (protocol === 'https:') {
+    return `${protocol}//${hostname}`
+  }
+
+  // HTTP 환경에서는 개발용 포트 사용
   const port = getBackendPort()
   return `${protocol}//${hostname}:${port}`
 }
