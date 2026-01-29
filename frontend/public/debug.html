@@ -137,8 +137,9 @@
         const href = window.location.href;
 
         // API URL 계산 (프론트엔드 코드와 동일한 로직)
-        const apiUrl = protocol + '//' + hostname + ':8100/api';
-        const backendUrl = protocol + '//' + hostname + ':8100';
+        // 환경에 따라 자동으로 백엔드 URL 결정
+        const apiUrl = protocol + '//' + hostname + ':8110/api';
+        const backendUrl = protocol + '//' + hostname + ':8110';
 
         // 전체 정보
         const info = {

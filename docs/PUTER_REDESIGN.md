@@ -435,7 +435,7 @@ class="... hover:shadow-lg transform hover:-translate-y-1 group"
 ### 3. 이미지 URL 하드코딩
 **파일**: `ProductCard.vue:83`
 ```javascript
-return `http://localhost:8100${props.product.icon_url}`
+return `http://localhost:8110${props.product.icon_url}`
 ```
 **프로덕션**: 환경 변수로 변경 필요
 ```javascript

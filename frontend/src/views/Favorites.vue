@@ -43,7 +43,7 @@
               <div class="w-20 h-20 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center mb-4 mx-auto">
                 <img
                   v-if="favorite.product?.icon_url"
-                  :src="favorite.product.icon_url"
+                  :src="getIconUrl(favorite.product?.icon_url)"
                   :alt="favorite.product?.title"
                   class="w-full h-full object-contain p-3"
                 />
@@ -96,6 +96,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { favoritesApi } from '../api/favorites'
 import { useDialog } from '../composables/useDialog'
+import { getIconUrl } from '../utils/env'
 
 const router = useRouter()
 const { t } = useI18n({ useScope: 'global' })

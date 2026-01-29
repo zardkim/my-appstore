@@ -142,7 +142,7 @@ When implementing docker-compose.yml:
 - Optional: Mount NAS software folder as **read-only** at `/library/NAS` (e.g., `/volume1/Software:/library/NAS:ro`)
 - Separate volumes for: DB storage (`./data/db`), Redis data (`./data/redis`), icon cache (`./data/icons`), library (`./data/library`)
 - Required environment variables: `OPENAI_API_KEY`, `SECRET_KEY`, `REDIS_URL`, `SCAN_BASE_PATH=/library`
-- Ports: Backend 8100, Frontend 5900, Redis 6379
+- Ports: Backend 8110, Frontend 5900, Redis 6379
 - Services: PostgreSQL (db), Redis (redis), FastAPI (backend), Vite (frontend)
 
 ## Critical Development Considerations

@@ -24,7 +24,7 @@
 - **CPU**: 2 코어 이상 권장
 - **메모리**: 4GB 이상 권장
 - **디스크**: 20GB 이상 여유 공간
-- **포트**: 5900 (프론트엔드), 8100 (백엔드), 5432 (PostgreSQL), 6379 (Redis)
+- **포트**: 5900 (프론트엔드), 8110 (백엔드), 5432 (PostgreSQL), 6379 (Redis)
 
 ---
 
@@ -75,8 +75,8 @@ nano .env.production
 
 5. **VITE 환경변수** - 프론트엔드에서 백엔드 접근 URL
    ```
-   VITE_API_BASE_URL=http://your-server-ip:8100/api
-   VITE_BACKEND_URL=http://your-server-ip:8100
+   VITE_API_BASE_URL=http://your-server-ip:8110/api
+   VITE_BACKEND_URL=http://your-server-ip:8110
    VITE_APP_URL=http://your-server-ip:5900
    ```
 
@@ -152,7 +152,7 @@ docker-compose -f docker-compose.prod.yml ps
 정상 실행 시 출력:
 ```
 NAME                    STATUS              PORTS
-myapp-backend-prod      Up (healthy)        0.0.0.0:8100->8100/tcp
+myapp-backend-prod      Up (healthy)        0.0.0.0:8110->8110/tcp
 myapp-frontend-prod     Up (healthy)        0.0.0.0:80->80/tcp
 myapp-db-prod           Up (healthy)        0.0.0.0:5432->5432/tcp
 myapp-redis-prod        Up (healthy)        0.0.0.0:6379->6379/tcp
@@ -187,7 +187,7 @@ docker-compose -f docker-compose.prod.yml logs -f db
 
 ```bash
 # 백엔드 헬스체크
-curl http://localhost:8100/health
+curl http://localhost:8110/health
 
 # 프론트엔드 헬스체크
 curl http://localhost:5900/
@@ -203,7 +203,7 @@ docker exec myapp-redis-prod redis-cli ping
 
 브라우저에서 접속:
 ```
-http://localhost:8100/api-status
+http://localhost:8110/api-status
 ```
 
 이 페이지에서 다음을 확인할 수 있습니다:
@@ -312,7 +312,7 @@ docker-compose -f docker-compose.prod.yml logs backend
 
 # 일반적인 원인:
 # - 환경변수 오류 (.env.production 파일 확인)
-# - 포트 충돌 (8100, 80 포트가 이미 사용 중인지 확인)
+# - 포트 충돌 (8110, 80 포트가 이미 사용 중인지 확인)
 # - 디스크 공간 부족
 ```
 
@@ -348,7 +348,7 @@ docker-compose -f docker-compose.prod.yml ps
 docker inspect myapp-backend-prod | grep -A 20 Health
 
 # 수동 헬스체크
-curl -v http://localhost:8100/health
+curl -v http://localhost:8110/health
 ```
 
 ### 5. 메모리 부족 오류
@@ -369,7 +369,7 @@ docker system prune -a
 
 `docker-compose.prod.yml`에서 uvicorn 워커 수 조정:
 ```yaml
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8100", "--workers", "4"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8110", "--workers", "4"]
 ```
 
 권장: CPU 코어 수 × 2 + 1
@@ -398,7 +398,7 @@ redis:
 - [ ] 데이터베이스 비밀번호가 기본값이 아님
 - [ ] Redis 비밀번호가 설정됨
 - [ ] CORS_ORIGINS가 실제 도메인으로 제한됨
-- [ ] 방화벽에서 필요한 포트만 개방 (5900, 8100)
+- [ ] 방화벽에서 필요한 포트만 개방 (5900, 8110)
 - [ ] 백업 스크립트가 설정됨
 - [ ] 로그 파일 로테이션 설정 확인
 - [ ] SSL/TLS 인증서 적용 (선택사항, Nginx 리버스 프록시 사용 시)
@@ -421,7 +421,7 @@ redis:
 
 - **GitHub Issues**: https://github.com/your-repo/issues
 - **문서**: /docs 디렉토리
-- **API 문서**: http://localhost:8100/docs (Swagger UI)
+- **API 문서**: http://localhost:8110/docs (Swagger UI)
 
 ---
 

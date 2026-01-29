@@ -30,7 +30,7 @@ nano .env.production
 - `SECRET_KEY`: 강력한 랜덤 키 생성 (`openssl rand -hex 32`)
 - `POSTGRES_PASSWORD`: 데이터베이스 비밀번호
 - `CORS_ORIGINS`: 허용할 도메인
-- `VITE_API_BASE_URL`: 백엔드 API URL (예: `http://192.168.0.8:8100/api`)
+- `VITE_API_BASE_URL`: 백엔드 API URL (예: `http://192.168.0.8:8110/api`)
 
 ### 2단계: 빌드
 
@@ -51,16 +51,16 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 docker-compose -f docker-compose.prod.yml ps
 
 # 헬스체크
-curl http://localhost:8100/health
+curl http://localhost:8110/health
 curl http://localhost:5900/
 ```
 
 ## 🌐 접속 주소
 
 - **프론트엔드**: http://localhost:5900
-- **백엔드 API**: http://localhost:8100
-- **API 문서**: http://localhost:8100/docs
-- **API 상태**: http://localhost:8100/api-status
+- **백엔드 API**: http://localhost:8110
+- **API 문서**: http://localhost:8110/docs
+- **API 상태**: http://localhost:8110/api-status
 
 ## 🔧 주요 명령어
 
@@ -111,7 +111,7 @@ docker-compose -f docker-compose.prod.yml down -v
 ```bash
 # 포트 사용 중인 프로세스 확인
 sudo lsof -i :5900
-sudo lsof -i :8100
+sudo lsof -i :8110
 
 # 또는 .env.production에서 포트 변경
 FRONTEND_PORT=8080

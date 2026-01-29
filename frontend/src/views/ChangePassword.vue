@@ -138,7 +138,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import axios from 'axios'
+import { authApi } from '../api/auth'
 
 const router = useRouter()
 const { t } = useI18n({ useScope: 'global' })
@@ -180,10 +180,7 @@ const handleChangePassword = async () => {
   loading.value = true
 
   try {
-    await axios.post('/api/auth/change-password', {
-      current_password: form.value.currentPassword,
-      new_password: form.value.newPassword
-    })
+    await authApi.changePassword(form.value.currentPassword, form.value.newPassword)
 
     successMessage.value = t('changePassword.success')
 

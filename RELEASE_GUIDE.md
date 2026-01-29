@@ -95,7 +95,7 @@ npx standard-version --dry-run
 
 ```bash
 # API로 확인
-curl http://localhost:8100/api/version
+curl http://localhost:8110/api/version
 
 # 파일로 확인
 cat package.json | grep version

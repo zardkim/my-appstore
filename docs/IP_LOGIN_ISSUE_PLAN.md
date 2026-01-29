@@ -9,10 +9,10 @@
 ## 1. 현황 분석
 
 ### ✅ 정상 작동하는 것
-- 백엔드 API 서버: `http://192.168.0.8:8100` 정상 응답
+- 백엔드 API 서버: `http://192.168.0.8:8110` 정상 응답
 - Health Check: `/health` 엔드포인트 정상
 - Setup Check: `/api/auth/check-setup` 정상
-- 방화벽 설정: 5900, 8100 포트 허용됨
+- 방화벽 설정: 5900, 8110 포트 허용됨
 - CORS 설정: `*` (모든 origin 허용)
 
 ### ❌ 문제가 있는 것
@@ -43,7 +43,7 @@
 #### Step 1-1: API 상태 페이지 확인
 모바일에서 다음 URL 접속:
 ```
-http://192.168.0.8:8100/api-status
+http://192.168.0.8:8110/api-status
 ```
 
 **확인 사항**:
@@ -163,7 +163,7 @@ ip addr show
             port: window.location.port,
             href: window.location.href,
             userAgent: navigator.userAgent,
-            apiUrl: window.location.protocol + '//' + window.location.hostname + ':8100/api'
+            apiUrl: window.location.protocol + '//' + window.location.hostname + ':8110/api'
         };
         document.getElementById('info').innerHTML =
             '<pre>' + JSON.stringify(info, null, 2) + '</pre>';
@@ -184,7 +184,7 @@ cd /home/nuricom/project/myappStore/backend
 pkill -f "uvicorn app.main:app"
 
 # 로그 파일에 저장하면서 실행
-nohup python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8100 --reload > /tmp/backend-debug.log 2>&1 &
+nohup python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8110 --reload > /tmp/backend-debug.log 2>&1 &
 
 # 로그 실시간 확인
 tail -f /tmp/backend-debug.log
@@ -226,7 +226,7 @@ server {
 
     # 백엔드 API
     location /api/ {
-        proxy_pass http://localhost:8100/api/;
+        proxy_pass http://localhost:8110/api/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -234,17 +234,17 @@ server {
 
     # 백엔드 정적 파일
     location /static/ {
-        proxy_pass http://localhost:8100/static/;
+        proxy_pass http://localhost:8110/static/;
     }
 
     # API 상태 페이지
     location /api-status {
-        proxy_pass http://localhost:8100/api-status;
+        proxy_pass http://localhost:8110/api-status;
     }
 
     # Health check
     location /health {
-        proxy_pass http://localhost:8100/health;
+        proxy_pass http://localhost:8110/health;
     }
 }
 ```
@@ -284,8 +284,8 @@ VITE_APP_URL=http://192.168.0.8
 
 ```bash
 # .env
-VITE_API_BASE_URL=http://192.168.0.8:8100/api
-VITE_BACKEND_URL=http://192.168.0.8:8100
+VITE_API_BASE_URL=http://192.168.0.8:8110/api
+VITE_BACKEND_URL=http://192.168.0.8:8110
 VITE_APP_URL=http://192.168.0.8:5900
 CORS_ORIGINS=*
 ```
@@ -304,14 +304,14 @@ docker-compose logs -f
 
 4. 접속
 - 프론트엔드: `http://192.168.0.8:5900`
-- 백엔드: `http://192.168.0.8:8100`
+- 백엔드: `http://192.168.0.8:8110`
 
 ---
 
 ## 3. 체크리스트
 
 ### 즉시 확인 사항
-- [ ] `http://192.168.0.8:8100/api-status` 접속 확인
+- [ ] `http://192.168.0.8:8110/api-status` 접속 확인
 - [ ] API 상태 페이지에서 "로그인 테스트" 성공 확인
 - [ ] 모바일 브라우저 캐시 완전 삭제
 - [ ] 프론트엔드 재시작
@@ -319,7 +319,7 @@ docker-compose logs -f
 
 ### 환경 설정 확인
 - [ ] `backend/.env`의 `CORS_ORIGINS=*` 확인
-- [ ] 방화벽 5900, 8100 포트 허용 확인
+- [ ] 방화벽 5900, 8110 포트 허용 확인
 - [ ] 서버 내부 IP 주소 확인 (192.168.0.8이 맞는지)
 - [ ] 모바일과 서버가 같은 네트워크에 있는지 확인
 
@@ -341,7 +341,7 @@ docker-compose logs -f
 **해결**: 브라우저 캐시 삭제 → 로그인 성공
 
 ### 시나리오 2: 동적 URL 미작동
-**증상**: API 요청이 localhost:8100으로 가고 있음
+**증상**: API 요청이 localhost:8110으로 가고 있음
 **해결**: 프론트엔드 재시작 또는 빌드 → 로그인 성공
 
 ### 시나리오 3: CORS 문제 (가능성 낮음)
@@ -384,7 +384,7 @@ docker-compose logs -f
 
 ```bash
 # 백엔드 상태 확인
-curl http://192.168.0.8:8100/health
+curl http://192.168.0.8:8110/health
 
 # 프론트엔드 프로세스 확인
 ps aux | grep vite
@@ -393,10 +393,10 @@ ps aux | grep vite
 sudo ufw status
 
 # 포트 리스닝 확인
-netstat -tuln | grep -E '5900|8100'
+netstat -tuln | grep -E '5900|8110'
 
 # CORS 설정 확인
-curl -s http://192.168.0.8:8100/debug-cors
+curl -s http://192.168.0.8:8110/debug-cors
 ```
 
 ### 연락처 정보

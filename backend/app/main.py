@@ -192,12 +192,11 @@ from app.middleware.logging_middleware import LoggingMiddleware
 app.add_middleware(LoggingMiddleware)
 
 # Mount static files directory for icons
-static_parent = os.path.dirname(settings.ICON_CACHE_DIR)
-if os.path.exists(static_parent):
+if os.path.exists(settings.ICON_CACHE_DIR):
     app.mount("/static/icons", StaticFiles(directory=settings.ICON_CACHE_DIR), name="icons")
     logger.info(f"✓ Icons mounted: /static/icons -> {settings.ICON_CACHE_DIR}")
 else:
-    logger.warning(f"Icons directory does not exist: {settings.ICON_CACHE_DIR}")
+    logger.warning(f"⚠ Icons directory does not exist: {settings.ICON_CACHE_DIR}")
 
 # Mount static files directory for screenshots
 if os.path.exists(settings.SCREENSHOT_CACHE_DIR):
@@ -307,9 +306,9 @@ async def api_info():
         "version": get_version(),
         "description": "NAS 기반 개인 소프트웨어 라이브러리 관리 시스템",
         "documentation": {
-            "swagger": "http://localhost:8100/docs",
-            "redoc": "http://localhost:8100/redoc",
-            "openapi_schema": "http://localhost:8100/openapi.json"
+            "swagger": f"{settings.get_backend_url()}/docs",
+            "redoc": f"{settings.get_backend_url()}/redoc",
+            "openapi_schema": f"{settings.get_backend_url()}/openapi.json"
         },
         "endpoints": {
             "authentication": "/api/auth",
@@ -479,7 +478,7 @@ async def api_status():
                 <tr><td>서버 상태</td><td><span class="status success">정상 작동</span></td></tr>
                 <tr><td>호스트명</td><td>{hostname}</td></tr>
                 <tr><td>내부 IP</td><td>{local_ip}</td></tr>
-                <tr><td>백엔드 포트</td><td>8100</td></tr>
+                <tr><td>백엔드 포트</td><td>8110</td></tr>
                 <tr><td>프론트엔드 포트</td><td>5900</td></tr>
                 <tr><td>CORS 설정</td><td>{settings.CORS_ORIGINS}</td></tr>
             </table>

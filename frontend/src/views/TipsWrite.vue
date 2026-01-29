@@ -185,6 +185,7 @@ import { useLocaleStore } from '../store/locale'
 import { postsApi } from '../api/posts'
 import { imagesApi } from '../api/images'
 import { useDialog } from '../composables/useDialog'
+import { ENV } from '../utils/env'
 
 const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
@@ -197,9 +198,21 @@ const { alert, confirm } = useDialog()
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 const isEdit = computed(() => route.params.id !== undefined)
 
-// TinyMCE language mapping
+// TinyMCE 언어 매핑 (locale code -> tinymce language file)
+// 영어는 TinyMCE 기본 언어이므로 언어 파일 불필요 (undefined 반환)
+const TINYMCE_LANGUAGE_MAP = {
+  ko: 'ko_KR',
+  en: undefined,  // 영어는 기본 언어이므로 언어 파일 불필요
+  ja: 'ja',
+  zh: 'zh_CN',
+  // 필요에 따라 추가 언어 매핑
+  // de: 'de',
+  // fr: 'fr_FR',
+  // es: 'es',
+}
+
 const editorLanguage = computed(() => {
-  return localeStore.locale === 'ko' ? 'ko_KR' : 'en_US'
+  return TINYMCE_LANGUAGE_MAP[localeStore.locale] || undefined
 })
 
 let editorInstance = null
@@ -265,7 +278,7 @@ const initEditor = () => {
 
       try {
         const token = localStorage.getItem('access_token')
-        const response = await fetch('http://localhost:8100/api/images/upload-tinymce', {
+        const response = await fetch(`${ENV.BACKEND_URL}/api/images/upload-tinymce`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -292,8 +305,9 @@ const initEditor = () => {
 
     content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
 
-    // 언어 설정 (동적)
-    language: editorLanguage.value,
+    // 언어 설정 (언어 파일이 있는 경우만 설정)
+    // undefined인 경우 TinyMCE가 기본 영어를 사용
+    ...(editorLanguage.value ? { language: editorLanguage.value } : {}),
 
     branding: false,
     promotion: false,

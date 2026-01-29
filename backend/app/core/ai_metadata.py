@@ -104,7 +104,9 @@ class AIMetadataGeneratorV2:
 
         # 커스텀 프롬프트가 있으면 사용, 없으면 기본 프롬프트 사용
         if custom_prompt:
-            prompt = custom_prompt
+            # 커스텀 프롬프트의 변수 치환
+            prompt = custom_prompt.replace('[SOFTWARE_NAME]', software_context)
+            prompt = prompt.replace('{SOFTWARE_NAME}', software_context)
         else:
             # 상세 메타데이터 프롬프트
             prompt = f"""다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요:
@@ -276,7 +278,9 @@ class AIMetadataGeneratorV2:
 
         # 커스텀 프롬프트가 있으면 사용, 없으면 기본 프롬프트 사용
         if custom_prompt:
-            prompt = custom_prompt
+            # 커스텀 프롬프트의 변수 치환
+            prompt = custom_prompt.replace('[SOFTWARE_NAME]', software_context)
+            prompt = prompt.replace('{SOFTWARE_NAME}', software_context)
         else:
             # Gemini용 상세 프롬프트 (OpenAI와 동일)
             prompt = f"""다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요:

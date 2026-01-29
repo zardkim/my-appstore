@@ -14,7 +14,7 @@ export const uploadAttachment = async (productId, file, note = '', type = 'patch
   if (note) formData.append('note', note)
   formData.append('type', type)
 
-  const response = await client.post('/api/attachments/upload', formData, {
+  const response = await client.post('/attachments/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
@@ -29,7 +29,7 @@ export const uploadAttachment = async (productId, file, note = '', type = 'patch
  */
 export const getProductAttachments = async (productId, type = null) => {
   const params = type ? { type } : {}
-  const response = await client.get(`/api/attachments/product/${productId}`, { params })
+  const response = await client.get(`/attachments/product/${productId}`, { params })
   return response.data
 }
 
@@ -38,7 +38,7 @@ export const getProductAttachments = async (productId, type = null) => {
  * @param {number} attachmentId - 첨부파일 ID
  */
 export const downloadAttachment = async (attachmentId) => {
-  const response = await client.get(`/api/attachments/download/${attachmentId}`, {
+  const response = await client.get(`/attachments/download/${attachmentId}`, {
     responseType: 'blob'
   })
   return response
@@ -50,7 +50,7 @@ export const downloadAttachment = async (attachmentId) => {
  * @param {string} note - 수정할 노트
  */
 export const updateAttachment = async (attachmentId, note) => {
-  const response = await client.patch(`/api/attachments/${attachmentId}`, { note })
+  const response = await client.patch(`/attachments/${attachmentId}`, { note })
   return response.data
 }
 
@@ -59,7 +59,7 @@ export const updateAttachment = async (attachmentId, note) => {
  * @param {number} attachmentId - 첨부파일 ID
  */
 export const deleteAttachment = async (attachmentId) => {
-  const response = await client.delete(`/api/attachments/${attachmentId}`)
+  const response = await client.delete(`/attachments/${attachmentId}`)
   return response.data
 }
 

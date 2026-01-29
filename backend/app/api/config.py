@@ -1,7 +1,7 @@
 """
 Config API for managing application settings
 """
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List, Union
 import json
@@ -169,7 +169,7 @@ async def get_config_section(
 @router.put("/{section}")
 async def update_config_section(
     section: str,
-    data: Any,
+    data: Union[Dict[str, Any], List[Any]] = Body(...),
     current_user: User = Depends(get_current_admin_user)
 ):
     """
@@ -177,6 +177,10 @@ async def update_config_section(
     Requires admin authentication
     Data can be dict (most sections) or list (categories)
     """
+    logger.info(f"Updating config section: {section}")
+    logger.info(f"Received data type: {type(data)}")
+    logger.info(f"Received data: {data}")
+
     config = load_config()
 
     # 폴더 설정인 경우 경로 검증
@@ -221,8 +225,13 @@ async def update_config_section(
     config[section] = data
 
     # Save to file
-    save_config(config)
+    try:
+        save_config(config)
+    except Exception as e:
+        logger.error(f"Failed to save config: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save config: {str(e)}")
 
+    logger.info(f"Config section '{section}' updated successfully")
     return {"message": f"Section '{section}' updated successfully", "data": data}
 
 

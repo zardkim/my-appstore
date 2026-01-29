@@ -1108,7 +1108,7 @@ import { imagesApi } from '../api/images'
 import attachmentsApi from '../api/attachments'
 import { useAuthStore } from '../store/auth'
 import { useThemeStore } from '../store/theme'
-import { getDownloadUrl } from '../utils/env'
+import { getDownloadUrl, getIconUrl, getBackendUrl } from '../utils/env'
 import ProductLogoSearchDialog from '../components/product/ProductLogoSearchDialog.vue'
 import ProductImageSearchDialog from '../components/product/ProductImageSearchDialog.vue'
 import { useDialog } from '../composables/useDialog'
@@ -1137,7 +1137,8 @@ const screenshotFileInputs = ref([]) // 스크린샷 파일 input refs
 // 로고 URL에 타임스탬프 추가 (브라우저 캐시 우회)
 const iconUrlWithTimestamp = computed(() => {
   if (!product.value?.icon_url) return null
-  const url = product.value.icon_url
+  const url = getIconUrl(product.value.icon_url)
+  if (!url) return null
   const separator = url.includes('?') ? '&' : '?'
   return `${url}${separator}t=${iconTimestamp.value}`
 })
@@ -1651,7 +1652,15 @@ const deleteScreenshot = async (index) => {
 // Get screenshot at specific index
 const getScreenshotAtIndex = (index) => {
   const screenshots = isEditing.value ? editForm.value.screenshots : product.value?.screenshots
-  return screenshots && screenshots[index] ? screenshots[index] : null
+  if (!screenshots || !screenshots[index]) return null
+
+  const screenshotPath = screenshots[index]
+  // 절대 URL이면 그대로 반환
+  if (screenshotPath.startsWith('http://') || screenshotPath.startsWith('https://')) {
+    return screenshotPath
+  }
+  // 상대 경로면 백엔드 URL과 결합
+  return getBackendUrl(screenshotPath)
 }
 
 // Trigger screenshot upload
@@ -1867,9 +1876,7 @@ const loadAttachments = async () => {
 
 onMounted(async () => {
   try {
-    console.log('Loading product with ID:', route.params.id)
     const response = await productsApi.getById(route.params.id)
-    console.log('Product loaded:', response.data)
     product.value = response.data
 
     // 패치 파일 목록 로드
@@ -1879,11 +1886,6 @@ onMounted(async () => {
     loadPatchLinks()
   } catch (err) {
     console.error('Failed to load product:', err)
-    console.error('Error details:', {
-      message: err.message,
-      response: err.response?.data,
-      status: err.response?.status
-    })
     error.value = err.response?.data?.detail || err.message || '제품을 불러오는데 실패했습니다.'
   } finally {
     loading.value = false

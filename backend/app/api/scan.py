@@ -256,10 +256,8 @@ async def get_scan_exclusions(
         # 파일이 없으면 기본값 반환
         if not exclusions_file.exists():
             return {
-                "folders": ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash',
-                           'System Volume Information', '.DS_Store', 'Thumbs.db',
-                           'desktop.ini', '._.DS_Store', 'Icon\r', '@eaDir'],
-                "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                "folders": ['.DAV', '.git', '.node_modules', '_MACOSX', '#recycle', '@eaDir'],
+                "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4'],
                 "paths": [],
                 "exclusions": []  # 하위 호환성
             }
@@ -270,8 +268,8 @@ async def get_scan_exclusions(
             if not content:
                 # 빈 파일인 경우 기본값 반환
                 return {
-                    "folders": ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash'],
-                    "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                    "folders": ['.DAV', '.git', '.node_modules', '_MACOSX', '#recycle', '@eaDir'],
+                    "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4'],
                     "paths": [],
                     "exclusions": []
                 }
@@ -293,7 +291,7 @@ async def get_scan_exclusions(
                 ]
                 return {
                     "folders": exclusions,
-                    "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                    "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4'],
                     "paths": [],
                     "exclusions": exclusions
                 }

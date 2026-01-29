@@ -52,6 +52,7 @@ export default {
     admin: 'Admin',
     logout: 'Logout',
     login: 'Login',
+    more: 'More',
     changePassword: 'Change Password',
   },
 
@@ -271,8 +272,8 @@ export default {
       frontendUrlPlaceholder: 'http://192.168.0.8:5900',
       frontendUrlDesc: 'Frontend access address (e.g.: http://192.168.0.8:5900, http://nas.local:5900)',
       backendUrl: 'Backend API URL',
-      backendUrlPlaceholder: 'http://192.168.0.8:8100',
-      backendUrlDesc: 'Backend API address (e.g.: http://192.168.0.8:8100, http://nas.local:8100)',
+      backendUrlPlaceholder: 'http://192.168.0.8:8110',
+      backendUrlDesc: 'Backend API address (e.g.: http://192.168.0.8:8110, http://nas.local:8110)',
       guideTitle: '💡 Configuration Guide',
       guideLocal: 'Local network access:',
       guideLocalDesc: 'Use http://internal-IP:port format (e.g.: http://192.168.0.8:5900)',
@@ -794,8 +795,46 @@ export default {
       customPromptTip: 'Tip:',
       customPromptTipText: 'More detailed and specific questions will help AI provide more accurate information.',
       // Default prompt templates
-      defaultPromptOpenai: 'Provide metadata for the software in JSON format. Use SOFTWARE_NAME variable for software name. Response format: title(official name), version, platform, developer, category, official_website(URL), license_type, language(supported languages), description_short(50-100 chars), description_detailed(200-300 chars), features(array of 5+ key features), supported_formats(array), system_requirements(object: os, cpu, ram, disk_space, gpu, additional), installation_info(object: installer_type, file_size, internet_required), release_notes. All fields required, use empty values if unknown, JSON only.',
-      defaultPromptGemini: 'Provide metadata for the software in JSON format. Use SOFTWARE_NAME variable for software name. Response format: title(official name), version, platform, developer, category, official_website(URL), license_type, language(supported languages), description_short(50-100 chars), description_detailed(200-300 chars), features(array of 6+ key features), supported_formats(array), system_requirements(object: os, cpu, ram, disk_space, gpu, additional), installation_info(object: installer_type, file_size, internet_required), release_notes. All fields required, use empty values if unknown, JSON only.',
+      defaultPromptOpenai: `Provide metadata for the software '[SOFTWARE_NAME]' in JSON format.
+
+Required fields:
+- title: Official name
+- version: Version number
+- platform: Platform (Windows, macOS, Linux, etc.)
+- developer: Developer/Manufacturer
+- category: Category (Graphics, Office, Development, etc.)
+- official_website: Official website URL
+- license_type: License type
+- language: Supported languages
+- description_short: Brief description (50-100 chars)
+- description_detailed: Detailed description (200-300 chars)
+- features: Key features (array, 5+ items)
+- supported_formats: Supported file formats (array)
+- system_requirements: System requirements (os, cpu, ram, disk_space, gpu, additional)
+- installation_info: Installation information (installer_type, file_size, internet_required)
+- release_notes: Release notes
+
+Use empty values for unknown fields. Respond in JSON format only.`,
+      defaultPromptGemini: `Provide metadata for the software '[SOFTWARE_NAME]' in JSON format.
+
+Required fields:
+- title: Official name
+- version: Version number
+- platform: Platform (Windows, macOS, Linux, etc.)
+- developer: Developer/Manufacturer
+- category: Category (Graphics, Office, Development, etc.)
+- official_website: Official website URL
+- license_type: License type
+- language: Supported languages
+- description_short: Brief description (50-100 chars)
+- description_detailed: Detailed description (200-300 chars)
+- features: Key features (array, 6+ items)
+- supported_formats: Supported file formats (array)
+- system_requirements: System requirements (os, cpu, ram, disk_space, gpu, additional)
+- installation_info: Installation information (installer_type, file_size, internet_required)
+- release_notes: Release notes
+
+Use empty values for unknown fields. Respond in JSON format only.`,
     },
     // Metadata Test Dialog
     metadataTest: {

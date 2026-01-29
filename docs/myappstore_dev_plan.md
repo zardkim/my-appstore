@@ -135,7 +135,7 @@ services:
       - OPENAI_API_KEY=your_key
       - SECRET_KEY=your_secret
     ports:
-      - "8100:8100"
+      - "8110:8110"
 
   frontend:
     build: ./frontend
