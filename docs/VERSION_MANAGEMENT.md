@@ -253,13 +253,13 @@ cat package.json | grep version
 
 ```bash
 # 버전 정보 조회
-curl http://localhost:8100/api/version
+curl http://localhost:8110/api/version
 
 # 상세 버전 정보
-curl http://localhost:8100/api/version/detailed
+curl http://localhost:8110/api/version/detailed
 
 # 헬스체크 (버전 포함)
-curl http://localhost:8100/api/health
+curl http://localhost:8110/api/health
 ```
 
 ### UI

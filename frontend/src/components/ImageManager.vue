@@ -37,7 +37,7 @@
       </div>
 
       <!-- Error Message -->
-      <div v-if="searchError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400 text-sm">
+      <div v-if="searchError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400 text-sm whitespace-pre-line">
         {{ searchError }}
       </div>
 
@@ -130,7 +130,7 @@
       </div>
 
       <!-- Error Message -->
-      <div v-if="searchError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400 text-sm">
+      <div v-if="searchError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400 text-sm whitespace-pre-line">
         {{ searchError }}
       </div>
 
@@ -444,11 +444,9 @@ const currentScreenshots = ref([])
 
 // props.product 변경 감지하여 current images 업데이트
 watch(() => props.product, (newProduct) => {
-  console.log('[ImageManager] Product updated:', newProduct)
 
   // 로고 업데이트
   currentLogo.value = newProduct?.icon_url || null
-  console.log('[ImageManager] Current logo:', currentLogo.value)
 
   // 스크린샷 업데이트
   const screenshots = newProduct?.screenshots || []
@@ -461,7 +459,6 @@ watch(() => props.product, (newProduct) => {
   } else {
     currentScreenshots.value = []
   }
-  console.log('[ImageManager] Current screenshots:', currentScreenshots.value)
 }, { deep: true, immediate: true })
 
 // 검색어 정리 함수 (버전 정보 제거)
@@ -508,18 +505,12 @@ const searchLogos = async (isLoadMore = false) => {
     // 검색어 정리
     const cleanedQuery = cleanSearchQuery(searchQuery.value)
     if (!isLoadMore) {
-      console.log('Original query:', searchQuery.value)
-      console.log('Cleaned query:', cleanedQuery)
     }
 
-    console.log(`Calling searchLogo API... (offset: ${searchOffset.value})`)
     const response = await imagesApi.searchLogo(cleanedQuery, 20, searchOffset.value)
-    console.log('API response status:', response.status)
-    console.log('API response data:', response.data)
 
     if (response.data.success) {
       const newResults = response.data.images || []
-      console.log(`Search results count: ${newResults.length}`)
 
       if (isLoadMore) {
         // 기존 결과에 추가
@@ -581,18 +572,12 @@ const searchScreenshots = async (isLoadMore = false) => {
     // 검색어 정리
     const cleanedQuery = cleanSearchQuery(searchQuery.value)
     if (!isLoadMore) {
-      console.log('Original query:', searchQuery.value)
-      console.log('Cleaned query:', cleanedQuery)
     }
 
-    console.log(`Calling searchScreenshots API... (offset: ${searchOffset.value})`)
     const response = await imagesApi.searchScreenshots(cleanedQuery, 20, searchOffset.value)
-    console.log('API response status:', response.status)
-    console.log('API response data:', response.data)
 
     if (response.data.success) {
       const newResults = response.data.images || []
-      console.log(`Search results count: ${newResults.length}`)
 
       if (isLoadMore) {
         // 기존 결과에 추가
@@ -637,7 +622,6 @@ const loadMore = async () => {
     return
   }
 
-  console.log('[Infinite Scroll] Loading more...')
 
   if (searchType.value === 'logo') {
     await searchLogos(true)
@@ -655,14 +639,12 @@ const setupIntersectionObserver = () => {
 
   // Find the scrollable container (dialog content)
   const scrollContainer = loadMoreTrigger.value?.closest('.overflow-y-auto')
-  console.log('[Infinite Scroll] Scroll container:', scrollContainer)
 
   // Create new observer
   scrollObserver.value = new IntersectionObserver(
     (entries) => {
       const target = entries[0]
       if (target.isIntersecting && hasMore.value && !isLoadingMore.value && !searchLoading.value) {
-        console.log('[Infinite Scroll] Trigger visible, loading more...')
         loadMore()
       }
     },
@@ -755,9 +737,7 @@ const downloadSelectedImages = async () => {
     if (searchType.value === 'logo') {
       // 로고 다운로드
       const imageUrl = selectedImages.value[0].url
-      console.log('Downloading logo from:', imageUrl)
       const response = await imagesApi.downloadLogo(props.productId, imageUrl)
-      console.log('Download logo response:', response.data)
 
       if (response.data.success) {
         emit('update:logo', response.data.url)
@@ -797,13 +777,8 @@ const downloadSelectedImages = async () => {
         }
       }
 
-      console.log('Existing screenshots:', existingUrls.length)
-      console.log('New screenshots selected:', newUrls.length)
-      console.log('Final screenshots to save:', finalUrls.length)
-      console.log('Downloading screenshots from:', finalUrls)
 
       const response = await imagesApi.downloadScreenshots(props.productId, finalUrls)
-      console.log('Download screenshots response:', response.data)
 
       if (response.data.success) {
         const screenshots = (response.data.urls || []).map(url => ({
@@ -949,22 +924,16 @@ const handleImageError = (event) => {
 
 // Initialize with search query from props and auto-search
 onMounted(() => {
-  console.log('[ImageManager] Component mounted')
-  console.log('[ImageManager] props.product:', props.product)
-  console.log('[ImageManager] props.product?.icon_url:', props.product?.icon_url)
-  console.log('[ImageManager] props.product?.screenshots:', props.product?.screenshots)
 
   // defaultTab이 지정되지 않은 경우에만 current 탭으로 자동 전환
   // visible-tabs에 current가 포함된 경우에만 current 탭으로 전환
   if (props.defaultTab === 'logo' && props.visibleTabs.includes('current') && (props.product?.icon_url || (props.product?.screenshots && props.product.screenshots.length > 0))) {
-    console.log('[ImageManager] Images found, switching to current tab')
     activeTab.value = 'current'
     return // 검색 실행하지 않음
   }
 
   if (props.initialSearchQuery) {
     searchQuery.value = props.initialSearchQuery
-    console.log('ImageManager initialized with search query:', props.initialSearchQuery)
 
     // 초기 탭에서 자동으로 검색 실행
     if (activeTab.value === 'logo') {
@@ -977,16 +946,9 @@ onMounted(() => {
 
 // Watch activeTab and auto-search when switching to logo/screenshot tabs
 watch(activeTab, (newTab) => {
-  console.log('[ImageManager] Active tab changed to:', newTab)
 
   // 현재 이미지 탭으로 전환 시 현재 값 로깅
   if (newTab === 'current') {
-    console.log('[ImageManager] Switching to current tab')
-    console.log('[ImageManager] currentLogo.value:', currentLogo.value)
-    console.log('[ImageManager] currentScreenshots.value:', currentScreenshots.value)
-    console.log('[ImageManager] props.product:', props.product)
-    console.log('[ImageManager] props.product?.icon_url:', props.product?.icon_url)
-    console.log('[ImageManager] props.product?.screenshots:', props.product?.screenshots)
   }
 
   if (!searchQuery.value) {

@@ -258,7 +258,7 @@
                 </svg>
                 {{ t('settings.users.addUser') }}
               </button>
-              <button @click="showInviteModal = true" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-medium flex items-center justify-center text-sm sm:text-base">
+              <button v-if="isDevelopment" @click="showInviteModal = true" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-medium flex items-center justify-center text-sm sm:text-base">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
@@ -1587,8 +1587,8 @@
       </div>
     </div>
 
-    <!-- Invite User Modal -->
-    <div v-if="showInviteModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click.self="showInviteModal = false">
+    <!-- Invite User Modal (개발 모드 전용) -->
+    <div v-if="isDevelopment && showInviteModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click.self="showInviteModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4">
         <div class="flex items-center mb-4">
           <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-3">
@@ -1944,7 +1944,7 @@ const language = computed({
   }
 })
 const accessUrl = ref(ENV.APP_URL)
-const apiUrl = ref('http://localhost:8100')
+const apiUrl = ref(ENV.BACKEND_URL)
 const passwordForm = ref({ currentPassword: '', newPassword: '', confirmPassword: '' })
 const passwordLoading = ref(false)
 const passwordError = ref('')
@@ -2021,6 +2021,7 @@ const clearStatsCache = async () => {
 // Users
 const users = ref([])
 const showAddUserModal = ref(false)
+const showEditUserModal = ref(false)
 const showInviteModal = ref(false)
 const showPasswordModal = ref(false)
 const inviteEmail = ref('')
@@ -2029,6 +2030,7 @@ const editingUser = ref({ id: null, username: '' })
 const newPassword = ref('')
 const confirmPassword = ref('')
 const loadingUsers = ref(false)
+const isDevelopment = import.meta.env.DEV // 개발 모드 확인
 
 // Folders
 const defaultLibraryPath = import.meta.env.VITE_LIBRARY_PATH || '/library'
@@ -2321,14 +2323,14 @@ const loadExceptionSettings = async () => {
         // 하위 호환성을 위한 처리
         exceptionFolders.value = response.data.exclusions
       } else {
-        exceptionFolders.value = ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash']
+        exceptionFolders.value = ['.DAV', '.git', '.node_modules', '_MACOSX', '#recycle', '@eaDir']
       }
 
       // 파일 패턴 예외
       if (response.data.patterns && response.data.patterns.length > 0) {
         exceptionPatterns.value = response.data.patterns
       } else {
-        exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini']
+        exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4']
       }
 
       // 경로 예외
@@ -2337,14 +2339,14 @@ const loadExceptionSettings = async () => {
       }
     } else {
       // 기본값 설정
-      exceptionFolders.value = ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash']
-      exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini']
+      exceptionFolders.value = ['.DAV', '.git', '.node_modules', '_MACOSX', '#recycle', '@eaDir']
+      exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4']
     }
   } catch (error) {
     console.error('스캔 예외 설정 불러오기 오류:', error)
     // 기본값 설정
-    exceptionFolders.value = ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash']
-    exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini']
+    exceptionFolders.value = ['.DAV', '.git', '.node_modules', '_MACOSX', '#recycle', '@eaDir']
+    exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4']
   }
 }
 
@@ -2762,12 +2764,22 @@ const saveMetadataSettings = async () => {
       customPromptGemini: customPromptGemini.value
     }
 
+    console.log('Saving metadata settings:', data)
     await configApi.updateSection('metadata', data)
     await alert.success(t('settings.metadata.saved'))
-    console.log('Metadata settings saved')
+    console.log('Metadata settings saved successfully')
   } catch (error) {
     console.error('Metadata settings save failed:', error)
-    await alert.error(t('settings.metadata.saveFailed'))
+    console.error('Error response:', error.response)
+
+    let errorMessage = t('settings.metadata.saveFailed')
+    if (error.response?.data?.detail) {
+      errorMessage += `: ${error.response.data.detail}`
+    } else if (error.message) {
+      errorMessage += `: ${error.message}`
+    }
+
+    await alert.error(errorMessage)
   }
 }
 
@@ -2910,8 +2922,8 @@ onMounted(async () => {
       // 언어 설정: language는 computed로 localeStore.locale을 자동 반영하므로 별도 설정 불필요
       // localeStore는 초기화 시 localStorage에서 값을 읽어옴
 
-      accessUrl.value = config.general.accessUrl || 'http://localhost:5900'
-      apiUrl.value = config.general.apiUrl || 'http://localhost:8100'
+      accessUrl.value = config.general.accessUrl || ENV.APP_URL
+      apiUrl.value = config.general.apiUrl || ENV.BACKEND_URL
     }
     isLoadingConfig.value = false
 
@@ -2958,8 +2970,6 @@ onMounted(async () => {
       // localStorage에도 저장 (TipsWrite, TipsDetail에서 사용)
       localStorage.setItem('boardSettings', JSON.stringify(config.board))
     }
-
-    console.log('설정 로드 완료:', config)
 
     // 이전 기본 프롬프트 초기화 (언어 변경 감지용) - config.metadata가 없는 경우 대비
     if (!prevDefaultPromptOpenai) {

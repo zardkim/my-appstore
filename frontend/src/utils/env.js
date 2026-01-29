@@ -3,19 +3,41 @@
  * Provides centralized access to environment variables
  */
 
+// 백엔드 포트 추출 함수
+function getBackendPort() {
+  const envUrl = import.meta.env.VITE_BACKEND_URL
+  if (envUrl) {
+    try {
+      const url = new URL(envUrl)
+      return url.port || (url.protocol === 'https:' ? '443' : '80')
+    } catch (e) {
+      // URL 파싱 실패 시 기본값
+    }
+  }
+  return '8110' // 기본 백엔드 포트
+}
+
 // 동적으로 백엔드 URL 생성
 function getBackendBaseUrl() {
   const envUrl = import.meta.env.VITE_BACKEND_URL
 
-  // 환경 변수가 절대 URL이면 그대로 사용
+  // 환경 변수가 절대 URL이면서 localhost가 아니면 그대로 사용
   if (envUrl && (envUrl.startsWith('http://') || envUrl.startsWith('https://'))) {
+    // localhost로 설정되어 있지만 현재 접속 호스트가 다르면 현재 호스트 사용
+    const currentHostname = window.location.hostname
+    if (envUrl.includes('localhost') && currentHostname !== 'localhost' && currentHostname !== '127.0.0.1') {
+      const protocol = window.location.protocol
+      const port = getBackendPort()
+      return `${protocol}//${currentHostname}:${port}`
+    }
     return envUrl
   }
 
   // 환경 변수가 없으면 현재 호스트 기준으로 생성
   const hostname = window.location.hostname
   const protocol = window.location.protocol
-  return `${protocol}//${hostname}:8100`
+  const port = getBackendPort()
+  return `${protocol}//${hostname}:${port}`
 }
 
 // 동적으로 앱 URL 생성

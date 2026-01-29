@@ -55,12 +55,8 @@ class FileScanner:
             # 파일이 없으면 기본 예외 목록으로 생성
             if not exclusions_file.exists():
                 default_data = {
-                    "folders": [
-                        '.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash',
-                        'System Volume Information', '.DS_Store', 'Thumbs.db',
-                        'desktop.ini', '._.DS_Store', 'Icon\r', '@eaDir'
-                    ],
-                    "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                    "folders": ['.DAV', '.git', '.node_modules', '_MACOSX', '#recycle', '@eaDir'],
+                    "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4'],
                     "paths": []
                 }
                 exclusions_file.parent.mkdir(parents=True, exist_ok=True)
@@ -73,8 +69,8 @@ class FileScanner:
                 content = f.read().strip()
                 if not content:
                     return {
-                        "folders": ['.git', 'node_modules', '__MACOSX', '$RECYCLE.BIN', '.Trash'],
-                        "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                        "folders": ['.DAV', '.git', '.node_modules', '_MACOSX', '#recycle', '@eaDir'],
+                        "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4'],
                         "paths": []
                     }
 
@@ -94,7 +90,7 @@ class FileScanner:
                     ]
                     return {
                         "folders": exclusions,
-                        "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini'],
+                        "patterns": ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4'],
                         "paths": []
                     }
         except Exception as e:

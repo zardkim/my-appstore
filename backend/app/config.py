@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     # Server
     HOST: str = "0.0.0.0"
     PORT: int = 8110
-    BACKEND_URL: str = "http://localhost:8110"  # Backend URL for image paths
+    BACKEND_URL: str = ""  # Backend URL for image paths (will be auto-generated if empty)
 
     # Logging
     LOG_LEVEL: str = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
@@ -62,6 +62,13 @@ class Settings(BaseSettings):
         if self.CORS_ORIGINS.strip() == "*":
             return ["*"]
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+
+    def get_backend_url(self) -> str:
+        """Get backend URL - use BACKEND_URL if set, otherwise auto-generate from HOST and PORT"""
+        if self.BACKEND_URL and self.BACKEND_URL.strip():
+            return self.BACKEND_URL
+        # Auto-generate from HOST and PORT
+        return f"http://localhost:{self.PORT}"
 
 
 settings = Settings()

@@ -308,9 +308,9 @@ const removeSpecificTime = (index) => {
 
 const getSpecificTimesPreview = () => {
   const times = specificTimes.value
-    .map(t => {
-      const hour = t.hour
-      const minute = String(t.minute).padStart(2, '0')
+    .map(timeObj => {
+      const hour = timeObj.hour
+      const minute = String(timeObj.minute).padStart(2, '0')
       const period = hour < 12 ? t('settings.scheduler.am') : t('settings.scheduler.pm')
       const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
       return `${period} ${displayHour}:${minute}`
@@ -345,10 +345,10 @@ const updateCronExpression = () => {
 
     // Group by minute
     const minuteGroups = {}
-    sortedTimes.forEach(t => {
-      const min = t.minute
+    sortedTimes.forEach(timeObj => {
+      const min = timeObj.minute
       if (!minuteGroups[min]) minuteGroups[min] = []
-      minuteGroups[min].push(t.hour)
+      minuteGroups[min].push(timeObj.hour)
     })
 
     // If all times have the same minute, use simplified format
@@ -360,7 +360,7 @@ const updateCronExpression = () => {
     } else {
       // Use first time's minute for now (simplified)
       const minute = sortedTimes[0].minute
-      const hours = sortedTimes.map(t => t.hour).join(',')
+      const hours = sortedTimes.map(timeObj => timeObj.hour).join(',')
       configForm.value.cron_schedule = `${minute} ${hours} * * *`
     }
   } else {
@@ -382,9 +382,9 @@ const parseCronExpression = (cron) => {
   } else if (hour.includes(',')) {
     // Specific times format
     scheduleType.value = 'specific'
-    const hours = hour.split(',').map(h => parseInt(h))
+    const hours = hour.split(',').map(hourStr => parseInt(hourStr))
     const min = parseInt(minute)
-    specificTimes.value = hours.map(h => ({ hour: h, minute: min }))
+    specificTimes.value = hours.map(hourNum => ({ hour: hourNum, minute: min }))
   } else {
     // Single time
     scheduleType.value = 'specific'

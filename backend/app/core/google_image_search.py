@@ -124,6 +124,8 @@ class GoogleImageSearcher:
                     }
 
                     logger.debug(f"Google Search] Requesting batch: start={batch['start']}, num={batch['num']}")
+                    logger.debug(f"Google Search] Full request params: {params}")
+                    logger.debug(f"Google Search] Request URL: {self.base_url}")
                     response = await client.get(self.base_url, params=params)
                     logger.debug(f"Google Search] Response status: {response.status_code}")
 
@@ -140,13 +142,24 @@ class GoogleImageSearcher:
                                 "context_link": item.get("image", {}).get("contextLink", "")
                             })
                     elif response.status_code == 403:
-                        logger.debug(f"Google Search] ERROR 403: Quota exceeded or permission denied")
-                        logger.debug(f"Google Search] Response: {response.text}")
-                        break  # 더 이상 요청하지 않음
+                        error_data = response.json()
+                        error_reason = error_data.get("error", {}).get("errors", [{}])[0].get("reason", "unknown")
+                        logger.error(f"Google Search] ERROR 403: {error_reason}")
+                        logger.error(f"Google Search] Response: {response.text}")
+
+                        # 403 오류 시 예외 발생하여 상세 메시지 전달
+                        if "quotaExceeded" in error_reason or "dailyLimitExceeded" in error_reason:
+                            raise Exception("Google API 일일 할당량이 초과되었습니다.")
+                        elif "keyInvalid" in error_reason:
+                            raise Exception("Google API Key가 잘못되었습니다. 설정을 확인해주세요.")
+                        else:
+                            raise Exception(f"Google API 오류: {error_reason}")
                     elif response.status_code == 400:
-                        logger.debug(f"Google Search] ERROR 400: Invalid request")
-                        logger.debug(f"Google Search] Response: {response.text}")
-                        break
+                        error_data = response.json()
+                        error_message = error_data.get("error", {}).get("message", "Invalid request")
+                        logger.error(f"Google Search] ERROR 400: {error_message}")
+                        logger.error(f"Google Search] Response: {response.text}")
+                        raise Exception(f"Google API 요청 오류: {error_message}")
                     else:
                         logger.debug(f"Google Search] ERROR {response.status_code}")
                         logger.debug(f"Google Search] Response: {response.text}")
@@ -172,4 +185,15 @@ class GoogleImageSearcher:
         Returns:
             설정 완료 여부
         """
-        return bool(self.api_key and self.search_engine_id)
+        if not self.api_key or not self.search_engine_id:
+            return False
+
+        # Search Engine ID 형식 검증
+        # OAuth 클라이언트 ID 형식 감지 (xxxxx.apps.googleusercontent.com)
+        if '.apps.googleusercontent.com' in self.search_engine_id:
+            logger.error(f"Invalid Search Engine ID format: {self.search_engine_id}")
+            logger.error("This looks like an OAuth Client ID, not a Programmable Search Engine ID")
+            logger.error("Please create a Programmable Search Engine at: https://programmablesearchengine.google.com/")
+            return False
+
+        return True

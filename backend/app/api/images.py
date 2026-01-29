@@ -150,8 +150,13 @@ async def search_logo(
     searcher = get_google_searcher()
 
     if not searcher.is_configured():
-        error_msg = "Google Custom Search API가 설정되지 않았습니다. Settings → Metadata에서 API Key와 Search Engine ID를 설정해주세요."
-        logger.debug(f"Images API] ERROR: {error_msg}")
+        # OAuth 클라이언트 ID 형식 감지
+        if '.apps.googleusercontent.com' in searcher.search_engine_id:
+            error_msg = "❌ Search Engine ID가 잘못되었습니다.\n\n현재 입력된 값은 OAuth 클라이언트 ID입니다.\n\n올바른 설정:\n1. https://programmablesearchengine.google.com 방문\n2. 새 검색엔진 생성 (이미지 검색 활성화 필수)\n3. 생성된 검색엔진 ID를 복사하여 입력\n\n예시: 017576662512468239146:omuauf_lfve"
+        else:
+            error_msg = "Google Custom Search API가 설정되지 않았습니다. Settings → Metadata에서 API Key와 Search Engine ID를 설정해주세요."
+
+        logger.error(f"Images API] ERROR: {error_msg}")
         return GoogleImageSearchResponse(
             success=False,
             images=[],
@@ -209,8 +214,13 @@ async def search_screenshots(
     searcher = get_google_searcher()
 
     if not searcher.is_configured():
-        error_msg = "Google Custom Search API가 설정되지 않았습니다. Settings → Metadata에서 API Key와 Search Engine ID를 설정해주세요."
-        logger.debug(f"Images API] ERROR: {error_msg}")
+        # OAuth 클라이언트 ID 형식 감지
+        if '.apps.googleusercontent.com' in searcher.search_engine_id:
+            error_msg = "❌ Search Engine ID가 잘못되었습니다.\n\n현재 입력된 값은 OAuth 클라이언트 ID입니다.\n\n올바른 설정:\n1. https://programmablesearchengine.google.com 방문\n2. 새 검색엔진 생성 (이미지 검색 활성화 필수)\n3. 생성된 검색엔진 ID를 복사하여 입력\n\n예시: 017576662512468239146:omuauf_lfve"
+        else:
+            error_msg = "Google Custom Search API가 설정되지 않았습니다. Settings → Metadata에서 API Key와 Search Engine ID를 설정해주세요."
+
+        logger.error(f"Images API] ERROR: {error_msg}")
         return GoogleImageSearchResponse(
             success=False,
             images=[],
@@ -303,17 +313,19 @@ async def upload_logo(
         with open(file_path, 'wb') as f:
             f.write(content)
 
-        # 전체 URL 생성 (프론트엔드가 다른 포트에서 실행되므로 백엔드 URL 포함)
+        # 상대 경로만 저장 (프론트엔드에서 동적으로 백엔드 URL 추가)
         local_path = f"/static/icons/{filename}"
-        icon_url = f"{settings.BACKEND_URL}{local_path}"
 
-        # DB 업데이트
-        product.icon_url = icon_url
+        # DB 업데이트 (상대 경로만 저장)
+        product.icon_url = local_path
         db.commit()
+
+        # 응답에는 전체 URL 반환 (API 응답용)
+        full_url = f"{settings.get_backend_url()}{local_path}"
 
         return ImageUploadResponse(
             success=True,
-            url=icon_url
+            url=full_url
         )
 
     except Exception as e:
@@ -447,19 +459,20 @@ async def download_logo_from_url(
         local_path = await icon_cache.download_and_cache(url, product_id)
 
         if local_path:
-            # 전체 URL 생성 (프론트엔드가 다른 포트에서 실행되므로 백엔드 URL 포함)
-            full_url = f"{settings.BACKEND_URL}{local_path}"
             logger.debug(f"Download Logo] Local path: {local_path}")
-            logger.debug(f"Download Logo] Full URL: {full_url}")
 
-            # 제품이 존재하면 DB 업데이트
+            # 제품이 존재하면 DB 업데이트 (상대 경로만 저장)
             product = db.query(Product).filter(Product.id == product_id).first()
             if product:
-                product.icon_url = full_url
+                product.icon_url = local_path
                 db.commit()
                 logger.debug(f"Download Logo] DB updated for product {product_id}")
             else:
                 logger.debug(f"Download Logo] Product {product_id} not found in DB (test mode), skipping DB update")
+
+            # 응답에는 전체 URL 반환 (API 응답용)
+            full_url = f"{settings.get_backend_url()}{local_path}"
+            logger.debug(f"Download Logo] Full URL: {full_url}")
 
             return ImageUploadResponse(
                 success=True,

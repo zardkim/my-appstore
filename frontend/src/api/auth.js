@@ -21,5 +21,12 @@ export const authApi = {
       password,
       role: 'admin'
     })
+  },
+
+  async changePassword(currentPassword, newPassword) {
+    return apiClient.post('auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword
+    })
   }
 }

@@ -274,6 +274,7 @@ import { productsApi } from '../api/products'
 import ProductCard from '../components/product/ProductCard.vue'
 import ProductAISearchDialog from '../components/product/ProductAISearchDialog.vue'
 import ProductManualEditDialog from '../components/product/ProductManualEditDialog.vue'
+import ProductImageSearchDialog from '../components/product/ProductImageSearchDialog.vue'
 import { useAuthStore } from '../store/auth'
 
 const { t } = useI18n({ useScope: 'global' })
@@ -318,6 +319,7 @@ const pageSize = 20
 // Dialog state
 const aiSearchDialogOpen = ref(false)
 const manualEditDialogOpen = ref(false)
+const imageSearchDialogOpen = ref(false)
 const selectedProduct = ref(null)
 const showCategoryModal = ref(false)
 
@@ -435,7 +437,6 @@ const closeAISearchDialog = () => {
 }
 
 const handleMetadataSaved = async (metadata) => {
-  console.log('Metadata saved:', metadata)
   // Refresh the product list to show updated data
   await loadProducts()
 }
@@ -446,7 +447,16 @@ const closeManualEditDialog = () => {
 }
 
 const handleManualEditSaved = async (data) => {
-  console.log('Manual edit saved:', data)
+  // Refresh the product list to show updated data
+  await loadProducts()
+}
+
+const closeImageSearchDialog = () => {
+  imageSearchDialogOpen.value = false
+  selectedProduct.value = null
+}
+
+const handleImagesSaved = async () => {
   // Refresh the product list to show updated data
   await loadProducts()
 }

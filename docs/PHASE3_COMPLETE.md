@@ -194,7 +194,7 @@ frontend/src/views/
 
 프론트엔드에서 다운로드 버튼 클릭 시:
 ```javascript
-window.open(`http://localhost:8100/api/download/${versionId}`, '_blank')
+window.open(`http://localhost:8110/api/download/${versionId}`, '_blank')
 ```
 
 ---
@@ -215,7 +215,7 @@ server {
 
     # Backend API
     location /api/ {
-        proxy_pass http://backend:8100;
+        proxy_pass http://backend:8110;
     }
 
     # Static files (icons)
@@ -381,10 +381,10 @@ services:
 
 ```bash
 # 스케줄러 상태 확인
-curl http://localhost:8100/api/scheduler/status
+curl http://localhost:8110/api/scheduler/status
 
 # 스케줄러 시작
-curl -X POST http://localhost:8100/api/scheduler/start \
+curl -X POST http://localhost:8110/api/scheduler/start \
   -H "Content-Type: application/json" \
   -d '{
     "cron_schedule": "0 2 * * *",
@@ -393,27 +393,27 @@ curl -X POST http://localhost:8100/api/scheduler/start \
   }'
 
 # 즉시 스캔
-curl -X POST http://localhost:8100/api/scheduler/run-now
+curl -X POST http://localhost:8110/api/scheduler/run-now
 ```
 
 ### 2. 검색 테스트
 
 ```bash
 # 검색
-curl "http://localhost:8100/api/products/?search=adobe"
+curl "http://localhost:8110/api/products/?search=adobe"
 
 # 카테고리 필터
-curl "http://localhost:8100/api/products/?category=Graphics"
+curl "http://localhost:8110/api/products/?category=Graphics"
 
 # 자동완성
-curl "http://localhost:8100/api/products/search/suggestions?q=pho"
+curl "http://localhost:8110/api/products/search/suggestions?q=pho"
 ```
 
 ### 3. 다운로드 테스트
 
 브라우저에서:
 ```
-http://localhost:8100/api/download/1
+http://localhost:8110/api/download/1
 ```
 
 ---

@@ -21,8 +21,8 @@ class FilenameParser:
         # 패키징
         'repack', 'repacked', 'incl', 'pre', 'extras', 'addon', 'addons',
         'custom', 'embedded', 'delta', 'winpe',
-        # 빌드 관련
-        'build', 'sp1', 'sp2', 'sp3', 'r1', 'r2', 'ltsc',
+        # 빌드 관련 (ltsc 제거 - Office 버전 구분에 중요)
+        'build', 'sp1', 'sp2', 'sp3', 'r1', 'r2',
         # 파일 확장자
         'dvd', 'cd', 'iso', 'img', 'exe', 'msi', 'zip', 'rar', '7z', 'cab',
         # 릴리즈 그룹/사이트
@@ -132,6 +132,7 @@ class FilenameParser:
             r'(\d+\.\d+\.\d+\.\d+)',         # 1.2.3.4
             r'(\d+\.\d+\.\d+)',              # 1.2.3
             r'[\s_](\d+\.\d+)[\s_]',         # 공백/언더스코어로 둘러싸인 1.2
+            r'\b(365|360|2024|2023|2022|2021|2020|2019|2018|2017|2016)\b',  # Office 365, 2021 등 특수 버전
             r'\b(20\d{2})\b',                # 2022 (연도 형식 버전)
             r'\bSP(\d+)\b',                  # SP1, SP2 (Service Pack)
             r'\bR(\d+)\b',                   # R1, R2 (Release)

@@ -110,7 +110,7 @@ echo ""
 
 # 백엔드 헬스체크
 log_info "백엔드 헬스체크..."
-if curl -sf http://localhost:8100/health > /dev/null; then
+if curl -sf http://localhost:8110/health > /dev/null; then
     log_success "✓ 백엔드: 정상"
 else
     log_error "✗ 백엔드: 응답 없음"
@@ -150,9 +150,9 @@ echo ""
 log_info "접속 정보:"
 echo ""
 echo "  프론트엔드:  http://localhost:5900"
-echo "  백엔드 API:  http://localhost:8100"
-echo "  API 문서:    http://localhost:8100/docs"
-echo "  API 상태:    http://localhost:8100/api-status"
+echo "  백엔드 API:  http://localhost:8110"
+echo "  API 문서:    http://localhost:8110/docs"
+echo "  API 상태:    http://localhost:8110/api-status"
 echo ""
 
 # 10. 다음 단계 안내

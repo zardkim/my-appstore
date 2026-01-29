@@ -486,10 +486,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./app ./app
 
 # 포트 노출
-EXPOSE 8100
+EXPOSE 8110
 
 # 실행
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8100", "--reload"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8110", "--reload"]
 ```
 
 #### 1.4.2 Docker Compose
@@ -523,7 +523,7 @@ services:
       - SECRET_KEY=your-secret-key-change-this
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     ports:
-      - "8100:8100"
+      - "8110:8110"
     depends_on:
       - db
 
@@ -558,7 +558,7 @@ npx tailwindcss init -p
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8100/api',
+  baseURL: 'http://localhost:8110/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -660,7 +660,7 @@ const handleLogin = async () => {
 **Phase 1 완료 체크리스트:**
 - [ ] Docker 환경 실행 확인 (`docker-compose up`)
 - [ ] PostgreSQL 연결 확인
-- [ ] Backend API 문서 확인 (`http://localhost:8100/docs`)
+- [ ] Backend API 문서 확인 (`http://localhost:8110/docs`)
 - [ ] 로그인 페이지 접속 확인 (`http://localhost:5900`)
 - [ ] 파일 스캔 API 테스트 (`POST /api/scan/start`)
 
@@ -1314,7 +1314,7 @@ const formatSize = (bytes) => {
 
 const download = async (versionId) => {
   // 다운로드 API 호출
-  window.open(`http://localhost:8100/api/download/${versionId}`, '_blank');
+  window.open(`http://localhost:8110/api/download/${versionId}`, '_blank');
 };
 
 onMounted(async () => {
@@ -1476,7 +1476,7 @@ tar -czf icons_backup.tar.gz data/icons/
 docker-compose logs backend
 
 # 포트 충돌 확인
-lsof -i :8100
+lsof -i :8110
 lsof -i :5900
 ```
 

@@ -25,15 +25,15 @@ backend:
 
     # 서버는 모든 인터페이스에서 수신
     - HOST=0.0.0.0
-    - PORT=8100
+    - PORT=8110
 ```
 
 ### 프론트엔드 설정 (frontend/.env.local)
 
 ```bash
 # 개발 환경 - 실제 IP 주소 사용
-VITE_API_BASE_URL=http://192.168.0.8:8100/api
-VITE_BACKEND_URL=http://192.168.0.8:8100
+VITE_API_BASE_URL=http://192.168.0.8:8110/api
+VITE_BACKEND_URL=http://192.168.0.8:8110
 VITE_APP_URL=http://192.168.0.8:5900
 ```
 
@@ -93,7 +93,7 @@ npm run dev
    - 대상:
      - 프로토콜: HTTP
      - 호스트 이름: localhost
-     - 포트: 8100
+     - 포트: 8110
 
 4. **CORS 설정**
    ```yaml
@@ -109,7 +109,7 @@ npm run dev
 services:
   backend:
     ports:
-      - "8100:8100"  # 호스트:컨테이너
+      - "8110:8110"  # 호스트:컨테이너
 
   frontend:
     ports:
@@ -120,11 +120,11 @@ services:
 ```bash
 # UFW 사용 시
 sudo ufw allow 5900/tcp
-sudo ufw allow 8100/tcp
+sudo ufw allow 8110/tcp
 
 # firewalld 사용 시
 sudo firewall-cmd --permanent --add-port=5900/tcp
-sudo firewall-cmd --permanent --add-port=8100/tcp
+sudo firewall-cmd --permanent --add-port=8110/tcp
 sudo firewall-cmd --reload
 ```
 
@@ -136,7 +136,7 @@ sudo firewall-cmd --reload
    - 예: `http://192.168.0.8:5900`, `https://myapp.example.com`
 
 2. **백엔드 API URL**
-   - 예: `http://192.168.0.8:8100`, `https://myapp.example.com/api`
+   - 예: `http://192.168.0.8:8110`, `https://myapp.example.com/api`
 
 3. **추가 허용 도메인 (CORS)**
    - 역방향 프록시 사용 시 HTTPS URL 추가
@@ -168,7 +168,7 @@ Access to XMLHttpRequest has been blocked by CORS policy
 
 1. **네트워크 연결 확인**:
    ```bash
-   curl http://192.168.0.8:8100/health
+   curl http://192.168.0.8:8110/health
    ```
 
 2. **프론트엔드 환경 변수 확인**:
@@ -185,7 +185,7 @@ Access to XMLHttpRequest has been blocked by CORS policy
 
 1. **프론트엔드 `.env.local` 파일 수정**:
    ```bash
-   VITE_API_BASE_URL=http://실제IP:8100/api
+   VITE_API_BASE_URL=http://실제IP:8110/api
    ```
 
 2. **백엔드 CORS 설정**:

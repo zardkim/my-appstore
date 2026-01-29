@@ -312,7 +312,7 @@ MainLayout
 
 ## 주의사항
 
-1. **이미지 URL**: ProductCard에서 localhost:8100을 하드코딩했습니다. 프로덕션 환경에서는 환경 변수로 변경 필요.
+1. **이미지 URL**: ProductCard에서 localhost:8110을 하드코딩했습니다. 프로덕션 환경에서는 환경 변수로 변경 필요.
 
 2. **GitHub URL**: Footer에 임시 URL이 있습니다. 실제 저장소 URL로 변경 필요.
 

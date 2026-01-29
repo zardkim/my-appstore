@@ -52,6 +52,7 @@ export default {
     admin: '관리자',
     logout: '로그아웃',
     login: '로그인',
+    more: '더보기',
     changePassword: '비밀번호 변경',
   },
 
@@ -271,8 +272,8 @@ export default {
       frontendUrlPlaceholder: 'http://192.168.0.8:5900',
       frontendUrlDesc: '프론트엔드 접속 주소 (예: http://192.168.0.8:5900, http://nas.local:5900)',
       backendUrl: '백엔드 API URL',
-      backendUrlPlaceholder: 'http://192.168.0.8:8100',
-      backendUrlDesc: '백엔드 API 주소 (예: http://192.168.0.8:8100, http://nas.local:8100)',
+      backendUrlPlaceholder: 'http://192.168.0.8:8110',
+      backendUrlDesc: '백엔드 API 주소 (예: http://192.168.0.8:8110, http://nas.local:8110)',
       guideTitle: '💡 설정 가이드',
       guideLocal: '로컬 네트워크 접속:',
       guideLocalDesc: 'http://내부IP:포트 형식 사용 (예: http://192.168.0.8:5900)',
@@ -794,8 +795,46 @@ export default {
       customPromptTip: '팁:',
       customPromptTipText: '더 상세하고 구체적인 질문을 하면 AI가 더 정확한 정보를 제공합니다.',
       // 기본 프롬프트 템플릿
-      defaultPromptOpenai: '다음 소프트웨어에 대한 메타데이터를 JSON으로 제공하세요. 소프트웨어명에는 SOFTWARE_NAME 변수를 사용합니다. 응답 형식: title(정식명칭), version(버전), platform(플랫폼), developer(개발사), category(카테고리), official_website(공식URL), license_type(라이선스), language(지원언어), description_short(간단설명 50-100자), description_detailed(상세설명 200-300자), features(주요기능 배열 5개 이상), supported_formats(지원포맷 배열), system_requirements(시스템요구사항 객체: os, cpu, ram, disk_space, gpu, additional), installation_info(설치정보 객체: installer_type, file_size, internet_required), release_notes(릴리즈노트). 모든 필드 필수, 알 수 없으면 빈값 사용, JSON만 응답.',
-      defaultPromptGemini: '다음 소프트웨어에 대한 메타데이터를 JSON으로 제공하세요. 소프트웨어명에는 SOFTWARE_NAME 변수를 사용합니다. 응답 형식: title(정식명칭), version(버전), platform(플랫폼), developer(개발사), category(카테고리), official_website(공식URL), license_type(라이선스), language(지원언어), description_short(간단설명 50-100자), description_detailed(상세설명 200-300자), features(주요기능 배열 6개 이상), supported_formats(지원포맷 배열), system_requirements(시스템요구사항 객체: os, cpu, ram, disk_space, gpu, additional), installation_info(설치정보 객체: installer_type, file_size, internet_required), release_notes(릴리즈노트). 모든 필드 필수, 알 수 없으면 빈값 사용, JSON만 응답.',
+      defaultPromptOpenai: `소프트웨어 '[SOFTWARE_NAME]'에 대한 메타데이터를 JSON 형식으로 제공해주세요.
+
+필수 필드:
+- title: 정식 명칭
+- version: 버전 번호
+- platform: 플랫폼 (Windows, macOS, Linux 등)
+- developer: 개발사/제조사
+- category: 카테고리 (Graphics, Office, Development 등)
+- official_website: 공식 웹사이트 URL
+- license_type: 라이선스 유형
+- language: 지원 언어
+- description_short: 간단한 설명 (50-100자)
+- description_detailed: 상세 설명 (200-300자)
+- features: 주요 기능 (배열, 5개 이상)
+- supported_formats: 지원 파일 형식 (배열)
+- system_requirements: 시스템 요구사항 (os, cpu, ram, disk_space, gpu, additional)
+- installation_info: 설치 정보 (installer_type, file_size, internet_required)
+- release_notes: 릴리즈 노트
+
+알 수 없는 필드는 빈 값을 사용하세요. JSON 형식으로만 응답해주세요.`,
+      defaultPromptGemini: `소프트웨어 '[SOFTWARE_NAME]'에 대한 메타데이터를 JSON 형식으로 제공해주세요.
+
+필수 필드:
+- title: 정식 명칭
+- version: 버전 번호
+- platform: 플랫폼 (Windows, macOS, Linux 등)
+- developer: 개발사/제조사
+- category: 카테고리 (Graphics, Office, Development 등)
+- official_website: 공식 웹사이트 URL
+- license_type: 라이선스 유형
+- language: 지원 언어
+- description_short: 간단한 설명 (50-100자)
+- description_detailed: 상세 설명 (200-300자)
+- features: 주요 기능 (배열, 6개 이상)
+- supported_formats: 지원 파일 형식 (배열)
+- system_requirements: 시스템 요구사항 (os, cpu, ram, disk_space, gpu, additional)
+- installation_info: 설치 정보 (installer_type, file_size, internet_required)
+- release_notes: 릴리즈 노트
+
+알 수 없는 필드는 빈 값을 사용하세요. JSON 형식으로만 응답해주세요.`,
     },
     // 스캔 예외 설정
     exceptions: {
