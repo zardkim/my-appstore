@@ -75,6 +75,12 @@ async def get_products(
     total = query.count()
     products = query.offset(skip).limit(limit).all()
 
+    # 각 버전의 파일 존재 여부 확인
+    import os
+    for product in products:
+        for version in product.versions:
+            version.file_exists = os.path.exists(version.file_path) if version.file_path else False
+
     return {"total": total, "products": products}
 
 
@@ -154,6 +160,11 @@ async def get_product(
 
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+
+    # 각 버전의 파일 존재 여부 확인
+    import os
+    for version in product.versions:
+        version.file_exists = os.path.exists(version.file_path) if version.file_path else False
 
     return product
 
@@ -442,4 +453,67 @@ async def regenerate_product_metadata(
         raise HTTPException(
             status_code=500,
             detail=f"메타데이터 재생성 중 오류 발생: {str(e)}"
+        )
+
+
+@router.post("/cleanup-deleted")
+async def cleanup_deleted_files(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_admin_user)
+):
+    """
+    삭제된 파일들을 DB에서 정리 (관리자 전용)
+
+    실제로 존재하지 않는 파일의 Version과 Product를 삭제합니다.
+    """
+    try:
+        # 모든 Version 조회
+        versions = db.query(Version).all()
+
+        deleted_version_ids = []
+        product_ids_to_check = set()
+
+        # 파일이 존재하지 않는 Version 찾기
+        for version in versions:
+            if not os.path.exists(version.file_path):
+                deleted_version_ids.append(version.id)
+                product_ids_to_check.add(version.product_id)
+
+        # Version 삭제
+        if deleted_version_ids:
+            db.query(Version).filter(Version.id.in_(deleted_version_ids)).delete(synchronize_session=False)
+
+        # Version이 없는 Product 삭제
+        deleted_product_ids = []
+        for product_id in product_ids_to_check:
+            version_count = db.query(Version).filter(Version.product_id == product_id).count()
+            if version_count == 0:
+                deleted_product_ids.append(product_id)
+
+        if deleted_product_ids:
+            db.query(Product).filter(Product.id.in_(deleted_product_ids)).delete(synchronize_session=False)
+
+        db.commit()
+
+        # 캐시 무효화
+        invalidate_cache([
+            "products:*",
+            "products_recent:*",
+            "products_by_category:*",
+            "stats_overview:*",
+            "stats_categories:*"
+        ])
+
+        return {
+            "success": True,
+            "message": f"{len(deleted_version_ids)}개의 버전과 {len(deleted_product_ids)}개의 제품이 삭제되었습니다.",
+            "deleted_versions": len(deleted_version_ids),
+            "deleted_products": len(deleted_product_ids)
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"삭제된 파일 정리 중 오류 발생: {str(e)}"
         )

@@ -566,9 +566,14 @@ class FileScanner:
             product_ids_to_check = set()
 
             # 파일이 존재하지 않는 Version 찾기
+            # scanned_files 체크와 실제 파일 존재 여부 모두 확인
             for version in versions:
-                if version.file_path not in scanned_files:
-                    logger.info(f"Deleted file detected: {version.file_path}")
+                # 1. scanned_files에 없거나
+                # 2. 실제로 파일이 존재하지 않으면 삭제
+                file_exists = os.path.exists(version.file_path)
+
+                if version.file_path not in scanned_files or not file_exists:
+                    logger.info(f"Deleted file detected: {version.file_path} (exists: {file_exists})")
                     deleted_version_ids.append(version.id)
                     product_ids_to_check.add(version.product_id)
 

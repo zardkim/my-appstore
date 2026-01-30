@@ -140,6 +140,11 @@ export default {
     scanPrograms: '스캔',
     scanProgramsTitle: '프로그램 스캔하기',
     selectCategory: '카테고리 선택',
+    cleanupDeleted: '삭제된 파일 정리',
+    cleanup: '정리',
+    cleanupConfirm: '실제로 존재하지 않는 파일들을 DB에서 모두 삭제하시겠습니까?',
+    cleanupSuccess: '{deleted_versions}개의 버전과 {deleted_products}개의 제품이 삭제되었습니다.',
+    cleanupFailed: '삭제된 파일 정리 중 오류가 발생했습니다.',
   },
 
   // 제품
@@ -1347,6 +1352,12 @@ export default {
     guideDeleted: '설치 가이드가 삭제되었습니다.',
     deleteFailed: '삭제에 실패했습니다',
     deleteScreenshot: '이 스크린샷을 삭제하시겠습니까?',
+    fileNotFound: '파일 없음',
+    fileNotFoundBadge: '⚠️ 파일 없음',
+    deleteFromDb: 'DB에서 삭제',
+    deleteVersionConfirm: '이 버전을 DB에서 삭제하시겠습니까? (파일은 이미 삭제되었습니다)',
+    deletedFilesCleanedUp: '삭제된 파일이 정리되었습니다.',
+    versionDeleteFailed: '버전 삭제 중 오류가 발생했습니다.',
     // 참조사이트 다이얼로그
     referenceSitesTitle: '참조사이트 (수동 수정 시 참고)',
     referenceSitesDescription: '메타데이터를 수동으로 수정할 때 아래 사이트들을 참고하세요:',
