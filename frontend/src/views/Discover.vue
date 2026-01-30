@@ -101,6 +101,20 @@
               <option value="title">{{ t('discover.sortByName') }}</option>
               <option value="category">{{ t('discover.sortByCategory') }}</option>
             </select>
+
+            <!-- 삭제된 파일 일괄 정리 버튼 (관리자 전용) -->
+            <button
+              v-if="authStore.user?.role === 'admin'"
+              @click="cleanupDeletedFiles"
+              class="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg font-medium text-sm flex-shrink-0"
+            >
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span class="hidden sm:inline">{{ t('discover.cleanupDeleted') }}</span>
+              <span class="sm:hidden">{{ t('discover.cleanup') }}</span>
+            </button>
           </div>
         </div>
 
@@ -375,6 +389,27 @@ const loadProducts = async () => {
     totalProducts.value = 0
   } finally {
     loading.value = false
+  }
+}
+
+// 삭제된 파일 일괄 정리
+const cleanupDeletedFiles = async () => {
+  if (!confirm(t('discover.cleanupConfirm'))) {
+    return
+  }
+
+  try {
+    const response = await productsApi.cleanupDeleted()
+    const { deleted_versions, deleted_products } = response.data
+
+    await alert.success(t('discover.cleanupSuccess', { deleted_versions, deleted_products }))
+
+    // 목록 새로고침
+    await loadProducts()
+    await loadCategoryStats()
+  } catch (error) {
+    console.error('Failed to cleanup deleted files:', error)
+    await alert.error(t('discover.cleanupFailed'))
   }
 }
 

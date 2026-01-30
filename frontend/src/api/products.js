@@ -43,5 +43,9 @@ export const productsApi = {
 
   async regenerateMetadata(productId) {
     return apiClient.post(`/products/${productId}/regenerate-metadata`)
+  },
+
+  async cleanupDeleted() {
+    return apiClient.post('/products/cleanup-deleted')
   }
 }

@@ -461,6 +461,13 @@
                         </svg>
                         {{ formatDate(version.release_date) }}
                       </span>
+                      <!-- 파일 삭제 상태 뱃지 -->
+                      <span
+                        v-if="version.file_exists === false"
+                        class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700"
+                      >
+                        {{ t('productDetail.fileNotFoundBadge') }}
+                      </span>
                       <!-- 포터블/설치형 뱃지 -->
                       <span
                         v-if="version.is_portable"
@@ -488,7 +495,33 @@
                       </p>
                     </div>
                   </div>
+                  <!-- 파일이 삭제된 경우 삭제 버튼 표시 (관리자만) -->
                   <button
+                    v-if="version.file_exists === false && authStore.user?.role === 'admin'"
+                    @click="deleteVersion(version.id)"
+                    class="w-full sm:w-auto flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg font-medium text-sm sm:text-base"
+                  >
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    {{ t('productDetail.deleteFromDb') }}
+                  </button>
+                  <!-- 파일이 없는 경우 비활성화된 다운로드 버튼 (일반 사용자) -->
+                  <button
+                    v-else-if="version.file_exists === false"
+                    disabled
+                    class="w-full sm:w-auto flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg sm:rounded-xl cursor-not-allowed font-medium text-sm sm:text-base opacity-60"
+                  >
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                    {{ t('productDetail.fileNotFound') }}
+                  </button>
+                  <!-- 정상 다운로드 버튼 -->
+                  <button
+                    v-else
                     @click="download(version.id)"
                     class="w-full sm:w-auto flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-medium text-sm sm:text-base"
                   >
@@ -1253,6 +1286,25 @@ const handleImageError = (event) => {
 const download = (versionId) => {
   const token = localStorage.getItem('access_token')
   window.open(getDownloadUrl(versionId, token), '_blank')
+}
+
+// 버전 삭제 (파일이 없는 경우)
+const deleteVersion = async (versionId) => {
+  if (!confirm(t('productDetail.deleteVersionConfirm'))) {
+    return
+  }
+
+  try {
+    // 해당 버전만 삭제하는 API가 필요하지만, 우선 전체 정리 API 사용
+    await productsApi.cleanupDeleted()
+    await alert.success(t('productDetail.deletedFilesCleanedUp'))
+
+    // 제품 정보 새로고침
+    await loadProduct()
+  } catch (error) {
+    console.error('Failed to delete version:', error)
+    await alert.error(t('productDetail.versionDeleteFailed'))
+  }
 }
 
 // 아이콘 업로드 처리

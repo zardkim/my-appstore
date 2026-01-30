@@ -15,6 +15,7 @@ class VersionResponse(VersionBase):
     file_path: str
     release_date: datetime
     is_portable: bool = False
+    file_exists: Optional[bool] = None  # 파일 존재 여부 (동적으로 설정)
 
     class Config:
         from_attributes = True
