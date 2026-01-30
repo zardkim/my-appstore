@@ -29,16 +29,35 @@ def get_default_config() -> Dict[str, Any]:
     config.json is the single source of truth for all settings.
     Changes should be made in config.json, not here.
     """
-    # VITE_APP_URL 환경변수가 있으면 사용, 없으면 기본값
-    default_access_url = os.getenv("VITE_APP_URL", "http://localhost:5900")
+    # 환경별 기본 URL 설정
+    environment = settings.ENVIRONMENT
+    if environment == "production":
+        # 프로덕션 환경: localhost 사용 (리버스 프록시로 접근)
+        default_frontend_url = "http://localhost:5900"
+        default_backend_url = "http://localhost:8110"
+    else:
+        # 개발 환경: localhost 사용
+        default_frontend_url = "http://localhost:5900"
+        default_backend_url = "http://localhost:8110"
+
+    # 스캔 기본 폴더 경로 설정
+    # 도커 환경에서는 /app/data/library를 기본으로 사용
+    default_scan_folder = settings.SCAN_BASE_PATH
+    if not default_scan_folder.startswith('/'):
+        default_scan_folder = f"/{default_scan_folder}"
+
+    # /library는 /app/data/library로 매핑
+    if default_scan_folder == "/library":
+        default_scan_folder = "/app/data/library"
 
     return {
         "general": {
             "language": "ko",
-            "accessUrl": default_access_url
+            "frontendUrl": default_frontend_url,
+            "backendUrl": default_backend_url
         },
         "folders": {
-            "scanFolders": [settings.SCAN_BASE_PATH]
+            "scanFolders": [default_scan_folder]
         },
         "categories": [
         {"name": "Graphics", "label": "그래픽", "icon": "🎨"},

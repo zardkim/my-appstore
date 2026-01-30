@@ -2033,7 +2033,7 @@ const loadingUsers = ref(false)
 const isDevelopment = import.meta.env.DEV // 개발 모드 확인
 
 // Folders
-const defaultLibraryPath = import.meta.env.VITE_LIBRARY_PATH || '/library'
+const defaultLibraryPath = import.meta.env.VITE_LIBRARY_PATH || '/app/data/library'
 const scanFolders = ref([
   { path: defaultLibraryPath, scanning: false }
 ])
@@ -2723,8 +2723,8 @@ const saveGeneralSettings = async () => {
   try {
     const data = {
       language: language.value,
-      accessUrl: accessUrl.value,
-      apiUrl: apiUrl.value
+      frontendUrl: accessUrl.value,
+      backendUrl: apiUrl.value
     }
 
     await configApi.updateSection('general', data)
@@ -2922,8 +2922,8 @@ onMounted(async () => {
       // 언어 설정: language는 computed로 localeStore.locale을 자동 반영하므로 별도 설정 불필요
       // localeStore는 초기화 시 localStorage에서 값을 읽어옴
 
-      accessUrl.value = config.general.accessUrl || ENV.APP_URL
-      apiUrl.value = config.general.apiUrl || ENV.BACKEND_URL
+      accessUrl.value = config.general.frontendUrl || ENV.APP_URL
+      apiUrl.value = config.general.backendUrl || ENV.BACKEND_URL
     }
     isLoadingConfig.value = false
 
