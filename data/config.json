@@ -6,7 +6,7 @@
   },
   "folders": {
     "scanFolders": [
-      "/home/nuricom/project/myappStore/data/library"
+      "/app/data/library"
     ]
   },
   "categories": [
@@ -120,10 +120,10 @@
     "scanMethod": "ai",
     "aiProvider": "gemini",
     "aiModel": "gemini-3-flash-preview",
-    "geminiApiKey": "AIzaSyC7cxJ3r9LO1rH4zoHkaA5LxrBz2UxvTw8",
+    "geminiApiKey": "",
     "openaiApiKey": "",
-    "googleApiKey": "AIzaSyDdt7WAo98BFe8VgZP3iV01OSUcic8RkFw",
-    "googleSearchEngineId": "a51ef478742604baa",
+    "googleApiKey": "",
+    "googleSearchEngineId": "",
     "useDefaultPrompt": true,
     "customPromptOpenai": "소프트웨어 ''에 대한 메타데이터를 JSON 형식으로 제공해주세요.\n\n필수 필드:\n- title: 정식 명칭\n- version: 버전 번호\n- platform: 플랫폼 (Windows, macOS, Linux 등)\n- developer: 개발사/제조사\n- category: 카테고리 (Graphics, Office, Development 등)\n- official_website: 공식 웹사이트 URL\n- license_type: 라이선스 유형\n- language: 지원 언어\n- description_short: 간단한 설명 (50-100자)\n- description_detailed: 상세 설명 (200-300자)\n- features: 주요 기능 (배열, 5개 이상)\n- supported_formats: 지원 파일 형식 (배열)\n- system_requirements: 시스템 요구사항 (os, cpu, ram, disk_space, gpu, additional)\n- installation_info: 설치 정보 (installer_type, file_size, internet_required)\n- release_notes: 릴리즈 노트\n\n알 수 없는 필드는 빈 값을 사용하세요. JSON 형식으로만 응답해주세요.",
     "customPromptGemini": "소프트웨어 ''에 대한 메타데이터를 JSON 형식으로 제공해주세요.\n\n필수 필드:\n- title: 정식 명칭\n- version: 버전 번호\n- platform: 플랫폼 (Windows, macOS, Linux 등)\n- developer: 개발사/제조사\n- category: 카테고리 (Graphics, Office, Development 등)\n- official_website: 공식 웹사이트 URL\n- license_type: 라이선스 유형\n- language: 지원 언어\n- description_short: 간단한 설명 (50-100자)\n- description_detailed: 상세 설명 (200-300자)\n- features: 주요 기능 (배열, 6개 이상)\n- supported_formats: 지원 파일 형식 (배열)\n- system_requirements: 시스템 요구사항 (os, cpu, ram, disk_space, gpu, additional)\n- installation_info: 설치 정보 (installer_type, file_size, internet_required)\n- release_notes: 릴리즈 노트\n\n알 수 없는 필드는 빈 값을 사용하세요. JSON 형식으로만 응답해주세요."

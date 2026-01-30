@@ -119,6 +119,16 @@
             </svg>
             {{ t('productCard.manualEdit') }}
           </button>
+          <button
+            v-if="isAdmin"
+            @click="handleDeleteProduct"
+            class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            {{ t('productCard.deleteProduct') }}
+          </button>
         </div>
       </div>
     </div>
@@ -129,11 +139,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { favoritesApi } from '../../api/favorites'
+import { productsApi } from '../../api/products'
 import { getIconUrl } from '../../utils/env'
 import { useDialog } from '../../composables/useDialog'
+import { useAuthStore } from '../../store/auth'
 
 const { t } = useI18n({ useScope: 'global' })
-const { alert } = useDialog()
+const { alert, confirm } = useDialog()
+const authStore = useAuthStore()
 
 const props = defineProps({
   product: {
@@ -142,11 +155,13 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['ai-search', 'manual-edit'])
+const emit = defineEmits(['ai-search', 'manual-edit', 'product-deleted'])
 
 const imageError = ref(false)
 const isFavorite = ref(false)
 const showMenu = ref(false)
+
+const isAdmin = computed(() => authStore.user?.role === 'admin')
 
 const iconUrl = computed(() => {
   if (imageError.value) return ''
@@ -231,6 +246,24 @@ const handleAISearch = () => {
 const handleManualEdit = () => {
   showMenu.value = false
   emit('manual-edit', props.product)
+}
+
+const handleDeleteProduct = async () => {
+  showMenu.value = false
+
+  const confirmed = await confirm.danger(t('productCard.deleteProductConfirm'))
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    await productsApi.deleteProduct(props.product.id)
+    await alert.success(t('productCard.deleteProductSuccess'))
+    emit('product-deleted', props.product.id)
+  } catch (error) {
+    console.error('Failed to delete product:', error)
+    await alert.error(t('productCard.deleteProductFailed'))
+  }
 }
 
 // Close menu when clicking outside

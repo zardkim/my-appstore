@@ -517,3 +517,51 @@ async def cleanup_deleted_files(
             status_code=500,
             detail=f"삭제된 파일 정리 중 오류 발생: {str(e)}"
         )
+
+
+@router.delete("/{product_id}")
+async def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_admin_user)
+):
+    """
+    제품 삭제 (관리자 전용)
+
+    제품과 연결된 모든 버전을 삭제합니다.
+    """
+    try:
+        # 제품 확인
+        product = db.query(Product).filter(Product.id == product_id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="제품을 찾을 수 없습니다")
+
+        # 제품에 연결된 모든 버전 삭제 (cascade로 자동 삭제되지만 명시적으로 처리)
+        db.query(Version).filter(Version.product_id == product_id).delete(synchronize_session=False)
+
+        # 제품 삭제
+        db.delete(product)
+        db.commit()
+
+        # 캐시 무효화
+        invalidate_cache([
+            "products:*",
+            "products_recent:*",
+            "products_by_category:*",
+            "stats_overview:*",
+            "stats_categories:*"
+        ])
+
+        return {
+            "success": True,
+            "message": "제품이 삭제되었습니다."
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"제품 삭제 중 오류 발생: {str(e)}"
+        )

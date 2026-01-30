@@ -1375,6 +1375,10 @@ export default {
   productCard: {
     aiMatching: 'AI 매칭',
     manualEdit: '수동 수정',
+    deleteProduct: '제품 삭제',
+    deleteProductConfirm: '이 제품과 모든 버전을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+    deleteProductSuccess: '제품이 삭제되었습니다.',
+    deleteProductFailed: '제품 삭제에 실패했습니다.',
     loginRequired: '로그인이 필요합니다.',
     favoriteFailed: '즐겨찾기 처리에 실패했습니다.',
   },

@@ -149,6 +149,7 @@
                 :product="product"
                 @ai-search="handleAISearch"
                 @manual-edit="handleManualEdit"
+                @product-deleted="handleProductDeleted"
               />
             </div>
 
@@ -290,8 +291,10 @@ import ProductAISearchDialog from '../components/product/ProductAISearchDialog.v
 import ProductManualEditDialog from '../components/product/ProductManualEditDialog.vue'
 import ProductImageSearchDialog from '../components/product/ProductImageSearchDialog.vue'
 import { useAuthStore } from '../store/auth'
+import { useDialog } from '../composables/useDialog'
 
 const { t } = useI18n({ useScope: 'global' })
+const { alert, confirm } = useDialog()
 
 const route = useRoute()
 const router = useRouter()
@@ -394,7 +397,8 @@ const loadProducts = async () => {
 
 // 삭제된 파일 일괄 정리
 const cleanupDeletedFiles = async () => {
-  if (!confirm(t('discover.cleanupConfirm'))) {
+  const confirmed = await confirm.danger(t('discover.cleanupConfirm'))
+  if (!confirmed) {
     return
   }
 
@@ -411,6 +415,13 @@ const cleanupDeletedFiles = async () => {
     console.error('Failed to cleanup deleted files:', error)
     await alert.error(t('discover.cleanupFailed'))
   }
+}
+
+// 제품 삭제 후 처리
+const handleProductDeleted = async (productId) => {
+  // 목록 새로고침
+  await loadProducts()
+  await loadCategoryStats()
 }
 
 const loadCategoryStats = async () => {

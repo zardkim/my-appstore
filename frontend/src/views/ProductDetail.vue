@@ -1290,7 +1290,8 @@ const download = (versionId) => {
 
 // 버전 삭제 (파일이 없는 경우)
 const deleteVersion = async (versionId) => {
-  if (!confirm(t('productDetail.deleteVersionConfirm'))) {
+  const confirmed = await confirm.danger(t('productDetail.deleteVersionConfirm'))
+  if (!confirmed) {
     return
   }
 

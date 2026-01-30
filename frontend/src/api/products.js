@@ -47,5 +47,9 @@ export const productsApi = {
 
   async cleanupDeleted() {
     return apiClient.post('/products/cleanup-deleted')
+  },
+
+  async deleteProduct(id) {
+    return apiClient.delete(`/products/${id}`)
   }
 }
