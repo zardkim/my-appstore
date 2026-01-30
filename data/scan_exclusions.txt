@@ -1,0 +1,22 @@
+{
+  "folders": [
+    ".DAV",
+    ".git",
+    ".node_modules",
+    "_MACOSX",
+    "#recycle",
+    "@eaDir"
+  ],
+  "patterns": [
+    "*.txt",
+    "*.log",
+    "thumbs.db",
+    "desktop.ini",
+    "*.nfo",
+    "*.sfv",
+    "*.sha1",
+    "*.md5",
+    "*.md4"
+  ],
+  "paths": []
+}

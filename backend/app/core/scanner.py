@@ -178,6 +178,7 @@ class FileScanner:
             "updated_products": 0,
             "deleted_versions": 0,
             "deleted_products": 0,
+            "renamed_files": 0,
             "ai_generated": 0,
             "icons_cached": 0,
             "errors": []
@@ -188,6 +189,9 @@ class FileScanner:
 
         # 재귀적으로 모든 하위 폴더 스캔
         await self._scan_folder_recursive_async(base_path, results, scanned_files)
+
+        # 파일명 변경 감지 및 업데이트 (삭제 전에 먼저 실행)
+        self._detect_renamed_files(str(base_path.absolute()), scanned_files, results)
 
         # 삭제된 파일 정리
         self._cleanup_deleted_files(str(base_path.absolute()), scanned_files, results)
@@ -242,6 +246,7 @@ class FileScanner:
             "updated_products": 0,
             "deleted_versions": 0,
             "deleted_products": 0,
+            "renamed_files": 0,
             "errors": []
         }
 
@@ -250,6 +255,9 @@ class FileScanner:
 
         # 재귀적으로 모든 하위 폴더 스캔
         self._scan_folder_recursive(base_path, results, scanned_files)
+
+        # 파일명 변경 감지 및 업데이트 (삭제 전에 먼저 실행)
+        self._detect_renamed_files(str(base_path.absolute()), scanned_files, results)
 
         # 삭제된 파일 정리
         self._cleanup_deleted_files(str(base_path.absolute()), scanned_files, results)
@@ -429,6 +437,115 @@ class FileScanner:
 
         self.db.add(violation)
         results["new_products"] += 1  # Count scanned files as new products
+
+    def _detect_renamed_files(self, base_path: str, scanned_files: set, results: Dict):
+        """
+        파일명이 변경된 파일을 감지하고 업데이트
+
+        같은 폴더 내에서 파일 크기와 수정 시간이 동일한 파일을 찾아서
+        Version과 FilenameViolation 레코드를 업데이트
+
+        Args:
+            base_path: 스캔 경로
+            scanned_files: 스캔된 파일 경로 Set (딕셔너리로 변경 필요)
+            results: 결과 딕셔너리
+        """
+        try:
+            # 스캔된 파일들의 메타데이터 수집 (경로, 크기, 수정 시간)
+            scanned_file_info = {}
+            for file_path in scanned_files:
+                if os.path.isfile(file_path):
+                    try:
+                        stat = os.stat(file_path)
+                        folder = str(Path(file_path).parent)
+                        scanned_file_info[file_path] = {
+                            'folder': folder,
+                            'size': stat.st_size,
+                            'mtime': int(stat.st_mtime),
+                            'name': Path(file_path).name
+                        }
+                    except Exception as e:
+                        logger.warning(f"Could not get file info for {file_path}: {e}")
+
+            # DB에 있는 모든 Version 조회
+            versions = self.db.query(Version).join(Product).filter(
+                Product.folder_path.like(f"{base_path}%")
+            ).all()
+
+            renamed_count = 0
+
+            for version in versions:
+                if version.file_path not in scanned_files:
+                    # 파일이 스캔 결과에 없음 - 삭제되었거나 이름이 변경됨
+                    old_path = version.file_path
+
+                    # 같은 폴더 내에서 크기가 같은 파일 찾기
+                    old_folder = str(Path(old_path).parent)
+
+                    if os.path.isfile(old_path):
+                        # 파일이 여전히 존재 - 스캔 대상이 아님
+                        continue
+
+                    try:
+                        # 기존 파일 정보가 있다면 사용
+                        if version.file_size:
+                            old_size = version.file_size
+                        else:
+                            continue
+
+                        # 같은 폴더 내에서 같은 크기의 새 파일 찾기
+                        matched_new_file = None
+                        for new_path, info in scanned_file_info.items():
+                            if (info['folder'] == old_folder and
+                                info['size'] == old_size):
+                                # DB에 이미 있는지 확인
+                                existing = self.db.query(Version).filter(
+                                    Version.file_path == new_path
+                                ).first()
+
+                                if not existing:
+                                    matched_new_file = new_path
+                                    break
+
+                        if matched_new_file:
+                            # 파일명 변경 감지됨 - Version 업데이트
+                            old_filename = version.file_name
+                            new_filename = Path(matched_new_file).name
+
+                            logger.info(f"Renamed file detected: {old_filename} → {new_filename}")
+
+                            version.file_name = new_filename
+                            version.file_path = matched_new_file
+
+                            # FilenameViolation도 업데이트
+                            violations = self.db.query(FilenameViolation).filter(
+                                FilenameViolation.folder_path == old_folder,
+                                FilenameViolation.file_name == old_filename
+                            ).all()
+
+                            for violation in violations:
+                                violation.file_name = new_filename
+                                # 새 파일명으로 다시 검증하여 제안 업데이트
+                                validation_result = FilenameValidator.validate_filename(new_filename)
+                                if validation_result['violations']:
+                                    first_violation = validation_result['violations'][0]
+                                    violation.suggestion = first_violation.get('suggestion', '')
+
+                            renamed_count += 1
+
+                            # scanned_files에서 제거하여 중복 처리 방지
+                            scanned_files.discard(matched_new_file)
+
+                    except Exception as e:
+                        logger.warning(f"Error detecting rename for {old_path}: {e}")
+
+            if renamed_count > 0:
+                results["renamed_files"] = renamed_count
+                logger.info(f"Updated {renamed_count} renamed files")
+
+        except Exception as e:
+            logger.error(f"Error detecting renamed files: {e}")
+            results["errors"].append(f"Rename detection error: {str(e)}")
 
     def _cleanup_deleted_files(self, base_path: str, scanned_files: set, results: Dict):
         """
