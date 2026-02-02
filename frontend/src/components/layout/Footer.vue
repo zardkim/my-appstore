@@ -30,8 +30,8 @@
 
 <script setup>
 import { computed } from 'vue'
-import { version } from '../../version.js'
 
 const currentYear = computed(() => new Date().getFullYear())
-const appVersion = version
+// Use version injected by Vite from package.json
+const appVersion = __APP_VERSION__
 </script>

@@ -1881,7 +1881,6 @@ import { invitationsApi } from '../api/invitations'
 import { cacheApi } from '../api/cache'
 import { ENV } from '../utils/env'
 import { useDialog } from '../composables/useDialog'
-import { version } from '../version.js'
 
 const { t, locale } = useI18n({ useScope: 'global' })
 
@@ -1890,7 +1889,8 @@ const authStore = useAuthStore()
 const localeStore = useLocaleStore()
 const { alert, confirm } = useDialog()
 
-const appVersion = version
+// Use version injected by Vite from package.json
+const appVersion = __APP_VERSION__
 
 const sections = computed(() => {
   const allSections = [

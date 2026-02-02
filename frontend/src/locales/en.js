@@ -44,6 +44,7 @@ export default {
   nav: {
     home: 'Home',
     discover: 'Discover',
+    search: 'Search',
     detectedList: 'Detected List',
     favorites: 'Favorites',
     scraps: 'Scraps',
