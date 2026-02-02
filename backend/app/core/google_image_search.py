@@ -26,7 +26,8 @@ class GoogleImageSearcher:
         로고/아이콘 이미지 검색
 
         Args:
-            query: 검색어 (예: "Adobe Photoshop logo")
+            query: 검색어 (예: "Adobe Photoshop logo" 또는 "Adobe Photoshop 로고")
+                   프론트엔드에서 언어에 맞는 키워드를 포함해서 전달
             limit: 최대 결과 개수
             offset: 시작 위치 (0부터 시작, 최대 91)
 
@@ -39,14 +40,15 @@ class GoogleImageSearcher:
             "safe": "active"
         }
 
-        return await self._make_request(f"{query} logo", filters, limit, offset)
+        return await self._make_request(query, filters, limit, offset)
 
     async def search_screenshots(self, query: str, limit: int = 10, offset: int = 0) -> List[Dict[str, str]]:
         """
         스크린샷 이미지 검색
 
         Args:
-            query: 검색어 (예: "Adobe Photoshop screenshot")
+            query: 검색어 (예: "Adobe Photoshop screenshot" 또는 "Adobe Photoshop 스크린샷")
+                   프론트엔드에서 언어에 맞는 키워드를 포함해서 전달
             limit: 최대 결과 개수
             offset: 시작 위치 (0부터 시작, 최대 91)
 
@@ -58,7 +60,7 @@ class GoogleImageSearcher:
             "safe": "active"
         }
 
-        return await self._make_request(f"{query} screenshot", filters, limit, offset)
+        return await self._make_request(query, filters, limit, offset)
 
     async def _make_request(
         self,

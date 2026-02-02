@@ -100,3 +100,4 @@ htmlcov/
 
 # Development folders
 sample/
+redis/

@@ -105,7 +105,7 @@
               v-if="product?.id && metadata"
               :product-id="product.id"
               :product="metadata"
-              :initial-search-query="product.title"
+              :initial-search-query="aiSearchQuery"
               @update:logo="handleLogoUpdate"
               @update:screenshots="handleScreenshotsUpdate"
             />
@@ -210,6 +210,16 @@ watch(() => props.isOpen, (isOpen) => {
   if (isOpen && props.product?.title && !metadata.value) {
     startAISearch()
   }
+})
+
+// AI 결과의 title + 주요 버전으로 이미지 검색어 구성
+const aiSearchQuery = computed(() => {
+  if (!metadata.value) return props.product?.title || ''
+  const title = metadata.value.title || props.product?.title || ''
+  const version = metadata.value.parsed_info?.version || ''
+  // 주요 버전만 사용 (v16.0.0 → v16)
+  const majorVersion = version.replace(/^(v?\d+).*/, '$1')
+  return majorVersion ? `${title} ${majorVersion}` : title
 })
 
 const filteredMetadata = computed(() => {
@@ -336,11 +346,7 @@ const saveMetadata = async () => {
     if (hasValue(metadata.value.icon_url)) updateData.icon_url = metadata.value.icon_url
     if (hasValue(metadata.value.screenshots)) updateData.screenshots = metadata.value.screenshots
 
-    console.log('Sending update data:', updateData)
-
-    const response = await productsApi.updateProduct(props.product.id, updateData)
-
-    console.log('Update response:', response)
+    await productsApi.updateProduct(props.product.id, updateData)
 
     emit('saved', metadata.value)
     close()

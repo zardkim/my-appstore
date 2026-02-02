@@ -104,112 +104,115 @@ class AIMetadataGeneratorV2:
 
         # 커스텀 프롬프트가 있으면 사용, 없으면 기본 프롬프트 사용
         if custom_prompt:
-            # 커스텀 프롬프트의 변수 치환
-            prompt = custom_prompt.replace('[SOFTWARE_NAME]', software_context)
+            # 커스텀 프롬프트의 변수 치환 (소문자/대문자/괄더형 모두 지원)
+            prompt = custom_prompt.replace('{software_name}', software_context)
             prompt = prompt.replace('{SOFTWARE_NAME}', software_context)
+            prompt = prompt.replace('[SOFTWARE_NAME]', software_context)
         else:
-            # 상세 메타데이터 프롬프트
-            prompt = f"""다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요:
+            # 상세 메타데이터 프롬프트 (영어 - 더 나은 성능)
+            prompt = f"""Provide detailed metadata for the software: {software_context}
 
-소프트웨어: {software_context}
+Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
-다음 정보를 포함한 JSON 객체를 작성해주세요:
+**Basic Information:**
+- title: Official software name
+- version: Version number (if known)
+- platform: Windows, macOS, Linux, or Cross-platform
+- developer: Official developer/vendor name
+- category: Choose the BEST match based on PRIMARY function:
+  * Graphics: Image editing, graphic design, 3D modeling
+  * Media: Video/audio editing, media playback, screen recording
+  * Office: Documents, spreadsheets, presentations
+  * Business: Accounting, ERP, CRM, business management
+  * Development: Programming, IDE, development tools
+  * Utility: System utilities, optimization tools
+  * Security, Network, OS, Engineering, Hardware, or Uncategorized for others
+- official_website: Official website URL (full URL with https://)
+- icon_url: Official logo/icon image URL (leave "" if unknown)
+- license_type: Free, Freemium, Trial, Commercial, or Open Source
+- language: Supported languages (e.g., "English, Korean, Japanese" or "Multilingual")
 
-**기본 정보:**
-- title: 정확한 공식 소프트웨어 이름
-- version: 버전 정보 (알려진 경우)
-- platform: 플랫폼 (예: Windows, macOS, Linux, Cross-platform)
-- developer: 개발사/제조사 공식 이름
-- category: 소프트웨어의 **주요 기능**을 기준으로 가장 적합한 카테고리 선택
-  * Graphics: 이미지 편집, 그래픽 디자인, 3D 모델링
-  * Media: 비디오/오디오 편집, 미디어 재생, 영상 제작, 화면 녹화
-  * Office: 문서 작성, 스프레드시트, 프레젠테이션
-  * Business: 회계, ERP, CRM, 업무 관리 (미디어 제작 도구는 Media)
-  * Development: 프로그래밍, IDE, 개발 도구
-  * Utility: 시스템 유틸리티, 최적화 도구
-  * 기타: Security, Network, OS, Engineering, Hardware, Uncategorized 등
-- official_website: 공식 웹사이트 URL (알려진 경우)
-- icon_url: 공식 로고/아이콘 이미지 URL (PNG, SVG, ICO 등)
-  * 공식 웹사이트의 파비콘, 로고 이미지, 앱 아이콘 등
-  * 찾을 수 없으면 빈 문자열 ""
-- license_type: 라이선스 종류 (Free, Freemium, Trial, Commercial, Open Source 등)
-- language: 지원 언어 (예: "영어, 한국어, 일본어" 또는 "다국어")
+**Descriptions:**
+- description_short: 50-100 character brief description (one sentence)
+- description_detailed: 200-300 character detailed description (main features and purpose)
 
-**프로그램 설명:**
-- description_short: 50-100자 이내의 간결한 설명 (한 문장)
-- description_detailed: 200-300자 이내의 상세 설명 (소프트웨어의 주요 특징과 용도를 자세히)
+**Features (5-10 items):**
+- features: Array of key features (e.g., ["Virtual machine management", "Snapshot support"])
 
-**주요 기능:** (최대 5-10개)
-- features: 주요 기능 리스트 배열 (예: ["사진 라이브러리 관리 (태그/평점/카테고리)", "RAW 이미지 지원", "비파괴 편집"])
+**File Formats:**
+- supported_formats: Array of supported file formats (e.g., [".vmdk", ".iso", ".ova"])
 
-**지원 파일 포맷:** (해당되는 경우)
-- supported_formats: 지원 파일 포맷 배열 (예: ["JPEG", "PNG", "PSD", "RAW"])
-
-**시스템 요구 사양:**
+**System Requirements (object):**
 - system_requirements: {{
-    "os": "운영체제 요구사항 (구체적으로)",
-    "cpu": "CPU 요구사항",
-    "ram": "RAM 요구사항 (최소/권장)",
-    "disk_space": "디스크 공간",
-    "gpu": "GPU 요구사항 (있는 경우)",
-    "additional": "추가 요구사항 (있는 경우)"
+    "os": "Operating system requirements (specific)",
+    "cpu": "CPU requirements",
+    "ram": "RAM requirements (minimum/recommended)",
+    "disk_space": "Disk space needed",
+    "gpu": "GPU requirements (if any)",
+    "additional": "Additional requirements (if any)"
   }}
 
-**설치 정보:**
+**Installation Info (object):**
 - installation_info: {{
-    "installer_type": "설치 방식 (예: DMG 마운트 → Applications 복사, EXE 실행, 압축 해제)",
-    "file_size": "예상 파일 크기 (예: 약 500MB)",
-    "internet_required": "인터넷 필요 여부 (예: 라이선스 인증 시 필요, 불필요)"
+    "installer_type": "Installation method (e.g., EXE installer, DMG mount, Archive extraction)",
+    "file_size": "Approximate file size (e.g., about 500MB)",
+    "internet_required": "Internet requirement (e.g., Required for activation, Not required)"
   }}
 
-**릴리즈 정보:**
-- release_notes: 주요 릴리즈 노트 또는 버전 히스토리 (알려진 경우, 2-3줄)
+**Release Notes:**
+- release_notes: Major release notes or version history (2-3 lines if known)
 
-**중요:**
-- 응답은 반드시 유효한 JSON 형식만 작성하세요
-- 추가 설명이나 코멘트를 포함하지 마세요
-- 확실하지 않은 정보는 빈 문자열("") 또는 빈 배열([])을 사용하세요
-- 모든 필드를 반드시 포함해야 합니다
-- 상세하고 구체적인 정보를 제공하세요
-
-예시:
+**Example Output:**
 {{
-  "title": "ACDSee Photo Studio",
-  "version": "7.1",
-  "platform": "macOS",
-  "developer": "ACD Systems International Inc.",
-  "category": "Graphics",
-  "official_website": "https://www.acdsee.com",
+  "title": "VMware Workstation Pro",
+  "version": "12.0.1",
+  "platform": "Windows",
+  "developer": "VMware, Inc.",
+  "category": "Utility",
+  "official_website": "https://www.vmware.com/products/workstation-pro.html",
   "icon_url": "",
   "license_type": "Commercial",
-  "language": "영어 (기본), 다국어 인터페이스 가능",
-  "description_short": "사진을 빠르게 관리·정리하고, 색보정 및 편집까지 가능한 전문 사진 관리 소프트웨어",
-  "description_detailed": "ACDSee Photo Studio for Mac은 대용량 사진 라이브러리를 빠르게 탐색하고, RAW 파일을 포함한 다양한 이미지 포맷을 지원합니다. 비파괴 편집 워크플로우로 색상 보정, 노출 조절, 디테일 보정이 가능하며, 태그, 카테고리, 평점 기반 사진 관리 기능을 제공합니다. Adobe Lightroom 대안으로 자주 사용됩니다.",
+  "language": "다국어 지원 (영어, 한국어, 일본어, 중국어 등)",
+  "description_short": "단일 PC에서 여러 운영체제를 가상 머신으로 실행할 수 있는 전문 가상화 소프트웨어",
+  "description_detailed": "VMware Workstation Pro는 IT 전문가와 개발자가 Windows 또는 Linux PC 한 대에서 여러 운영체제를 실행, 테스트, 배포할 수 있도록 하는 업계 표준 하이퍼바이저 솔루션입니다. 고급 3D 그래픽 지원, 고해상도 디스플레이, 강력한 가상 네트워킹 기능을 제공합니다.",
   "features": [
-    "사진 라이브러리 관리 (태그/평점/카테고리)",
-    "RAW 이미지 지원",
-    "색상 보정/화이트밸런스/노출 조절",
-    "비파괴 편집 (Undo/Redo 자유)",
-    "고속 이미지 뷰어",
-    "메타데이터(EXIF/IPTC) 편집",
-    "일괄(Batch) 처리"
+    "하나의 PC에서 여러 운영체제 동시 실행",
+    "DirectX 10 및 OpenGL 3.3 지원으로 3D 그래픽 구현",
+    "4K UHD 디스플레이 지원",
+    "가상 네트워크 구성 기능",
+    "스냅샷 및 복제 기능",
+    "vSphere/ESXi 원격 연결",
+    "USB 3.0 장치 지원"
   ],
-  "supported_formats": ["JPEG", "PNG", "TIFF", "BMP", "RAW (Canon, Nikon, Sony 등)", "PSD (부분 지원)"],
+  "supported_formats": [".vmx", ".vmdk", ".ovf", ".ova", ".iso"],
   "system_requirements": {{
-    "os": "macOS 10.15 (Catalina) 이상",
-    "cpu": "Intel Mac / Apple Silicon (M1 이상, Rosetta 지원)",
-    "ram": "최소 4GB (8GB 이상 권장)",
-    "disk_space": "설치용 약 2GB 이상",
-    "gpu": "Metal 지원 GPU 권장",
-    "additional": ""
+    "os": "Windows 7 이상 (64비트)",
+    "cpu": "1.3GHz 이상의 64비트 Intel 또는 AMD 멀티코어 프로세서",
+    "ram": "최소 2GB (4GB 이상 권장)",
+    "disk_space": "설치용 1.2GB (가상 머신용 추가 공간 필요)",
+    "gpu": "DirectX 10 호환 그래픽 카드",
+    "additional": "BIOS에서 하드웨어 가상화(Intel VT-x 또는 AMD-V) 활성화 필요"
   }},
   "installation_info": {{
-    "installer_type": "DMG 마운트 → Applications 폴더로 복사",
-    "file_size": "약 500MB 내외",
-    "internet_required": "설치 후 라이선스 인증 시 필요"
+    "installer_type": "EXE 실행 파일",
+    "file_size": "약 300-600MB",
+    "internet_required": "라이선스 인증 및 업데이트 시 필요"
   }},
-  "release_notes": "7.0 버전: macOS 버전 주요 UI 개선. 7.1 버전: 안정성 개선 및 버그 수정, Apple Silicon 최적화 강화"
-}}"""
+  "release_notes": "버전 12.0.1: Windows 10 안정성 개선, Intel Skylake 호환성 향상, USB 3.0 수정 및 보안 패치 포함"
+}}
+
+**CRITICAL RULES:**
+1. Return ONLY valid JSON - no markdown, no comments, no explanations
+2. Include ALL fields listed above - this is MANDATORY
+3. Use empty strings "" or empty arrays [] for unknown information
+4. Be specific and detailed - provide comprehensive information
+5. For well-known software, fill in as much detail as possible
+
+**LANGUAGE REQUIREMENT:**
+- Provide ALL text content (descriptions, features, notes, etc.) in KOREAN language
+- Keep technical terms and proper nouns in their original form
+- Examples: "가상 머신 관리", "스냅샷 및 복제 기능", "Windows 10 안정성 개선"
+- Field names remain in English, but all VALUES must be in Korean"""
 
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
@@ -224,14 +227,14 @@ class AIMetadataGeneratorV2:
                         "messages": [
                             {
                                 "role": "system",
-                                "content": "You are an expert software analyst. You provide comprehensive, accurate metadata about software applications in JSON format. Your responses are detailed, well-structured, and factually correct."
+                                "content": "You are an expert software analyst. You provide comprehensive, accurate metadata about software applications in JSON format. Always include ALL required fields in your response, even if you need to use empty strings or arrays for unknown information. Your responses are detailed, well-structured, and factually correct."
                             },
                             {
                                 "role": "user",
                                 "content": prompt
                             }
                         ],
-                        "temperature": 0.3,
+                        "temperature": 0.2,
                         "max_tokens": 4096
                     }
                 )
@@ -278,88 +281,138 @@ class AIMetadataGeneratorV2:
 
         # 커스텀 프롬프트가 있으면 사용, 없으면 기본 프롬프트 사용
         if custom_prompt:
-            # 커스텀 프롬프트의 변수 치환
-            prompt = custom_prompt.replace('[SOFTWARE_NAME]', software_context)
+            # 커스텀 프롬프트의 변수 치환 (소문자/대문자/괄더형 모두 지원)
+            prompt = custom_prompt.replace('{software_name}', software_context)
             prompt = prompt.replace('{SOFTWARE_NAME}', software_context)
+            prompt = prompt.replace('[SOFTWARE_NAME]', software_context)
         else:
-            # Gemini용 상세 프롬프트 (OpenAI와 동일)
-            prompt = f"""다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요:
+            # Gemini용 영어 프롬프트 (더 나은 성능)
+            prompt = f"""Provide detailed metadata for the software: {software_context}
 
-소프트웨어: {software_context}
+Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
-다음 정보를 포함한 JSON 객체를 작성해주세요:
+**Basic Information:**
+- title: Official software name
+- version: Version number (if known)
+- platform: Windows, macOS, Linux, or Cross-platform
+- developer: Official developer/vendor name
+- category: Choose the BEST match based on PRIMARY function:
+  * Graphics: Image editing, graphic design, 3D modeling
+  * Media: Video/audio editing, media playback, screen recording
+  * Office: Documents, spreadsheets, presentations
+  * Business: Accounting, ERP, CRM, business management
+  * Development: Programming, IDE, development tools
+  * Utility: System utilities, optimization tools
+  * Security, Network, OS, Engineering, Hardware, or Uncategorized for others
+- official_website: Official website URL (full URL with https://)
+- icon_url: Official logo/icon image URL (leave "" if unknown)
+- license_type: Free, Freemium, Trial, Commercial, or Open Source
+- language: Supported languages (e.g., "English, Korean, Japanese" or "Multilingual")
 
-**기본 정보:**
-- title: 정확한 공식 소프트웨어 이름
-- version: 버전 정보 (알려진 경우)
-- platform: 플랫폼 (예: Windows, macOS, Linux, Cross-platform)
-- developer: 개발사/제조사 공식 이름
-- category: 소프트웨어의 **주요 기능**을 기준으로 가장 적합한 카테고리 선택
-  * Graphics: 이미지 편집, 그래픽 디자인, 3D 모델링
-  * Media: 비디오/오디오 편집, 미디어 재생, 영상 제작, 화면 녹화
-  * Office: 문서 작성, 스프레드시트, 프레젠테이션
-  * Business: 회계, ERP, CRM, 업무 관리 (미디어 제작 도구는 Media)
-  * Development: 프로그래밍, IDE, 개발 도구
-  * Utility: 시스템 유틸리티, 최적화 도구
-  * 기타: Security, Network, OS, Engineering, Hardware, Uncategorized 등
-- official_website: 공식 웹사이트 URL (알려진 경우)
-- icon_url: 공식 로고/아이콘 이미지 URL (PNG, SVG, ICO 등)
-  * 공식 웹사이트의 파비콘, 로고 이미지, 앱 아이콘 등
-  * 찾을 수 없으면 빈 문자열 ""
-- license_type: 라이선스 종류 (Free, Freemium, Trial, Commercial, Open Source 등)
-- language: 지원 언어 (예: "영어, 한국어, 일본어" 또는 "다국어")
+**Descriptions:**
+- description_short: 50-100 character brief description (one sentence)
+- description_detailed: 200-300 character detailed description (main features and purpose)
 
-**프로그램 설명:**
-- description_short: 50-100자 이내의 간결한 설명 (한 문장)
-- description_detailed: 200-300자 이내의 상세 설명 (소프트웨어의 주요 특징과 용도를 자세히)
+**Features (5-10 items):**
+- features: Array of key features (e.g., ["Virtual machine management", "Snapshot support"])
 
-**주요 기능:** (최대 5-10개)
-- features: 주요 기능 리스트 배열 (예: ["사진 라이브러리 관리 (태그/평점/카테고리)", "RAW 이미지 지원"])
+**File Formats:**
+- supported_formats: Array of supported file formats (e.g., [".vmdk", ".iso", ".ova"])
 
-**지원 파일 포맷:** (해당되는 경우)
-- supported_formats: 지원 파일 포맷 배열 (예: ["JPEG", "PNG", "PSD"])
-
-**시스템 요구 사양:**
+**System Requirements (object):**
 - system_requirements: {{
-    "os": "운영체제 요구사항 (구체적으로)",
-    "cpu": "CPU 요구사항",
-    "ram": "RAM 요구사항 (최소/권장)",
-    "disk_space": "디스크 공간",
-    "gpu": "GPU 요구사항 (있는 경우)",
-    "additional": "추가 요구사항 (있는 경우)"
+    "os": "Operating system requirements (specific)",
+    "cpu": "CPU requirements",
+    "ram": "RAM requirements (minimum/recommended)",
+    "disk_space": "Disk space needed",
+    "gpu": "GPU requirements (if any)",
+    "additional": "Additional requirements (if any)"
   }}
 
-**설치 정보:**
+**Installation Info (object):**
 - installation_info: {{
-    "installer_type": "설치 방식 (예: DMG 마운트 → Applications 복사, EXE 실행, 압축 해제)",
-    "file_size": "예상 파일 크기 (예: 약 500MB)",
-    "internet_required": "인터넷 필요 여부 (예: 라이선스 인증 시 필요, 불필요)"
+    "installer_type": "Installation method (e.g., EXE installer, DMG mount, Archive extraction)",
+    "file_size": "Approximate file size (e.g., about 500MB)",
+    "internet_required": "Internet requirement (e.g., Required for activation, Not required)"
   }}
 
-**릴리즈 정보:**
-- release_notes: 주요 릴리즈 노트 또는 버전 히스토리 (알려진 경우, 2-3줄)
+**Release Notes:**
+- release_notes: Major release notes or version history (2-3 lines if known)
 
-**중요:**
-- 응답은 반드시 유효한 JSON 형식만 작성하세요
-- 추가 설명이나 코멘트를 포함하지 마세요
-- 확실하지 않은 정보는 빈 문자열("") 또는 빈 배열([])을 사용하세요
-- 모든 필드를 반드시 포함해야 합니다
-- 상세하고 구체적인 정보를 제공하세요"""
+**Example Output:**
+{{
+  "title": "VMware Workstation Pro",
+  "version": "12.0.1",
+  "platform": "Windows",
+  "developer": "VMware, Inc.",
+  "category": "Utility",
+  "official_website": "https://www.vmware.com/products/workstation-pro.html",
+  "icon_url": "",
+  "license_type": "Commercial",
+  "language": "다국어 지원 (영어, 한국어, 일본어, 중국어 등)",
+  "description_short": "단일 PC에서 여러 운영체제를 가상 머신으로 실행할 수 있는 전문 가상화 소프트웨어",
+  "description_detailed": "VMware Workstation Pro는 IT 전문가와 개발자가 Windows 또는 Linux PC 한 대에서 여러 운영체제를 실행, 테스트, 배포할 수 있도록 하는 업계 표준 하이퍼바이저 솔루션입니다. 고급 3D 그래픽 지원, 고해상도 디스플레이, 강력한 가상 네트워킹 기능을 제공합니다.",
+  "features": [
+    "하나의 PC에서 여러 운영체제 동시 실행",
+    "DirectX 10 및 OpenGL 3.3 지원으로 3D 그래픽 구현",
+    "4K UHD 디스플레이 지원",
+    "가상 네트워크 구성 기능",
+    "스냅샷 및 복제 기능",
+    "vSphere/ESXi 원격 연결",
+    "USB 3.0 장치 지원"
+  ],
+  "supported_formats": [".vmx", ".vmdk", ".ovf", ".ova", ".iso"],
+  "system_requirements": {{
+    "os": "Windows 7 이상 (64비트)",
+    "cpu": "1.3GHz 이상의 64비트 Intel 또는 AMD 멀티코어 프로세서",
+    "ram": "최소 2GB (4GB 이상 권장)",
+    "disk_space": "설치용 1.2GB (가상 머신용 추가 공간 필요)",
+    "gpu": "DirectX 10 호환 그래픽 카드",
+    "additional": "BIOS에서 하드웨어 가상화(Intel VT-x 또는 AMD-V) 활성화 필요"
+  }},
+  "installation_info": {{
+    "installer_type": "EXE 실행 파일",
+    "file_size": "약 300-600MB",
+    "internet_required": "라이선스 인증 및 업데이트 시 필요"
+  }},
+  "release_notes": "버전 12.0.1: Windows 10 안정성 개선, Intel Skylake 호환성 향상, USB 3.0 수정 및 보안 패치 포함"
+}}
+
+**CRITICAL RULES:**
+1. Return ONLY valid JSON - no markdown, no comments, no explanations
+2. Include ALL fields listed above - this is MANDATORY
+3. Use empty strings "" or empty arrays [] for unknown information
+4. Be specific and detailed - provide comprehensive information
+5. For well-known software, fill in as much detail as possible
+
+**LANGUAGE REQUIREMENT:**
+- Provide ALL text content (descriptions, features, notes, etc.) in KOREAN language
+- Keep technical terms and proper nouns in their original form
+- Examples: "가상 머신 관리", "스냅샷 및 복제 기능", "Windows 10 안정성 개선"
+- Field names remain in English, but all VALUES must be in Korean"""
 
         try:
             api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+
+            # System instruction을 별도로 추가
+            system_instruction = "You are an expert software analyst. Provide comprehensive, accurate metadata about software applications in JSON format. Always include ALL required fields, even if you need to use empty strings or arrays for unknown information. Be thorough and detailed."
 
             async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(
                     api_url,
                     headers={"Content-Type": "application/json"},
                     json={
+                        "system_instruction": {
+                            "parts": [{"text": system_instruction}]
+                        },
                         "contents": [{
                             "parts": [{"text": prompt}]
                         }],
                         "generationConfig": {
-                            "temperature": 0.3,
-                            "maxOutputTokens": 8192
+                            "temperature": 0.2,
+                            "maxOutputTokens": 8192,
+                            "topP": 0.95,
+                            "topK": 40
                         }
                     }
                 )

@@ -111,7 +111,7 @@
               v-if="metadata"
               :product-id="null"
               :product="metadata"
-              :initial-search-query="softwareName"
+              :initial-search-query="aiSearchQuery"
               @update:logo="handleLogoUpdate"
               @update:screenshots="handleScreenshotsUpdate"
             />
@@ -223,6 +223,16 @@ watch(() => props.isOpen, (isOpen) => {
   if (isOpen && softwareName.value && !metadata.value) {
     startAISearch()
   }
+})
+
+// AI 결과의 title + 주요 버전으로 이미지 검색어 구성
+const aiSearchQuery = computed(() => {
+  if (!metadata.value) return softwareName.value
+  const title = metadata.value.title || softwareName.value
+  const version = metadata.value.parsed_info?.version || ''
+  // 주요 버전만 사용 (v16.0.0 → v16)
+  const majorVersion = version.replace(/^(v?\d+).*/, '$1')
+  return majorVersion ? `${title} ${majorVersion}` : title
 })
 
 const filteredMetadata = computed(() => {
@@ -348,8 +358,6 @@ const saveMetadata = async () => {
     if (hasValue(metadata.value.release_date)) mappedMetadata.release_date = metadata.value.release_date
     if (hasValue(metadata.value.installation_info)) mappedMetadata.installation_info = metadata.value.installation_info
     if (hasValue(metadata.value.screenshots)) mappedMetadata.screenshots = metadata.value.screenshots
-
-    console.log('Sending mapped metadata:', mappedMetadata)
 
     // Create product from violation with AI metadata
     const response = await filenameViolationsApi.createProductWithMetadata(

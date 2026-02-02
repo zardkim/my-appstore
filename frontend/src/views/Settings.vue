@@ -1936,7 +1936,6 @@ const language = computed({
           accessUrl: accessUrl.value,
           apiUrl: apiUrl.value
         })
-        console.log('언어 설정 즉시 저장 완료:', value)
       } catch (error) {
         console.error('언어 설정 저장 실패:', error)
       }
@@ -2729,7 +2728,6 @@ const saveGeneralSettings = async () => {
 
     await configApi.updateSection('general', data)
     await alert.success(t('settings.general.saved'))
-    console.log('General settings saved:', data)
   } catch (error) {
     console.error('General settings save failed:', error)
     await alert.error(t('settings.general.saveFailed'))
@@ -2741,7 +2739,6 @@ const saveCategories = async () => {
   try {
     await configApi.updateSection('categories', categories.value)
     await alert.success(t('settings.categoriesManagement.categorySaved'))
-    console.log('Category settings saved:', categories.value)
   } catch (error) {
     console.error('Category settings save failed:', error)
     await alert.error(t('settings.categoriesManagement.categorySaveFailed'))
@@ -2764,10 +2761,8 @@ const saveMetadataSettings = async () => {
       customPromptGemini: customPromptGemini.value
     }
 
-    console.log('Saving metadata settings:', data)
     await configApi.updateSection('metadata', data)
     await alert.success(t('settings.metadata.saved'))
-    console.log('Metadata settings saved successfully')
   } catch (error) {
     console.error('Metadata settings save failed:', error)
     console.error('Error response:', error.response)
@@ -2890,7 +2885,6 @@ const saveBoardSettings = async () => {
     localStorage.setItem('boardSettings', JSON.stringify(data))
 
     await alert.success(t('settings.board.saved'))
-    console.log('Board settings saved:', data)
   } catch (error) {
     console.error('Board settings save failed:', error)
     await alert.error(t('settings.board.saveFailed'))

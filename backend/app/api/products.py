@@ -10,6 +10,7 @@ from app.models.version import Version
 from app.models.scan_history import ScanHistory
 from app.models.filename_violation import FilenameViolation
 from app.models.setting import Setting
+from app.models.favorite import Favorite
 from app.schemas.product import ProductResponse, ProductListResponse, ProductUpdateRequest, VersionUpdateRequest
 from app.dependencies import get_current_user, get_current_admin_user
 from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
@@ -491,6 +492,9 @@ async def cleanup_deleted_files(
                 deleted_product_ids.append(product_id)
 
         if deleted_product_ids:
+            # 관련 Favorite 먼저 삭제 (외래키 제약 조건 방지)
+            db.query(Favorite).filter(Favorite.product_id.in_(deleted_product_ids)).delete(synchronize_session=False)
+            # Product 삭제
             db.query(Product).filter(Product.id.in_(deleted_product_ids)).delete(synchronize_session=False)
 
         db.commit()
@@ -535,6 +539,9 @@ async def delete_product(
         product = db.query(Product).filter(Product.id == product_id).first()
         if not product:
             raise HTTPException(status_code=404, detail="제품을 찾을 수 없습니다")
+
+        # 관련 Favorite 삭제 (외래키 제약 조건 방지)
+        db.query(Favorite).filter(Favorite.product_id == product_id).delete(synchronize_session=False)
 
         # 제품에 연결된 모든 버전 삭제 (cascade로 자동 삭제되지만 명시적으로 처리)
         db.query(Version).filter(Version.product_id == product_id).delete(synchronize_session=False)
