@@ -16,7 +16,12 @@
     "*.sfv",
     "*.sha1",
     "*.md5",
-    "*.md4"
+    "*.md4",
+    ".gitkeep",
+    "README.md",
+    "readme.md",
+    "*.md",
+    "*.gitkeep"
   ],
   "paths": []
 }

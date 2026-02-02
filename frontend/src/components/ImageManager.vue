@@ -27,6 +27,31 @@
         </p>
       </div>
 
+      <!-- Editable Search Query -->
+      <div class="flex gap-2">
+        <div class="flex-1">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ t('imageManager.searchQuery') }}
+          </label>
+          <input
+            v-model="editableSearchQuery"
+            type="text"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            :placeholder="t('imageManager.searchQueryPlaceholder')"
+            @keyup.enter="searchLogos(false)"
+          />
+        </div>
+        <div class="flex items-end">
+          <button
+            @click="searchLogos(false)"
+            :disabled="!editableSearchQuery.trim()"
+            class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {{ t('imageManager.search') }}
+          </button>
+        </div>
+      </div>
+
       <!-- Loading -->
       <div v-if="searchLoading" class="flex items-center justify-center py-8">
         <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -118,6 +143,31 @@
           {{ t('imageManager.searchingScreenshotFor', { name: searchQuery || props.product?.title || t('imageManager.software') }) }}
           <span class="text-xs block mt-1">({{ t('imageManager.maxSelectHint') }})</span>
         </p>
+      </div>
+
+      <!-- Editable Search Query -->
+      <div class="flex gap-2">
+        <div class="flex-1">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ t('imageManager.searchQuery') }}
+          </label>
+          <input
+            v-model="editableSearchQuery"
+            type="text"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            :placeholder="t('imageManager.searchQueryPlaceholder')"
+            @keyup.enter="searchScreenshots(false)"
+          />
+        </div>
+        <div class="flex items-end">
+          <button
+            @click="searchScreenshots(false)"
+            :disabled="!editableSearchQuery.trim()"
+            class="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {{ t('imageManager.search') }}
+          </button>
+        </div>
       </div>
 
       <!-- Loading -->
@@ -341,7 +391,7 @@
             :src="hoveredImage.url"
             :alt="hoveredImage.title"
             class="w-96 h-72 object-contain bg-gray-50 dark:bg-gray-900 rounded"
-            @error="(e) => e.target.src = hoveredImage.thumbnail"
+            @error="(e) => e.target.src = hoveredImage?.thumbnail || ''"
           />
           <div class="max-w-96">
             <p class="text-sm font-medium text-gray-900 dark:text-white truncate" :title="hoveredImage.title">
@@ -363,7 +413,7 @@ import { useI18n } from 'vue-i18n'
 import { imagesApi } from '../api/images'
 import { useDialog } from '../composables/useDialog'
 
-const { t } = useI18n({ useScope: 'global' })
+const { t, locale } = useI18n({ useScope: 'global' })
 const { alert, confirm: confirmDialog } = useDialog()
 
 const props = defineProps({
@@ -414,6 +464,7 @@ const activeTab = ref(props.defaultTab)
 
 // Search
 const searchQuery = ref('')
+const editableSearchQuery = ref('') // 사용자가 편집 가능한 최종 검색어
 const searchResults = ref([])
 const searchLoading = ref(false)
 const searchError = ref('')
@@ -461,20 +512,23 @@ watch(() => props.product, (newProduct) => {
   }
 }, { deep: true, immediate: true })
 
-// 검색어 정리 함수 (버전 정보 제거)
+// 검색어 정리 함수 (세부 버전을 주요 버전으로 축소, 불필요한 키워드 제거)
 const cleanSearchQuery = (query) => {
   if (!query) return ''
 
   let cleaned = query.trim()
 
-  // 버전 패턴 제거
-  // v1.0, v22.1.2529.0, 2024 v22.1 등의 패턴 제거
-  cleaned = cleaned.replace(/\s+v?\d+(\.\d+)+(\.\d+)*$/i, '') // 끝부분의 버전 번호
-  cleaned = cleaned.replace(/\s+v\d+(\.\d+)*$/i, '') // v로 시작하는 버전
-  cleaned = cleaned.replace(/\s+\d{4}\s+v\d+.*$/i, '') // 연도 + v버전
+  // Build xxxxx 패턴 제거
+  cleaned = cleaned.replace(/\s+Build\s+\d+/gi, '')
+
+  // 세부 버전을 주요 버전으로 축소 (v16.0.0 → v16, v22.1.2529 → v22)
+  cleaned = cleaned.replace(/\b(v\d+)\.\d+(\.\d+)*/gi, '$1')
+
+  // 연도가 아닌 독립적인 긴 숫자 제거 (예: 16894299)
+  cleaned = cleaned.replace(/\s+\d{5,}/g, '')
 
   // RePackk, Portable, x64, x86 등의 불필요한 키워드 제거
-  cleaned = cleaned.replace(/\s+(repack|portable|x64|x86|win|windows|macos|linux|crack|keygen|patch).*$/i, '')
+  cleaned = cleaned.replace(/\s+(repack|portable|x64|x86|win|windows|macos|linux|crack|keygen|patch|final).*$/i, '')
 
   // 여러 공백을 하나로
   cleaned = cleaned.replace(/\s+/g, ' ').trim()
@@ -484,7 +538,7 @@ const cleanSearchQuery = (query) => {
 
 // Search logos
 const searchLogos = async (isLoadMore = false) => {
-  if (!searchQuery.value.trim()) return
+  if (!searchQuery.value.trim() && !editableSearchQuery.value.trim()) return
 
   // 초기 검색인 경우
   if (!isLoadMore) {
@@ -496,49 +550,65 @@ const searchLogos = async (isLoadMore = false) => {
     selectedImages.value = []
     searchOffset.value = 0
     hasMore.value = true
+
+    // editableSearchQuery가 비어있으면 자동 생성
+    if (!editableSearchQuery.value.trim()) {
+      const cleanedQuery = cleanSearchQuery(searchQuery.value)
+      const keyword = locale.value === 'ko' ? '로고' : 'logo'
+      editableSearchQuery.value = `${cleanedQuery} ${keyword}`
+    }
   } else {
     // 추가 로딩인 경우
     isLoadingMore.value = true
   }
 
   try {
-    // 검색어 정리
-    const cleanedQuery = cleanSearchQuery(searchQuery.value)
+    const baseQuery = editableSearchQuery.value.trim()
+
     if (!isLoadMore) {
-    }
+      // 초기 검색: 한국어와 영어 두 번 검색
+      const koreanQuery = baseQuery.replace(/\s+logo$/i, ' 로고')
+      const englishQuery = baseQuery.replace(/\s+로고$/i, ' logo')
 
-    const response = await imagesApi.searchLogo(cleanedQuery, 20, searchOffset.value)
+      // 한국어 검색
+      const response1 = await imagesApi.searchLogo(koreanQuery, 10, 0)
+      const koreanResults = response1.data.success ? (response1.data.images || []) : []
 
-    if (response.data.success) {
-      const newResults = response.data.images || []
+      // 영어 검색
+      const response2 = await imagesApi.searchLogo(englishQuery, 10, 0)
+      const englishResults = response2.data.success ? (response2.data.images || []) : []
 
-      if (isLoadMore) {
-        // 기존 결과에 추가
-        searchResults.value = [...searchResults.value, ...newResults]
-      } else {
-        // 새로운 검색
-        searchResults.value = newResults
-      }
+      // 결과 병합 및 중복 제거
+      const allResults = [...koreanResults, ...englishResults]
+      const uniqueResults = allResults.filter((item, index, self) =>
+        index === self.findIndex(t => t.url === item.url)
+      )
 
-      // 더 로드할 데이터가 있는지 확인
-      if (newResults.length < 20 || searchOffset.value >= 80) {
-        // 20개 미만이거나 offset이 80을 넘으면 더 이상 없음 (Google API 최대 100개)
-        hasMore.value = false
-      } else {
-        hasMore.value = true
-        searchOffset.value += newResults.length
-      }
+      searchResults.value = uniqueResults
+      searchOffset.value = uniqueResults.length
 
-      if (searchResults.value.length === 0 && !isLoadMore) {
-        if (response.data.error) {
-          searchError.value = response.data.error
-        } else {
-          searchError.value = t('imageManager.errors.noResults')
-        }
+      // 더 로드 가능 여부
+      hasMore.value = koreanResults.length >= 10 || englishResults.length >= 10
+
+      if (searchResults.value.length === 0) {
+        searchError.value = response1.data.error || response2.data.error || t('imageManager.errors.noResults')
       }
     } else {
-      console.error('API returned error:', response.data.error)
-      searchError.value = response.data.error || t('imageManager.errors.searchFailed')
+      // 추가 로딩: 기존 방식 유지
+      const response = await imagesApi.searchLogo(baseQuery, 20, searchOffset.value)
+
+      if (response.data.success) {
+        const newResults = response.data.images || []
+        searchResults.value = [...searchResults.value, ...newResults]
+
+        if (newResults.length < 20 || searchOffset.value >= 80) {
+          hasMore.value = false
+        } else {
+          searchOffset.value += newResults.length
+        }
+      } else {
+        searchError.value = response.data.error || t('imageManager.errors.searchFailed')
+      }
     }
   } catch (error) {
     console.error('Logo search error:', error)
@@ -551,7 +621,7 @@ const searchLogos = async (isLoadMore = false) => {
 
 // Search screenshots
 const searchScreenshots = async (isLoadMore = false) => {
-  if (!searchQuery.value.trim()) return
+  if (!searchQuery.value.trim() && !editableSearchQuery.value.trim()) return
 
   // 초기 검색인 경우
   if (!isLoadMore) {
@@ -563,49 +633,65 @@ const searchScreenshots = async (isLoadMore = false) => {
     selectedImages.value = []
     searchOffset.value = 0
     hasMore.value = true
+
+    // editableSearchQuery가 비어있으면 자동 생성
+    if (!editableSearchQuery.value.trim()) {
+      const cleanedQuery = cleanSearchQuery(searchQuery.value)
+      const keyword = locale.value === 'ko' ? '스크린샷' : 'screenshot'
+      editableSearchQuery.value = `${cleanedQuery} ${keyword}`
+    }
   } else {
     // 추가 로딩인 경우
     isLoadingMore.value = true
   }
 
   try {
-    // 검색어 정리
-    const cleanedQuery = cleanSearchQuery(searchQuery.value)
+    const baseQuery = editableSearchQuery.value.trim()
+
     if (!isLoadMore) {
-    }
+      // 초기 검색: 한국어와 영어 두 번 검색
+      const koreanQuery = baseQuery.replace(/\s+screenshot$/i, ' 스크린샷')
+      const englishQuery = baseQuery.replace(/\s+스크린샷$/i, ' screenshot')
 
-    const response = await imagesApi.searchScreenshots(cleanedQuery, 20, searchOffset.value)
+      // 한국어 검색
+      const response1 = await imagesApi.searchScreenshots(koreanQuery, 10, 0)
+      const koreanResults = response1.data.success ? (response1.data.images || []) : []
 
-    if (response.data.success) {
-      const newResults = response.data.images || []
+      // 영어 검색
+      const response2 = await imagesApi.searchScreenshots(englishQuery, 10, 0)
+      const englishResults = response2.data.success ? (response2.data.images || []) : []
 
-      if (isLoadMore) {
-        // 기존 결과에 추가
-        searchResults.value = [...searchResults.value, ...newResults]
-      } else {
-        // 새로운 검색
-        searchResults.value = newResults
-      }
+      // 결과 병합 및 중복 제거
+      const allResults = [...koreanResults, ...englishResults]
+      const uniqueResults = allResults.filter((item, index, self) =>
+        index === self.findIndex(t => t.url === item.url)
+      )
 
-      // 더 로드할 데이터가 있는지 확인
-      if (newResults.length < 20 || searchOffset.value >= 80) {
-        // 20개 미만이거나 offset이 80을 넘으면 더 이상 없음 (Google API 최대 100개)
-        hasMore.value = false
-      } else {
-        hasMore.value = true
-        searchOffset.value += newResults.length
-      }
+      searchResults.value = uniqueResults
+      searchOffset.value = uniqueResults.length
 
-      if (searchResults.value.length === 0 && !isLoadMore) {
-        if (response.data.error) {
-          searchError.value = response.data.error
-        } else {
-          searchError.value = t('imageManager.errors.noResults')
-        }
+      // 더 로드 가능 여부
+      hasMore.value = koreanResults.length >= 10 || englishResults.length >= 10
+
+      if (searchResults.value.length === 0) {
+        searchError.value = response1.data.error || response2.data.error || t('imageManager.errors.noResults')
       }
     } else {
-      console.error('API returned error:', response.data.error)
-      searchError.value = response.data.error || t('imageManager.errors.searchFailed')
+      // 추가 로딩: 기존 방식 유지
+      const response = await imagesApi.searchScreenshots(baseQuery, 20, searchOffset.value)
+
+      if (response.data.success) {
+        const newResults = response.data.images || []
+        searchResults.value = [...searchResults.value, ...newResults]
+
+        if (newResults.length < 20 || searchOffset.value >= 80) {
+          hasMore.value = false
+        } else {
+          searchOffset.value += newResults.length
+        }
+      } else {
+        searchError.value = response.data.error || t('imageManager.errors.searchFailed')
+      }
     }
   } catch (error) {
     console.error('Screenshot search error:', error)
@@ -959,6 +1045,9 @@ watch(activeTab, (newTab) => {
       searchQuery.value = props.product.title
     }
   }
+
+  // 탭 전환 시 editableSearchQuery 초기화하여 자동 생성되도록
+  editableSearchQuery.value = ''
 
   // 탭 전환 시 자동 검색
   if (newTab === 'logo' && searchQuery.value) {

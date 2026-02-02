@@ -165,6 +165,8 @@ async def match_violations_to_products(
                         product.system_requirements = metadata['system_requirements']
                     if metadata.get('supported_formats'):
                         product.supported_formats = metadata['supported_formats']
+                    if metadata.get('installation_info'):
+                        product.installation_info = metadata['installation_info']
                     if metadata.get('release_notes'):
                         product.release_notes = metadata['release_notes']
                     if metadata.get('release_date'):
@@ -202,6 +204,7 @@ async def match_violations_to_products(
                         features=metadata.get('features'),
                         system_requirements=metadata.get('system_requirements'),
                         supported_formats=metadata.get('supported_formats'),
+                        installation_info=metadata.get('installation_info'),
                         release_notes=metadata.get('release_notes'),
                         release_date=metadata.get('release_date'),
                         icon_url=metadata.get('icon_url', ''),

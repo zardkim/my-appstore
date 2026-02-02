@@ -49,7 +49,7 @@
             v-if="product?.id"
             :product-id="product.id"
             :product="product"
-            :initial-search-query="product.title"
+            :initial-search-query="searchQueryWithVersion"
             default-tab="screenshot"
             :visible-tabs="['screenshot']"
             @update:logo="handleLogoUpdate"
@@ -72,6 +72,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import ImageManager from '../ImageManager.vue'
 
 const props = defineProps({
@@ -87,14 +88,19 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved'])
 
-const handleLogoUpdate = (iconUrl) => {
-  // 로고는 스크린샷 검색 다이얼로그에서 사용하지 않음
-  console.log('Logo updated (ignored in screenshot dialog)')
+// title + 최신 버전의 주요 버전으로 검색어 구성
+const searchQueryWithVersion = computed(() => {
+  const title = props.product?.title || ''
+  const versions = props.product?.versions || []
+  const latestVersion = versions.length > 0 ? versions[versions.length - 1]?.version_name || '' : ''
+  const majorVersion = latestVersion.replace(/^(v?\d+).*/, '$1')
+  return majorVersion ? `${title} ${majorVersion}` : title
+})
+
+const handleLogoUpdate = () => {
 }
 
 const handleScreenshotsUpdate = (screenshots) => {
-  // 스크린샷 저장 후 부모 컴포넌트에 전달
-  console.log('Screenshots updated:', screenshots)
   const screenshotUrls = Array.isArray(screenshots)
     ? screenshots.map(s => typeof s === 'string' ? s : s.url)
     : []

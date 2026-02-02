@@ -28,6 +28,7 @@ class Product(Base):
     features = Column(JSON)  # 주요 기능 목록 ["기능1", "기능2", ...]
     system_requirements = Column(JSON)  # 시스템 요구사항 {"os": "...", "cpu": "...", "ram": "..."}
     supported_formats = Column(JSON)  # 지원 파일 포맷 {"images": ["jpg", "png"], "videos": [...]}
+    installation_info = Column(JSON)  # 설치 정보 {"installer_type": "...", "file_size": "...", "internet_required": "..."}
 
     # 릴리즈 정보
     release_notes = Column(Text)  # 릴리즈 노트

@@ -1562,6 +1562,9 @@ export default {
       current: '현재 이미지',
     },
     // 검색 관련
+    searchQuery: '검색어',
+    searchQueryPlaceholder: '검색어를 입력하거나 수정하세요',
+    search: '검색',
     searchingLogoFor: '{name}의 로고를 검색합니다.',
     searchingScreenshotFor: '{name}의 스크린샷을 검색합니다.',
     searchingLogo: '로고 검색 중...',

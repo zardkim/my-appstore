@@ -100,7 +100,7 @@ async def test_metadata_generation(
             model=ai_model
         )
 
-        # 파일명/폴더명 파싱 (예: "Adobe_Photoshop_2024.zip" → "Adobe Photoshop 2024")
+        # 파일명/폴더명 파싱 (예제용 표시 정보만)
         parsed_info = generator.parser.parse(request.software_name)
         software_display_name = parsed_info.get('software_name', request.software_name)
 
@@ -108,19 +108,19 @@ async def test_metadata_generation(
         logger.debug(f"파싱 결과: {parsed_info}")
         logger.debug(f"표시 이름: {software_display_name}")
 
-        # 커스텀 프롬프트 처리
+        # 커스텀 프롬프트는 ai_metadata.py에서 플레이스홀더 교체 수행
         custom_prompt = None
         if request.use_custom_prompt and request.custom_prompt:
-            custom_prompt = request.custom_prompt.replace('{software_name}', software_display_name)
+            custom_prompt = request.custom_prompt
             logger.debug(f"🎨 커스텀 프롬프트 사용 (길이: {len(custom_prompt)}자)")
 
-        # 기본 메타데이터 생성
+        # 원본 입력을 전달 → ai_metadata.py에서 파싱하여 버전 정보 유지
         metadata = await generator.generate_detailed_metadata(
-            software_display_name,
+            request.software_name,
             custom_prompt=custom_prompt
         )
 
-        # 파싱 정보 추가
+        # 파싱 정보 추가 (원본 파싱 결과)
         metadata['parsed_info'] = {
             'original_input': request.software_name,
             'parsed_name': software_display_name,

@@ -601,8 +601,6 @@ const closeAIMatchingDialog = () => {
 }
 
 const handleAIMatchingSaved = async (data) => {
-  console.log('AI matching saved:', data)
-
   // 목록에서 해당 항목 제거
   if (selectedViolation.value?.id) {
     violations.value = violations.value.filter(v => v.id !== selectedViolation.value.id)
