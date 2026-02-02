@@ -44,6 +44,7 @@ export default {
   nav: {
     home: '홈',
     discover: '탐색',
+    search: '검색',
     detectedList: '검색된 목록',
     favorites: '즐겨찾기',
     scraps: '스크랩',

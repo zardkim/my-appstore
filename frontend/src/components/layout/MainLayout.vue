@@ -34,16 +34,16 @@
           <span class="mobile-nav-text">{{ $t('nav.home') }}</span>
         </router-link>
 
-        <!-- Store -->
+        <!-- Search -->
         <router-link
           to="/discover"
           class="mobile-nav-item"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <span class="mobile-nav-text">{{ $t('nav.discover') }}</span>
+          <span class="mobile-nav-text">{{ $t('nav.search') }}</span>
         </router-link>
 
         <!-- Tips -->
@@ -95,7 +95,7 @@
         @click="toggleMobileMenu"
       >
         <div
-          class="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl max-h-[80vh] overflow-y-auto safe-area-bottom"
+          class="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl max-h-[60vh] overflow-y-auto safe-area-bottom"
           @click.stop
         >
           <!-- User Info Header -->
