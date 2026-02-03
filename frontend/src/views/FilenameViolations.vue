@@ -224,9 +224,11 @@
                 </div>
 
                 <!-- 제안 -->
-                <div v-if="editingId !== violation.id && violation.suggestion" class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <span class="text-sm font-medium text-blue-700 dark:text-blue-400">{{ t('detectedList.suggestion') }}</span>
-                  <span class="text-sm text-blue-600 dark:text-blue-300 ml-2">{{ violation.suggestion }}</span>
+                <div v-if="editingId !== violation.id && violation.suggestion" class="mt-2 p-3 rounded-lg" :class="violation.file_name === violation.suggestion ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'">
+                  <span class="text-sm font-medium" :class="violation.file_name === violation.suggestion ? 'text-green-700 dark:text-green-400' : 'text-blue-700 dark:text-blue-400'">
+                    {{ violation.file_name === violation.suggestion ? '✓ 일치' : t('detectedList.suggestion') }}
+                  </span>
+                  <span v-if="violation.file_name !== violation.suggestion" class="text-sm text-blue-600 dark:text-blue-300 ml-2">{{ violation.suggestion }}</span>
                 </div>
 
                 <!-- 날짜 -->
@@ -264,7 +266,7 @@
                 </button>
 
                 <button
-                  v-if="violation.suggestion"
+                  v-if="violation.suggestion && violation.file_name !== violation.suggestion"
                   @click="renameSingle(violation)"
                   :title="t('detectedList.applySuggestion')"
                   class="p-1.5 sm:p-2 lg:p-3 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"

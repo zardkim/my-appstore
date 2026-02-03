@@ -95,7 +95,7 @@
         @click="toggleMobileMenu"
       >
         <div
-          class="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl max-h-[60vh] overflow-y-auto safe-area-bottom"
+          class="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl max-h-[75vh] overflow-y-auto safe-area-bottom"
           @click.stop
         >
           <!-- User Info Header -->
@@ -113,6 +113,20 @@
 
           <!-- Menu Items -->
           <div class="p-4 space-y-2">
+            <!-- Detected List (Admin Only) -->
+            <router-link
+              v-if="isAdmin"
+              to="/filename-violations"
+              @click="toggleMobileMenu"
+              class="mobile-menu-item"
+            >
+              <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>{{ $t('nav.detectedList') }}</span>
+            </router-link>
+
             <router-link
               to="/favorites"
               @click="toggleMobileMenu"
@@ -150,6 +164,17 @@
             </router-link>
 
             <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+
+            <button
+              @click="toggleLanguage"
+              class="mobile-menu-item"
+            >
+              <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              <span>{{ localeStore.locale === 'ko' ? 'English' : '한국어' }}</span>
+            </button>
 
             <button
               @click="toggleTheme"
@@ -190,21 +215,30 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
+import { useLocaleStore } from '../../store/locale'
 import Sidebar from './Sidebar.vue'
 import Footer from './Footer.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+const localeStore = useLocaleStore()
 
 const showMobileMenu = ref(false)
 
 const username = computed(() => authStore.user?.username || 'User')
 const userRole = computed(() => authStore.user?.role || 'user')
+const isAdmin = computed(() => authStore.user?.role === 'admin')
 const userInitial = computed(() => username.value.charAt(0).toUpperCase())
 
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
+}
+
+const toggleLanguage = () => {
+  const newLocale = localeStore.locale === 'ko' ? 'en' : 'ko'
+  localeStore.setLocale(newLocale)
+  showMobileMenu.value = false
 }
 
 const toggleTheme = () => {
