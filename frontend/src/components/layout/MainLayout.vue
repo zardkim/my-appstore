@@ -19,7 +19,7 @@
     </div>
 
     <!-- Mobile Bottom Navigation -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 safe-area-bottom overflow-x-auto scrollbar-hide">
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 safe-area-bottom overflow-x-auto scrollbar-hide scroll-smooth">
       <div class="flex items-center h-16 px-2">
         <!-- Home -->
         <router-link
@@ -310,5 +310,11 @@ const logout = () => {
 /* Safe area for mobile devices (iOS notch) */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Smooth horizontal scrolling */
+.scroll-smooth {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 </style>
