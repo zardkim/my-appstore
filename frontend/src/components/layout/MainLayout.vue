@@ -95,24 +95,24 @@
         @click="toggleMobileMenu"
       >
         <div
-          class="absolute bottom-16 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl max-h-[60vh] overflow-y-auto pb-4"
+          class="absolute bottom-16 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl max-h-[50vh] overflow-y-auto pb-2"
           @click.stop
         >
           <!-- User Info Header -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
-            <div class="flex items-center space-x-4">
-              <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                <span class="text-xl font-bold text-white">{{ userInitial }}</span>
+          <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                <span class="text-lg font-bold text-white">{{ userInitial }}</span>
               </div>
               <div>
-                <p class="text-lg font-bold text-gray-900 dark:text-white">{{ username }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 capitalize">{{ userRole }}</p>
+                <p class="text-base font-bold text-gray-900 dark:text-white">{{ username }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 capitalize">{{ userRole }}</p>
               </div>
             </div>
           </div>
 
           <!-- Menu Items -->
-          <div class="p-4 space-y-2">
+          <div class="p-3 space-y-1">
             <!-- Detected List (Admin Only) -->
             <router-link
               v-if="isAdmin"
@@ -275,7 +275,7 @@ const logout = () => {
 
 /* Mobile Menu Items */
 .mobile-menu-item {
-  @apply flex items-center space-x-3 p-4 rounded-lg transition-colors;
+  @apply flex items-center space-x-3 p-3 rounded-lg transition-colors;
   @apply text-gray-700 dark:text-gray-300;
   @apply hover:bg-gray-100 dark:hover:bg-gray-700;
 }
