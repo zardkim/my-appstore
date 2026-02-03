@@ -3,14 +3,17 @@ from sqlalchemy.orm import Session
 from typing import Optional
 import os
 from pathlib import Path
+import logging
 
 from app.database import get_db
 from app.models.version import Version
 from app.models.user import User
 from app.dependencies import get_current_user
 from app.core.security import decode_access_token
+from app.config import settings
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 async def get_user_from_token(
@@ -68,40 +71,54 @@ async def download_file(
     Returns:
         X-Accel-Redirect 헤더로 Nginx가 파일을 전송
     """
-    # 버전 조회
-    version = db.query(Version).filter(Version.id == version_id).first()
-    if not version:
-        raise HTTPException(status_code=404, detail="File not found")
+    try:
+        logger.info(f"Download request for version_id: {version_id}")
 
-    # 파일 존재 확인
-    file_path = Path(version.file_path)
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Physical file not found")
+        # 버전 조회
+        version = db.query(Version).filter(Version.id == version_id).first()
+        if not version:
+            logger.error(f"Version not found: {version_id}")
+            raise HTTPException(status_code=404, detail="File not found")
 
-    # 파일 크기 확인
-    file_size = file_path.stat().st_size
+        logger.info(f"Version found: {version.file_name}, path: {version.file_path}")
 
-    # Nginx X-Accel-Redirect 사용
-    # Nginx 설정에서 /protected/ 경로를 실제 파일 경로로 매핑 필요
-    # 예: location /protected/ { internal; alias /mnt/software/; }
+        # 파일 존재 확인
+        file_path = Path(version.file_path)
+        if not file_path.exists():
+            logger.error(f"Physical file not found: {version.file_path}")
+            raise HTTPException(status_code=404, detail="Physical file not found")
 
-    # 내부 경로 생성
-    # /mnt/software/folder/file.exe -> /protected/folder/file.exe
-    internal_path = str(file_path).replace('/mnt/software', '/protected')
+        # 파일 크기 확인
+        file_size = file_path.stat().st_size
+        logger.info(f"File size: {file_size} bytes")
 
-    # 파일명에서 특수문자 처리 (URL 인코딩)
-    import urllib.parse
-    safe_filename = urllib.parse.quote(version.file_name)
+        # Nginx X-Accel-Redirect 사용
+        # SCAN_BASE_PATH를 사용하여 동적으로 경로 변환
+        # 예: /library/folder/file.exe -> /protected/folder/file.exe
+        scan_base_path = settings.SCAN_BASE_PATH
+        internal_path = str(file_path).replace(scan_base_path, '/protected')
 
-    return Response(
-        status_code=200,
-        headers={
-            'X-Accel-Redirect': internal_path,
-            'Content-Disposition': f'attachment; filename="{safe_filename}"',
-            'Content-Type': 'application/octet-stream',
-            'Content-Length': str(file_size)
-        }
-    )
+        logger.info(f"Internal path for X-Accel-Redirect: {internal_path}")
+
+        # 파일명에서 특수문자 처리 (URL 인코딩)
+        import urllib.parse
+        safe_filename = urllib.parse.quote(version.file_name)
+
+        return Response(
+            status_code=200,
+            headers={
+                'X-Accel-Redirect': internal_path,
+                'Content-Disposition': f'attachment; filename="{safe_filename}"',
+                'Content-Type': 'application/octet-stream',
+                'Content-Length': str(file_size)
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Download error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
 
 
 @router.get("/direct/{version_id}")
@@ -118,21 +135,34 @@ async def download_file_direct(
         version_id: 버전 ID
         token: JWT 토큰 (쿼리 파라미터)
     """
-    from fastapi.responses import FileResponse
+    try:
+        from fastapi.responses import FileResponse
 
-    # 버전 조회
-    version = db.query(Version).filter(Version.id == version_id).first()
-    if not version:
-        raise HTTPException(status_code=404, detail="File not found")
+        logger.info(f"Direct download request for version_id: {version_id}")
 
-    # 파일 존재 확인
-    file_path = Path(version.file_path)
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Physical file not found")
+        # 버전 조회
+        version = db.query(Version).filter(Version.id == version_id).first()
+        if not version:
+            logger.error(f"Version not found: {version_id}")
+            raise HTTPException(status_code=404, detail="File not found")
 
-    # 파일 응답
-    return FileResponse(
-        path=str(file_path),
-        filename=version.file_name,
-        media_type='application/octet-stream'
-    )
+        logger.info(f"Version found: {version.file_name}, path: {version.file_path}")
+
+        # 파일 존재 확인
+        file_path = Path(version.file_path)
+        if not file_path.exists():
+            logger.error(f"Physical file not found: {version.file_path}")
+            raise HTTPException(status_code=404, detail="Physical file not found")
+
+        # 파일 응답
+        return FileResponse(
+            path=str(file_path),
+            filename=version.file_name,
+            media_type='application/octet-stream'
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Direct download error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")

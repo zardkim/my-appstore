@@ -366,6 +366,17 @@ const saveMetadata = async () => {
     )
 
     if (response.data.success) {
+      // 중복 제품인 경우 알림 표시
+      if (response.data.product?.is_duplicate) {
+        const product = response.data.product
+        await alert.info(
+          `이미 존재하는 제품입니다.\n\n` +
+          `제품명: ${product.title || ''}\n` +
+          `${product.duplicate_reason || '버전만 추가되었습니다.'}\n\n` +
+          `제품 상세페이지의 버전 탭에서 확인하세요.`
+        )
+      }
+
       emit('saved', response.data)
       close()
     } else {
@@ -403,7 +414,8 @@ const toRelativePath = (url) => {
   // http://localhost:8110/static/icons/1.png → /static/icons/1.png
   // https://app.nuripc.kr/static/icons/1.png → /static/icons/1.png
   if (url.includes('/static/')) {
-    return '/' + url.split('/static/')[1].split('?')[0].replace(/^\/+/, 'static/')
+    const afterStatic = url.split('/static/')[1].split('?')[0]
+    return '/static/' + afterStatic
   }
   return url
 }

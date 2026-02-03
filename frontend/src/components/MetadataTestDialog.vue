@@ -466,7 +466,8 @@ const handleImageError = (event) => {
 const toRelativePath = (url) => {
   if (!url) return url
   if (url.includes('/static/')) {
-    return '/' + url.split('/static/')[1].split('?')[0].replace(/^\/+/, 'static/')
+    const afterStatic = url.split('/static/')[1].split('?')[0]
+    return '/static/' + afterStatic
   }
   return url
 }
