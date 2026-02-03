@@ -88,6 +88,15 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved'])
 
+// Helper function to convert full URL to relative path
+const toRelativePath = (url) => {
+  if (!url) return url
+  if (url.includes('/static/')) {
+    return '/' + url.split('/static/')[1].split('?')[0].replace(/^\/+/, 'static/')
+  }
+  return url
+}
+
 // title + 최신 버전의 주요 버전으로 검색어 구성
 const searchQueryWithVersion = computed(() => {
   const title = props.product?.title || ''
@@ -98,7 +107,9 @@ const searchQueryWithVersion = computed(() => {
 })
 
 const handleLogoUpdate = (iconUrl) => {
-  emit('saved', { icon_url: iconUrl })
+  const relativePath = toRelativePath(iconUrl)
+  console.log('Logo updated:', relativePath)
+  emit('saved', { icon_url: relativePath })
 }
 
 const handleScreenshotsUpdate = () => {

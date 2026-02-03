@@ -3,8 +3,10 @@
 모든 매칭 작업에서 동일한 로직을 사용하도록 통합
 """
 import os
+import re
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
+from difflib import SequenceMatcher
 
 from app.models.filename_violation import FilenameViolation
 from app.models.product import Product
@@ -12,6 +14,99 @@ from app.models.version import Version
 from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
 from app.core.parser import FilenameParser
 from app.core.redis_cache import invalidate_cache
+
+
+def normalize_title(title: str) -> str:
+    """
+    제품 타이틀을 정규화하여 비교 가능하도록 만듦
+
+    Args:
+        title: 원본 타이틀
+
+    Returns:
+        정규화된 타이틀 (소문자, 불필요한 공백/특수문자 제거)
+    """
+    if not title:
+        return ""
+
+    # 소문자 변환
+    normalized = title.lower()
+
+    # 특수문자 제거 (단어 구분을 위한 공백은 유지)
+    normalized = re.sub(r'[^\w\s가-힣]', ' ', normalized)
+
+    # 여러 공백을 하나로
+    normalized = re.sub(r'\s+', ' ', normalized).strip()
+
+    return normalized
+
+
+def calculate_similarity(str1: str, str2: str) -> float:
+    """
+    두 문자열의 유사도 계산 (0.0 ~ 1.0)
+
+    Args:
+        str1: 첫 번째 문자열
+        str2: 두 번째 문자열
+
+    Returns:
+        유사도 (0.0 ~ 1.0)
+    """
+    return SequenceMatcher(None, str1, str2).ratio()
+
+
+def find_similar_product(
+    db: Session,
+    title: str,
+    vendor: str = None,
+    similarity_threshold: float = 0.85
+) -> Optional[Product]:
+    """
+    유사한 제품을 찾음
+
+    Args:
+        db: Database session
+        title: 제품 타이틀
+        vendor: 제조사 (있으면 더 정확한 매칭)
+        similarity_threshold: 유사도 임계값 (기본 0.85)
+
+    Returns:
+        유사한 제품 또는 None
+    """
+    # 타이틀 정규화
+    normalized_title = normalize_title(title)
+
+    # 모든 제품 가져오기 (추후 최적화 가능)
+    all_products = db.query(Product).all()
+
+    best_match = None
+    best_similarity = 0.0
+
+    for product in all_products:
+        # 제품 타이틀 정규화
+        product_normalized = normalize_title(product.title)
+
+        # 유사도 계산
+        similarity = calculate_similarity(normalized_title, product_normalized)
+
+        # 제조사가 제공되고 일치하면 유사도 보너스
+        if vendor and product.vendor:
+            vendor_normalized = normalize_title(vendor)
+            product_vendor_normalized = normalize_title(product.vendor)
+
+            if vendor_normalized == product_vendor_normalized:
+                similarity += 0.1  # 10% 보너스
+
+        # 최고 유사도 업데이트
+        if similarity > best_similarity:
+            best_similarity = similarity
+            best_match = product
+
+    # 임계값 이상이면 매칭
+    if best_similarity >= similarity_threshold:
+        return best_match
+
+    return None
 
 
 async def match_violations_to_products(
@@ -108,12 +203,7 @@ async def match_violations_to_products(
     # 4단계: Product 생성 및 Version 매칭
     for folder_path, violations_list in clear_folder_groups.items():
         try:
-            # 이미 Product가 있는지 확인
-            existing_product = db.query(Product).filter(
-                Product.folder_path == folder_path
-            ).first()
-
-            # 메타데이터 준비
+            # 메타데이터 준비 (먼저 준비해야 유사도 검사에 사용 가능)
             if provided_metadata:
                 # 수동 매칭: 사용자가 제공한 메타데이터 사용
                 metadata = provided_metadata
@@ -134,6 +224,25 @@ async def match_violations_to_products(
                     # AI: description_detailed → Product: detailed_description
                     'detailed_description': ai_metadata.get('description_detailed') or ai_metadata.get('detailed_description')
                 }
+
+            # 이미 Product가 있는지 확인
+            # 1단계: folder_path로 먼저 검색 (정확한 매칭)
+            existing_product = db.query(Product).filter(
+                Product.folder_path == folder_path
+            ).first()
+
+            # 2단계: folder_path에 없으면 유사한 제품 검색 (중복 방지)
+            # 수동 매칭(AI 매칭)에만 적용
+            if not existing_product and provided_metadata:
+                similar_product = find_similar_product(
+                    db,
+                    metadata.get('title', ''),
+                    metadata.get('vendor')
+                )
+                if similar_product:
+                    existing_product = similar_product
+                    # 같은 프로그램이지만 다른 폴더인 경우
+                    # Version만 추가하고 folder_path는 업데이트하지 않음
 
             # Product 생성 또는 업데이트
             if existing_product:

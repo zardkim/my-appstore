@@ -462,15 +462,25 @@ const handleImageError = (event) => {
   event.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="150"%3E%3Crect fill="%23f0f0f0" width="200" height="150"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23999"%3E이미지 없음%3C/text%3E%3C/svg%3E'
 }
 
+// Helper function to convert full URL to relative path
+const toRelativePath = (url) => {
+  if (!url) return url
+  if (url.includes('/static/')) {
+    return '/' + url.split('/static/')[1].split('?')[0].replace(/^\/+/, 'static/')
+  }
+  return url
+}
+
 // Image update handlers
 const handleLogoUpdate = (iconUrl) => {
-  console.log('[MetadataTestDialog] handleLogoUpdate called with:', iconUrl)
+  const relativePath = toRelativePath(iconUrl)
+  console.log('[MetadataTestDialog] handleLogoUpdate called with:', relativePath)
 
   // 이미지 검색 전용 모드일 때 metadata 객체 생성
   if (!metadata.value && showImageSearchMode.value) {
     metadata.value = {
       title: softwareName.value,
-      icon_url: iconUrl,
+      icon_url: relativePath,
       screenshots: []
     }
     console.log('[MetadataTestDialog] Created new metadata object')
@@ -478,7 +488,7 @@ const handleLogoUpdate = (iconUrl) => {
     // 기존 객체 업데이트 - 반응성 유지를 위해 전체 재할당
     metadata.value = {
       ...metadata.value,
-      icon_url: iconUrl
+      icon_url: relativePath
     }
     console.log('[MetadataTestDialog] Updated existing metadata object')
   }
@@ -487,21 +497,30 @@ const handleLogoUpdate = (iconUrl) => {
 }
 
 const handleScreenshotsUpdate = (screenshots) => {
-  console.log('[MetadataTestDialog] handleScreenshotsUpdate called with:', screenshots)
+  // Convert full URLs to relative paths
+  const normalizedScreenshots = screenshots.map(s => {
+    if (typeof s === 'string') {
+      return { type: 'local', url: toRelativePath(s) }
+    } else {
+      return { ...s, url: toRelativePath(s.url) }
+    }
+  })
+
+  console.log('[MetadataTestDialog] handleScreenshotsUpdate called with:', normalizedScreenshots)
 
   // 이미지 검색 전용 모드일 때 metadata 객체 생성
   if (!metadata.value && showImageSearchMode.value) {
     metadata.value = {
       title: softwareName.value,
       icon_url: null,
-      screenshots: screenshots
+      screenshots: normalizedScreenshots
     }
     console.log('[MetadataTestDialog] Created new metadata object with screenshots')
   } else if (metadata.value) {
     // 기존 객체 업데이트 - 반응성 유지를 위해 전체 재할당
     metadata.value = {
       ...metadata.value,
-      screenshots: screenshots
+      screenshots: normalizedScreenshots
     }
     console.log('[MetadataTestDialog] Updated existing metadata object with screenshots')
   }

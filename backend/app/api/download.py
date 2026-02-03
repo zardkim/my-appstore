@@ -1,26 +1,69 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Query
 from sqlalchemy.orm import Session
+from typing import Optional
 import os
 from pathlib import Path
 
 from app.database import get_db
 from app.models.version import Version
+from app.models.user import User
 from app.dependencies import get_current_user
+from app.core.security import decode_access_token
 
 router = APIRouter()
+
+
+async def get_user_from_token(
+    token: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+) -> User:
+    """
+    쿼리 파라미터에서 토큰을 읽어 사용자 인증
+    다운로드 엔드포인트 전용 (window.open 사용 시 Authorization 헤더 전달 불가)
+    """
+    if not token:
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated"
+        )
+
+    # JWT 토큰 검증
+    payload = decode_access_token(token)
+    if payload is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Could not validate credentials"
+        )
+
+    username: str = payload.get("sub")
+    if username is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Could not validate credentials"
+        )
+
+    user = db.query(User).filter(User.username == username).first()
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="User not found"
+        )
+
+    return user
 
 
 @router.get("/{version_id}")
 async def download_file(
     version_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user: User = Depends(get_user_from_token)
 ):
     """
     파일 다운로드 (Nginx X-Accel-Redirect 사용)
 
     Args:
         version_id: 버전 ID
+        token: JWT 토큰 (쿼리 파라미터)
 
     Returns:
         X-Accel-Redirect 헤더로 Nginx가 파일을 전송
@@ -65,7 +108,7 @@ async def download_file(
 async def download_file_direct(
     version_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user: User = Depends(get_user_from_token)
 ):
     """
     직접 다운로드 (Nginx 없이 FastAPI로 스트리밍)
@@ -73,6 +116,7 @@ async def download_file_direct(
 
     Args:
         version_id: 버전 ID
+        token: JWT 토큰 (쿼리 파라미터)
     """
     from fastapi.responses import FileResponse
 
