@@ -397,21 +397,44 @@ const saveMetadata = async () => {
   }
 }
 
+// Helper function to convert full URL to relative path
+const toRelativePath = (url) => {
+  if (!url) return url
+  // http://localhost:8110/static/icons/1.png → /static/icons/1.png
+  // https://app.nuripc.kr/static/icons/1.png → /static/icons/1.png
+  if (url.includes('/static/')) {
+    return '/' + url.split('/static/')[1].split('?')[0].replace(/^\/+/, 'static/')
+  }
+  return url
+}
+
 // Image update handlers
 const handleLogoUpdate = (iconUrl) => {
   if (metadata.value) {
+    // Convert full URL to relative path before saving
+    const relativePath = toRelativePath(iconUrl)
+    console.log('Logo saved from dialog', { icon_url: relativePath })
     metadata.value = {
       ...metadata.value,
-      icon_url: iconUrl
+      icon_url: relativePath
     }
   }
 }
 
 const handleScreenshotsUpdate = (screenshots) => {
   if (metadata.value) {
+    // Convert full URLs to relative paths
+    const normalizedScreenshots = screenshots.map(s => {
+      if (typeof s === 'string') {
+        return { type: 'local', url: toRelativePath(s) }
+      } else {
+        return { ...s, url: toRelativePath(s.url) }
+      }
+    })
+    console.log('Screenshots saved from dialog', { count: normalizedScreenshots.length })
     metadata.value = {
       ...metadata.value,
-      screenshots: screenshots
+      screenshots: normalizedScreenshots
     }
   }
 }

@@ -5,8 +5,8 @@ This file is automatically updated by the release process.
 Do not edit manually.
 """
 
-__version__ = "1.5.4"
-__version_info__ = (1, 5, 4)
+__version__ = "1.5.5"
+__version_info__ = (1, 5, 5)
 
 # Build information (optional, can be set during build process)
 __build_date__ = "2026-02-03"

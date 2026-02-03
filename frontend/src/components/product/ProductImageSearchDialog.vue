@@ -88,6 +88,15 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved'])
 
+// Helper function to convert full URL to relative path
+const toRelativePath = (url) => {
+  if (!url) return url
+  if (url.includes('/static/')) {
+    return '/' + url.split('/static/')[1].split('?')[0].replace(/^\/+/, 'static/')
+  }
+  return url
+}
+
 // title + 최신 버전의 주요 버전으로 검색어 구성
 const searchQueryWithVersion = computed(() => {
   const title = props.product?.title || ''
@@ -101,10 +110,18 @@ const handleLogoUpdate = () => {
 }
 
 const handleScreenshotsUpdate = (screenshots) => {
-  const screenshotUrls = Array.isArray(screenshots)
-    ? screenshots.map(s => typeof s === 'string' ? s : s.url)
+  // Convert full URLs to relative paths
+  const screenshotData = Array.isArray(screenshots)
+    ? screenshots.map(s => {
+        const url = typeof s === 'string' ? s : s.url
+        return {
+          type: typeof s === 'object' ? s.type : 'local',
+          url: toRelativePath(url)
+        }
+      })
     : []
-  emit('saved', { screenshots: screenshotUrls })
+  console.log('Screenshots updated:', screenshotData.length)
+  emit('saved', { screenshots: screenshotData })
 }
 
 const close = () => {
