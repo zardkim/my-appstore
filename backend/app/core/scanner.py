@@ -181,6 +181,8 @@ class FileScanner:
             "renamed_files": 0,
             "ai_generated": 0,
             "icons_cached": 0,
+            "scanned_folders": 0,
+            "scanned_files": 0,
             "errors": []
         }
 
@@ -214,6 +216,9 @@ class FileScanner:
             return
 
         try:
+            logger.info(f"Scanning folder: {folder}")
+            results["scanned_folders"] += 1
+
             # 현재 폴더의 파일들 처리
             await self._process_folder_async(folder, results, scanned_files)
 
@@ -222,8 +227,14 @@ class FileScanner:
                 if subfolder.is_dir():
                     await self._scan_folder_recursive_async(subfolder, results, scanned_files)
 
+        except PermissionError as e:
+            error_msg = f"Permission denied: {folder} - {str(e)}"
+            logger.warning(error_msg)
+            results["errors"].append(error_msg)
         except Exception as e:
-            results["errors"].append(f"Error processing {folder.name}: {str(e)}")
+            error_msg = f"Error processing {folder}: {str(e)}"
+            logger.error(error_msg)
+            results["errors"].append(error_msg)
 
     def scan_directory(self, base_path: str) -> Dict:
         """
@@ -247,6 +258,8 @@ class FileScanner:
             "deleted_versions": 0,
             "deleted_products": 0,
             "renamed_files": 0,
+            "scanned_folders": 0,
+            "scanned_files": 0,
             "errors": []
         }
 
@@ -280,6 +293,9 @@ class FileScanner:
             return
 
         try:
+            logger.info(f"Scanning folder: {folder}")
+            results["scanned_folders"] += 1
+
             # 현재 폴더의 파일들 처리
             self._process_folder(folder, results, scanned_files)
 
@@ -288,8 +304,14 @@ class FileScanner:
                 if subfolder.is_dir():
                     self._scan_folder_recursive(subfolder, results, scanned_files)
 
+        except PermissionError as e:
+            error_msg = f"Permission denied: {folder} - {str(e)}"
+            logger.warning(error_msg)
+            results["errors"].append(error_msg)
         except Exception as e:
-            results["errors"].append(f"Error processing {folder.name}: {str(e)}")
+            error_msg = f"Error processing {folder}: {str(e)}"
+            logger.error(error_msg)
+            results["errors"].append(error_msg)
 
     async def _process_folder_async(self, folder: Path, results: Dict, scanned_files: set):
         """
@@ -310,6 +332,8 @@ class FileScanner:
                 if self._is_excluded_file(file_path.name):
                     logger.debug(f"Skipping excluded file: {file_path.name}")
                     continue
+                logger.debug(f"Processing file: {file_path.name}")
+                results["scanned_files"] += 1
                 self._add_scanned_file(file_path, folder_path_str, results)
                 # 스캔된 파일 추적
                 scanned_files.add(str(file_path.absolute()))
@@ -333,6 +357,8 @@ class FileScanner:
                 if self._is_excluded_file(file_path.name):
                     logger.debug(f"Skipping excluded file: {file_path.name}")
                     continue
+                logger.debug(f"Processing file: {file_path.name}")
+                results["scanned_files"] += 1
                 self._add_scanned_file(file_path, folder_path_str, results)
                 # 스캔된 파일 추적
                 scanned_files.add(str(file_path.absolute()))
