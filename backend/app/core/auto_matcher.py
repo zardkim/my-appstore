@@ -142,7 +142,8 @@ async def match_violations_to_products(
         "matched": 0,
         "failed": 0,
         "errors": [],
-        "products": []
+        "products": [],
+        "duplicates": []  # 중복 제품 정보
     }
 
     if not violations:
@@ -231,6 +232,10 @@ async def match_violations_to_products(
                 Product.folder_path == folder_path
             ).first()
 
+            # 중복 제품 플래그
+            is_duplicate = False
+            duplicate_reason = None
+
             # 2단계: folder_path에 없으면 유사한 제품 검색 (중복 방지)
             # 수동 매칭(AI 매칭)에만 적용
             if not existing_product and provided_metadata:
@@ -241,15 +246,18 @@ async def match_violations_to_products(
                 )
                 if similar_product:
                     existing_product = similar_product
+                    is_duplicate = True
+                    duplicate_reason = f"'{similar_product.title}' 제품과 유사하여 중복으로 판단되었습니다."
                     # 같은 프로그램이지만 다른 폴더인 경우
-                    # Version만 추가하고 folder_path는 업데이트하지 않음
+                    # Version만 추가하고 메타데이터는 업데이트하지 않음
 
             # Product 생성 또는 업데이트
             if existing_product:
                 product = existing_product
 
-                # 사용자 제공 메타데이터가 있으면 업데이트
-                if provided_metadata:
+                # 중복이 아닌 경우에만 메타데이터 업데이트
+                # (같은 folder_path인 경우는 업데이트, 유사 제품인 경우는 건너뛰기)
+                if provided_metadata and not is_duplicate:
                     if metadata.get('title'):
                         product.title = metadata['title']
                     if metadata.get('subtitle'):
@@ -382,7 +390,7 @@ async def match_violations_to_products(
             db.refresh(product)
 
             # 생성/업데이트된 Product 정보 추가
-            results["products"].append({
+            product_info = {
                 "id": product.id,
                 "title": product.title,
                 "description": product.description,
@@ -390,7 +398,17 @@ async def match_violations_to_products(
                 "category": product.category,
                 "icon_url": product.icon_url,
                 "folder_path": product.folder_path
-            })
+            }
+
+            results["products"].append(product_info)
+
+            # 중복 제품인 경우 duplicates에도 추가
+            if is_duplicate:
+                results["duplicates"].append({
+                    **product_info,
+                    "reason": duplicate_reason,
+                    "original_folder": folder_path
+                })
 
         except Exception as e:
             db.rollback()

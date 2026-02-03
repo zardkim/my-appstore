@@ -383,7 +383,8 @@ const toRelativePath = (url) => {
   // http://localhost:8110/static/icons/1.png → /static/icons/1.png
   // https://app.nuripc.kr/static/icons/1.png → /static/icons/1.png
   if (url.includes('/static/')) {
-    return '/' + url.split('/static/')[1].split('?')[0].replace(/^\/+/, 'static/')
+    const afterStatic = url.split('/static/')[1].split('?')[0]
+    return '/static/' + afterStatic
   }
   return url
 }

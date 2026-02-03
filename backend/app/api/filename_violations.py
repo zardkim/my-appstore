@@ -631,13 +631,24 @@ async def create_product_from_violation_with_metadata(
 
         if results["matched"] > 0 and results["products"]:
             product_info = results["products"][0]
-            return {
+
+            # 중복 제품 정보 확인
+            is_duplicate = len(results.get("duplicates", [])) > 0
+            duplicate_info = results["duplicates"][0] if is_duplicate else None
+
+            response_data = {
                 "success": True,
-                "message": "Product가 성공적으로 생성되었습니다.",
+                "message": "Product가 성공적으로 생성되었습니다." if not is_duplicate else "기존 제품에 버전이 추가되었습니다.",
                 "product_id": product_info["id"],
                 "violation_id": violation_id,
-                "product": product_info
+                "product": {
+                    **product_info,
+                    "is_duplicate": is_duplicate,
+                    "duplicate_reason": duplicate_info["reason"] if duplicate_info else None
+                }
             }
+
+            return response_data
         else:
             raise HTTPException(
                 status_code=500,
