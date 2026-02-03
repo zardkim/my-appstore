@@ -109,7 +109,7 @@
             <!-- Image Manager -->
             <ImageManager
               v-if="metadata"
-              :product-id="null"
+              :product-id="999999"
               :product="metadata"
               :initial-search-query="aiSearchQuery"
               @update:logo="handleLogoUpdate"
