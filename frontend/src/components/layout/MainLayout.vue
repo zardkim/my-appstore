@@ -19,12 +19,12 @@
     </div>
 
     <!-- Mobile Bottom Navigation -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 safe-area-bottom">
-      <div class="flex justify-around items-center h-16">
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 safe-area-bottom overflow-x-auto scrollbar-hide">
+      <div class="flex items-center h-16 px-2">
         <!-- Home -->
         <router-link
           to="/"
-          class="mobile-nav-item"
+          class="mobile-nav-item flex-shrink-0"
           :class="{ 'active': $route.path === '/' }"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,7 +37,7 @@
         <!-- Discover -->
         <router-link
           to="/discover"
-          class="mobile-nav-item"
+          class="mobile-nav-item flex-shrink-0"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -46,10 +46,23 @@
           <span class="mobile-nav-text">{{ $t('nav.discover') }}</span>
         </router-link>
 
+        <!-- Detected List (Admin Only) -->
+        <router-link
+          v-if="isAdmin"
+          to="/filename-violations"
+          class="mobile-nav-item flex-shrink-0"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span class="mobile-nav-text">{{ $t('nav.detectedList') }}</span>
+        </router-link>
+
         <!-- Tips -->
         <router-link
           to="/tips"
-          class="mobile-nav-item"
+          class="mobile-nav-item flex-shrink-0"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -58,10 +71,34 @@
           <span class="mobile-nav-text">{{ $t('nav.tips') }}</span>
         </router-link>
 
+        <!-- Favorites -->
+        <router-link
+          to="/favorites"
+          class="mobile-nav-item flex-shrink-0"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          <span class="mobile-nav-text">{{ $t('nav.favorites') }}</span>
+        </router-link>
+
+        <!-- Scraps -->
+        <router-link
+          to="/scraps"
+          class="mobile-nav-item flex-shrink-0"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+          <span class="mobile-nav-text">{{ $t('nav.scraps') }}</span>
+        </router-link>
+
         <!-- Settings -->
         <router-link
           to="/settings"
-          class="mobile-nav-item"
+          class="mobile-nav-item flex-shrink-0"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -75,7 +112,7 @@
         <!-- More Menu -->
         <button
           @click="toggleMobileMenu"
-          class="mobile-nav-item"
+          class="mobile-nav-item flex-shrink-0"
           :class="{ 'active': showMobileMenu }"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,11 +132,11 @@
         @click="toggleMobileMenu"
       >
         <div
-          class="absolute bottom-16 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl max-h-[50vh] overflow-y-auto pb-2"
+          class="absolute bottom-16 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl"
           @click.stop
         >
           <!-- User Info Header -->
-          <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+          <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
                 <span class="text-lg font-bold text-white">{{ userInitial }}</span>
@@ -112,96 +149,58 @@
           </div>
 
           <!-- Menu Items -->
-          <div class="p-3 space-y-1">
-            <!-- Detected List (Admin Only) -->
-            <router-link
-              v-if="isAdmin"
-              to="/filename-violations"
-              @click="toggleMobileMenu"
-              class="mobile-menu-item"
-            >
-              <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <span>{{ $t('nav.detectedList') }}</span>
-            </router-link>
-
-            <router-link
-              to="/favorites"
-              @click="toggleMobileMenu"
-              class="mobile-menu-item"
-            >
-              <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              <span>{{ $t('nav.favorites') }}</span>
-            </router-link>
-
-            <router-link
-              to="/scraps"
-              @click="toggleMobileMenu"
-              class="mobile-menu-item"
-            >
-              <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-              <span>{{ $t('nav.scraps') }}</span>
-            </router-link>
-
+          <div class="p-3">
             <router-link
               to="/change-password"
               @click="toggleMobileMenu"
               class="mobile-menu-item"
             >
-              <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
-              <span>{{ $t('nav.changePassword') }}</span>
+              <span class="text-sm">{{ $t('nav.changePassword') }}</span>
             </router-link>
 
-            <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
 
             <button
               @click="toggleLanguage"
-              class="mobile-menu-item"
+              class="mobile-menu-item w-full"
             >
-              <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
               </svg>
-              <span>{{ localeStore.locale === 'ko' ? 'English' : '한국어' }}</span>
+              <span class="text-sm">{{ localeStore.locale === 'ko' ? 'English' : '한국어' }}</span>
             </button>
 
             <button
               @click="toggleTheme"
-              class="mobile-menu-item"
+              class="mobile-menu-item w-full"
             >
-              <svg v-if="!themeStore.isDark" class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-if="!themeStore.isDark" class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
-              <svg v-else class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-else class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
-              <span>{{ themeStore.isDark ? $t('theme.light') : $t('theme.dark') }}</span>
+              <span class="text-sm">{{ themeStore.isDark ? $t('theme.light') : $t('theme.dark') }}</span>
             </button>
 
-            <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
 
             <button
               @click="logout"
-              class="mobile-menu-item text-red-600 dark:text-red-400"
+              class="mobile-menu-item w-full text-red-600 dark:text-red-400"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              <span>{{ $t('nav.logout') }}</span>
+              <span class="text-sm">{{ $t('nav.logout') }}</span>
             </button>
           </div>
         </div>
@@ -257,8 +256,8 @@ const logout = () => {
 /* Mobile Navigation Styles */
 .mobile-nav-item {
   @apply flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 transition-colors;
-  min-width: 60px;
-  padding: 0.5rem;
+  min-width: 70px;
+  padding: 0.5rem 0.75rem;
 }
 
 .mobile-nav-item.active {
@@ -275,7 +274,7 @@ const logout = () => {
 
 /* Mobile Menu Items */
 .mobile-menu-item {
-  @apply flex items-center space-x-3 p-3 rounded-lg transition-colors;
+  @apply flex items-center space-x-2 p-2.5 rounded-lg transition-colors;
   @apply text-gray-700 dark:text-gray-300;
   @apply hover:bg-gray-100 dark:hover:bg-gray-700;
 }
