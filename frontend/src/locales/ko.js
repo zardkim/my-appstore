@@ -1227,6 +1227,7 @@ export default {
     aiMatchConfirm: 'AI로 메타데이터를 생성하고 스토어에 등록하시겠습니까?',
     productCreateSuccess: 'Product가 성공적으로 생성되었습니다.\n스토어 페이지로 이동합니다.',
     productCreateFailed: 'Product 생성에 실패했습니다.',
+    versionAddedToProduct: '"{title}" 제품에 버전이 추가되었습니다.',
 
     // Scan
     scan: '스캔',
@@ -1710,5 +1711,16 @@ export default {
     passwordMismatch: '비밀번호가 일치하지 않습니다.',
     success: '회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.',
     failed: '회원가입에 실패했습니다.',
+  },
+
+  // 스캔
+  scan: {
+    noFoldersConfigured: '설정된 폴더가 없습니다.\n설정 페이지에서 폴더를 추가해주세요.',
+    scanTitle: '폴더 스캔',
+    scanConfirmSingle: '"{path}" 폴더를 스캔하시겠습니까?',
+    scanConfirmMultiple: '{count}개의 폴더를 모두 스캔하시겠습니까?',
+    scanStarted: '스캔이 시작되었습니다.',
+    scanStartedMultiple: '{count}개 폴더 스캔이 시작되었습니다.',
+    scanFailed: '스캔 시작에 실패했습니다.',
   },
 }
