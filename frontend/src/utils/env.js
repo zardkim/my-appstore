@@ -112,10 +112,37 @@ export function getIconUrl(iconUrl) {
     return iconUrl
   }
 
-  // If relative path starting with /static, prepend backend URL
+  // If relative path starting with /static, return as relative path
+  // Both dev (vite proxy) and prod (nginx proxy) will handle /static requests
   if (iconUrl.startsWith('/static')) {
-    return getBackendUrl(iconUrl)
+    return iconUrl
   }
 
   return iconUrl
+}
+
+/**
+ * Get screenshot URL
+ * @param {string|object} screenshot - Screenshot path or object from database
+ * @returns {string} Full screenshot URL or empty string
+ */
+export function getScreenshotUrl(screenshot) {
+  if (!screenshot) return ''
+
+  // Handle object format { url: '...' }
+  const url = typeof screenshot === 'object' ? screenshot.url : screenshot
+
+  if (!url) return ''
+
+  // If already a full URL, return as-is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+
+  // If relative path starting with /static, return as relative path
+  if (url.startsWith('/static')) {
+    return url
+  }
+
+  return url
 }
