@@ -115,7 +115,8 @@ class AIMetadataGeneratorV2:
 Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
 **Basic Information:**
-- title: Official software name
+- title: Official software name (in English or original language)
+- subtitle: Korean product name if commonly used (e.g., "어도비 포토샵" for "Adobe Photoshop"), otherwise empty ""
 - version: Version number (if known)
 - platform: Windows, macOS, Linux, or Cross-platform
 - developer: Official developer/vendor name
@@ -165,6 +166,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 **Example Output:**
 {{
   "title": "VMware Workstation Pro",
+  "subtitle": "VMware 워크스테이션 프로",
   "version": "12.0.1",
   "platform": "Windows",
   "developer": "VMware, Inc.",
@@ -292,7 +294,8 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
 **Basic Information:**
-- title: Official software name
+- title: Official software name (in English or original language)
+- subtitle: Korean product name if commonly used (e.g., "어도비 포토샵" for "Adobe Photoshop"), otherwise empty ""
 - version: Version number (if known)
 - platform: Windows, macOS, Linux, or Cross-platform
 - developer: Official developer/vendor name
@@ -342,6 +345,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 **Example Output:**
 {{
   "title": "VMware Workstation Pro",
+  "subtitle": "VMware 워크스테이션 프로",
   "version": "12.0.1",
   "platform": "Windows",
   "developer": "VMware, Inc.",
@@ -618,6 +622,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 
         return {
             'title': software_name,
+            'subtitle': '',
             'version': parsed_info.get('version', ''),
             'platform': 'Windows',
             'developer': parsed_info.get('vendor', ''),

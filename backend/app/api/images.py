@@ -50,6 +50,30 @@ MIN_FILE_SIZE = 100
 MAX_FILE_SIZE = 5 * 1024 * 1024
 
 
+def sanitize_filename(name: str, max_length: int = 50) -> str:
+    """
+    파일명으로 사용할 수 있도록 문자열을 정리
+
+    Args:
+        name: 정리할 문자열
+        max_length: 최대 길이
+
+    Returns:
+        정리된 파일명
+    """
+    # 특수문자 제거, 공백을 언더스코어로 변환
+    sanitized = re.sub(r'[^\w\s-]', '', name)
+    sanitized = re.sub(r'[\s]+', '_', sanitized)
+    sanitized = sanitized.strip('_')
+
+    # 최대 길이 제한
+    if len(sanitized) > max_length:
+        sanitized = sanitized[:max_length]
+
+    # 빈 문자열이면 기본값 반환
+    return sanitized if sanitized else 'unnamed'
+
+
 def get_google_searcher() -> GoogleImageSearcher:
     """Google Image Searcher 인스턴스 생성"""
     # config.json에서 Google API 설정 읽기
@@ -307,7 +331,9 @@ async def upload_logo(
             else:
                 file_ext = ".png"
 
-        filename = f"{product_id}{file_ext}"
+        # 제품명을 포함한 파일명 생성
+        title_part = sanitize_filename(product.title, max_length=30)
+        filename = f"{product_id}_{title_part}_icon{file_ext}"
         file_path = Path(settings.ICON_CACHE_DIR) / filename
 
         with open(file_path, 'wb') as f:
@@ -394,7 +420,9 @@ async def upload_screenshots(
                 else:
                     file_ext = ".png"
 
-            filename = f"{product_id}_screenshot_{i}{file_ext}"
+            # 제품명을 포함한 파일명 생성
+            title_part = sanitize_filename(product.title, max_length=30)
+            filename = f"{product_id}_{title_part}_screenshot_{i}{file_ext}"
             file_path = Path(settings.SCREENSHOT_CACHE_DIR) / filename
 
             # 디렉토리 생성 (없으면)

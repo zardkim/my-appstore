@@ -1,12 +1,13 @@
 {
   "general": {
-    "language": "en",
-    "accessUrl": "http://localhost:5900",
-    "apiUrl": "http://localhost:8110"
+    "language": "ko",
+    "frontendUrl": "http://localhost:5900",
+    "backendUrl": "http://localhost:8110",
+    "registrationOpen": false
   },
   "folders": {
     "scanFolders": [
-      "/app/data/library"
+      "/home/nuricom/project/myappStore/data/library"
     ]
   },
   "categories": [
@@ -120,10 +121,10 @@
     "scanMethod": "ai",
     "aiProvider": "gemini",
     "aiModel": "gemini-2.5-flash",
-    "geminiApiKey": "",
+    "geminiApiKey": "AIzaSyAgjF6c2X7DK7sBPsEQ1ViD77Dtwj0HQwM",
     "openaiApiKey": "",
-    "googleApiKey": "",
-    "googleSearchEngineId": "",
+    "googleApiKey": "AIzaSyDdt7WAo98BFe8VgZP3iV01OSUcic8RkFw",
+    "googleSearchEngineId": "a51ef478742604baa",
     "useDefaultPrompt": true,
     "customPromptOpenai": "다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요:\n\n소프트웨어: {software_name}\n\n다음 정보를 포함한 JSON 객체를 작성해주세요:\n\n**기본 정보:**\n- title: 정확한 공식 소프트웨어 이름\n- version: 버전 정보 (알려진 경우)\n- platform: 플랫폼 (예: Windows, macOS, Linux, Cross-platform)\n- developer: 개발사/제조사 공식 이름\n- category: 소프트웨어의 **주요 기능**을 기준으로 가장 적합한 카테고리 선택\n  * Graphics: 이미지 편집, 그래픽 디자인, 3D 모델링\n  * Media: 비디오/오디오 편집, 미디어 재생, 영상 제작, 화면 녹화\n  * Office: 문서 작성, 스프레드시트, 프레젠테이션\n  * Business: 회계, ERP, CRM, 업무 관리 (미디어 제작 도구는 Media)\n  * Development: 프로그래밍, IDE, 개발 도구\n  * Utility: 시스템 유틸리티, 최적화 도구\n  * 기타: Security, Network, OS, Engineering, Hardware, Uncategorized 등\n- official_website: 공식 웹사이트 URL (알려진 경우)\n- icon_url: 공식 로고/아이콘 이미지 URL (PNG, SVG, ICO 등)\n  * 공식 웹사이트의 파비콘, 로고 이미지, 앱 아이콘 등\n  * 찾을 수 없으면 빈 문자열 \"\"\n- license_type: 라이선스 종류 (Free, Freemium, Trial, Commercial, Open Source 등)\n- language: 지원 언어 (예: \"영어, 한국어, 일본어\" 또는 \"다국어\")\n\n**프로그램 설명:**\n- description_short: 50-100자 이내의 간결한 설명 (한 문장)\n- description_detailed: 200-300자 이내의 상세 설명 (소프트웨어의 주요 특징과 용도를 자세히)\n\n**주요 기능:** (최대 5-10개)\n- features: 주요 기능 리스트 배열 (예: [\"사진 라이브러리 관리 (태그/평점/카테고리)\", \"RAW 이미지 지원\", \"비파괴 편집\"])\n\n**지원 파일 포맷:** (해당되는 경우)\n- supported_formats: 지원 파일 포맷 배열 (예: [\"JPEG\", \"PNG\", \"PSD\", \"RAW\"])\n\n**시스템 요구 사양:**\n- system_requirements: {\n    \"os\": \"운영체제 요구사항 (구체적으로)\",\n    \"cpu\": \"CPU 요구사항\",\n    \"ram\": \"RAM 요구사항 (최소/권장)\",\n    \"disk_space\": \"디스크 공간\",\n    \"gpu\": \"GPU 요구사항 (있는 경우)\",\n    \"additional\": \"추가 요구사항 (있는 경우)\"\n  }\n\n**설치 정보:**\n- installation_info: {\n    \"installer_type\": \"설치 방식 (예: DMG 마운트 → Applications 복사, EXE 실행, 압축 해제)\",\n    \"file_size\": \"예상 파일 크기 (예: 약 500MB)\",\n    \"internet_required\": \"인터넷 필요 여부 (예: 라이선스 인증 시 필요, 불필요)\"\n  }\n\n**릴리즈 정보:**\n- release_notes: 주요 릴리즈 노트 또는 버전 히스토리 (알려진 경우, 2-3줄)\n\n**중요:**\n- 응답은 반드시 유효한 JSON 형식만 작성하세요\n- 추가 설명이나 코멘트를 포함하지 마세요\n- 확실하지 않은 정보는 빈 문자열(\"\") 또는 빈 배열([])을 사용하세요\n- 모든 필드를 반드시 포함해야 합니다\n- 상세하고 구체적인 정보를 제공하세요\n\n예시:\n{\n  \"title\": \"ACDSee Photo Studio\",\n  \"version\": \"7.1\",\n  \"platform\": \"macOS\",\n  \"developer\": \"ACD Systems International Inc.\",\n  \"category\": \"Graphics\",\n  \"official_website\": \"https://www.acdsee.com\",\n  \"icon_url\": \"\",\n  \"license_type\": \"Commercial\",\n  \"language\": \"영어 (기본), 다국어 인터페이스 가능\",\n  \"description_short\": \"사진을 빠르게 관리·정리하고, 색보정 및 편집까지 가능한 전문 사진 관리 소프트웨어\",\n  \"description_detailed\": \"ACDSee Photo Studio for Mac은 대용량 사진 라이브러리를 빠르게 탐색하고, RAW 파일을 포함한 다양한 이미지 포맷을 지원합니다. 비파괴 편집 워크플로우로 색상 보정, 노출 조절, 디테일 보정이 가능하며, 태그, 카테고리, 평점 기반 사진 관리 기능을 제공합니다. Adobe Lightroom 대안으로 자주 사용됩니다.\",\n  \"features\": [\n    \"사진 라이브러리 관리 (태그/평점/카테고리)\",\n    \"RAW 이미지 지원\",\n    \"색상 보정/화이트밸런스/노출 조절\",\n    \"비파괴 편집 (Undo/Redo 자유)\",\n    \"고속 이미지 뷰어\",\n    \"메타데이터(EXIF/IPTC) 편집\",\n    \"일괄(Batch) 처리\"\n  ],\n  \"supported_formats\": [\"JPEG\", \"PNG\", \"TIFF\", \"BMP\", \"RAW (Canon, Nikon, Sony 등)\", \"PSD (부분 지원)\"],\n  \"system_requirements\": {\n    \"os\": \"macOS 10.15 (Catalina) 이상\",\n    \"cpu\": \"Intel Mac / Apple Silicon (M1 이상, Rosetta 지원)\",\n    \"ram\": \"최소 4GB (8GB 이상 권장)\",\n    \"disk_space\": \"설치용 약 2GB 이상\",\n    \"gpu\": \"Metal 지원 GPU 권장\",\n    \"additional\": \"\"\n  },\n  \"installation_info\": {\n    \"installer_type\": \"DMG 마운트 → Applications 폴더로 복사\",\n    \"file_size\": \"약 500MB 내외\",\n    \"internet_required\": \"설치 후 라이선스 인증 시 필요\"\n  },\n  \"release_notes\": \"7.0 버전: macOS 버전 주요 UI 개선. 7.1 버전: 안정성 개선 및 버그 수정, Apple Silicon 최적화 강화\"\n}",
     "customPromptGemini": "다음 소프트웨어에 대한 상세한 메타데이터를 JSON 형식으로 제공해주세요:\n\n소프트웨어: {software_name}\n\n다음 정보를 포함한 JSON 객체를 작성해주세요:\n\n**기본 정보:**\n- title: 정확한 공식 소프트웨어 이름\n- version: 버전 정보 (알려진 경우)\n- platform: 플랫폼 (예: Windows, macOS, Linux, Cross-platform)\n- developer: 개발사/제조사 공식 이름\n- category: 소프트웨어의 **주요 기능**을 기준으로 가장 적합한 카테고리 선택\n  * Graphics: 이미지 편집, 그래픽 디자인, 3D 모델링\n  * Media: 비디오/오디오 편집, 미디어 재생, 영상 제작, 화면 녹화\n  * Office: 문서 작성, 스프레드시트, 프레젠테이션\n  * Business: 회계, ERP, CRM, 업무 관리 (미디어 제작 도구는 Media)\n  * Development: 프로그래밍, IDE, 개발 도구\n  * Utility: 시스템 유틸리티, 최적화 도구\n  * 기타: Security, Network, OS, Engineering, Hardware, Uncategorized 등\n- official_website: 공식 웹사이트 URL (알려진 경우)\n- icon_url: 공식 로고/아이콘 이미지 URL (PNG, SVG, ICO 등)\n  * 공식 웹사이트의 파비콘, 로고 이미지, 앱 아이콘 등\n  * 찾을 수 없으면 빈 문자열 \"\"\n- license_type: 라이선스 종류 (Free, Freemium, Trial, Commercial, Open Source 등)\n- language: 지원 언어 (예: \"영어, 한국어, 일본어\" 또는 \"다국어\")\n\n**프로그램 설명:**\n- description_short: 50-100자 이내의 간결한 설명 (한 문장)\n- description_detailed: 200-300자 이내의 상세 설명 (소프트웨어의 주요 특징과 용도를 자세히)\n\n**주요 기능:** (최대 5-10개)\n- features: 주요 기능 리스트 배열 (예: [\"사진 라이브러리 관리 (태그/평점/카테고리)\", \"RAW 이미지 지원\"])\n\n**지원 파일 포맷:** (해당되는 경우)\n- supported_formats: 지원 파일 포맷 배열 (예: [\"JPEG\", \"PNG\", \"PSD\"])\n\n**시스템 요구 사양:**\n- system_requirements: {\n    \"os\": \"운영체제 요구사항 (구체적으로)\",\n    \"cpu\": \"CPU 요구사항\",\n    \"ram\": \"RAM 요구사항 (최소/권장)\",\n    \"disk_space\": \"디스크 공간\",\n    \"gpu\": \"GPU 요구사항 (있는 경우)\",\n    \"additional\": \"추가 요구사항 (있는 경우)\"\n  }\n\n**설치 정보:**\n- installation_info: {\n    \"installer_type\": \"설치 방식 (예: DMG 마운트 → Applications 복사, EXE 실행, 압축 해제)\",\n    \"file_size\": \"예상 파일 크기 (예: 약 500MB)\",\n    \"internet_required\": \"인터넷 필요 여부 (예: 라이선스 인증 시 필요, 불필요)\"\n  }\n\n**릴리즈 정보:**\n- release_notes: 주요 릴리즈 노트 또는 버전 히스토리 (알려진 경우, 2-3줄)\n\n**중요:**\n- 응답은 반드시 유효한 JSON 형식만 작성하세요\n- 추가 설명이나 코멘트를 포함하지 마세요\n- 확실하지 않은 정보는 빈 문자열(\"\") 또는 빈 배열([])을 사용하세요\n- 모든 필드를 반드시 포함해야 합니다\n- 상세하고 구체적인 정보를 제공하세요"

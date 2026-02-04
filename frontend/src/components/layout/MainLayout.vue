@@ -59,6 +59,19 @@
           <span class="mobile-nav-text">{{ $t('nav.detectedList') }}</span>
         </router-link>
 
+        <!-- Scan Button (Admin Only) -->
+        <button
+          v-if="isAdmin"
+          @click="handleScanClick"
+          class="mobile-nav-item flex-shrink-0"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span class="mobile-nav-text">{{ $t('nav.scan') }}</span>
+        </button>
+
         <!-- Tips -->
         <router-link
           to="/tips"
@@ -95,8 +108,9 @@
           <span class="mobile-nav-text">{{ $t('nav.scraps') }}</span>
         </router-link>
 
-        <!-- Settings -->
+        <!-- Settings (Admin only) -->
         <router-link
+          v-if="isAdmin"
           to="/settings"
           class="mobile-nav-item flex-shrink-0"
         >
@@ -215,6 +229,9 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
 import { useLocaleStore } from '../../store/locale'
+import { settingsApi } from '../../api/settings'
+import { scanApi } from '../../api/scan'
+import { useDialog } from '../../composables/useDialog'
 import Sidebar from './Sidebar.vue'
 import Footer from './Footer.vue'
 
@@ -222,6 +239,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const localeStore = useLocaleStore()
+const { alert, confirm } = useDialog()
 
 const showMobileMenu = ref(false)
 
@@ -243,6 +261,60 @@ const toggleLanguage = () => {
 const toggleTheme = () => {
   themeStore.toggleTheme()
   showMobileMenu.value = false
+}
+
+// 스캔 버튼 클릭 핸들러
+const handleScanClick = async () => {
+  try {
+    // 설정에서 스캔 폴더 목록 가져오기
+    const response = await settingsApi.get()
+    const scanPaths = response.data.folders?.scanFolders || []
+
+    if (scanPaths.length === 0) {
+      await alert.warning('스캔 폴더가 설정되지 않았습니다.\n설정 페이지에서 폴더를 추가해주세요.')
+      router.push('/settings?section=scan')
+      return
+    }
+
+    if (scanPaths.length === 1) {
+      // 폴더가 하나면 바로 스캔
+      const confirmed = await confirm.show(
+        '스캔 시작',
+        `"${scanPaths[0]}" 폴더를 스캔하시겠습니까?`
+      )
+
+      if (confirmed) {
+        await scanApi.startScan(scanPaths[0], true)
+        await alert.success('스캔이 시작되었습니다.')
+        router.push('/filename-violations')
+      }
+    } else {
+      // 폴더가 여러개면 선택 팝업
+      const folderOptions = scanPaths.map((path, index) => ({
+        label: path,
+        value: path
+      }))
+
+      // 간단한 선택 다이얼로그로 처리 (AskUserQuestion은 서버 도구이므로 confirm 사용)
+      const pathList = scanPaths.map((p, i) => `${i + 1}. ${p}`).join('\n')
+      const confirmed = await confirm.show(
+        '스캔 폴더 선택',
+        `스캔할 폴더를 선택하세요:\n\n${pathList}\n\n모든 폴더를 스캔하시겠습니까?`
+      )
+
+      if (confirmed) {
+        // 모든 폴더 스캔
+        for (const path of scanPaths) {
+          await scanApi.startScan(path, true)
+        }
+        await alert.success(`${scanPaths.length}개 폴더 스캔이 시작되었습니다.`)
+        router.push('/filename-violations')
+      }
+    }
+  } catch (error) {
+    console.error('Scan failed:', error)
+    await alert.error('스캔 시작에 실패했습니다.')
+  }
 }
 
 const logout = () => {

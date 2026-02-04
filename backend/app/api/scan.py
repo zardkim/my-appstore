@@ -381,3 +381,133 @@ async def add_scan_exclusion(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to add exclusion: {str(e)}")
+
+
+@router.get("/scan-info")
+async def get_scan_info(db: Session = Depends(get_db)):
+    """
+    스캔 관련 정보 반환:
+    - 지원하는 파일 확장자
+    - 예외 패턴
+    - 스캔 통계
+    """
+    scanner = FileScanner(db, use_ai=False)
+
+    # 지원하는 확장자 (실제로는 모든 확장자를 스캔하지만, 일반적인 소프트웨어 확장자 목록)
+    supported_extensions = {
+        "executables": [".exe", ".msi", ".app", ".dmg", ".deb", ".rpm"],
+        "archives": [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz"],
+        "diskImages": [".iso", ".img", ".vhd", ".vmdk", ".vdi"],
+        "scripts": [".sh", ".bat", ".cmd", ".ps1"],
+        "others": [".apk", ".ipa", ".jar"]
+    }
+
+    # 예외 패턴
+    exclusions_data = scanner._load_scan_exclusions()
+
+    # 스캔 통계
+    total_violations = db.query(FilenameViolation).count()
+    scanned_count = db.query(FilenameViolation).filter(FilenameViolation.violation_type == "scanned").count()
+
+    return {
+        "supported_extensions": supported_extensions,
+        "excluded_folders": exclusions_data.get("folders", []),
+        "excluded_patterns": exclusions_data.get("patterns", []),
+        "scan_stats": {
+            "total_violations": total_violations,
+            "scanned_files": scanned_count
+        }
+    }
+
+
+@router.get("/preview")
+async def preview_scan(
+    path: str,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_admin_user)
+):
+    """
+    스캔 미리보기 - 특정 경로에서 발견될 파일 목록 반환
+
+    Args:
+        path: 스캔할 경로
+        limit: 최대 파일 수 (기본 100)
+
+    Returns:
+        폴더 및 파일 목록, 확장자별 통계
+    """
+    scan_path = Path(path)
+
+    if not scan_path.exists():
+        raise HTTPException(status_code=404, detail=f"Path not found: {path}")
+
+    if not scan_path.is_dir():
+        raise HTTPException(status_code=400, detail="Path must be a directory")
+
+    # 지원하는 확장자
+    supported_extensions = {
+        ".exe", ".msi", ".app", ".dmg", ".deb", ".rpm",
+        ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz",
+        ".iso", ".img", ".vhd", ".vmdk", ".vdi",
+        ".sh", ".bat", ".cmd", ".ps1",
+        ".apk", ".ipa", ".jar"
+    }
+
+    # 폴더 및 파일 목록
+    folders = []
+    files = []
+    extension_stats = {}
+
+    try:
+        for item in scan_path.iterdir():
+            if item.is_dir():
+                # 폴더 내 파일 수 계산
+                file_count = 0
+                try:
+                    file_count = sum(1 for f in item.rglob('*') if f.is_file())
+                except:
+                    pass
+
+                folders.append({
+                    "name": item.name,
+                    "path": str(item),
+                    "file_count": file_count
+                })
+            elif item.is_file():
+                ext = item.suffix.lower()
+                is_supported = ext in supported_extensions
+
+                # 확장자 통계
+                if ext:
+                    if ext not in extension_stats:
+                        extension_stats[ext] = {"count": 0, "supported": is_supported}
+                    extension_stats[ext]["count"] += 1
+
+                if len(files) < limit:
+                    files.append({
+                        "name": item.name,
+                        "path": str(item),
+                        "size": item.stat().st_size,
+                        "extension": ext,
+                        "supported": is_supported
+                    })
+
+        # 정렬
+        folders.sort(key=lambda x: x["name"].lower())
+        files.sort(key=lambda x: x["name"].lower())
+
+        return {
+            "path": str(scan_path),
+            "folders": folders,
+            "files": files,
+            "total_folders": len(folders),
+            "total_files": len(files),
+            "extension_stats": extension_stats,
+            "supported_extensions": list(supported_extensions)
+        }
+
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to scan: {str(e)}")

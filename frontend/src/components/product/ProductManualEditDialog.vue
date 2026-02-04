@@ -83,25 +83,9 @@
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">{{ t('manualEditDialog.selectCategory') }}</option>
-                    <option value="Graphics">Graphics</option>
-                    <option value="Office">Office</option>
-                    <option value="Development">Development</option>
-                    <option value="Utility">Utility</option>
-                    <option value="Media">Media</option>
-                    <option value="OS">OS</option>
-                    <option value="Security">Security</option>
-                    <option value="Network">Network</option>
-                    <option value="Mac">Mac</option>
-                    <option value="Mobile">Mobile</option>
-                    <option value="Patch">Patch</option>
-                    <option value="Driver">Driver</option>
-                    <option value="Source">Source</option>
-                    <option value="Backup">Backup</option>
-                    <option value="Business">Business</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Theme">Theme</option>
-                    <option value="Hardware">Hardware</option>
-                    <option value="Uncategorized">Uncategorized</option>
+                    <option v-for="category in categories" :key="category.name" :value="category.name">
+                      {{ getCategoryLabel(category) }}
+                    </option>
                   </select>
                 </div>
                 <div class="col-span-2">
@@ -393,14 +377,17 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { productsApi } from '../../api/products'
 import { imagesApi } from '../../api/images'
+import { configApi } from '../../api/config'
 import { useDialog } from '../../composables/useDialog'
+import { useLocaleStore } from '../../store/locale'
 
 const { t } = useI18n({ useScope: 'global' })
 const { alert } = useDialog()
+const localeStore = useLocaleStore()
 
 const props = defineProps({
   product: {
@@ -442,6 +429,15 @@ const saving = ref(false)
 const showReferenceSitesDialog = ref(false)
 const logoFileName = ref('')
 const screenshotFileNames = ref('')
+const categories = ref([])
+
+// 현재 언어에 맞는 카테고리 라벨 반환
+const getCategoryLabel = (category) => {
+  if (localeStore.locale === 'ko' && category.label) {
+    return category.label
+  }
+  return category.name
+}
 
 // Helper refs for text-based inputs
 const featuresText = ref('')
@@ -495,6 +491,24 @@ watch(() => props.isOpen, (isOpen) => {
   }
 })
 
+// Load categories from config
+onMounted(async () => {
+  try {
+    const response = await configApi.getSection('categories')
+    categories.value = response.data || []
+  } catch (error) {
+    console.error('Failed to load categories:', error)
+    // Fallback to default categories
+    categories.value = [
+      { name: 'Graphics', label: '그래픽' },
+      { name: 'Office', label: '오피스' },
+      { name: 'Development', label: '개발' },
+      { name: 'Utility', label: '유틸리티' },
+      { name: 'Media', label: '미디어' }
+    ]
+  }
+})
+
 // Logo upload
 const uploadLogo = async (event) => {
   const file = event.target.files[0]
@@ -522,7 +536,10 @@ const downloadLogoFromUrl = async () => {
   uploadingLogo.value = true
   try {
     const response = await imagesApi.downloadLogo(props.product.id, logoUrl.value)
-    formData.value.icon_url = response.data.icon_url
+    // 백엔드는 url을 반환
+    if (response.data.url) {
+      formData.value.icon_url = response.data.url
+    }
     logoUrl.value = ''
   } catch (error) {
     console.error('Logo download error:', error)
@@ -541,7 +558,13 @@ const uploadScreenshots = async (event) => {
   uploadingScreenshots.value = true
   try {
     const response = await imagesApi.uploadScreenshots(props.product.id, files)
-    formData.value.screenshots = response.data.screenshots
+    // 백엔드는 urls를 반환하므로 screenshots 형식으로 변환
+    if (response.data.urls) {
+      formData.value.screenshots = response.data.urls.map(url => ({
+        type: 'local',
+        url: url
+      }))
+    }
   } catch (error) {
     console.error('Screenshots upload error:', error)
     await alert.error(t('manualEditDialog.screenshotUploadFailed'))
@@ -563,7 +586,13 @@ const downloadScreenshotsFromUrl = async () => {
   uploadingScreenshots.value = true
   try {
     const response = await imagesApi.downloadScreenshots(props.product.id, urls)
-    formData.value.screenshots = response.data.screenshots
+    // 백엔드는 urls를 반환하므로 screenshots 형식으로 변환
+    if (response.data.urls) {
+      formData.value.screenshots = response.data.urls.map(url => ({
+        type: 'local',
+        url: url
+      }))
+    }
     screenshotUrl.value = ''
   } catch (error) {
     console.error('Screenshots download error:', error)

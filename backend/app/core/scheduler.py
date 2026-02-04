@@ -171,30 +171,64 @@ class ScanScheduler:
 
     def load_settings_from_db(self):
         """
-        데이터베이스에서 스케줄러 설정 로드
+        데이터베이스와 config.json에서 스케줄러 설정 로드
+        config.json이 우선 (UI에서 설정하는 곳)
         """
-        db = SessionLocal()
+        import json
+        from pathlib import Path
+        from app.config import settings as app_settings
+
+        # 1. 먼저 config.json에서 로드 시도 (Settings 페이지와 동기화)
+        config_loaded = False
         try:
-            # 스캔 경로 로드
-            scan_paths_setting = db.query(Setting).filter(Setting.key == "scan_paths").first()
-            if scan_paths_setting and scan_paths_setting.value:
-                import json
-                self.scan_paths = json.loads(scan_paths_setting.value)
+            config_file = Path(app_settings.CONFIG_DATA_DIR) / "config.json"
+            if config_file.exists():
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
 
-            # Cron 스케줄 로드
-            cron_setting = db.query(Setting).filter(Setting.key == "cron_schedule").first()
-            if cron_setting and cron_setting.value:
-                self.cron_schedule = cron_setting.value
+                # 폴더 설정 로드
+                if config.get('folders', {}).get('scanFolders'):
+                    self.scan_paths = config['folders']['scanFolders']
+                    config_loaded = True
+                    logger.info(f"✓ Scan paths loaded from config.json: {self.scan_paths}")
 
-            # AI 활성화 여부 로드
-            ai_setting = db.query(Setting).filter(Setting.key == "use_ai").first()
-            if ai_setting and ai_setting.value:
-                self.use_ai = ai_setting.value.lower() == "true"
+                # AI 설정 로드 (scanMethod가 'ai'이면 True)
+                if config.get('metadata', {}).get('scanMethod'):
+                    self.use_ai = config['metadata']['scanMethod'] == 'ai'
+                    logger.info(f"✓ AI setting loaded from config.json: {self.use_ai}")
 
-            logger.info("✓ Scheduler settings loaded from database")
+                # 스케줄러 설정 로드 (config.json에 있으면)
+                if config.get('scheduler', {}).get('cronSchedule'):
+                    self.cron_schedule = config['scheduler']['cronSchedule']
+                    logger.info(f"✓ Cron schedule loaded from config.json: {self.cron_schedule}")
 
-        finally:
-            db.close()
+        except Exception as e:
+            logger.warning(f"Failed to load from config.json: {e}")
+
+        # 2. config.json에 없으면 데이터베이스에서 로드 (fallback)
+        if not config_loaded:
+            db = SessionLocal()
+            try:
+                # 스캔 경로 로드
+                scan_paths_setting = db.query(Setting).filter(Setting.key == "scan_paths").first()
+                if scan_paths_setting and scan_paths_setting.value:
+                    self.scan_paths = json.loads(scan_paths_setting.value)
+                    logger.info(f"✓ Scan paths loaded from database: {self.scan_paths}")
+
+                # Cron 스케줄 로드
+                cron_setting = db.query(Setting).filter(Setting.key == "cron_schedule").first()
+                if cron_setting and cron_setting.value:
+                    self.cron_schedule = cron_setting.value
+
+                # AI 활성화 여부 로드
+                ai_setting = db.query(Setting).filter(Setting.key == "use_ai").first()
+                if ai_setting and ai_setting.value:
+                    self.use_ai = ai_setting.value.lower() == "true"
+
+                logger.info("✓ Scheduler settings loaded from database")
+
+            finally:
+                db.close()
 
 
 # 전역 스케줄러 인스턴스

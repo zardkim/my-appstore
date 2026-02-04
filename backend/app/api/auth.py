@@ -4,18 +4,34 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 from pydantic import BaseModel
 import logging
+import json
+from pathlib import Path
+import re
 logger = logging.getLogger(__name__)
 
 
 from app.database import get_db
 from app.models.user import User, UserRole
 from app.schemas.auth import Token
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserRegister
 from app.core.security import verify_password, create_access_token, get_password_hash
 from app.dependencies import get_current_user
 from app.config import settings
 
 router = APIRouter()
+
+
+def get_registration_status() -> bool:
+    """Check if registration is open from config.json"""
+    try:
+        config_file = Path(settings.CONFIG_DATA_DIR) / "config.json"
+        if config_file.exists():
+            with open(config_file, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                return config.get('general', {}).get('registrationOpen', False)
+    except Exception as e:
+        logger.error(f"Error reading config: {e}")
+    return False
 
 
 class ChangePasswordRequest(BaseModel):
@@ -135,3 +151,76 @@ async def change_password(
     db.commit()
 
     return {"message": "Password changed successfully"}
+
+
+@router.get("/registration-status")
+async def check_registration_status():
+    """
+    Check if registration is open
+    """
+    return {"registration_open": get_registration_status()}
+
+
+@router.post("/register", response_model=UserResponse)
+async def register(user_data: UserRegister, db: Session = Depends(get_db)):
+    """
+    Public registration endpoint
+    Only works if registration is open in config
+    """
+    # Check if registration is open
+    if not get_registration_status():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Registration is currently closed"
+        )
+
+    # Validate username (alphanumeric, 3-20 chars)
+    if not re.match(r'^[a-zA-Z0-9_]{3,20}$', user_data.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username must be 3-20 characters, alphanumeric and underscore only"
+        )
+
+    # Validate password length
+    if len(user_data.password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long"
+        )
+
+    # Validate email format
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_regex, user_data.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email format"
+        )
+
+    # Check if username already exists
+    existing_user = db.query(User).filter(User.username == user_data.username).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already registered"
+        )
+
+    # Check if email already exists
+    existing_email = db.query(User).filter(User.email == user_data.email).first()
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+
+    # Create new user
+    new_user = User(
+        username=user_data.username,
+        email=user_data.email,
+        password_hash=get_password_hash(user_data.password),
+        role=UserRole.user
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user

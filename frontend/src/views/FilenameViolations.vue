@@ -58,6 +58,21 @@
             </svg>
             <span class="hidden sm:inline">{{ t('detectedList.refresh') }}</span>
           </button>
+
+          <button
+            @click="openScanModal"
+            :disabled="isScanning"
+            class="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all flex items-center text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg v-if="isScanning" class="animate-spin w-4 h-4 sm:mr-1.5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg v-else class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span class="hidden sm:inline">{{ isScanning ? t('detectedList.scanning') : t('detectedList.scan') }}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -325,6 +340,97 @@
       @close="closeAIMatchingDialog"
       @saved="handleAIMatchingSaved"
     />
+
+    <!-- Scan Modal -->
+    <div v-if="showScanModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4" @click.self="closeScanModal">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
+          <h3 class="text-lg font-bold text-white flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            {{ t('detectedList.scanTitle') }}
+          </h3>
+        </div>
+
+        <div class="p-6">
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ t('detectedList.scanDescription') }}</p>
+
+          <!-- Scan Options -->
+          <div class="space-y-3 mb-6">
+            <label class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+              <input
+                type="radio"
+                v-model="scanMode"
+                value="all"
+                class="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+              />
+              <div class="ml-3">
+                <span class="font-medium text-gray-900 dark:text-white">{{ t('detectedList.scanAllFolders') }}</span>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ t('detectedList.scanAllFoldersDesc') }}</p>
+              </div>
+            </label>
+
+            <label class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+              <input
+                type="radio"
+                v-model="scanMode"
+                value="select"
+                class="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+              />
+              <div class="ml-3">
+                <span class="font-medium text-gray-900 dark:text-white">{{ t('detectedList.scanSelectFolders') }}</span>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ t('detectedList.scanSelectFoldersDesc') }}</p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Folder Selection (when select mode) -->
+          <div v-if="scanMode === 'select'" class="mb-6">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('detectedList.selectFoldersToScan') }}</p>
+            <div v-if="scanFolders.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+              {{ t('detectedList.noFoldersConfigured') }}
+            </div>
+            <div v-else class="space-y-2 max-h-48 overflow-y-auto">
+              <label
+                v-for="folder in scanFolders"
+                :key="folder"
+                class="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  v-model="selectedScanFolders"
+                  :value="folder"
+                  class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                />
+                <span class="ml-3 text-sm text-gray-900 dark:text-white font-mono truncate">{{ folder }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex space-x-3">
+            <button
+              @click="closeScanModal"
+              class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+            >
+              {{ t('common.cancel') }}
+            </button>
+            <button
+              @click="startScan"
+              :disabled="isScanning || (scanMode === 'select' && selectedScanFolders.length === 0)"
+              class="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              <svg v-if="isScanning" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isScanning ? t('detectedList.scanning') : t('detectedList.startScan') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -335,6 +441,7 @@ import { useI18n } from 'vue-i18n'
 import { filenameViolationsApi } from '../api/filenameViolations'
 import { productsApi } from '../api/products'
 import { scanApi } from '../api/scan'
+import { configApi } from '../api/config'
 import ViolationAISearchDialog from '../components/violation/ViolationAISearchDialog.vue'
 import { useDialog } from '../composables/useDialog'
 
@@ -356,6 +463,14 @@ const selectedIds = ref([])
 const isAllSelected = ref(false)
 const aiMatchingDialogOpen = ref(false)
 const selectedViolation = ref(null)
+
+// Scan Modal
+const showScanModal = ref(false)
+const isScanning = ref(false)
+const scanMode = ref('all')
+const scanFolders = ref([])
+const selectedScanFolders = ref([])
+const useAI = ref(false)
 
 const getViolationTypeLabel = (type) => {
   return t(`detectedList.violationTypes.${type}`) || type
@@ -457,14 +572,20 @@ const addToExclusions = async (violation) => {
   }
 
   try {
+    // 스캔 예외에 추가
     await scanApi.addScanExclusion(selectedPattern, 'pattern')
-    await alert.success(t('detectedList.addedToExclusions', { pattern: selectedPattern }))
 
-    // 설정 페이지로 이동할지 물어봄
-    const shouldGoToSettings = await confirm.info(t('detectedList.goToSettings'))
-    if (shouldGoToSettings) {
-      router.push('/settings?section=exceptions')
+    // 목록에서 해당 항목 제거
+    violations.value = violations.value.filter(v => v.id !== violation.id)
+
+    // 통계 업데이트
+    if (stats.value) {
+      stats.value.scanned = Math.max(0, stats.value.scanned - 1)
+      stats.value.total = Math.max(0, stats.value.total - 1)
     }
+
+    // 성공 메시지 (설정 페이지 이동 메시지 제거)
+    await alert.success(t('detectedList.addedToExclusions', { pattern: selectedPattern }))
   } catch (error) {
     console.error('Failed to add to exclusions:', error)
     await alert.error(t('detectedList.addToExclusionsFailed'))
@@ -592,9 +713,53 @@ const batchDeleteSelected = async () => {
   }
 }
 
-const openAIMatchingDialog = (violation) => {
-  selectedViolation.value = violation
-  aiMatchingDialogOpen.value = true
+const openAIMatchingDialog = async (violation) => {
+  try {
+    // 1. 파일명에서 제품명 추출 (suggestion 사용 또는 폴더명 사용)
+    const folderName = violation.folder_path.split('/').filter(Boolean).pop() || ''
+    const parsedName = folderName || violation.file_name.replace(/\.(exe|msi|zip|rar|7z|iso)$/i, '')
+
+    // 2. 기존 제품 검색
+    const searchResponse = await productsApi.getProducts({ search: parsedName, limit: 10 })
+    const products = searchResponse.data.items || searchResponse.data
+
+    // 3. 정확히 일치하는 제품 찾기 (대소문자 구분 없이)
+    const matchedProduct = products.find(p =>
+      p.title.toLowerCase() === parsedName.toLowerCase()
+    )
+
+    if (matchedProduct) {
+      // 제품이 이미 있으면 버전으로 추가
+      const confirmed = await confirm.show(
+        '기존 제품 발견',
+        `"${matchedProduct.title}" 제품에 버전으로 추가하시겠습니까?`
+      )
+
+      if (confirmed) {
+        await filenameViolationsApi.addToProduct(violation.id, matchedProduct.id)
+
+        // 목록에서 제거
+        violations.value = violations.value.filter(v => v.id !== violation.id)
+
+        // 통계 업데이트
+        if (stats.value) {
+          stats.value.scanned = Math.max(0, stats.value.scanned - 1)
+          stats.value.total = Math.max(0, stats.value.total - 1)
+        }
+
+        await alert.success(`버전이 추가되었습니다.\n\n제품: ${matchedProduct.title}`)
+      }
+    } else {
+      // 제품이 없으면 AI 매칭 다이얼로그 열기
+      selectedViolation.value = violation
+      aiMatchingDialogOpen.value = true
+    }
+  } catch (error) {
+    console.error('Failed to check existing product:', error)
+    // 오류 발생시 기존 동작 (다이얼로그 열기)
+    selectedViolation.value = violation
+    aiMatchingDialogOpen.value = true
+  }
 }
 
 const closeAIMatchingDialog = () => {
@@ -627,6 +792,83 @@ const handleAIMatchingSaved = async (data) => {
 const goToProduct = (productId) => {
   // 제품 상세 페이지로 이동
   router.push(`/product/${productId}`)
+}
+
+// Scan Modal Functions
+const openScanModal = async () => {
+  // Load configured folders and AI settings
+  try {
+    const response = await configApi.getConfig()
+    const config = response.data
+    if (config.folders && config.folders.scanFolders) {
+      scanFolders.value = config.folders.scanFolders
+    } else {
+      scanFolders.value = []
+    }
+    // Load AI setting (same as Settings page)
+    if (config.metadata && config.metadata.scanMethod) {
+      useAI.value = config.metadata.scanMethod === 'ai'
+    }
+  } catch (error) {
+    console.error('Failed to load scan folders:', error)
+    scanFolders.value = []
+  }
+
+  scanMode.value = 'all'
+  selectedScanFolders.value = []
+  showScanModal.value = true
+}
+
+const closeScanModal = () => {
+  showScanModal.value = false
+}
+
+const startScan = async () => {
+  isScanning.value = true
+  closeScanModal()
+
+  try {
+    let foldersToScan = []
+
+    if (scanMode.value === 'all') {
+      foldersToScan = scanFolders.value.length > 0 ? scanFolders.value : ['/library']
+    } else {
+      foldersToScan = selectedScanFolders.value
+    }
+
+    // Scan each folder (uses same AI setting as Settings page)
+    let totalNewProducts = 0
+    let totalNewVersions = 0
+    let errorMessages = []
+
+    for (const folder of foldersToScan) {
+      try {
+        const result = await scanApi.startScan(folder, useAI.value)
+        if (result.data) {
+          totalNewProducts += result.data.new_products || 0
+          totalNewVersions += result.data.new_versions || 0
+        }
+      } catch (error) {
+        console.error(`Failed to scan folder ${folder}:`, error)
+        const errorDetail = error.response?.data?.detail || error.message
+        errorMessages.push(`${folder}: ${errorDetail}`)
+      }
+    }
+
+    if (errorMessages.length > 0) {
+      await alert.warning(t('detectedList.scanComplete') + '\n\n' + errorMessages.join('\n'))
+    } else {
+      await alert.success(t('detectedList.scanComplete'))
+    }
+
+    // Reload violations list
+    await loadViolations()
+  } catch (error) {
+    console.error('Scan failed:', error)
+    await alert.error(t('detectedList.scanFailed'))
+  } finally {
+    isScanning.value = false
+  }
 }
 
 onMounted(() => {

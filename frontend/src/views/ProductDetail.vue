@@ -123,17 +123,29 @@
                 />
               </svg>
 
-              <!-- 로고 검색 아이콘 (우측 하단, Admin만 표시) -->
-              <button
-                v-if="authStore.user?.role === 'admin'"
-                @click="openLogoSearch"
-                class="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
-                title="로고 검색"
-              >
-                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
+              <!-- 로고 버튼들 (Admin만 표시) -->
+              <div v-if="authStore.user?.role === 'admin'" class="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <!-- URL로 로고 추가 -->
+                <button
+                  @click="showLogoUrlDialog = true"
+                  class="w-7 h-7 sm:w-8 sm:h-8 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110"
+                  :title="t('productDetail.addLogoFromUrl')"
+                >
+                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </button>
+                <!-- 로고 검색 -->
+                <button
+                  @click="openLogoSearch"
+                  class="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110"
+                  :title="t('productDetail.searchLogo')"
+                >
+                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div class="flex-1">
@@ -205,7 +217,7 @@
                   class="px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white backdrop-blur-sm border border-white/30 text-gray-900 focus:outline-none focus:border-blue-500"
                 >
                   <option value="" class="text-gray-900">{{ t('productDetail.selectCategory') }}</option>
-                  <option v-for="cat in categories" :key="cat" :value="cat" class="text-gray-900">{{ getCategoryIcon(cat) }} {{ cat }}</option>
+                  <option v-for="cat in categories" :key="cat" :value="cat" class="text-gray-900">{{ getCategoryIcon(cat) }} {{ t('categories.' + cat) || cat }}</option>
                 </select>
                 <span
                   v-else-if="product.category"
@@ -543,17 +555,29 @@
                   {{ t('product.screenshots.title') }}
                 </h3>
 
-                <!-- Screenshot Search Button (Admin only) -->
-                <button
-                  v-if="authStore.user?.role === 'admin'"
-                  @click="openScreenshotSearch"
-                  class="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
-                >
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <span>{{ t('product.screenshots.searchButton') }}</span>
-                </button>
+                <!-- Screenshot Buttons (Admin only) -->
+                <div v-if="authStore.user?.role === 'admin'" class="flex gap-2">
+                  <!-- URL로 스크린샷 추가 -->
+                  <button
+                    @click="showScreenshotUrlDialog = true"
+                    class="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
+                  >
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <span>{{ t('product.screenshots.addFromUrl') }}</span>
+                  </button>
+                  <!-- 스크린샷 검색 -->
+                  <button
+                    @click="openScreenshotSearch"
+                    class="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
+                  >
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>{{ t('product.screenshots.searchButton') }}</span>
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -1129,6 +1153,109 @@
         </div>
       </div>
     </div>
+
+    <!-- Logo URL Input Dialog -->
+    <div
+      v-if="showLogoUrlDialog"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+      @click="showLogoUrlDialog = false"
+    >
+      <div
+        class="relative max-w-lg w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+        @click.stop
+      >
+        <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            <h3 class="text-xl font-bold text-white">{{ t('productDetail.addLogoFromUrlTitle') }}</h3>
+          </div>
+          <button @click="showLogoUrlDialog = false" class="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-6">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('productDetail.imageUrl') }}</label>
+          <input
+            v-model="logoUrlInput"
+            type="url"
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            :placeholder="t('productDetail.imageUrlPlaceholder')"
+            @keyup.enter="addLogoFromUrl"
+          />
+          <div class="flex gap-3 mt-6">
+            <button
+              @click="showLogoUrlDialog = false"
+              class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              {{ t('common.cancel') }}
+            </button>
+            <button
+              @click="addLogoFromUrl"
+              class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              {{ t('common.add') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screenshot URL Input Dialog -->
+    <div
+      v-if="showScreenshotUrlDialog"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+      @click="showScreenshotUrlDialog = false"
+    >
+      <div
+        class="relative max-w-lg w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+        @click.stop
+      >
+        <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h3 class="text-xl font-bold text-white">{{ t('productDetail.addScreenshotFromUrlTitle') }}</h3>
+          </div>
+          <button @click="showScreenshotUrlDialog = false" class="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-6">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('productDetail.imageUrl') }}</label>
+          <input
+            v-model="screenshotUrlInput"
+            type="url"
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            :placeholder="t('productDetail.imageUrlPlaceholder')"
+            @keyup.enter="addScreenshotFromUrl"
+          />
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            {{ t('productDetail.screenshotsRemaining', { count: 4 - (product?.screenshots?.length || 0) }) }}
+          </p>
+          <div class="flex gap-3 mt-6">
+            <button
+              @click="showScreenshotUrlDialog = false"
+              class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              {{ t('common.cancel') }}
+            </button>
+            <button
+              @click="addScreenshotFromUrl"
+              class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              {{ t('common.add') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1166,6 +1293,10 @@ const currentScreenshot = ref('')
 const iconTimestamp = ref(Date.now()) // 로고 캐시 버스팅용 타임스탬프
 const isWritingGuide = ref(false) // 설치방법 가이드 작성 모드
 const screenshotFileInputs = ref([]) // 스크린샷 파일 input refs
+const showLogoUrlDialog = ref(false) // 로고 URL 입력 다이얼로그
+const showScreenshotUrlDialog = ref(false) // 스크린샷 URL 입력 다이얼로그
+const logoUrlInput = ref('') // 로고 URL 입력값
+const screenshotUrlInput = ref('') // 스크린샷 URL 입력값
 
 // 로고 URL에 타임스탬프 추가 (브라우저 캐시 우회)
 const iconUrlWithTimestamp = computed(() => {
@@ -1263,10 +1394,19 @@ const formatFilePath = (fullPath) => {
   if (!fullPath) return ''
   // /library 이후의 경로만 표시
   const libraryIndex = fullPath.indexOf('/library')
-  if (libraryIndex !== -1) {
-    return fullPath.substring(libraryIndex)
+  let path = libraryIndex !== -1 ? fullPath.substring(libraryIndex) : fullPath
+
+  // 경로를 /로 분리
+  const parts = path.split('/').filter(Boolean)
+
+  // /library/폴더1/폴더2/파일명 형태에서 마지막 2개 경로만 표시
+  if (parts.length > 3) {
+    // library를 제외한 경로가 3개 이상이면 축약
+    const lastTwo = parts.slice(-2)
+    return `.../${lastTwo.join('/')}`
   }
-  return fullPath
+
+  return path
 }
 
 const parseDetailedDescription = (description) => {
@@ -1691,6 +1831,65 @@ const handleScreenshotsSaved = async () => {
   closeScreenshotSearchDialog()
 }
 
+// URL로 로고 추가
+const addLogoFromUrl = async () => {
+  if (!logoUrlInput.value.trim()) {
+    await alert.warning(t('productDetail.enterLogoUrl'))
+    return
+  }
+
+  try {
+    const response = await imagesApi.downloadLogo(product.value.id, logoUrlInput.value.trim())
+    if (response.data.success) {
+      product.value.icon_url = response.data.url
+      iconTimestamp.value = Date.now()
+      showLogoUrlDialog.value = false
+      logoUrlInput.value = ''
+      await alert.success(t('productDetail.logoAdded'))
+    } else {
+      await alert.error(response.data.error || t('productDetail.logoAddFailed'))
+    }
+  } catch (error) {
+    console.error('Failed to add logo from URL:', error)
+    await alert.error(t('productDetail.logoAddFailed'))
+  }
+}
+
+// URL로 스크린샷 추가
+const addScreenshotFromUrl = async () => {
+  if (!screenshotUrlInput.value.trim()) {
+    await alert.warning(t('productDetail.enterScreenshotUrl'))
+    return
+  }
+
+  try {
+    // 현재 스크린샷 목록 가져오기
+    const currentScreenshots = product.value.screenshots || []
+    if (currentScreenshots.length >= 4) {
+      await alert.warning(t('productDetail.maxScreenshots'))
+      return
+    }
+
+    // 새 URL을 기존 목록에 추가
+    const allUrls = [...currentScreenshots, screenshotUrlInput.value.trim()]
+
+    const response = await imagesApi.downloadScreenshots(product.value.id, allUrls)
+    if (response.data.success) {
+      // 제품 정보 새로고침
+      const productResponse = await productsApi.getById(product.value.id)
+      product.value = productResponse.data
+      showScreenshotUrlDialog.value = false
+      screenshotUrlInput.value = ''
+      await alert.success(t('productDetail.screenshotAdded'))
+    } else {
+      await alert.error(response.data.error || t('productDetail.screenshotAddFailed'))
+    }
+  } catch (error) {
+    console.error('Failed to add screenshot from URL:', error)
+    await alert.error(t('productDetail.screenshotAddFailed'))
+  }
+}
+
 // Delete screenshot
 const deleteScreenshot = async (index) => {
   const shouldDelete = await confirm.danger(t('productDetail.deleteScreenshot'))
@@ -1744,9 +1943,10 @@ const uploadScreenshot = async (event, index) => {
     // 단일 스크린샷 업로드
     const response = await imagesApi.uploadScreenshots(product.value.id, [file])
 
-    if (response.data.screenshots && response.data.screenshots.length > 0) {
+    // 백엔드는 urls 배열을 반환함
+    if (response.data.success && response.data.urls && response.data.urls.length > 0) {
       // 새로 업로드된 스크린샷으로 해당 인덱스 대체
-      currentScreenshots[index] = response.data.screenshots[0]
+      currentScreenshots[index] = response.data.urls[0]
 
       // Product의 screenshots 업데이트
       await productsApi.updateProduct(product.value.id, {

@@ -43,9 +43,10 @@ export default {
   // 네비게이션
   nav: {
     home: '홈',
-    discover: '탐색',
+    discover: '스토어',
     search: '검색',
     detectedList: '검색된 목록',
+    scan: '스캔',
     favorites: '즐겨찾기',
     scraps: '스크랩',
     tips: '팁&테크',
@@ -79,6 +80,8 @@ export default {
     languageAuto: '자동',
     languageKorean: '한국어',
     languageEnglish: 'English',
+    noAccount: '계정이 없으신가요?',
+    register: '회원가입',
   },
 
   // 셋업
@@ -103,8 +106,8 @@ export default {
     welcome: '환영합니다',
     recentlyAdded: '최근 추가된 프로그램',
     statistics: '통계',
-    totalProducts: '완료된 소프트웨어',
-    incompleteProducts: '미완료된 소프트웨어',
+    totalProducts: '등록된 소프트웨어',
+    incompleteProducts: '미정리된 소프트웨어',
     totalVersions: '전체 버전',
     totalCategories: '카테고리',
     lastScan: '마지막 스캔',
@@ -155,7 +158,7 @@ export default {
       versions: '버전',
       screenshots: '스크린샷',
       installation: '설치방법',
-      patches: '패치/크랙',
+      patches: '패치',
     },
     info: {
       title: '프로그램 설명',
@@ -194,6 +197,7 @@ export default {
       uploadButton: '스크린샷 업로드',
       deleteButton: '스크린샷 삭제',
       screenshot: '스크린샷',
+      addFromUrl: 'URL로 추가',
     },
     installation: {
       title: '설치 방법',
@@ -212,7 +216,7 @@ export default {
       placeholder: '설치 방법을 입력하세요...',
     },
     patches: {
-      title: '패치 / 크랙 파일',
+      title: '패치 파일',
       uploadArea: '파일 업로드 영역',
       fileType: '파일 종류',
       description: '설명',
@@ -220,7 +224,7 @@ export default {
       descriptionPlaceholder: '파일에 대한 간단한 설명을 입력하세요',
       noFiles: '등록된 파일이 없습니다',
       noFilesDesc: '아직 업로드된 파일이 없습니다',
-      noFilesAdmin: '위의 업로드 영역에서 패치/크랙 파일을 업로드할 수 있습니다',
+      noFilesAdmin: '위의 업로드 영역에서 패치 파일을 업로드할 수 있습니다',
       uploadSuccess: '파일이 성공적으로 업로드되었습니다',
       uploadFailed: '파일 업로드에 실패했습니다',
       downloadFailed: '파일 다운로드에 실패했습니다',
@@ -229,7 +233,7 @@ export default {
       deleteFailed: '파일 삭제에 실패했습니다',
       types: {
         patch: '패치',
-        crack: '크랙',
+        crack: '패치',
         manual: '매뉴얼',
         other: '기타',
       },
@@ -332,9 +336,8 @@ export default {
     // 사용자 관리
     users: {
       title: '사용자 관리',
-      description: '사용자를 직접 추가하거나 초대 이메일을 발송할 수 있습니다',
+      description: '사용자 계정과 회원가입 설정을 관리합니다',
       addUser: '사용자 추가',
-      inviteUser: '사용자 초대',
       currentUser: '현재 사용자',
       username: '사용자명',
       role: '역할',
@@ -352,6 +355,14 @@ export default {
       adminRequired: '관리자 권한 필요',
       adminOnlyAccess: '사용자 관리는 관리자만 접근할 수 있습니다.',
       noUsers: '등록된 사용자가 없습니다',
+      // 회원가입 설정
+      registrationSettings: '회원가입 설정',
+      registrationSettingsDesc: '외부 사용자의 회원가입 허용 여부를 설정합니다',
+      registrationOpen: '회원가입 열림',
+      registrationClosed: '회원가입 닫힘',
+      registrationOpened: '회원가입이 열렸습니다. 누구나 회원가입할 수 있습니다.',
+      registrationClosedMsg: '회원가입이 닫혔습니다. 관리자만 사용자를 추가할 수 있습니다.',
+      registrationToggleFailed: '회원가입 설정 변경에 실패했습니다.',
       // 사용자 추가 다이얼로그
       addUserTitle: '사용자 추가',
       addUserDescription: '새 사용자를 직접 생성합니다. 일반 사용자 권한으로 추가됩니다.',
@@ -361,12 +372,7 @@ export default {
       passwordConfirmPlaceholder: '비밀번호 재입력',
       cancel: '취소',
       add: '추가',
-      // 사용자 초대 다이얼로그
-      inviteUserTitle: '사용자 초대',
-      inviteUserDescription: '이메일 주소를 입력하면 회원가입 링크가 포함된 초대 이메일이 발송됩니다.',
       emailAddress: '이메일 주소',
-      inviteLinkValidity: '초대 링크는 7일간 유효하며, 한 번만 사용할 수 있습니다.',
-      sendInvite: '초대 보내기',
       // 메시지
       usernameMinLength: '사용자명은 최소 3자 이상이어야 합니다.',
       passwordMinLength: '비밀번호는 최소 8자 이상이어야 합니다.',
@@ -376,8 +382,6 @@ export default {
       addFailed: '사용자 추가에 실패했습니다.',
       enterEmail: '이메일 주소를 입력해주세요.',
       invalidEmail: '올바른 이메일 주소를 입력해주세요.',
-      inviteSent: '초대 이메일이 발송되었습니다.',
-      inviteFailed: '초대 이메일 발송에 실패했습니다.',
       passwordChanged: '비밀번호가 변경되었습니다.',
       passwordChangeFailed: '비밀번호 변경에 실패했습니다.',
       statusChangeFailed: '사용자 상태 변경에 실패했습니다.',
@@ -872,6 +876,14 @@ export default {
       apply: '적용',
       saved: '스캔 예외 설정이 저장되었습니다.',
       saveFailed: '스캔 예외 설정 저장에 실패했습니다.',
+      // 지원 확장자
+      supportedExtensionsTitle: '✅ 지원하는 파일 확장자',
+      supportedExtensionsDesc: '스캔 시 인식되는 파일 확장자 목록입니다',
+      executables: '실행 파일',
+      archives: '압축 파일',
+      diskImages: '디스크 이미지',
+      scripts: '스크립트',
+      others: '기타',
     },
     // 시스템 정보
     system: {
@@ -1155,6 +1167,8 @@ export default {
 
     // Violation types
     violationTypes: {
+      scanned: '스캔됨',
+      mismatched: '불일치',
       underscore_overuse: '언더스코어 과다',
       bracket_usage: '대괄호 사용',
       version_format: '버전 형식 오류',
@@ -1213,6 +1227,21 @@ export default {
     aiMatchConfirm: 'AI로 메타데이터를 생성하고 스토어에 등록하시겠습니까?',
     productCreateSuccess: 'Product가 성공적으로 생성되었습니다.\n스토어 페이지로 이동합니다.',
     productCreateFailed: 'Product 생성에 실패했습니다.',
+
+    // Scan
+    scan: '스캔',
+    scanning: '스캔 중...',
+    scanTitle: '폴더 스캔',
+    scanDescription: '스캔할 폴더 범위를 선택하세요.',
+    scanAllFolders: '전체 폴더 스캔',
+    scanAllFoldersDesc: '설정된 모든 폴더를 스캔합니다.',
+    scanSelectFolders: '선택 폴더 스캔',
+    scanSelectFoldersDesc: '특정 폴더만 선택하여 스캔합니다.',
+    selectFoldersToScan: '스캔할 폴더 선택',
+    noFoldersConfigured: '설정된 폴더가 없습니다. 설정 페이지에서 폴더를 추가해주세요.',
+    startScan: '스캔 시작',
+    scanComplete: '스캔이 완료되었습니다.',
+    scanFailed: '스캔에 실패했습니다.',
   },
 
   // 카테고리
@@ -1370,6 +1399,21 @@ export default {
     enterProductName: '제품명을 입력해주세요.',
     saved: '저장되었습니다.',
     screenshotUploadFailed: '스크린샷 업로드에 실패했습니다.',
+    // 로고/스크린샷 URL 추가
+    addLogoFromUrl: 'URL로 로고 추가',
+    searchLogo: '로고 검색',
+    addLogoFromUrlTitle: 'URL로 로고 추가',
+    addScreenshotFromUrlTitle: 'URL로 스크린샷 추가',
+    imageUrl: '이미지 URL',
+    imageUrlPlaceholder: 'https://example.com/image.png',
+    enterLogoUrl: '로고 URL을 입력해주세요.',
+    enterScreenshotUrl: '스크린샷 URL을 입력해주세요.',
+    logoAdded: '로고가 추가되었습니다.',
+    logoAddFailed: '로고 추가에 실패했습니다.',
+    screenshotAdded: '스크린샷이 추가되었습니다.',
+    screenshotAddFailed: '스크린샷 추가에 실패했습니다.',
+    maxScreenshots: '스크린샷은 최대 4개까지 추가할 수 있습니다.',
+    screenshotsRemaining: '추가 가능: {count}개',
   },
 
   // 제품 카드
@@ -1635,5 +1679,36 @@ export default {
       imageDeleteFailed: '이미지 삭제에 실패했습니다.',
       imageDeleteError: '이미지 삭제 중 오류가 발생했습니다.',
     },
+  },
+
+  // 회원가입 페이지
+  register: {
+    subtitle: '새 계정을 만들어 시작하세요',
+    checkingStatus: '회원가입 가능 여부 확인 중...',
+    registrationClosed: '회원가입이 닫혀있습니다',
+    registrationClosedDesc: '현재 새로운 회원가입을 받지 않고 있습니다. 관리자에게 문의하세요.',
+    goToLogin: '로그인 페이지로 이동',
+    username: '아이디',
+    usernamePlaceholder: '아이디를 입력하세요',
+    usernameHint: '3-20자, 영문/숫자/밑줄(_)만 사용 가능',
+    email: '이메일',
+    emailPlaceholder: 'example@email.com',
+    password: '비밀번호',
+    passwordPlaceholder: '비밀번호를 입력하세요',
+    passwordHint: '최소 8자 이상',
+    passwordConfirm: '비밀번호 확인',
+    passwordConfirmPlaceholder: '비밀번호를 다시 입력하세요',
+    registerButton: '회원가입',
+    registering: '회원가입 중...',
+    haveAccount: '이미 계정이 있으신가요?',
+    login: '로그인',
+    // 에러 메시지
+    statusCheckFailed: '회원가입 상태 확인에 실패했습니다.',
+    invalidUsername: '아이디는 3-20자, 영문/숫자/밑줄(_)만 사용 가능합니다.',
+    invalidEmail: '올바른 이메일 형식을 입력해주세요.',
+    passwordTooShort: '비밀번호는 최소 8자 이상이어야 합니다.',
+    passwordMismatch: '비밀번호가 일치하지 않습니다.',
+    success: '회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.',
+    failed: '회원가입에 실패했습니다.',
   },
 }
