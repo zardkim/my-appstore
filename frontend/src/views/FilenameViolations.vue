@@ -473,7 +473,11 @@ const selectedScanFolders = ref([])
 const useAI = ref(false)
 
 const getViolationTypeLabel = (type) => {
-  return t(`detectedList.violationTypes.${type}`) || type
+  if (!type) return ''
+  const key = `detectedList.violationTypes.${type.toLowerCase()}`
+  const translated = t(key)
+  // vue-i18n returns the key itself if translation not found
+  return translated !== key ? translated : type
 }
 
 const formatDate = (dateString) => {
@@ -575,6 +579,9 @@ const addToExclusions = async (violation) => {
     // 스캔 예외에 추가
     await scanApi.addScanExclusion(selectedPattern, 'pattern')
 
+    // 서버에서 violation 삭제
+    await filenameViolationsApi.deleteViolation(violation.id)
+
     // 목록에서 해당 항목 제거
     violations.value = violations.value.filter(v => v.id !== violation.id)
 
@@ -584,7 +591,7 @@ const addToExclusions = async (violation) => {
       stats.value.total = Math.max(0, stats.value.total - 1)
     }
 
-    // 성공 메시지 (설정 페이지 이동 메시지 제거)
+    // 성공 메시지
     await alert.success(t('detectedList.addedToExclusions', { pattern: selectedPattern }))
   } catch (error) {
     console.error('Failed to add to exclusions:', error)
@@ -729,26 +736,20 @@ const openAIMatchingDialog = async (violation) => {
     )
 
     if (matchedProduct) {
-      // 제품이 이미 있으면 버전으로 추가
-      const confirmed = await confirm.show(
-        '기존 제품 발견',
-        `"${matchedProduct.title}" 제품에 버전으로 추가하시겠습니까?`
-      )
+      // 제품이 이미 있으면 바로 버전으로 추가
+      await filenameViolationsApi.addToProduct(violation.id, matchedProduct.id)
 
-      if (confirmed) {
-        await filenameViolationsApi.addToProduct(violation.id, matchedProduct.id)
+      // 목록에서 제거
+      violations.value = violations.value.filter(v => v.id !== violation.id)
 
-        // 목록에서 제거
-        violations.value = violations.value.filter(v => v.id !== violation.id)
-
-        // 통계 업데이트
-        if (stats.value) {
-          stats.value.scanned = Math.max(0, stats.value.scanned - 1)
-          stats.value.total = Math.max(0, stats.value.total - 1)
-        }
-
-        await alert.success(`버전이 추가되었습니다.\n\n제품: ${matchedProduct.title}`)
+      // 통계 업데이트
+      if (stats.value) {
+        stats.value.scanned = Math.max(0, stats.value.scanned - 1)
+        stats.value.total = Math.max(0, stats.value.total - 1)
       }
+
+      await alert.success(t('detectedList.versionAddedToProduct', { title: matchedProduct.title }))
+      return
     } else {
       // 제품이 없으면 AI 매칭 다이얼로그 열기
       selectedViolation.value = violation

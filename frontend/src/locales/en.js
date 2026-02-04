@@ -157,7 +157,7 @@ export default {
       versions: 'Versions',
       screenshots: 'Screenshots',
       installation: 'Installation',
-      patches: 'Patches/Cracks',
+      patches: 'Patches',
     },
     info: {
       title: 'Program Description',
@@ -214,7 +214,7 @@ export default {
       placeholder: 'Enter installation instructions...',
     },
     patches: {
-      title: 'Patch / Crack Files',
+      title: 'Patch Files',
       uploadArea: 'File Upload Area',
       fileType: 'File Type',
       description: 'Description',
@@ -222,7 +222,7 @@ export default {
       descriptionPlaceholder: 'Enter a brief description of the file',
       noFiles: 'No files registered',
       noFilesDesc: 'No files have been uploaded yet',
-      noFilesAdmin: 'You can upload patch/crack files in the upload area above',
+      noFilesAdmin: 'You can upload patch files in the upload area above',
       uploadSuccess: 'File uploaded successfully',
       uploadFailed: 'File upload failed',
       downloadFailed: 'File download failed',
@@ -231,7 +231,7 @@ export default {
       deleteFailed: 'File deletion failed',
       types: {
         patch: 'Patch',
-        crack: 'Crack',
+        crack: 'Patch',
         manual: 'Manual',
         other: 'Other',
       },
@@ -1273,6 +1273,7 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     aiMatchConfirm: 'Generate metadata with AI and register to store?',
     productCreateSuccess: 'Product created successfully.\nRedirecting to store page.',
     productCreateFailed: 'Failed to create product.',
+    versionAddedToProduct: 'Version added to "{title}" product.',
 
     // Scan
     scan: 'Scan',
@@ -1695,5 +1696,16 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     passwordMismatch: 'Passwords do not match.',
     success: 'Registration successful! Redirecting to login.',
     failed: 'Registration failed.',
+  },
+
+  // Scan
+  scan: {
+    noFoldersConfigured: 'No folders configured.\nPlease add folders in the settings page.',
+    scanTitle: 'Folder Scan',
+    scanConfirmSingle: 'Do you want to scan the "{path}" folder?',
+    scanConfirmMultiple: 'Do you want to scan all {count} folders?',
+    scanStarted: 'Scan has started.',
+    scanStartedMultiple: 'Scan of {count} folders has started.',
+    scanFailed: 'Failed to start scan.',
   },
 }

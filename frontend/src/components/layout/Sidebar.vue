@@ -74,6 +74,22 @@
         <span v-if="!isCollapsed" class="menu-text">{{ $t('nav.detectedList') }}</span>
       </router-link>
 
+      <!-- Scan Button (Admin Only) -->
+      <button
+        v-if="isAdmin"
+        @click="handleScanClick"
+        class="menu-item group w-full"
+        :class="isCollapsed ? 'justify-center' : ''"
+      >
+        <div class="menu-icon">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </div>
+        <span v-if="!isCollapsed" class="menu-text">{{ $t('nav.scan') }}</span>
+      </button>
+
       <!-- Tips & Tech -->
       <router-link
         to="/tips"
@@ -326,15 +342,21 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
 import { useLocaleStore } from '../../store/locale'
+import { settingsApi } from '../../api/settings'
+import { scanApi } from '../../api/scan'
+import { useDialog } from '../../composables/useDialog'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const localeStore = useLocaleStore()
+const { alert, confirm } = useDialog()
 
 const isCollapsed = ref(false)
 const showUserMenu = ref(false)
@@ -372,6 +394,54 @@ const toggleTheme = () => {
 const toggleLanguage = () => {
   const newLocale = localeStore.locale === 'ko' ? 'en' : 'ko'
   localeStore.setLocale(newLocale)
+}
+
+// 스캔 버튼 클릭 핸들러
+const handleScanClick = async () => {
+  try {
+    // 설정에서 스캔 폴더 목록 가져오기
+    const response = await settingsApi.get()
+    const scanPaths = response.data.folders?.scanFolders || []
+
+    if (scanPaths.length === 0) {
+      await alert.warning(t('scan.noFoldersConfigured'))
+      router.push('/settings?section=scan')
+      return
+    }
+
+    if (scanPaths.length === 1) {
+      // 폴더가 하나면 바로 스캔
+      const confirmed = await confirm.show(
+        t('scan.scanTitle'),
+        t('scan.scanConfirmSingle', { path: scanPaths[0] })
+      )
+
+      if (confirmed) {
+        await scanApi.startScan(scanPaths[0], true)
+        await alert.success(t('scan.scanStarted'))
+        router.push('/filename-violations')
+      }
+    } else {
+      // 폴더가 여러개면 전체 스캔 확인
+      const pathList = scanPaths.map((p, i) => `${i + 1}. ${p}`).join('\n')
+      const confirmed = await confirm.show(
+        t('scan.scanTitle'),
+        t('scan.scanConfirmMultiple', { count: scanPaths.length }) + '\n\n' + pathList
+      )
+
+      if (confirmed) {
+        // 모든 폴더 스캔
+        for (const path of scanPaths) {
+          await scanApi.startScan(path, true)
+        }
+        await alert.success(t('scan.scanStartedMultiple', { count: scanPaths.length }))
+        router.push('/filename-violations')
+      }
+    }
+  } catch (error) {
+    console.error('Scan failed:', error)
+    await alert.error(t('scan.scanFailed'))
+  }
 }
 
 // 외부 클릭 시 드롭다운 닫기

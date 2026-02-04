@@ -95,13 +95,15 @@ async def download_file(
         # Nginx X-Accel-Redirect 사용
         # SCAN_BASE_PATH를 사용하여 동적으로 경로 변환
         # 예: /library/folder/file.exe -> /protected/folder/file.exe
+        import urllib.parse
         scan_base_path = settings.SCAN_BASE_PATH
-        internal_path = str(file_path).replace(scan_base_path, '/protected')
+        relative_path = str(file_path).replace(scan_base_path, '')
+        # X-Accel-Redirect 경로도 URL 인코딩 (한글 폴더명 지원)
+        internal_path = '/protected' + urllib.parse.quote(relative_path)
 
         logger.info(f"Internal path for X-Accel-Redirect: {internal_path}")
 
         # 파일명을 RFC 2231 형식으로 인코딩 (한글 파일명 지원)
-        import urllib.parse
         encoded_filename = urllib.parse.quote(version.file_name)
 
         # RFC 5987: filename*=UTF-8''encoded_name 형식 사용
