@@ -100,15 +100,18 @@ async def download_file(
 
         logger.info(f"Internal path for X-Accel-Redirect: {internal_path}")
 
-        # 파일명에서 특수문자 처리 (URL 인코딩)
+        # 파일명을 RFC 2231 형식으로 인코딩 (한글 파일명 지원)
         import urllib.parse
-        safe_filename = urllib.parse.quote(version.file_name)
+        encoded_filename = urllib.parse.quote(version.file_name)
+
+        # RFC 5987: filename*=UTF-8''encoded_name 형식 사용
+        content_disposition = f"attachment; filename*=UTF-8''{encoded_filename}"
 
         return Response(
             status_code=200,
             headers={
                 'X-Accel-Redirect': internal_path,
-                'Content-Disposition': f'attachment; filename="{safe_filename}"',
+                'Content-Disposition': content_disposition,
                 'Content-Type': 'application/octet-stream',
                 'Content-Length': str(file_size)
             }
@@ -154,12 +157,21 @@ async def download_file_direct(
             logger.error(f"Physical file not found: {version.file_path}")
             raise HTTPException(status_code=404, detail="Physical file not found")
 
-        # 파일 응답
-        return FileResponse(
+        # 파일명을 RFC 2231 형식으로 인코딩 (한글 파일명 지원)
+        import urllib.parse
+        encoded_filename = urllib.parse.quote(version.file_name)
+
+        # FileResponse without filename parameter to avoid latin-1 encoding issues
+        # Content-Disposition header is set manually with RFC 5987 encoding
+        response = FileResponse(
             path=str(file_path),
-            filename=version.file_name,
             media_type='application/octet-stream'
         )
+
+        # RFC 5987 형식으로 Content-Disposition 헤더 명시적 설정 (한글 파일명 지원)
+        response.headers['Content-Disposition'] = f"attachment; filename*=UTF-8''{encoded_filename}"
+
+        return response
 
     except HTTPException:
         raise

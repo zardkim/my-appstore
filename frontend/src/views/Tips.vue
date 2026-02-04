@@ -7,7 +7,7 @@
           <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">{{ t('tips.title') }}</h1>
           <p class="text-sm sm:text-base text-blue-100 dark:text-blue-200">{{ t('tips.description') }}</p>
         </div>
-        <button v-if="isAdmin" @click="goToWrite" class="px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 rounded-lg sm:rounded-xl hover:shadow-lg transition-all font-medium flex items-center text-sm sm:text-base self-start sm:self-auto">
+        <button @click="goToWrite" class="px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 rounded-lg sm:rounded-xl hover:shadow-lg transition-all font-medium flex items-center text-sm sm:text-base self-start sm:self-auto">
           <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>

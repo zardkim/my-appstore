@@ -93,8 +93,9 @@
       <div v-if="!isCollapsed" class="my-4 border-t border-gray-200 dark:border-gray-700"></div>
       <div v-else class="my-2"></div>
 
-      <!-- Settings -->
+      <!-- Settings (Admin only) -->
       <router-link
+        v-if="isAdmin"
         to="/settings"
         class="menu-item group"
         :class="isCollapsed ? 'justify-center' : ''"

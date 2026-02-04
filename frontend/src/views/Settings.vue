@@ -258,12 +258,6 @@
                 </svg>
                 {{ t('settings.users.addUser') }}
               </button>
-              <button v-if="isDevelopment" @click="showInviteModal = true" class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-medium flex items-center justify-center text-sm sm:text-base">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                {{ t('settings.users.inviteUser') }}
-              </button>
             </div>
           </div>
 
@@ -277,8 +271,35 @@
             </div>
           </div>
 
+          <!-- Registration Settings -->
+          <div v-if="isAdmin" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center">
+                  <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  {{ t('settings.users.registrationSettings') }}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('settings.users.registrationSettingsDesc') }}</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="registrationOpen"
+                  @change="toggleRegistration"
+                  class="sr-only peer"
+                />
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <span class="ml-3 text-sm font-medium" :class="registrationOpen ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'">
+                  {{ registrationOpen ? t('settings.users.registrationOpen') : t('settings.users.registrationClosed') }}
+                </span>
+              </label>
+            </div>
+          </div>
+
           <!-- Desktop Table View -->
-          <div v-else class="hidden md:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div v-if="isAdmin" class="hidden md:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <table class="w-full">
               <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <tr>
@@ -1430,6 +1451,45 @@
             </div>
           </div>
 
+          <!-- Supported Extensions -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <span class="mr-2">✅</span>
+              {{ t('settings.exceptions.supportedExtensionsTitle') }}
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              {{ t('settings.exceptions.supportedExtensionsDesc') }}
+            </p>
+
+            <div v-if="loadingSupportedExtensions" class="text-center py-4">
+              <svg class="animate-spin h-6 w-6 mx-auto text-blue-500" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div
+                v-for="(extensions, category) in supportedExtensions"
+                :key="category"
+                class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4"
+              >
+                <h4 class="font-medium text-gray-900 dark:text-white mb-2">
+                  {{ t('settings.exceptions.' + category) || category }}
+                </h4>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="ext in extensions"
+                    :key="ext"
+                    class="px-2 py-1 text-xs font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
+                  >
+                    {{ ext }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Info Box -->
           <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
             <h4 class="text-sm font-bold text-blue-900 dark:text-blue-300 mb-2">{{ t('settings.exceptions.exceptionGuideTitle') }}</h4>
@@ -1582,38 +1642,6 @@
           <div class="flex space-x-3">
             <button type="button" @click="showAddUserModal = false" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.users.cancel') }}</button>
             <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 shadow-md">{{ t('settings.users.add') }}</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Invite User Modal (개발 모드 전용) -->
-    <div v-if="isDevelopment && showInviteModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click.self="showInviteModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4">
-        <div class="flex items-center mb-4">
-          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-3">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.users.inviteUserTitle') }}</h3>
-        </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ t('settings.users.inviteUserDescription') }}</p>
-        <form @submit.prevent="sendInvitation" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.users.emailAddress') }}</label>
-            <input
-              v-model="inviteEmail"
-              type="email"
-              required
-              placeholder="user@example.com"
-              class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ t('settings.users.inviteLinkValidity') }}</p>
-          </div>
-          <div class="flex space-x-3">
-            <button type="button" @click="showInviteModal = false" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.users.cancel') }}</button>
-            <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">{{ t('settings.users.sendInvite') }}</button>
           </div>
         </form>
       </div>
@@ -1877,8 +1905,8 @@ import AdminScheduler from './AdminScheduler.vue'
 import { configApi } from '../api/config'
 import { scanApi } from '../api/scan'
 import { usersApi } from '../api/users'
-import { invitationsApi } from '../api/invitations'
 import { cacheApi } from '../api/cache'
+import { authApi } from '../api/auth'
 import { ENV } from '../utils/env'
 import { useDialog } from '../composables/useDialog'
 
@@ -1933,8 +1961,8 @@ const language = computed({
       try {
         await configApi.updateSection('general', {
           language: value,
-          accessUrl: accessUrl.value,
-          apiUrl: apiUrl.value
+          frontendUrl: accessUrl.value,
+          backendUrl: apiUrl.value
         })
       } catch (error) {
         console.error('언어 설정 저장 실패:', error)
@@ -2021,15 +2049,13 @@ const clearStatsCache = async () => {
 const users = ref([])
 const showAddUserModal = ref(false)
 const showEditUserModal = ref(false)
-const showInviteModal = ref(false)
 const showPasswordModal = ref(false)
-const inviteEmail = ref('')
 const newUser = ref({ username: '', password: '', passwordConfirm: '' })
 const editingUser = ref({ id: null, username: '' })
 const newPassword = ref('')
 const confirmPassword = ref('')
 const loadingUsers = ref(false)
-const isDevelopment = import.meta.env.DEV // 개발 모드 확인
+const registrationOpen = ref(false)
 
 // Folders
 const defaultLibraryPath = import.meta.env.VITE_LIBRARY_PATH || '/app/data/library'
@@ -2237,6 +2263,10 @@ const newExceptionFolder = ref('')
 const newExceptionPath = ref('')
 const savingExceptions = ref(false)
 
+// Supported Extensions
+const supportedExtensions = ref({})
+const loadingSupportedExtensions = ref(false)
+
 const changePassword = async () => {
   passwordError.value = ''
   passwordSuccess.value = ''
@@ -2314,6 +2344,8 @@ const saveExceptionSettings = async () => {
 const loadExceptionSettings = async () => {
   try {
     const response = await scanApi.getScanExclusions()
+    console.log('✅ Exception settings response:', response.data)
+
     if (response && response.data) {
       // 폴더 예외
       if (response.data.folders && response.data.folders.length > 0) {
@@ -2336,16 +2368,42 @@ const loadExceptionSettings = async () => {
       if (response.data.paths && response.data.paths.length > 0) {
         exceptionPaths.value = response.data.paths
       }
+
+      console.log('✅ Exceptions loaded - Folders:', exceptionFolders.value.length, 'Patterns:', exceptionPatterns.value.length)
     } else {
+      console.warn('❌ No exception data in response')
       // 기본값 설정
       exceptionFolders.value = ['.DAV', '.git', '.node_modules', '_MACOSX', '#recycle', '@eaDir']
       exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4']
     }
   } catch (error) {
-    console.error('스캔 예외 설정 불러오기 오류:', error)
+    console.error('❌ 스캔 예외 설정 불러오기 오류:', error)
     // 기본값 설정
     exceptionFolders.value = ['.DAV', '.git', '.node_modules', '_MACOSX', '#recycle', '@eaDir']
     exceptionPatterns.value = ['*.txt', '*.log', 'thumbs.db', 'desktop.ini', '*.nfo', '*.sfv', '*.sha1', '*.md5', '*.md4']
+  }
+}
+
+// 지원 확장자 목록 불러오기
+const loadSupportedExtensions = async () => {
+  loadingSupportedExtensions.value = true
+  try {
+    const response = await scanApi.getScanInfo()
+    if (response && response.data && response.data.supported_extensions) {
+      supportedExtensions.value = response.data.supported_extensions
+    }
+  } catch (error) {
+    console.error('❌ 지원 확장자 불러오기 오류:', error)
+    // 기본값 설정
+    supportedExtensions.value = {
+      executables: ['.exe', '.msi', '.app', '.dmg', '.deb', '.rpm'],
+      archives: ['.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz'],
+      diskImages: ['.iso', '.img', '.vhd', '.vmdk', '.vdi'],
+      scripts: ['.sh', '.bat', '.cmd', '.ps1'],
+      others: ['.apk', '.ipa', '.jar']
+    }
+  } finally {
+    loadingSupportedExtensions.value = false
   }
 }
 
@@ -2354,9 +2412,11 @@ const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('ko-KR')
 const loadUsers = async () => {
   try {
     loadingUsers.value = true
-    users.value = await usersApi.getAll()
+    const result = await usersApi.getAll()
+    console.log('✅ Users loaded:', result)
+    users.value = result
   } catch (error) {
-    console.error('사용자 목록 로드 오류:', error)
+    console.error('❌ 사용자 목록 로드 오류:', error)
 
     // Fallback: 최소한 현재 로그인한 사용자는 표시
     if (authStore.user) {
@@ -2408,28 +2468,25 @@ const addUser = async () => {
   }
 }
 
-const sendInvitation = async () => {
-  if (!inviteEmail.value) {
-    await alert.warning(t('settings.users.enterEmail'))
-    return
-  }
-
-  // 이메일 형식 검증
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(inviteEmail.value)) {
-    await alert.warning(t('settings.users.invalidEmail'))
-    return
-  }
-
+const toggleRegistration = async () => {
   try {
-    await invitationsApi.send(inviteEmail.value)
-    await alert.success(t('settings.users.inviteSent'))
-    showInviteModal.value = false
-    inviteEmail.value = ''
+    // Update config with new registration status
+    const response = await configApi.getConfig()
+    const config = response.data
+    const generalConfig = config.general || {}
+    generalConfig.registrationOpen = registrationOpen.value
+    await configApi.updateSection('general', generalConfig)
+
+    if (registrationOpen.value) {
+      await alert.success(t('settings.users.registrationOpened'))
+    } else {
+      await alert.success(t('settings.users.registrationClosedMsg'))
+    }
   } catch (error) {
-    console.error('Invitation send error:', error)
-    const errorMessage = error.response?.data?.detail || t('settings.users.inviteFailed')
-    await alert.error(errorMessage)
+    console.error('Toggle registration error:', error)
+    // Revert on error
+    registrationOpen.value = !registrationOpen.value
+    await alert.error(t('settings.users.registrationToggleFailed'))
   }
 }
 
@@ -2906,6 +2963,9 @@ onMounted(async () => {
     // 스캔 예외 설정 로드
     await loadExceptionSettings()
 
+    // 지원 확장자 목록 로드
+    await loadSupportedExtensions()
+
     // config.json에서 모든 설정 로드
     isLoadingConfig.value = true
     const response = await configApi.getConfig()
@@ -2916,8 +2976,12 @@ onMounted(async () => {
       // 언어 설정: language는 computed로 localeStore.locale을 자동 반영하므로 별도 설정 불필요
       // localeStore는 초기화 시 localStorage에서 값을 읽어옴
 
-      accessUrl.value = config.general.frontendUrl || ENV.APP_URL
-      apiUrl.value = config.general.backendUrl || ENV.BACKEND_URL
+      // 필드명 호환성 처리 (frontendUrl/backendUrl 또는 accessUrl/apiUrl)
+      accessUrl.value = config.general.frontendUrl || config.general.accessUrl || ENV.APP_URL
+      apiUrl.value = config.general.backendUrl || config.general.apiUrl || ENV.BACKEND_URL
+
+      // 회원가입 설정
+      registrationOpen.value = config.general.registrationOpen || false
     }
     isLoadingConfig.value = false
 
@@ -2932,6 +2996,9 @@ onMounted(async () => {
     // 카테고리 설정
     if (config.categories && Array.isArray(config.categories)) {
       categories.value = config.categories
+      console.log('✅ Categories loaded:', categories.value.length, 'items')
+    } else {
+      console.warn('❌ No categories in config:', config.categories)
     }
 
     // 메타데이터 설정

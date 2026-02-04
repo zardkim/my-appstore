@@ -19,5 +19,13 @@ export const scanApi = {
 
   async addScanExclusion(pattern, type) {
     return apiClient.post('scan/exclusions/add', { pattern, type })
+  },
+
+  async getScanInfo() {
+    return apiClient.get('scan/scan-info')
+  },
+
+  async previewScan(path, limit = 100) {
+    return apiClient.get('scan/preview', { params: { path, limit } })
   }
 }

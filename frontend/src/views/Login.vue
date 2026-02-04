@@ -52,6 +52,13 @@
       </form>
 
       <p v-if="error" class="text-red-500 dark:text-red-400 text-sm mt-4 text-center">{{ error }}</p>
+
+      <div v-if="registrationOpen" class="mt-6 text-center">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          {{ t('auth.noAccount') }}
+          <router-link to="/register" class="text-blue-500 dark:text-blue-400 hover:underline font-medium">{{ t('auth.register') }}</router-link>
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -74,6 +81,7 @@ const username = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+const registrationOpen = ref(false)
 
 // Selected language (synced with localeStore)
 const selectedLanguage = ref(localeStore.locale)
@@ -98,6 +106,14 @@ onMounted(async () => {
     if (err.code === 'ERR_NETWORK' || err.message.includes('Network Error') || err.response?.headers?.['content-type']?.includes('text/html')) {
       router.push('/setup')
     }
+  }
+
+  // Check registration status
+  try {
+    const regResponse = await authApi.getRegistrationStatus()
+    registrationOpen.value = regResponse.data.registration_open
+  } catch (err) {
+    console.error('Failed to check registration status:', err)
   }
 })
 

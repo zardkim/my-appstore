@@ -28,5 +28,17 @@ export const authApi = {
       current_password: currentPassword,
       new_password: newPassword
     })
+  },
+
+  async getRegistrationStatus() {
+    return apiClient.get('auth/registration-status')
+  },
+
+  async register(username, password, email) {
+    return apiClient.post('auth/register', {
+      username,
+      password,
+      email
+    })
   }
 }
