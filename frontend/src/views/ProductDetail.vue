@@ -1906,13 +1906,21 @@ const getScreenshotAtIndex = (index) => {
   const screenshots = isEditing.value ? editForm.value.screenshots : product.value?.screenshots
   if (!screenshots || !screenshots[index]) return null
 
-  const screenshotPath = screenshots[index]
+  const screenshot = screenshots[index]
+  // Handle object format { url: '...' } or string format
+  const screenshotPath = typeof screenshot === 'object' ? screenshot.url : screenshot
+
+  if (!screenshotPath) return null
+
   // 절대 URL이면 그대로 반환
   if (screenshotPath.startsWith('http://') || screenshotPath.startsWith('https://')) {
     return screenshotPath
   }
-  // 상대 경로면 백엔드 URL과 결합
-  return getBackendUrl(screenshotPath)
+  // 상대 경로면 그대로 반환 (nginx/vite 프록시가 처리)
+  if (screenshotPath.startsWith('/static')) {
+    return screenshotPath
+  }
+  return screenshotPath
 }
 
 // Trigger screenshot upload

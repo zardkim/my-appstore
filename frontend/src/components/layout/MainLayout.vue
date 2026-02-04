@@ -38,6 +38,7 @@
         <router-link
           to="/discover"
           class="mobile-nav-item flex-shrink-0"
+          :class="{ 'active': $route.path === '/discover' || $route.path.startsWith('/product/') }"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -51,6 +52,7 @@
           v-if="isAdmin"
           to="/filename-violations"
           class="mobile-nav-item flex-shrink-0"
+          :class="{ 'active': $route.path === '/filename-violations' }"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -76,6 +78,7 @@
         <router-link
           to="/tips"
           class="mobile-nav-item flex-shrink-0"
+          :class="{ 'active': $route.path.startsWith('/tips') }"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -88,6 +91,7 @@
         <router-link
           to="/favorites"
           class="mobile-nav-item flex-shrink-0"
+          :class="{ 'active': $route.path === '/favorites' }"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -100,6 +104,7 @@
         <router-link
           to="/scraps"
           class="mobile-nav-item flex-shrink-0"
+          :class="{ 'active': $route.path === '/scraps' }"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -113,6 +118,7 @@
           v-if="isAdmin"
           to="/settings"
           class="mobile-nav-item flex-shrink-0"
+          :class="{ 'active': $route.path === '/settings' }"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

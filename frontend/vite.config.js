@@ -31,6 +31,13 @@ export default defineConfig({
     port: 5900,
     watch: {
       usePolling: true
+    },
+    proxy: {
+      // Proxy /static requests to backend for local development
+      '/static': {
+        target: 'http://localhost:8110',
+        changeOrigin: true
+      }
     }
   }
 })

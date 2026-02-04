@@ -431,12 +431,11 @@ async def upload_screenshots(
             with open(file_path, 'wb') as f:
                 f.write(content)
 
-            # 전체 URL 생성 (프론트엔드가 다른 포트에서 실행되므로 백엔드 URL 포함)
+            # 상대 경로만 저장 (프록시가 처리)
             local_path = f"/static/screenshots/{filename}"
-            full_url = f"{settings.BACKEND_URL}{local_path}"
-            screenshot_urls.append(full_url)
+            screenshot_urls.append(local_path)
 
-        # DB 업데이트 (JSON 배열로 저장)
+        # DB 업데이트 (JSON 배열로 저장, 상대 경로 사용)
         screenshots_data = [{"type": "local", "url": url} for url in screenshot_urls]
         product.screenshots = screenshots_data
         db.commit()
@@ -601,9 +600,9 @@ async def download_screenshots_from_urls(
                 local_path = await icon_cache._download_screenshot(url, product_id, i)
 
                 if local_path:
-                    full_url = f"{settings.BACKEND_URL}{local_path}"
-                    downloaded_local_urls.append(full_url)
-                    logger.debug(f"Download Screenshots] Downloaded: {local_path} → {full_url}")
+                    # 상대 경로만 저장 (프록시가 처리)
+                    downloaded_local_urls.append(local_path)
+                    logger.debug(f"Download Screenshots] Downloaded: {local_path}")
                 else:
                     # 다운로드 실패 시 원본 외부 URL 사용
                     failed_external_urls.append(url)
