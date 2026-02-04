@@ -1,8 +1,7 @@
 # Dependencies
 node_modules/
 
-# Production
-dist/
+# Production (dist is included for pre-built Docker images)
 build/
 
 # IDE
