@@ -232,9 +232,17 @@ class IconCache:
         extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']
 
         deleted = False
+
+        # 패턴 1: {product_id}{ext} (현재 표준 패턴)
         for ext in extensions:
             file_path = self.cache_dir / f"{product_id}{ext}"
             if file_path.exists():
+                file_path.unlink()
+                deleted = True
+
+        # 패턴 2: {product_id}_*_icon{ext} (이전 패턴 - 하위 호환성)
+        for file_path in self.cache_dir.glob(f"{product_id}_*_icon.*"):
+            if file_path.is_file():
                 file_path.unlink()
                 deleted = True
 
@@ -423,10 +431,16 @@ class IconCache:
         """
         deleted_count = 0
 
-        # {product_id}_screenshot_* 패턴의 파일 찾기
-        pattern = f"{product_id}_screenshot_*"
+        # 패턴 1: {product_id}_screenshot_* (현재 표준 패턴)
+        pattern1 = f"{product_id}_screenshot_*"
+        for file_path in self.screenshot_cache_dir.glob(pattern1):
+            if file_path.is_file():
+                file_path.unlink()
+                deleted_count += 1
 
-        for file_path in self.screenshot_cache_dir.glob(pattern):
+        # 패턴 2: {product_id}_*_screenshot_* (이전 패턴 - 하위 호환성)
+        pattern2 = f"{product_id}_*_screenshot_*"
+        for file_path in self.screenshot_cache_dir.glob(pattern2):
             if file_path.is_file():
                 file_path.unlink()
                 deleted_count += 1

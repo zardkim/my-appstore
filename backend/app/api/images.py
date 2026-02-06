@@ -331,9 +331,8 @@ async def upload_logo(
             else:
                 file_ext = ".png"
 
-        # 제품명을 포함한 파일명 생성
-        title_part = sanitize_filename(product.title, max_length=30)
-        filename = f"{product_id}_{title_part}_icon{file_ext}"
+        # 파일명 생성 (icon_cache.py와 동일한 패턴 사용)
+        filename = f"{product_id}{file_ext}"
         file_path = Path(settings.ICON_CACHE_DIR) / filename
 
         with open(file_path, 'wb') as f:
@@ -420,9 +419,8 @@ async def upload_screenshots(
                 else:
                     file_ext = ".png"
 
-            # 제품명을 포함한 파일명 생성
-            title_part = sanitize_filename(product.title, max_length=30)
-            filename = f"{product_id}_{title_part}_screenshot_{i}{file_ext}"
+            # 파일명 생성 (icon_cache.py와 동일한 패턴 사용)
+            filename = f"{product_id}_screenshot_{i}{file_ext}"
             file_path = Path(settings.SCREENSHOT_CACHE_DIR) / filename
 
             # 디렉토리 생성 (없으면)

@@ -557,9 +557,9 @@
 
                 <!-- Screenshot Buttons (Admin only) -->
                 <div v-if="authStore.user?.role === 'admin'" class="flex gap-2">
-                  <!-- URL로 스크린샷 추가 -->
+                  <!-- URL로 스크린샷 추가/편집 -->
                   <button
-                    @click="showScreenshotUrlDialog = true"
+                    @click="openScreenshotUrlDialog"
                     class="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
                   >
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1204,14 +1204,14 @@
       </div>
     </div>
 
-    <!-- Screenshot URL Input Dialog -->
+    <!-- Screenshot URL Input Dialog (개별 슬롯 1-4) -->
     <div
       v-if="showScreenshotUrlDialog"
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
       @click="showScreenshotUrlDialog = false"
     >
       <div
-        class="relative max-w-lg w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+        class="relative max-w-2xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
         @click.stop
       >
         <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 flex items-center justify-between">
@@ -1227,18 +1227,39 @@
             </svg>
           </button>
         </div>
-        <div class="p-6">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('productDetail.imageUrl') }}</label>
-          <input
-            v-model="screenshotUrlInput"
-            type="url"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            :placeholder="t('productDetail.imageUrlPlaceholder')"
-            @keyup.enter="addScreenshotFromUrl"
-          />
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            {{ t('productDetail.screenshotsRemaining', { count: 4 - (product?.screenshots?.length || 0) }) }}
-          </p>
+        <div class="p-6 max-h-[70vh] overflow-y-auto">
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ t('productDetail.screenshotUrlDescription') }}</p>
+          <div class="space-y-4">
+            <div v-for="idx in 4" :key="idx" class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-20 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center">
+                <img
+                  v-if="getScreenshotUrlInputPreview(idx - 1)"
+                  :src="getScreenshotUrlInputPreview(idx - 1)"
+                  class="w-full h-full object-cover"
+                  @error="handleImageError($event)"
+                />
+                <span v-else class="text-xs text-gray-400">{{ idx }}</span>
+              </div>
+              <div class="flex-1">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('productDetail.screenshotSlot', { index: idx }) }}</label>
+                <input
+                  v-model="screenshotUrlInputs[idx - 1]"
+                  type="url"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  :placeholder="t('productDetail.imageUrlPlaceholder')"
+                />
+              </div>
+              <button
+                v-if="screenshotUrlInputs[idx - 1]"
+                @click="screenshotUrlInputs[idx - 1] = ''"
+                class="flex-shrink-0 p-2 text-gray-400 hover:text-red-500 transition-colors mt-5"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
           <div class="flex gap-3 mt-6">
             <button
               @click="showScreenshotUrlDialog = false"
@@ -1247,10 +1268,11 @@
               {{ t('common.cancel') }}
             </button>
             <button
-              @click="addScreenshotFromUrl"
-              class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              @click="saveScreenshotUrls"
+              :disabled="!hasAnyScreenshotUrl"
+              class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {{ t('common.add') }}
+              {{ t('common.save') }}
             </button>
           </div>
         </div>
@@ -1296,7 +1318,7 @@ const screenshotFileInputs = ref([]) // 스크린샷 파일 input refs
 const showLogoUrlDialog = ref(false) // 로고 URL 입력 다이얼로그
 const showScreenshotUrlDialog = ref(false) // 스크린샷 URL 입력 다이얼로그
 const logoUrlInput = ref('') // 로고 URL 입력값
-const screenshotUrlInput = ref('') // 스크린샷 URL 입력값
+const screenshotUrlInputs = ref(['', '', '', '']) // 스크린샷 URL 입력값 (4개 슬롯)
 
 // 로고 URL에 타임스탬프 추가 (브라우저 캐시 우회)
 const iconUrlWithTimestamp = computed(() => {
@@ -1855,37 +1877,54 @@ const addLogoFromUrl = async () => {
   }
 }
 
-// URL로 스크린샷 추가
-const addScreenshotFromUrl = async () => {
-  if (!screenshotUrlInput.value.trim()) {
-    await alert.warning(t('productDetail.enterScreenshotUrl'))
-    return
+// 스크린샷 URL 다이얼로그 열기 (기존 URL 로드)
+const openScreenshotUrlDialog = () => {
+  // 현재 스크린샷 URL들을 입력 필드에 로드
+  const currentScreenshots = product.value?.screenshots || []
+  screenshotUrlInputs.value = ['', '', '', '']
+  for (let i = 0; i < Math.min(currentScreenshots.length, 4); i++) {
+    const screenshot = currentScreenshots[i]
+    screenshotUrlInputs.value[i] = typeof screenshot === 'object' ? screenshot.url : screenshot
   }
+  showScreenshotUrlDialog.value = true
+}
 
+// 스크린샷 URL 미리보기 (입력된 URL 또는 기존 스크린샷)
+const getScreenshotUrlInputPreview = (index) => {
+  const url = screenshotUrlInputs.value[index]
+  if (url && url.trim()) return url
+  return null
+}
+
+// 스크린샷 URL이 하나라도 있는지 확인
+const hasAnyScreenshotUrl = computed(() => {
+  return screenshotUrlInputs.value.some(url => url && url.trim())
+})
+
+// URL로 스크린샷 저장 (4개 슬롯 개별 처리)
+const saveScreenshotUrls = async () => {
   try {
-    // 현재 스크린샷 목록 가져오기
-    const currentScreenshots = product.value.screenshots || []
-    if (currentScreenshots.length >= 4) {
-      await alert.warning(t('productDetail.maxScreenshots'))
+    // 입력된 URL들만 필터링 (빈 값 제외)
+    const urls = screenshotUrlInputs.value.filter(url => url && url.trim())
+
+    if (urls.length === 0) {
+      await alert.warning(t('productDetail.enterScreenshotUrl'))
       return
     }
 
-    // 새 URL을 기존 목록에 추가
-    const allUrls = [...currentScreenshots, screenshotUrlInput.value.trim()]
-
-    const response = await imagesApi.downloadScreenshots(product.value.id, allUrls)
+    const response = await imagesApi.downloadScreenshots(product.value.id, urls)
     if (response.data.success) {
       // 제품 정보 새로고침
       const productResponse = await productsApi.getById(product.value.id)
       product.value = productResponse.data
       showScreenshotUrlDialog.value = false
-      screenshotUrlInput.value = ''
-      await alert.success(t('productDetail.screenshotAdded'))
+      screenshotUrlInputs.value = ['', '', '', '']
+      await alert.success(t('productDetail.screenshotsSaved'))
     } else {
       await alert.error(response.data.error || t('productDetail.screenshotAddFailed'))
     }
   } catch (error) {
-    console.error('Failed to add screenshot from URL:', error)
+    console.error('Failed to save screenshot URLs:', error)
     await alert.error(t('productDetail.screenshotAddFailed'))
   }
 }

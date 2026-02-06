@@ -257,8 +257,11 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
                     return metadata
                 else:
                     error_text = response.text
-                    logger.debug(f"OpenAI API error: {response.status_code} - {error_text}")
-                    return self._fallback_metadata(parsed_info)
+                    error_info = self._parse_api_error(response.status_code, error_text, 'openai')
+                    logger.error(f"OpenAI API error: {error_info}")
+                    fallback = self._fallback_metadata(parsed_info)
+                    fallback['ai_error'] = error_info
+                    return fallback
 
         except json.JSONDecodeError as e:
             logger.debug(f"JSON parsing error (OpenAI): {e}")
@@ -443,10 +446,15 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
                         return metadata
                     else:
                         logger.debug(f"❌ Gemini API unexpected response: {result}")
-                        return self._fallback_metadata(parsed_info)
+                        fallback = self._fallback_metadata(parsed_info)
+                        fallback['ai_error'] = {'code': 'unexpected_response', 'message': 'Unexpected API response format'}
+                        return fallback
                 else:
-                    logger.debug(f"❌ Gemini API error: {response.status_code} - {response.text}")
-                    return self._fallback_metadata(parsed_info)
+                    error_info = self._parse_api_error(response.status_code, response.text, 'gemini')
+                    logger.error(f"❌ Gemini API error: {error_info}")
+                    fallback = self._fallback_metadata(parsed_info)
+                    fallback['ai_error'] = error_info
+                    return fallback
 
         except json.JSONDecodeError as e:
             logger.debug(f"❌ JSON parsing error (Gemini): {e}")
@@ -470,6 +478,190 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
             text = '\n'.join(lines)
 
         return text.strip()
+
+    def _parse_api_error(self, status_code: int, error_text: str, provider: str) -> dict:
+        """API 에러 코드 파싱 및 사용자 친화적 메시지 생성"""
+        error_info = {
+            'code': status_code,
+            'provider': provider,
+            'raw_error': error_text[:500] if error_text else ''
+        }
+
+        # 공통 에러 코드 처리
+        if status_code == 401:
+            error_info['type'] = 'invalid_api_key'
+            error_info['message'] = 'API 키가 유효하지 않습니다. 설정에서 API 키를 확인해주세요.'
+        elif status_code == 402:
+            error_info['type'] = 'insufficient_quota'
+            error_info['message'] = 'API 사용 한도가 초과되었거나 결제가 필요합니다.'
+        elif status_code == 403:
+            error_info['type'] = 'api_key_blocked'
+            error_info['message'] = 'API 키가 차단되었거나 권한이 없습니다.'
+        elif status_code == 429:
+            error_info['type'] = 'rate_limit'
+            error_info['message'] = 'API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.'
+        elif status_code >= 500:
+            error_info['type'] = 'server_error'
+            error_info['message'] = f'{provider.upper()} 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+        else:
+            error_info['type'] = 'unknown_error'
+            error_info['message'] = f'알 수 없는 오류가 발생했습니다. (코드: {status_code})'
+
+        # 상세 에러 메시지 파싱 시도
+        try:
+            import json as json_module
+            error_data = json_module.loads(error_text)
+            if provider == 'openai':
+                if 'error' in error_data:
+                    error_info['detail'] = error_data['error'].get('message', '')
+                    error_type = error_data['error'].get('type', '')
+                    if error_type == 'insufficient_quota':
+                        error_info['type'] = 'insufficient_quota'
+                        error_info['message'] = 'API 사용 한도가 초과되었습니다. OpenAI 대시보드에서 결제 정보를 확인해주세요.'
+            elif provider == 'gemini':
+                if 'error' in error_data:
+                    error_info['detail'] = error_data['error'].get('message', '')
+        except:
+            pass
+
+        return error_info
+
+    async def test_api_connection(self) -> dict:
+        """
+        API 연결 테스트 및 상태 확인
+
+        Returns:
+            {
+                'success': bool,
+                'provider': str,
+                'model': str,
+                'message': str,
+                'error': dict (if failed)
+            }
+        """
+        if not self.api_key or not self.api_key.strip():
+            return {
+                'success': False,
+                'provider': self.provider,
+                'model': self.model,
+                'message': 'API 키가 설정되지 않았습니다.',
+                'error': {'type': 'no_api_key', 'code': 0}
+            }
+
+        try:
+            if self.provider == 'openai':
+                return await self._test_openai_connection()
+            elif self.provider == 'gemini':
+                return await self._test_gemini_connection()
+            else:
+                return {
+                    'success': False,
+                    'provider': self.provider,
+                    'model': self.model,
+                    'message': f'지원하지 않는 AI 제공자: {self.provider}',
+                    'error': {'type': 'unsupported_provider', 'code': 0}
+                }
+        except Exception as e:
+            return {
+                'success': False,
+                'provider': self.provider,
+                'model': self.model,
+                'message': f'연결 테스트 중 오류 발생: {str(e)}',
+                'error': {'type': 'connection_error', 'code': 0, 'detail': str(e)}
+            }
+
+    async def _test_openai_connection(self) -> dict:
+        """OpenAI API 연결 테스트"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # 간단한 테스트 요청
+                response = await client.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": self.model,
+                        "messages": [{"role": "user", "content": "Hi"}],
+                        "max_tokens": 5
+                    }
+                )
+
+                # Rate limit 헤더 확인
+                rate_limit_info = {
+                    'limit_requests': response.headers.get('x-ratelimit-limit-requests'),
+                    'remaining_requests': response.headers.get('x-ratelimit-remaining-requests'),
+                    'limit_tokens': response.headers.get('x-ratelimit-limit-tokens'),
+                    'remaining_tokens': response.headers.get('x-ratelimit-remaining-tokens'),
+                }
+
+                if response.status_code == 200:
+                    return {
+                        'success': True,
+                        'provider': 'openai',
+                        'model': self.model,
+                        'message': 'API 연결 성공',
+                        'rate_limit': rate_limit_info
+                    }
+                else:
+                    error_info = self._parse_api_error(response.status_code, response.text, 'openai')
+                    return {
+                        'success': False,
+                        'provider': 'openai',
+                        'model': self.model,
+                        'message': error_info['message'],
+                        'error': error_info,
+                        'rate_limit': rate_limit_info
+                    }
+        except httpx.TimeoutException:
+            return {
+                'success': False,
+                'provider': 'openai',
+                'model': self.model,
+                'message': 'API 연결 시간 초과',
+                'error': {'type': 'timeout', 'code': 0}
+            }
+
+    async def _test_gemini_connection(self) -> dict:
+        """Gemini API 연결 테스트"""
+        try:
+            api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    api_url,
+                    headers={"Content-Type": "application/json"},
+                    json={
+                        "contents": [{"parts": [{"text": "Hi"}]}],
+                        "generationConfig": {"maxOutputTokens": 5}
+                    }
+                )
+
+                if response.status_code == 200:
+                    return {
+                        'success': True,
+                        'provider': 'gemini',
+                        'model': self.model,
+                        'message': 'API 연결 성공'
+                    }
+                else:
+                    error_info = self._parse_api_error(response.status_code, response.text, 'gemini')
+                    return {
+                        'success': False,
+                        'provider': 'gemini',
+                        'model': self.model,
+                        'message': error_info['message'],
+                        'error': error_info
+                    }
+        except httpx.TimeoutException:
+            return {
+                'success': False,
+                'provider': 'gemini',
+                'model': self.model,
+                'message': 'API 연결 시간 초과',
+                'error': {'type': 'timeout', 'code': 0}
+            }
 
     async def is_filename_clear_for_matching(
         self,

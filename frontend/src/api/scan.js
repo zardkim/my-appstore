@@ -27,5 +27,9 @@ export const scanApi = {
 
   async previewScan(path, limit = 100) {
     return apiClient.get('scan/preview', { params: { path, limit } })
+  },
+
+  async testAiApi() {
+    return apiClient.get('scan/test-api')
   }
 }

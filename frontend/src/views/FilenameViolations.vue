@@ -722,18 +722,40 @@ const batchDeleteSelected = async () => {
 
 const openAIMatchingDialog = async (violation) => {
   try {
-    // 1. 파일명에서 제품명 추출 (suggestion 사용 또는 폴더명 사용)
+    // 1. 폴더명과 파일명에서 제품명 추출
     const folderName = violation.folder_path.split('/').filter(Boolean).pop() || ''
-    const parsedName = folderName || violation.file_name.replace(/\.(exe|msi|zip|rar|7z|iso)$/i, '')
+    const fileNameWithoutExt = violation.file_name.replace(/\.(exe|msi|zip|rar|7z|iso|dmg|pkg|deb|rpm|tar\.gz|tar\.bz2)$/i, '')
 
-    // 2. 기존 제품 검색
-    const searchResponse = await productsApi.getProducts({ search: parsedName, limit: 10 })
-    const products = searchResponse.data.items || searchResponse.data
+    // 검색할 이름들 (폴더명 우선, 파일명 차선)
+    const searchNames = [folderName, fileNameWithoutExt].filter(Boolean)
 
-    // 3. 정확히 일치하는 제품 찾기 (대소문자 구분 없이)
-    const matchedProduct = products.find(p =>
-      p.title.toLowerCase() === parsedName.toLowerCase()
-    )
+    // 2. 각 이름으로 기존 제품 검색
+    let matchedProduct = null
+
+    for (const searchName of searchNames) {
+      if (!searchName || searchName.length < 2) continue
+
+      const searchResponse = await productsApi.getProducts({ search: searchName, limit: 20 })
+      const products = searchResponse.data.items || searchResponse.data
+
+      if (!products || products.length === 0) continue
+
+      // 정확히 일치하는 제품 찾기 (대소문자 구분 없이)
+      matchedProduct = products.find(p =>
+        p.title.toLowerCase() === searchName.toLowerCase()
+      )
+
+      // 정확한 매칭이 없으면 포함 관계 확인 (제품명이 검색어를 포함하거나 검색어가 제품명을 포함)
+      if (!matchedProduct) {
+        matchedProduct = products.find(p => {
+          const pTitle = p.title.toLowerCase()
+          const sName = searchName.toLowerCase()
+          return pTitle.includes(sName) || sName.includes(pTitle)
+        })
+      }
+
+      if (matchedProduct) break
+    }
 
     if (matchedProduct) {
       // 제품이 이미 있으면 바로 버전으로 추가

@@ -101,3 +101,4 @@ htmlcov/
 # Development folders
 sample/
 redis/
+data/config.json
