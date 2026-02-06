@@ -63,6 +63,16 @@ END
 echo "Database tables will be created by SQLAlchemy Base.metadata.create_all()"
 echo "Note: For future migrations, Alembic configuration can be added to the Docker image"
 
+# config.json 파일이 없으면 config.sample.json에서 복사
+CONFIG_DIR="${CONFIG_DATA_DIR:-/app/data}"
+if [ ! -f "$CONFIG_DIR/config.json" ] && [ -f "$CONFIG_DIR/config.sample.json" ]; then
+    echo "Creating config.json from config.sample.json..."
+    cp "$CONFIG_DIR/config.sample.json" "$CONFIG_DIR/config.json"
+    echo "✓ config.json created successfully"
+elif [ ! -f "$CONFIG_DIR/config.json" ]; then
+    echo "Warning: Neither config.json nor config.sample.json found in $CONFIG_DIR"
+fi
+
 # Execute the main command (passed as arguments)
 echo "Starting application..."
 exec "$@"

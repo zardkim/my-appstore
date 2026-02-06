@@ -217,14 +217,14 @@
                   class="px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white backdrop-blur-sm border border-white/30 text-gray-900 focus:outline-none focus:border-blue-500"
                 >
                   <option value="" class="text-gray-900">{{ t('productDetail.selectCategory') }}</option>
-                  <option v-for="cat in categories" :key="cat" :value="cat" class="text-gray-900">{{ getCategoryIcon(cat) }} {{ t('categories.' + cat) || cat }}</option>
+                  <option v-for="cat in categories" :key="cat" :value="cat" class="text-gray-900">{{ getCategoryIcon(cat) }} {{ getCategoryLabel(cat) }}</option>
                 </select>
                 <span
                   v-else-if="product.category"
                   class="inline-flex items-center px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white/20 backdrop-blur-sm border border-white/30"
                 >
                   <span class="mr-1">{{ getCategoryIcon(product.category) }}</span>
-                  <span class="hidden sm:inline">{{ product.category }}</span>
+                  <span class="hidden sm:inline">{{ getCategoryLabel(product.category) }}</span>
                 </span>
                 <span class="inline-flex items-center px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white/20 backdrop-blur-sm border border-white/30">
                   {{ product.versions?.length || 0 }} {{ t('productDetail.versions') }}
@@ -1288,6 +1288,7 @@ import { useI18n } from 'vue-i18n'
 import { productsApi } from '../api/products'
 import { imagesApi } from '../api/images'
 import attachmentsApi from '../api/attachments'
+import { settingsApi } from '../api/settings'
 import { useAuthStore } from '../store/auth'
 import { useThemeStore } from '../store/theme'
 import { getDownloadUrl, getIconUrl, getBackendUrl } from '../utils/env'
@@ -1319,6 +1320,7 @@ const showLogoUrlDialog = ref(false) // 로고 URL 입력 다이얼로그
 const showScreenshotUrlDialog = ref(false) // 스크린샷 URL 입력 다이얼로그
 const logoUrlInput = ref('') // 로고 URL 입력값
 const screenshotUrlInputs = ref(['', '', '', '']) // 스크린샷 URL 입력값 (4개 슬롯)
+const configCategories = ref([]) // config에서 가져온 카테고리 목록
 
 // 로고 URL에 타임스탬프 추가 (브라우저 캐시 우회)
 const iconUrlWithTimestamp = computed(() => {
@@ -1349,29 +1351,17 @@ const editForm = ref({
   screenshots: []
 })
 
-const categories = [
-  'Graphics', 'Office', 'Development', 'Utility', 'Media',
-  'OS', 'Security', 'Game', 'Network', 'Database', 'Design',
-  'Education', 'Business', 'Communication', 'Entertainment'
-]
+// 카테고리 목록 (config에서 동적으로 가져옴)
+const categories = computed(() => configCategories.value.map(cat => cat.name))
 
-const categoryIcons = {
-  'Graphics': '🎨',
-  'Office': '📊',
-  'Development': '💻',
-  'Utility': '🛠️',
-  'Media': '🎬',
-  'OS': '💿',
-  'Security': '🔒',
-  'Game': '🎮',
-  'Network': '🌐',
-  'Database': '🗄️',
-  'Design': '✏️',
-  'Education': '📚',
-  'Business': '💼',
-  'Communication': '💬',
-  'Entertainment': '🎭'
-}
+// 카테고리 아이콘 맵 (config에서 동적으로 가져옴)
+const categoryIcons = computed(() => {
+  const icons = {}
+  configCategories.value.forEach(cat => {
+    icons[cat.name] = cat.icon || '📦'
+  })
+  return icons
+})
 
 const referenceSites = [
   { name: 'Portable Freeware', url: 'https://www.portablefreeware.com/' },
@@ -1386,7 +1376,13 @@ const referenceSites = [
 ]
 
 const getCategoryIcon = (category) => {
-  return categoryIcons[category] || '📦'
+  return categoryIcons.value[category] || '📦'
+}
+
+// 카테고리 레이블 가져오기 (한글 표시용)
+const getCategoryLabel = (categoryName) => {
+  const cat = configCategories.value.find(c => c.name === categoryName)
+  return cat?.label || categoryName
 }
 
 const tabClass = (tab) => {
@@ -2175,6 +2171,15 @@ const loadAttachments = async () => {
 }
 
 onMounted(async () => {
+  // 카테고리 목록 로드 (config에서)
+  try {
+    const configResponse = await settingsApi.getSection('categories')
+    configCategories.value = configResponse.data || []
+  } catch (e) {
+    console.error('Failed to load categories from config:', e)
+    configCategories.value = []
+  }
+
   try {
     const response = await productsApi.getById(route.params.id)
     product.value = response.data
