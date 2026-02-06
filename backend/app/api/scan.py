@@ -383,6 +383,54 @@ async def add_scan_exclusion(
         raise HTTPException(status_code=500, detail=f"Failed to add exclusion: {str(e)}")
 
 
+@router.get("/test-api")
+async def test_ai_api(
+    current_user = Depends(get_current_admin_user)
+):
+    """
+    AI API 연결 테스트 및 상태 확인
+    Admin only
+
+    Returns:
+        - success: 연결 성공 여부
+        - provider: AI 제공자 (openai/gemini)
+        - model: 사용 중인 모델
+        - message: 상태 메시지
+        - rate_limit: API 사용량 정보 (OpenAI만 해당)
+        - error: 에러 정보 (실패 시)
+    """
+    config = load_config()
+    metadata_config = config.get('metadata', {})
+
+    ai_provider = metadata_config.get('aiProvider', 'openai')
+    ai_model = metadata_config.get('aiModel', 'gpt-4o-mini')
+
+    # API 키 가져오기
+    if ai_provider == 'gemini':
+        api_key = metadata_config.get('geminiApiKey', '')
+    else:
+        api_key = metadata_config.get('openaiApiKey', '')
+
+    if not api_key or not api_key.strip():
+        return {
+            'success': False,
+            'provider': ai_provider,
+            'model': ai_model,
+            'message': 'API 키가 설정되지 않았습니다. 설정 > AI/메타데이터에서 API 키를 입력해주세요.',
+            'error': {'type': 'no_api_key', 'code': 0}
+        }
+
+    # AI 메타데이터 생성기 초기화 및 테스트
+    ai_generator = AIMetadataGenerator(
+        provider=ai_provider,
+        api_key=api_key,
+        model=ai_model
+    )
+
+    result = await ai_generator.test_api_connection()
+    return result
+
+
 @router.get("/scan-info")
 async def get_scan_info(db: Session = Depends(get_db)):
     """

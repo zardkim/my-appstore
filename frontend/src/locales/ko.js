@@ -1415,6 +1415,9 @@ export default {
     screenshotAddFailed: '스크린샷 추가에 실패했습니다.',
     maxScreenshots: '스크린샷은 최대 4개까지 추가할 수 있습니다.',
     screenshotsRemaining: '추가 가능: {count}개',
+    screenshotUrlDescription: '각 슬롯에 스크린샷 이미지 URL을 입력하세요. 빈 슬롯은 건너뜁니다.',
+    screenshotSlot: '스크린샷 {index}',
+    screenshotsSaved: '스크린샷이 저장되었습니다.',
   },
 
   // 제품 카드
@@ -1531,6 +1534,18 @@ export default {
     noPermission: '권한이 없습니다. 관리자만 사용할 수 있습니다.',
     searchError: 'AI 검색 중 오류가 발생했습니다. API 키가 설정되어 있는지 확인해주세요.',
     createProductFailed: '제품 생성에 실패했습니다.',
+    // API 에러 관련
+    testApiConnection: 'API 연결 테스트',
+    goToSettings: '설정으로 이동',
+    retry: '다시 시도',
+    apiTestFailed: 'API 테스트에 실패했습니다.',
+    remainingRequests: '남은 요청 수',
+    apiError: 'API 오류가 발생했습니다.',
+    rateLimitError: 'API 요청 한도를 초과했습니다.',
+    rateLimitHint: '잠시 후 다시 시도하거나, 다른 AI 제공자를 사용해보세요.',
+    invalidApiKey: 'API 키가 유효하지 않습니다.',
+    apiKeyHint: '설정에서 API 키를 확인하고 다시 입력해주세요.',
+    quotaHint: 'API 사용량이 초과되었습니다. OpenAI/Google Cloud 대시보드에서 결제 정보를 확인하세요.',
   },
 
   // 푸터
