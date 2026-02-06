@@ -1,0 +1,165 @@
+{
+  "general": {
+    "language": "ko",
+    "frontendUrl": "http://localhost:5900",
+    "backendUrl": "http://localhost:8110",
+    "registrationOpen": false
+  },
+  "folders": {
+    "scanFolders": [
+      "/app/data/library"
+    ]
+  },
+  "categories": [
+    {
+      "name": "Graphics",
+      "label": "그래픽",
+      "icon": "🎨"
+    },
+    {
+      "name": "Office",
+      "label": "오피스",
+      "icon": "📊"
+    },
+    {
+      "name": "Development",
+      "label": "개발",
+      "icon": "💻"
+    },
+    {
+      "name": "Utility",
+      "label": "유틸리티",
+      "icon": "🛠️"
+    },
+    {
+      "name": "Media",
+      "label": "미디어",
+      "icon": "🎬"
+    },
+    {
+      "name": "OS",
+      "label": "운영체제",
+      "icon": "💿"
+    },
+    {
+      "name": "Security",
+      "label": "보안",
+      "icon": "🔒"
+    },
+    {
+      "name": "Network",
+      "label": "네트워크",
+      "icon": "🌐"
+    },
+    {
+      "name": "Mac",
+      "label": "맥",
+      "icon": "🍎"
+    },
+    {
+      "name": "Mobile",
+      "label": "모바일",
+      "icon": "📱"
+    },
+    {
+      "name": "Patch",
+      "label": "패치",
+      "icon": "🔧"
+    },
+    {
+      "name": "Driver",
+      "label": "드라이버",
+      "icon": "⚙️"
+    },
+    {
+      "name": "Source",
+      "label": "소스코드",
+      "icon": "📦"
+    },
+    {
+      "name": "Backup",
+      "label": "백업&복구",
+      "icon": "💾"
+    },
+    {
+      "name": "Portable",
+      "label": "포터블",
+      "icon": "🎒"
+    },
+    {
+      "name": "Business",
+      "label": "업무용",
+      "icon": "💼"
+    },
+    {
+      "name": "Engineering",
+      "label": "공학용",
+      "icon": "📐"
+    },
+    {
+      "name": "Theme",
+      "label": "테마&스킨",
+      "icon": "🎭"
+    },
+    {
+      "name": "Hardware",
+      "label": "하드웨어",
+      "icon": "🔌"
+    },
+    {
+      "name": "Font",
+      "label": "글꼴",
+      "icon": "🔤"
+    },
+    {
+      "name": "Uncategorized",
+      "label": "미분류",
+      "icon": "📂"
+    }
+  ],
+  "metadata": {
+    "scanMethod": "ai",
+    "aiProvider": "gemini",
+    "aiModel": "gemini-2.5-flash",
+    "geminiApiKey": "",
+    "openaiApiKey": "",
+    "googleApiKey": "",
+    "googleSearchEngineId": "",
+    "useDefaultPrompt": true,
+    "customPromptOpenai": "",
+    "customPromptGemini": ""
+  },
+  "board": {
+    "categories": [
+      {
+        "value": "tip",
+        "label": "팁",
+        "color": "green"
+      },
+      {
+        "value": "tech",
+        "label": "기술",
+        "color": "blue"
+      },
+      {
+        "value": "tutorial",
+        "label": "튜토리얼",
+        "color": "purple"
+      },
+      {
+        "value": "qna",
+        "label": "Q&A",
+        "color": "yellow"
+      },
+      {
+        "value": "news",
+        "label": "뉴스",
+        "color": "red"
+      }
+    ],
+    "postsPerPage": "20",
+    "allowComments": true,
+    "allowAttachments": true,
+    "allowAnonymousComments": false
+  }
+}
