@@ -4,6 +4,8 @@
 """
 import os
 import re
+import asyncio
+import logging
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 from difflib import SequenceMatcher
@@ -14,6 +16,11 @@ from app.models.version import Version
 from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
 from app.core.parser import FilenameParser
 from app.core.redis_cache import invalidate_cache
+
+logger = logging.getLogger(__name__)
+
+# API 오류로 매칭을 중단해야 하는 에러 타입
+FATAL_API_ERRORS = {'rate_limit', 'insufficient_quota', 'invalid_api_key', 'api_key_blocked'}
 
 
 def normalize_title(title: str) -> str:
@@ -202,7 +209,18 @@ async def match_violations_to_products(
         clear_folder_groups = folder_groups
 
     # 4단계: Product 생성 및 Version 매칭
+    api_error_occurred = False  # API 오류 발생 시 나머지 폴더 건너뛰기
+    api_error_info = None
+
     for folder_path, violations_list in clear_folder_groups.items():
+        # API 오류(rate_limit, quota 등)가 발생했으면 나머지 폴더 건너뛰기
+        if api_error_occurred:
+            results["failed"] += len(violations_list)
+            results["errors"].append(
+                f"Skipped {folder_path}: API 오류로 인해 건너뜀 ({api_error_info.get('message', '')})"
+            )
+            continue
+
         try:
             # 메타데이터 준비 (먼저 준비해야 유사도 검사에 사용 가능)
             if provided_metadata:
@@ -214,6 +232,25 @@ async def match_violations_to_products(
                 parsed_info = parser.parse(folder_name)
                 software_name = parsed_info.get('software_name', folder_name)
                 ai_metadata = await generator.generate_detailed_metadata(software_name)
+
+                # AI 오류 확인 (rate_limit, quota 초과 등)
+                if ai_metadata.get('ai_error'):
+                    error_type = ai_metadata['ai_error'].get('type', '')
+                    error_msg = ai_metadata['ai_error'].get('message', '')
+
+                    if error_type in FATAL_API_ERRORS:
+                        # 치명적 API 오류: 현재 폴더 건너뛰고 나머지도 중단
+                        api_error_occurred = True
+                        api_error_info = ai_metadata['ai_error']
+                        results["failed"] += len(violations_list)
+                        results["errors"].append(
+                            f"AI API 오류 ({error_type}): {error_msg}"
+                        )
+                        logger.warning(f"AI API fatal error ({error_type}): {error_msg} - stopping remaining matches")
+                        continue
+
+                # API 호출 간 짧은 딜레이 (rate limit 방지)
+                await asyncio.sleep(0.5)
 
                 # AI 메타데이터 필드명 → Product 모델 필드명 매핑
                 metadata = {
@@ -414,6 +451,10 @@ async def match_violations_to_products(
             db.rollback()
             results["failed"] += len(violations_list)
             results["errors"].append(f"Failed to process {folder_path}: {str(e)}")
+
+    # API 오류 정보를 결과에 포함
+    if api_error_occurred and api_error_info:
+        results["api_error"] = api_error_info
 
     # 캐시 무효화 (매칭이 완료되면 항상 실행)
     if results["matched"] > 0:
