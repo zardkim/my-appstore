@@ -566,6 +566,15 @@ async def create_product_from_violation(
                 "product": product_info
             }
         else:
+            # API 오류 정보가 있으면 구체적 메시지 반환
+            if results.get("api_error"):
+                error_type = results["api_error"].get("type", "")
+                error_msg = results["api_error"].get("message", "")
+                status_code = 429 if error_type == "rate_limit" else 402 if error_type == "insufficient_quota" else 500
+                raise HTTPException(
+                    status_code=status_code,
+                    detail=f"{error_msg}"
+                )
             raise HTTPException(
                 status_code=500,
                 detail=f"Product 생성 실패: {', '.join(results['errors']) if results['errors'] else 'Unknown error'}"

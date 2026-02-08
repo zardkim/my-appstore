@@ -158,8 +158,14 @@ async def start_scan(
         # 매칭 결과를 results에 반영
         if match_results.get("matched", 0) > 0:
             results["new_products"] = match_results["matched"]
-            if match_results.get("errors"):
-                results["errors"].extend(match_results["errors"])
+        if match_results.get("errors"):
+            results["errors"].extend(match_results["errors"])
+        # API 오류 정보 전달
+        if match_results.get("api_error"):
+            results["errors"].append(
+                f"[{match_results['api_error'].get('type', 'unknown')}] "
+                f"{match_results['api_error'].get('message', 'AI API 오류')}"
+            )
 
         # 캐시 무효화 (새 제품이 추가되었을 수 있음)
         invalidate_cache([
