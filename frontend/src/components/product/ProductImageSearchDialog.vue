@@ -98,13 +98,9 @@ const toRelativePath = (url) => {
   return url
 }
 
-// title + 최신 버전의 주요 버전으로 검색어 구성
+// 소프트웨어명으로만 검색
 const searchQueryWithVersion = computed(() => {
-  const title = props.product?.title || ''
-  const versions = props.product?.versions || []
-  const latestVersion = versions.length > 0 ? versions[versions.length - 1]?.version_name || '' : ''
-  const majorVersion = latestVersion.replace(/^(v?\d+).*/, '$1')
-  return majorVersion ? `${title} ${majorVersion}` : title
+  return props.product?.title || ''
 })
 
 const handleLogoUpdate = () => {
