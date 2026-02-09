@@ -345,12 +345,9 @@ async def upload_logo(
         product.icon_url = local_path
         db.commit()
 
-        # 응답에는 전체 URL 반환 (API 응답용)
-        full_url = f"{settings.get_backend_url()}{local_path}"
-
         return ImageUploadResponse(
             success=True,
-            url=full_url
+            url=local_path
         )
 
     except Exception as e:
@@ -495,13 +492,9 @@ async def download_logo_from_url(
             else:
                 logger.debug(f"Download Logo] Product {product_id} not found in DB (test mode), skipping DB update")
 
-            # 응답에는 전체 URL 반환 (API 응답용)
-            full_url = f"{settings.get_backend_url()}{local_path}"
-            logger.debug(f"Download Logo] Full URL: {full_url}")
-
             return ImageUploadResponse(
                 success=True,
-                url=full_url
+                url=local_path
             )
         else:
             return ImageUploadResponse(
@@ -560,16 +553,24 @@ async def download_screenshots_from_urls(
         existing_screenshots = product.screenshots or []
         existing_urls = [s['url'] if isinstance(s, dict) else s for s in existing_screenshots]
 
+        # full URL을 상대경로로 정규화하는 헬퍼
+        def normalize_local_url(u):
+            if u.startswith('/static/'):
+                return u
+            if '/static/' in u:
+                return '/static/' + u.split('/static/', 1)[1]
+            return u
+
         # 요청받은 URL 중 유지할 로컬 URL 목록
         keep_urls = set()
         for url in urls:
-            if url.startswith(settings.BACKEND_URL) or url.startswith('/static/'):
-                keep_urls.add(url)
+            if url.startswith('/static/') or '/static/' in url:
+                keep_urls.add(normalize_local_url(url))
 
         # 기존 스크린샷 중 삭제할 파일만 삭제
         screenshot_dir = Path(settings.SCREENSHOT_CACHE_DIR)
         for old_url in existing_urls:
-            if old_url not in keep_urls:
+            if normalize_local_url(old_url) not in keep_urls:
                 try:
                     # URL에서 파일명 추출
                     if '/static/screenshots/' in old_url:
@@ -588,10 +589,9 @@ async def download_screenshots_from_urls(
         for i, url in enumerate(urls):
             logger.debug(f"Download Screenshots] Processing URL {i+1}/{len(urls)}: {url}")
 
-            # 이미 로컬 파일인 경우 (재사용)
-            if url.startswith(settings.BACKEND_URL) or url.startswith('/static/'):
-                # 기존 로컬 URL 그대로 사용
-                downloaded_local_urls.append(url)
+            # 이미 로컬 파일인 경우 (재사용) — 상대경로로 정규화
+            if url.startswith('/static/') or '/static/' in url:
+                downloaded_local_urls.append(normalize_local_url(url))
                 logger.debug(f"Download Screenshots] - Keeping existing local screenshot")
             else:
                 # 외부 URL 다운로드

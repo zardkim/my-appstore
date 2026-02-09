@@ -175,10 +175,8 @@ class GoogleImageSearcher:
             return []
 
         except Exception as e:
-            logger.debug(f"Google Search] Exception: {e}")
-            import traceback
-            traceback.print_exc()
-            return []
+            logger.error(f"Google Search] Exception: {e}")
+            raise
 
     def is_configured(self) -> bool:
         """
