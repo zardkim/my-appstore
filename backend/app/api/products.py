@@ -17,8 +17,18 @@ from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
 from app.core.parser import FilenameParser
 from app.api.config import load_config
 from app.core.redis_cache import cache_response, invalidate_cache
+from app.config import settings
 
 router = APIRouter()
+
+
+def _validate_icon_url(product):
+    """icon_url이 로컬 파일을 가리키는데 실제 파일이 없으면 None으로 설정"""
+    if product.icon_url and product.icon_url.startswith('/static/icons/'):
+        filename = product.icon_url.split('/static/icons/')[-1].split('?')[0]
+        icon_path = os.path.join(settings.ICON_CACHE_DIR, filename)
+        if not os.path.exists(icon_path):
+            product.icon_url = None
 
 
 @router.get("/", response_model=ProductListResponse)
@@ -76,9 +86,9 @@ async def get_products(
     total = query.count()
     products = query.offset(skip).limit(limit).all()
 
-    # 각 버전의 파일 존재 여부 확인
-    import os
+    # 각 버전의 파일 존재 여부 및 아이콘 유효성 확인
     for product in products:
+        _validate_icon_url(product)
         for version in product.versions:
             version.file_exists = os.path.exists(version.file_path) if version.file_path else False
 
@@ -94,6 +104,8 @@ async def get_recent_products(
 ):
     """Get recently added products"""
     products = db.query(Product).options(joinedload(Product.versions)).order_by(Product.id.desc()).limit(limit).all()
+    for product in products:
+        _validate_icon_url(product)
     return products
 
 
@@ -122,6 +134,8 @@ async def get_products_by_category(
         ).limit(10).all()
 
         if products:
+            for p in products:
+                _validate_icon_url(p)
             result[category] = [ProductResponse.from_orm(p) for p in products]
 
     return result
@@ -162,8 +176,8 @@ async def get_product(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    # 각 버전의 파일 존재 여부 확인
-    import os
+    # 아이콘 유효성 및 각 버전의 파일 존재 여부 확인
+    _validate_icon_url(product)
     for version in product.versions:
         version.file_exists = os.path.exists(version.file_path) if version.file_path else False
 

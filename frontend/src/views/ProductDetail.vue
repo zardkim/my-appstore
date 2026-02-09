@@ -125,6 +125,16 @@
 
               <!-- 로고 버튼들 (Admin만 표시) -->
               <div v-if="authStore.user?.role === 'admin'" class="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <!-- 로고 파일 업로드 -->
+                <button
+                  @click="triggerLogoUpload"
+                  class="w-7 h-7 sm:w-8 sm:h-8 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110"
+                  :title="t('productDetail.uploadLogo')"
+                >
+                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </button>
                 <!-- URL로 로고 추가 -->
                 <button
                   @click="showLogoUrlDialog = true"
@@ -146,6 +156,14 @@
                   </svg>
                 </button>
               </div>
+              <!-- 로고 업로드용 숨김 input -->
+              <input
+                ref="logoFileInput"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="handleLogoFileUpload"
+              />
             </div>
 
             <div class="flex-1">
@@ -1805,6 +1823,35 @@ const saveEdit = async () => {
 }
 
 // Logo search dialog handlers
+// 로고 파일 업로드
+const logoFileInput = ref(null)
+
+const triggerLogoUpload = () => {
+  logoFileInput.value?.click()
+}
+
+const handleLogoFileUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  try {
+    const response = await imagesApi.uploadLogo(product.value.id, file)
+    if (response.data.success) {
+      product.value.icon_url = response.data.url
+      iconTimestamp.value = Date.now()
+      await alert.success(t('productDetail.logoUploaded'))
+    } else {
+      await alert.error(response.data.error || t('productDetail.logoUploadFailed'))
+    }
+  } catch (error) {
+    console.error('Failed to upload logo:', error)
+    await alert.error(t('productDetail.logoUploadFailed'))
+  } finally {
+    // input 초기화
+    if (logoFileInput.value) logoFileInput.value.value = ''
+  }
+}
+
 const openLogoSearch = () => {
   logoSearchDialogOpen.value = true
 }

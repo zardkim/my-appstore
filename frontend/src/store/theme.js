@@ -19,13 +19,19 @@ export const useThemeStore = defineStore('theme', () => {
     applyTheme()
   }
 
-  // Apply theme to document
+  // Apply theme to document and update theme-color meta tags
   const applyTheme = () => {
     if (isDark.value) {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
+
+    // Update theme-color meta tags for browser/PWA status bar
+    const themeColor = isDark.value ? '#111827' : '#ffffff'
+    document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
+      meta.setAttribute('content', themeColor)
+    })
   }
 
   // Toggle theme

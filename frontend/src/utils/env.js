@@ -107,8 +107,11 @@ export function getDownloadUrl(versionId, token) {
 export function getIconUrl(iconUrl) {
   if (!iconUrl) return ''
 
-  // If already a full URL, return as-is
+  // If full URL containing /static/, extract relative path for proxy compatibility
   if (iconUrl.startsWith('http://') || iconUrl.startsWith('https://')) {
+    if (iconUrl.includes('/static/')) {
+      return '/static/' + iconUrl.split('/static/')[1]
+    }
     return iconUrl
   }
 
@@ -134,8 +137,11 @@ export function getScreenshotUrl(screenshot) {
 
   if (!url) return ''
 
-  // If already a full URL, return as-is
+  // If full URL containing /static/, extract relative path for proxy compatibility
   if (url.startsWith('http://') || url.startsWith('https://')) {
+    if (url.includes('/static/')) {
+      return '/static/' + url.split('/static/')[1]
+    }
     return url
   }
 
