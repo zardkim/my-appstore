@@ -191,26 +191,15 @@ app.add_middleware(
 from app.middleware.logging_middleware import LoggingMiddleware
 app.add_middleware(LoggingMiddleware)
 
-# Mount static files directory for icons
-if os.path.exists(settings.ICON_CACHE_DIR):
-    app.mount("/static/icons", StaticFiles(directory=settings.ICON_CACHE_DIR), name="icons")
-    logger.info(f"✓ Icons mounted: /static/icons -> {settings.ICON_CACHE_DIR}")
-else:
-    logger.warning(f"⚠ Icons directory does not exist: {settings.ICON_CACHE_DIR}")
-
-# Mount static files directory for screenshots
-if os.path.exists(settings.SCREENSHOT_CACHE_DIR):
-    app.mount("/static/screenshots", StaticFiles(directory=settings.SCREENSHOT_CACHE_DIR), name="screenshots")
-    logger.info(f"✓ Screenshots mounted: /static/screenshots -> {settings.SCREENSHOT_CACHE_DIR}")
-else:
-    logger.warning(f"Screenshots directory does not exist: {settings.SCREENSHOT_CACHE_DIR}")
-
-# Mount static files directory for external images (post content images)
-if os.path.exists(settings.EXIMAGE_DIR):
-    app.mount("/static/eximage", StaticFiles(directory=settings.EXIMAGE_DIR), name="eximage")
-    logger.info(f"✓ External images mounted: /static/eximage -> {settings.EXIMAGE_DIR}")
-else:
-    logger.warning(f"External images directory does not exist: {settings.EXIMAGE_DIR}")
+# 정적 파일 디렉토리 생성 및 마운트 (디렉토리가 없으면 자동 생성)
+for dir_path, mount_path, name in [
+    (settings.ICON_CACHE_DIR, "/static/icons", "icons"),
+    (settings.SCREENSHOT_CACHE_DIR, "/static/screenshots", "screenshots"),
+    (settings.EXIMAGE_DIR, "/static/eximage", "eximage"),
+]:
+    os.makedirs(dir_path, exist_ok=True)
+    app.mount(mount_path, StaticFiles(directory=dir_path), name=name)
+    logger.info(f"✓ {name} mounted: {mount_path} -> {dir_path}")
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])

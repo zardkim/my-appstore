@@ -612,6 +612,18 @@
                         </svg>
                       </div>
 
+                      <!-- Admin 전용: URL 입력 버튼 (업로드 좌측) -->
+                      <button
+                        v-if="authStore.user?.role === 'admin'"
+                        @click.stop="promptScreenshotUrl(idx - 1)"
+                        class="absolute bottom-1.5 right-10 sm:bottom-2 sm:right-12 p-1.5 sm:p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-lg transition-colors opacity-0 group-hover:opacity-100"
+                        :title="t('product.screenshots.addFromUrl')"
+                      >
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                      </button>
+
                       <!-- Admin 전용: 업로드 버튼 -->
                       <button
                         v-if="authStore.user?.role === 'admin'"
@@ -1921,6 +1933,39 @@ const saveScreenshotUrls = async () => {
     }
   } catch (error) {
     console.error('Failed to save screenshot URLs:', error)
+    await alert.error(t('productDetail.screenshotAddFailed'))
+  }
+}
+
+// 개별 스크린샷 슬롯에 URL로 추가
+const promptScreenshotUrl = async (index) => {
+  const url = window.prompt(t('productDetail.enterScreenshotUrl'))
+  if (!url || !url.trim()) return
+
+  try {
+    // 기존 스크린샷 배열을 유지하면서 해당 인덱스에 새 URL 삽입
+    const screenshots = product.value?.screenshots || []
+    const allUrls = []
+    for (let i = 0; i < 4; i++) {
+      if (i === index) {
+        allUrls.push(url.trim())
+      } else if (screenshots[i]) {
+        const s = screenshots[i]
+        const sUrl = typeof s === 'object' ? s.url : s
+        if (sUrl) allUrls.push(sUrl)
+      }
+    }
+
+    const response = await imagesApi.downloadScreenshots(product.value.id, allUrls)
+    if (response.data.success) {
+      const productResponse = await productsApi.getById(product.value.id)
+      product.value = productResponse.data
+      await alert.success(t('productDetail.screenshotsSaved'))
+    } else {
+      await alert.error(response.data.error || t('productDetail.screenshotAddFailed'))
+    }
+  } catch (error) {
+    console.error('Failed to add screenshot from URL:', error)
     await alert.error(t('productDetail.screenshotAddFailed'))
   }
 }
