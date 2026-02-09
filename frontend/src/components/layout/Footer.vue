@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
       <div class="flex items-center space-x-4">
         <span>
-          <a href="https://discord.gg/tbG3EwsY" target="_blank" rel="noopener noreferrer" class="hover:text-gray-900 dark:hover:text-white transition-colors">zardkim</a>
+          <a href="https://discord.gg/kjqZYrbU" target="_blank" rel="noopener noreferrer" class="hover:text-gray-900 dark:hover:text-white transition-colors">zardkim</a>
           &copy; {{ currentYear }} MyApp Store. {{ $t('footer.copyright') }}
         </span>
         <span class="text-gray-400 dark:text-gray-600">|</span>

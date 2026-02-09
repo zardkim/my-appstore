@@ -101,11 +101,26 @@ class FileScanner:
         """폴더가 스캔 예외 목록에 있는지 확인"""
         return folder_name.lower() in [ex.lower() for ex in self.scan_exclusions]
 
+    # 이미지 및 비소프트웨어 확장자 (항상 제외)
+    EXCLUDED_EXTENSIONS = {
+        # 이미지 파일
+        '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.tif',
+        '.svg', '.webp', '.ico', '.heic', '.heif', '.avif',
+        # 레지스트리 파일
+        '.reg',
+    }
+
     def _is_excluded_file(self, file_name: str) -> bool:
         """파일이 스캔 예외 목록에 있는지 확인 (와일드카드 패턴 지원)"""
         import fnmatch
 
         file_name_lower = file_name.lower()
+
+        # 이미지/레지스트리 등 비소프트웨어 확장자 제외
+        ext = os.path.splitext(file_name_lower)[1]
+        if ext in self.EXCLUDED_EXTENSIONS:
+            logger.debug(f"File {file_name} excluded by extension: {ext}")
+            return True
 
         # 정확한 파일명 매칭 (폴더 예외 목록에서)
         if file_name_lower in [ex.lower() for ex in self.scan_exclusions]:
@@ -118,10 +133,6 @@ class FileScanner:
             if fnmatch.fnmatch(file_name_lower, pattern_lower):
                 logger.info(f"File {file_name} excluded by pattern match: {pattern}")
                 return True
-
-        # 디버그: 매칭 실패 시 로그
-        if file_name_lower in ['.gitkeep', 'readme.md'] or file_name_lower.endswith('.md'):
-            logger.warning(f"File {file_name} NOT excluded. Patterns: {self.scan_patterns}, Folders: {self.scan_exclusions}")
 
         return False
 
@@ -325,18 +336,25 @@ class FileScanner:
         """
         folder_path_str = str(folder.absolute())
 
-        # Scan files in the folder and add them to FilenameViolation
+        # 유효한 파일만 수집 (제외 대상 건너뛰기)
+        valid_files = []
         for file_path in folder.iterdir():
             if file_path.is_file():
-                # 예외 파일 건너뛰기 (desktop.ini, .DS_Store 등)
                 if self._is_excluded_file(file_path.name):
                     logger.debug(f"Skipping excluded file: {file_path.name}")
                     continue
-                logger.debug(f"Processing file: {file_path.name}")
-                results["scanned_files"] += 1
-                self._add_scanned_file(file_path, folder_path_str, results)
-                # 스캔된 파일 추적
-                scanned_files.add(str(file_path.absolute()))
+                valid_files.append(file_path)
+
+        # 유효한 파일이 없으면 폴더 건너뛰기
+        if not valid_files:
+            logger.debug(f"Skipping empty folder (no valid files): {folder}")
+            return
+
+        for file_path in valid_files:
+            logger.debug(f"Processing file: {file_path.name}")
+            results["scanned_files"] += 1
+            self._add_scanned_file(file_path, folder_path_str, results)
+            scanned_files.add(str(file_path.absolute()))
 
     def _process_folder(self, folder: Path, results: Dict, scanned_files: set):
         """
@@ -350,18 +368,25 @@ class FileScanner:
         """
         folder_path_str = str(folder.absolute())
 
-        # Scan files in the folder and add them to FilenameViolation
+        # 유효한 파일만 수집 (제외 대상 건너뛰기)
+        valid_files = []
         for file_path in folder.iterdir():
             if file_path.is_file():
-                # 예외 파일 건너뛰기 (desktop.ini, .DS_Store 등)
                 if self._is_excluded_file(file_path.name):
                     logger.debug(f"Skipping excluded file: {file_path.name}")
                     continue
-                logger.debug(f"Processing file: {file_path.name}")
-                results["scanned_files"] += 1
-                self._add_scanned_file(file_path, folder_path_str, results)
-                # 스캔된 파일 추적
-                scanned_files.add(str(file_path.absolute()))
+                valid_files.append(file_path)
+
+        # 유효한 파일이 없으면 폴더 건너뛰기
+        if not valid_files:
+            logger.debug(f"Skipping empty folder (no valid files): {folder}")
+            return
+
+        for file_path in valid_files:
+            logger.debug(f"Processing file: {file_path.name}")
+            results["scanned_files"] += 1
+            self._add_scanned_file(file_path, folder_path_str, results)
+            scanned_files.add(str(file_path.absolute()))
 
     def _process_file(self, file_path: Path, product: Product, results: Dict):
         """
