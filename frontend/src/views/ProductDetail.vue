@@ -575,16 +575,6 @@
 
                 <!-- Screenshot Buttons (Admin only) -->
                 <div v-if="authStore.user?.role === 'admin'" class="flex gap-2">
-                  <!-- URL로 스크린샷 추가/편집 -->
-                  <button
-                    @click="openScreenshotUrlDialog"
-                    class="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
-                  >
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
-                    <span>{{ t('product.screenshots.addFromUrl') }}</span>
-                  </button>
                   <!-- 스크린샷 검색 -->
                   <button
                     @click="openScreenshotSearch"
@@ -629,18 +619,6 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                         </svg>
                       </div>
-
-                      <!-- Admin 전용: URL 입력 버튼 (업로드 좌측) -->
-                      <button
-                        v-if="authStore.user?.role === 'admin'"
-                        @click.stop="promptScreenshotUrl(idx - 1)"
-                        class="absolute bottom-1.5 right-10 sm:bottom-2 sm:right-12 p-1.5 sm:p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-lg transition-colors opacity-0 group-hover:opacity-100"
-                        :title="t('product.screenshots.addFromUrl')"
-                      >
-                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                      </button>
 
                       <!-- Admin 전용: 업로드 버튼 -->
                       <button
@@ -1234,80 +1212,6 @@
       </div>
     </div>
 
-    <!-- Screenshot URL Input Dialog (개별 슬롯 1-4) -->
-    <div
-      v-if="showScreenshotUrlDialog"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
-      @click="showScreenshotUrlDialog = false"
-    >
-      <div
-        class="relative max-w-2xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
-        @click.stop
-      >
-        <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 flex items-center justify-between">
-          <div class="flex items-center">
-            <svg class="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <h3 class="text-xl font-bold text-white">{{ t('productDetail.addScreenshotFromUrlTitle') }}</h3>
-          </div>
-          <button @click="showScreenshotUrlDialog = false" class="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div class="p-6 max-h-[70vh] overflow-y-auto">
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ t('productDetail.screenshotUrlDescription') }}</p>
-          <div class="space-y-4">
-            <div v-for="idx in 4" :key="idx" class="flex items-start gap-3">
-              <div class="flex-shrink-0 w-20 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center">
-                <img
-                  v-if="getScreenshotUrlInputPreview(idx - 1)"
-                  :src="getScreenshotUrlInputPreview(idx - 1)"
-                  class="w-full h-full object-cover"
-                  @error="handleImageError($event)"
-                />
-                <span v-else class="text-xs text-gray-400">{{ idx }}</span>
-              </div>
-              <div class="flex-1">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('productDetail.screenshotSlot', { index: idx }) }}</label>
-                <input
-                  v-model="screenshotUrlInputs[idx - 1]"
-                  type="url"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  :placeholder="t('productDetail.imageUrlPlaceholder')"
-                />
-              </div>
-              <button
-                v-if="screenshotUrlInputs[idx - 1]"
-                @click="screenshotUrlInputs[idx - 1] = ''"
-                class="flex-shrink-0 p-2 text-gray-400 hover:text-red-500 transition-colors mt-5"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="flex gap-3 mt-6">
-            <button
-              @click="showScreenshotUrlDialog = false"
-              class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-            >
-              {{ t('common.cancel') }}
-            </button>
-            <button
-              @click="saveScreenshotUrls"
-              :disabled="!hasAnyScreenshotUrl"
-              class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {{ t('common.save') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -1347,9 +1251,7 @@ const iconTimestamp = ref(Date.now()) // 로고 캐시 버스팅용 타임스탬
 const isWritingGuide = ref(false) // 설치방법 가이드 작성 모드
 const screenshotFileInputs = ref([]) // 스크린샷 파일 input refs
 const showLogoUrlDialog = ref(false) // 로고 URL 입력 다이얼로그
-const showScreenshotUrlDialog = ref(false) // 스크린샷 URL 입력 다이얼로그
 const logoUrlInput = ref('') // 로고 URL 입력값
-const screenshotUrlInputs = ref(['', '', '', '']) // 스크린샷 URL 입력값 (4개 슬롯)
 const configCategories = ref([]) // config에서 가져온 카테고리 목록
 
 // 로고 URL에 타임스탬프 추가 (브라우저 캐시 우회)
@@ -1932,91 +1834,6 @@ const addLogoFromUrl = async () => {
   }
 }
 
-// 스크린샷 URL 다이얼로그 열기 (기존 URL 로드)
-const openScreenshotUrlDialog = () => {
-  // 현재 스크린샷 URL들을 입력 필드에 로드
-  const currentScreenshots = product.value?.screenshots || []
-  screenshotUrlInputs.value = ['', '', '', '']
-  for (let i = 0; i < Math.min(currentScreenshots.length, 4); i++) {
-    const screenshot = currentScreenshots[i]
-    screenshotUrlInputs.value[i] = typeof screenshot === 'object' ? screenshot.url : screenshot
-  }
-  showScreenshotUrlDialog.value = true
-}
-
-// 스크린샷 URL 미리보기 (입력된 URL 또는 기존 스크린샷)
-const getScreenshotUrlInputPreview = (index) => {
-  const url = screenshotUrlInputs.value[index]
-  if (url && url.trim()) return url
-  return null
-}
-
-// 스크린샷 URL이 하나라도 있는지 확인
-const hasAnyScreenshotUrl = computed(() => {
-  return screenshotUrlInputs.value.some(url => url && url.trim())
-})
-
-// URL로 스크린샷 저장 (4개 슬롯 개별 처리)
-const saveScreenshotUrls = async () => {
-  try {
-    // 입력된 URL들만 필터링 (빈 값 제외)
-    const urls = screenshotUrlInputs.value.filter(url => url && url.trim())
-
-    if (urls.length === 0) {
-      await alert.warning(t('productDetail.enterScreenshotUrl'))
-      return
-    }
-
-    const response = await imagesApi.downloadScreenshots(product.value.id, urls)
-    if (response.data.success) {
-      // 제품 정보 새로고침
-      const productResponse = await productsApi.getById(product.value.id)
-      product.value = productResponse.data
-      showScreenshotUrlDialog.value = false
-      screenshotUrlInputs.value = ['', '', '', '']
-      await alert.success(t('productDetail.screenshotsSaved'))
-    } else {
-      await alert.error(response.data.error || t('productDetail.screenshotAddFailed'))
-    }
-  } catch (error) {
-    console.error('Failed to save screenshot URLs:', error)
-    await alert.error(t('productDetail.screenshotAddFailed'))
-  }
-}
-
-// 개별 스크린샷 슬롯에 URL로 추가
-const promptScreenshotUrl = async (index) => {
-  const url = window.prompt(t('productDetail.enterScreenshotUrl'))
-  if (!url || !url.trim()) return
-
-  try {
-    // 기존 스크린샷 배열을 유지하면서 해당 인덱스에 새 URL 삽입
-    const screenshots = product.value?.screenshots || []
-    const allUrls = []
-    for (let i = 0; i < 4; i++) {
-      if (i === index) {
-        allUrls.push(url.trim())
-      } else if (screenshots[i]) {
-        const s = screenshots[i]
-        const sUrl = typeof s === 'object' ? s.url : s
-        if (sUrl) allUrls.push(sUrl)
-      }
-    }
-
-    const response = await imagesApi.downloadScreenshots(product.value.id, allUrls)
-    if (response.data.success) {
-      const productResponse = await productsApi.getById(product.value.id)
-      product.value = productResponse.data
-      await alert.success(t('productDetail.screenshotsSaved'))
-    } else {
-      await alert.error(response.data.error || t('productDetail.screenshotAddFailed'))
-    }
-  } catch (error) {
-    console.error('Failed to add screenshot from URL:', error)
-    await alert.error(t('productDetail.screenshotAddFailed'))
-  }
-}
-
 // Delete screenshot
 const deleteScreenshot = async (index) => {
   const shouldDelete = await confirm.danger(t('productDetail.deleteScreenshot'))
@@ -2057,46 +1874,25 @@ const triggerScreenshotUpload = (index) => {
   }
 }
 
-// Upload screenshot at specific index
+// Upload screenshot at specific index (단일 슬롯만 교체, 다른 슬롯 유지)
 const uploadScreenshot = async (event, index) => {
   const file = event.target.files[0]
   if (!file) return
 
   try {
-    // 현재 스크린샷 배열 가져오기
-    const currentScreenshots = [...(product.value.screenshots || [])]
+    const response = await imagesApi.uploadScreenshotFile(product.value.id, file, index)
 
-    // 해당 인덱스에 스크린샷이 없으면 배열 확장
-    while (currentScreenshots.length <= index) {
-      currentScreenshots.push(null)
-    }
-
-    // FormData 생성 및 파일 추가
-    const formData = new FormData()
-    formData.append('files', file)
-
-    // 단일 스크린샷 업로드
-    const response = await imagesApi.uploadScreenshots(product.value.id, [file])
-
-    // 백엔드는 urls 배열을 반환함
-    if (response.data.success && response.data.urls && response.data.urls.length > 0) {
-      // 새로 업로드된 스크린샷으로 해당 인덱스 대체
-      currentScreenshots[index] = response.data.urls[0]
-
-      // Product의 screenshots 업데이트
-      await productsApi.updateProduct(product.value.id, {
-        screenshots: currentScreenshots.filter(s => s !== null)
-      })
-
-      // Product 다시 로드
+    if (response.data.success) {
+      // Product 다시 로드 (백엔드가 DB를 이미 업데이트함)
       const updatedProduct = await productsApi.getById(product.value.id)
       product.value = updatedProduct.data
+    } else {
+      await alert.error(response.data.error || t('productDetail.screenshotUploadFailed'))
     }
   } catch (error) {
     console.error('Screenshot upload error:', error)
     await alert.error(t('productDetail.screenshotUploadFailed'))
   } finally {
-    // input 초기화
     event.target.value = ''
   }
 }

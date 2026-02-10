@@ -70,6 +70,17 @@ html, body, #app {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* PWA 모바일에서 body 바운스/스크롤 방지 */
+html {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 #app {

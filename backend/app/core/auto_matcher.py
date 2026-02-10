@@ -23,6 +23,37 @@ logger = logging.getLogger(__name__)
 FATAL_API_ERRORS = {'rate_limit', 'insufficient_quota', 'invalid_api_key', 'api_key_blocked'}
 
 
+def extract_version_from_title(title: str) -> Optional[str]:
+    """
+    제목에서 버전/연도 정보 추출 (유사도 비교 시 버전 구분용)
+
+    Args:
+        title: 제품 타이틀
+
+    Returns:
+        버전/연도 문자열 또는 None
+    """
+    if not title:
+        return None
+
+    # 연도 패턴 (2003, 2007, 2010, 2019, 2024 등)
+    year_match = re.search(r'\b((?:19|20)\d{2})\b', title)
+    if year_match:
+        return year_match.group(1)
+
+    # 특수 버전 (365, 360 등)
+    special_match = re.search(r'\b(365|360)\b', title)
+    if special_match:
+        return special_match.group(1)
+
+    # 주요 버전 번호 (v10, v11, 단독 숫자 제외)
+    ver_match = re.search(r'\bv?(\d+(?:\.\d+)+)\b', title)
+    if ver_match:
+        return ver_match.group(1)
+
+    return None
+
+
 def normalize_title(title: str) -> str:
     """
     제품 타이틀을 정규화하여 비교 가능하도록 만듦
@@ -83,6 +114,9 @@ def find_similar_product(
     # 타이틀 정규화
     normalized_title = normalize_title(title)
 
+    # 입력 타이틀에서 버전/연도 추출
+    title_version = extract_version_from_title(title)
+
     # 모든 제품 가져오기 (추후 최적화 가능)
     all_products = db.query(Product).all()
 
@@ -90,6 +124,11 @@ def find_similar_product(
     best_similarity = 0.0
 
     for product in all_products:
+        # 버전/연도 비교: 둘 다 버전이 있는데 다르면 다른 제품으로 판단
+        product_version = extract_version_from_title(product.title)
+        if title_version and product_version and title_version != product_version:
+            continue
+
         # 제품 타이틀 정규화
         product_normalized = normalize_title(product.title)
 
@@ -222,49 +261,8 @@ async def match_violations_to_products(
             continue
 
         try:
-            # 메타데이터 준비 (먼저 준비해야 유사도 검사에 사용 가능)
-            if provided_metadata:
-                # 수동 매칭: 사용자가 제공한 메타데이터 사용
-                metadata = provided_metadata
-            else:
-                # 자동 매칭: AI로 메타데이터 생성
-                folder_name = os.path.basename(folder_path)
-                parsed_info = parser.parse(folder_name)
-                software_name = parsed_info.get('software_name', folder_name)
-                ai_metadata = await generator.generate_detailed_metadata(software_name)
-
-                # AI 오류 확인 (rate_limit, quota 초과 등)
-                if ai_metadata.get('ai_error'):
-                    error_type = ai_metadata['ai_error'].get('type', '')
-                    error_msg = ai_metadata['ai_error'].get('message', '')
-
-                    if error_type in FATAL_API_ERRORS:
-                        # 치명적 API 오류: 현재 폴더 건너뛰고 나머지도 중단
-                        api_error_occurred = True
-                        api_error_info = ai_metadata['ai_error']
-                        results["failed"] += len(violations_list)
-                        results["errors"].append(
-                            f"AI API 오류 ({error_type}): {error_msg}"
-                        )
-                        logger.warning(f"AI API fatal error ({error_type}): {error_msg} - stopping remaining matches")
-                        continue
-
-                # API 호출 간 짧은 딜레이 (rate limit 방지)
-                await asyncio.sleep(0.5)
-
-                # AI 메타데이터 필드명 → Product 모델 필드명 매핑
-                metadata = {
-                    **ai_metadata,
-                    # AI: description_short → Product: description
-                    'description': ai_metadata.get('description_short') or ai_metadata.get('description', ''),
-                    # AI: developer → Product: vendor
-                    'vendor': ai_metadata.get('developer') or ai_metadata.get('vendor', ''),
-                    # AI: description_detailed → Product: detailed_description
-                    'detailed_description': ai_metadata.get('description_detailed') or ai_metadata.get('detailed_description')
-                }
-
-            # 이미 Product가 있는지 확인
-            # 1단계: folder_path로 먼저 검색 (정확한 매칭)
+            # ===== 1단계: 기존 제품 확인 (AI 호출 전에 먼저 체크) =====
+            # folder_path로 정확한 매칭
             existing_product = db.query(Product).filter(
                 Product.folder_path == folder_path
             ).first()
@@ -272,114 +270,165 @@ async def match_violations_to_products(
             # 중복 제품 플래그
             is_duplicate = False
             duplicate_reason = None
+            metadata = None
 
-            # 2단계: folder_path에 없으면 유사한 제품 검색 (중복 방지)
-            # 수동 매칭(AI 매칭)에만 적용
-            if not existing_product and provided_metadata:
-                similar_product = find_similar_product(
-                    db,
-                    metadata.get('title', ''),
-                    metadata.get('vendor')
-                )
-                if similar_product:
-                    existing_product = similar_product
-                    is_duplicate = True
-                    duplicate_reason = f"'{similar_product.title}' 제품과 유사하여 중복으로 판단되었습니다."
-                    # 같은 프로그램이지만 다른 폴더인 경우
-                    # Version만 추가하고 메타데이터는 업데이트하지 않음
-
-            # Product 생성 또는 업데이트
             if existing_product:
+                # 이미 등록된 폴더 → AI 호출 없이 Version만 추가
                 product = existing_product
-
-                # 중복이 아닌 경우에만 메타데이터 업데이트
-                # (같은 folder_path인 경우는 업데이트, 유사 제품인 경우는 건너뛰기)
-                if provided_metadata and not is_duplicate:
-                    if metadata.get('title'):
-                        product.title = metadata['title']
-                    if metadata.get('subtitle'):
-                        product.subtitle = metadata['subtitle']
-                    if metadata.get('description'):
-                        product.description = metadata['description']
-                    if metadata.get('vendor'):
-                        product.vendor = metadata['vendor']
-                    if metadata.get('category'):
-                        product.category = metadata['category']
-                    if metadata.get('official_website'):
-                        product.official_website = metadata['official_website']
-                    if metadata.get('license_type'):
-                        product.license_type = metadata['license_type']
-                    if metadata.get('platform'):
-                        product.platform = metadata['platform']
-                    if metadata.get('detailed_description'):
-                        product.detailed_description = metadata['detailed_description']
-                    if metadata.get('features'):
-                        product.features = metadata['features']
-                    if metadata.get('system_requirements'):
-                        product.system_requirements = metadata['system_requirements']
-                    if metadata.get('supported_formats'):
-                        product.supported_formats = metadata['supported_formats']
-                    if metadata.get('installation_info'):
-                        product.installation_info = metadata['installation_info']
-                    if metadata.get('release_notes'):
-                        product.release_notes = metadata['release_notes']
-                    if metadata.get('release_date'):
-                        product.release_date = metadata['release_date']
-                    if metadata.get('icon_url'):
-                        product.icon_url = metadata['icon_url']
-                    if metadata.get('screenshots'):
-                        product.screenshots = metadata['screenshots']
+                logger.info(f"기존 제품 발견 (folder_path): {product.title} - {folder_path}")
             else:
-                # 새 Product 생성
+                # ===== 2단계: 폴더명 파싱 및 유사 제품 검색 (AI 호출 전) =====
                 folder_name = os.path.basename(folder_path)
                 parsed_info = parser.parse(folder_name)
                 software_name = parsed_info.get('software_name', folder_name)
 
-                # 포터블 여부 감지
-                is_portable = False
-                if violations_list:
-                    filename_lower = violations_list[0].file_name.lower()
-                    if 'portable' in filename_lower or '무설치' in violations_list[0].file_name:
-                        is_portable = True
+                # 연도/버전 정보를 소프트웨어명에 포함 (예: "MS Office" → "MS Office 2003")
+                # 버전별 제품 구분을 위해 필수 (Office 2003 vs Office 2007 등)
+                if parsed_info.get('year'):
+                    year = parsed_info['year']
+                    if year not in software_name:
+                        software_name = f"{software_name} {year}"
 
-                # Product 생성
-                if provided_metadata:
-                    # 사용자 제공 메타데이터로 생성 (상세 필드 포함)
-                    product = Product(
-                        title=metadata.get('title', software_name),
-                        subtitle=metadata.get('subtitle'),
-                        description=metadata.get('description', f"{software_name} 소프트웨어"),
-                        vendor=metadata.get('vendor', ''),
-                        category=metadata.get('category', 'Utility'),
-                        official_website=metadata.get('official_website'),
-                        license_type=metadata.get('license_type'),
-                        platform=metadata.get('platform'),
-                        detailed_description=metadata.get('detailed_description'),
-                        features=metadata.get('features'),
-                        system_requirements=metadata.get('system_requirements'),
-                        supported_formats=metadata.get('supported_formats'),
-                        installation_info=metadata.get('installation_info'),
-                        release_notes=metadata.get('release_notes'),
-                        release_date=metadata.get('release_date'),
-                        icon_url=metadata.get('icon_url', ''),
-                        screenshots=metadata.get('screenshots'),
-                        folder_path=folder_path,
-                        is_portable=is_portable
-                    )
+                # 유사 제품 검색 (자동/수동 매칭 모두 적용)
+                search_title = software_name
+                if provided_metadata and provided_metadata.get('title'):
+                    search_title = provided_metadata['title']
+
+                similar_product = find_similar_product(
+                    db,
+                    search_title,
+                    provided_metadata.get('vendor') if provided_metadata else None
+                )
+
+                if similar_product:
+                    # 유사 제품 발견 → AI 호출 없이 Version만 추가
+                    product = similar_product
+                    is_duplicate = True
+                    duplicate_reason = f"'{similar_product.title}' 제품과 유사하여 중복으로 판단되었습니다."
+                    logger.info(f"유사 제품 발견: {search_title} → {similar_product.title}")
                 else:
-                    # 자동 생성 메타데이터로 생성 (기본 필드만)
-                    product = Product(
-                        title=metadata.get('title', software_name),
-                        description=metadata.get('description', f"{software_name} 소프트웨어"),
-                        vendor=metadata.get('vendor', ''),
-                        category=metadata.get('category', 'Utility'),
-                        icon_url=metadata.get('icon_url', ''),
-                        folder_path=folder_path,
-                        is_portable=is_portable
-                    )
+                    # ===== 3단계: 새 제품 - 메타데이터 준비 =====
+                    if provided_metadata:
+                        # 수동 매칭: 사용자가 제공한 메타데이터 사용
+                        metadata = provided_metadata
+                    else:
+                        # 자동 매칭: AI로 메타데이터 생성
+                        ai_metadata = await generator.generate_detailed_metadata(software_name)
 
-                db.add(product)
-                db.flush()  # Get product ID
+                        # AI 오류 확인 (rate_limit, quota 초과 등)
+                        if ai_metadata.get('ai_error'):
+                            error_type = ai_metadata['ai_error'].get('type', '')
+                            error_msg = ai_metadata['ai_error'].get('message', '')
+
+                            if error_type in FATAL_API_ERRORS:
+                                # 치명적 API 오류: 현재 폴더 건너뛰고 나머지도 중단
+                                api_error_occurred = True
+                                api_error_info = ai_metadata['ai_error']
+                                results["failed"] += len(violations_list)
+                                results["errors"].append(
+                                    f"AI API 오류 ({error_type}): {error_msg}"
+                                )
+                                logger.warning(f"AI API fatal error ({error_type}): {error_msg} - stopping remaining matches")
+                                continue
+
+                        # API 호출 간 짧은 딜레이 (rate limit 방지)
+                        await asyncio.sleep(0.5)
+
+                        # AI 메타데이터 필드명 → Product 모델 필드명 매핑
+                        metadata = {
+                            **ai_metadata,
+                            # AI: description_short → Product: description
+                            'description': ai_metadata.get('description_short') or ai_metadata.get('description', ''),
+                            # AI: developer → Product: vendor
+                            'vendor': ai_metadata.get('developer') or ai_metadata.get('vendor', ''),
+                            # AI: description_detailed → Product: detailed_description
+                            'detailed_description': ai_metadata.get('description_detailed') or ai_metadata.get('detailed_description')
+                        }
+
+                    # ===== 4단계: 새 Product 생성 =====
+                    # 포터블 여부 감지
+                    is_portable = False
+                    if violations_list:
+                        filename_lower = violations_list[0].file_name.lower()
+                        if 'portable' in filename_lower or '무설치' in violations_list[0].file_name:
+                            is_portable = True
+
+                    if provided_metadata:
+                        # 사용자 제공 메타데이터로 생성 (상세 필드 포함)
+                        product = Product(
+                            title=metadata.get('title', software_name),
+                            subtitle=metadata.get('subtitle'),
+                            description=metadata.get('description', f"{software_name} 소프트웨어"),
+                            vendor=metadata.get('vendor', ''),
+                            category=metadata.get('category', 'Utility'),
+                            official_website=metadata.get('official_website'),
+                            license_type=metadata.get('license_type'),
+                            platform=metadata.get('platform'),
+                            detailed_description=metadata.get('detailed_description'),
+                            features=metadata.get('features'),
+                            system_requirements=metadata.get('system_requirements'),
+                            supported_formats=metadata.get('supported_formats'),
+                            installation_info=metadata.get('installation_info'),
+                            release_notes=metadata.get('release_notes'),
+                            release_date=metadata.get('release_date'),
+                            icon_url=metadata.get('icon_url', ''),
+                            screenshots=metadata.get('screenshots'),
+                            folder_path=folder_path,
+                            is_portable=is_portable
+                        )
+                    else:
+                        # 자동 생성 메타데이터로 생성 (기본 필드만)
+                        product = Product(
+                            title=metadata.get('title', software_name),
+                            description=metadata.get('description', f"{software_name} 소프트웨어"),
+                            vendor=metadata.get('vendor', ''),
+                            category=metadata.get('category', 'Utility'),
+                            icon_url=metadata.get('icon_url', ''),
+                            folder_path=folder_path,
+                            is_portable=is_portable
+                        )
+
+                    db.add(product)
+                    db.flush()  # Get product ID
+
+            # 수동 매칭: 기존 제품(folder_path 일치, 비중복)의 메타데이터 업데이트
+            if existing_product and provided_metadata and not is_duplicate:
+                if metadata is None:
+                    metadata = provided_metadata
+                if metadata.get('title'):
+                    product.title = metadata['title']
+                if metadata.get('subtitle'):
+                    product.subtitle = metadata['subtitle']
+                if metadata.get('description'):
+                    product.description = metadata['description']
+                if metadata.get('vendor'):
+                    product.vendor = metadata['vendor']
+                if metadata.get('category'):
+                    product.category = metadata['category']
+                if metadata.get('official_website'):
+                    product.official_website = metadata['official_website']
+                if metadata.get('license_type'):
+                    product.license_type = metadata['license_type']
+                if metadata.get('platform'):
+                    product.platform = metadata['platform']
+                if metadata.get('detailed_description'):
+                    product.detailed_description = metadata['detailed_description']
+                if metadata.get('features'):
+                    product.features = metadata['features']
+                if metadata.get('system_requirements'):
+                    product.system_requirements = metadata['system_requirements']
+                if metadata.get('supported_formats'):
+                    product.supported_formats = metadata['supported_formats']
+                if metadata.get('installation_info'):
+                    product.installation_info = metadata['installation_info']
+                if metadata.get('release_notes'):
+                    product.release_notes = metadata['release_notes']
+                if metadata.get('release_date'):
+                    product.release_date = metadata['release_date']
+                if metadata.get('icon_url'):
+                    product.icon_url = metadata['icon_url']
+                if metadata.get('screenshots'):
+                    product.screenshots = metadata['screenshots']
 
             # Version 생성
             for violation in violations_list:

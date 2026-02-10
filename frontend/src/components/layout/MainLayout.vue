@@ -8,7 +8,7 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Main Content Area -->
-      <main class="flex-1 overflow-y-auto pb-16 lg:pb-0">
+      <main class="flex-1 overflow-y-auto main-content-area lg:pb-0 overscroll-contain">
         <router-view />
       </main>
 
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Mobile Bottom Navigation -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 safe-area-bottom overflow-x-auto scrollbar-hide scroll-smooth">
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 safe-area-bottom overflow-x-auto scrollbar-hide scroll-smooth touch-pan-x">
       <div class="flex items-center h-16 px-2">
         <!-- Home -->
         <router-link
@@ -316,12 +316,34 @@ const logout = () => {
 
 /* Safe area for mobile devices (iOS notch) */
 .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Smooth horizontal scrolling */
 .scroll-smooth {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+}
+
+/* 메인 콘텐츠 스크롤 영역: 바운스 방지 */
+.overscroll-contain {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 하단 네비게이션: 수평 스크롤만 허용, 수직 터치 전파 방지 */
+.touch-pan-x {
+  touch-action: pan-x;
+  overscroll-behavior: none;
+}
+
+/* 메인 콘텐츠: 하단 네비바 + safe area 만큼 패딩 */
+.main-content-area {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 1024px) {
+  .main-content-area {
+    padding-bottom: 0;
+  }
 }
 </style>
