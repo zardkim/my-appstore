@@ -73,12 +73,12 @@ MyApp Store는 GitHub Actions를 사용하여 Docker 이미지를 자동으로 �
    ```bash
    git push origin main
    ```
-   → 버전 `1.3.0-beta`와 `latest` 태그로 빌드
+   → 버전 `1.2.0`와 `latest` 태그로 빌드
 
 2. **버전 태그를 푸시할 때**
    ```bash
-   git tag v1.3.0-beta
-   git push origin v1.3.0-beta
+   git tag v1.2.0
+   git push origin v1.2.0
    ```
    → 태그 버전과 `latest` 태그로 빌드
 
@@ -87,7 +87,7 @@ MyApp Store는 GitHub Actions를 사용하여 Docker 이미지를 자동으로 �
 1. GitHub 저장소 → **Actions** 탭
 2. 좌측에서 **Build and Push Docker Images** 워크플로우 선택
 3. **Run workflow** 클릭
-4. (선택사항) 버전 입력 (예: `1.3.0-beta`)
+4. (선택사항) 버전 입력 (예: `1.2.0`)
 5. **Run workflow** 클릭
 
 ---
@@ -112,7 +112,7 @@ MyApp Store는 GitHub Actions를 사용하여 Docker 이미지를 자동으로 �
    - `zardkim/myappstore-backend`
    - `zardkim/myappstore-frontend`
 3. 각 저장소의 **Tags** 탭에서 이미지 태그 확인:
-   - `1.3.0-beta`
+   - `1.2.0`
    - `latest`
 
 ---
@@ -129,9 +129,9 @@ MyApp Store는 GitHub Actions를 사용하여 Docker 이미지를 자동으로 �
 
 | 이미지 | Docker Hub 태그 |
 |--------|----------------|
-| Backend | `zardkim/myappstore-backend:1.3.0-beta` |
+| Backend | `zardkim/myappstore-backend:1.2.0` |
 | Backend | `zardkim/myappstore-backend:latest` |
-| Frontend | `zardkim/myappstore-frontend:1.3.0-beta` |
+| Frontend | `zardkim/myappstore-frontend:1.2.0` |
 | Frontend | `zardkim/myappstore-frontend:latest` |
 
 ### 환경 변수
@@ -155,12 +155,12 @@ env:
 
 ```bash
 # 새 버전 태그 생성
-git tag v1.4.0
-git push origin v1.4.0
+git tag v1.3.0
+git push origin v1.3.0
 
 # 자동으로 다음 이미지가 빌드됩니다:
-# - zardkim/myappstore-backend:1.4.0
-# - zardkim/myappstore-frontend:1.4.0
+# - zardkim/myappstore-backend:1.3.0
+# - zardkim/myappstore-frontend:1.3.0
 # - latest 태그도 함께 업데이트
 ```
 
@@ -168,7 +168,7 @@ git push origin v1.4.0
 
 1. GitHub → **Actions** → **Build and Push Docker Images**
 2. **Run workflow** 클릭
-3. Version 입력: `1.4.0`
+3. Version 입력: `1.3.0`
 4. **Run workflow** 클릭
 
 ### 방법 3: 코드 변경 후 푸시
@@ -176,11 +176,11 @@ git push origin v1.4.0
 ```bash
 # 워크플로우 파일의 기본 버전 수정
 # .github/workflows/docker-build.yml 파일에서:
-echo "version=1.4.0" >> $GITHUB_OUTPUT
+echo "version=1.3.0" >> $GITHUB_OUTPUT
 
 # main 브랜치에 푸시
 git add .
-git commit -m "chore: Update version to 1.4.0"
+git commit -m "chore: Update version to 1.3.0"
 git push origin main
 ```
 
