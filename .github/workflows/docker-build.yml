@@ -2,14 +2,12 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches:
-      - main
     tags:
       - 'v*'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g., 1.3.0-beta)'
+        description: 'Version tag (e.g., 1.2.0)'
         required: false
         default: 'latest'
 
@@ -58,18 +56,14 @@ jobs:
         id: backend_tags
         run: |
           TAGS="${{ env.BACKEND_IMAGE }}:${{ steps.version.outputs.version }}"
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="${TAGS},${{ env.BACKEND_IMAGE }}:latest"
-          fi
+          TAGS="${TAGS},${{ env.BACKEND_IMAGE }}:latest"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
       - name: Generate Frontend image tags
         id: frontend_tags
         run: |
           TAGS="${{ env.FRONTEND_IMAGE }}:${{ steps.version.outputs.version }}"
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="${TAGS},${{ env.FRONTEND_IMAGE }}:latest"
-          fi
+          TAGS="${TAGS},${{ env.FRONTEND_IMAGE }}:latest"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
       - name: Build and push Backend image
