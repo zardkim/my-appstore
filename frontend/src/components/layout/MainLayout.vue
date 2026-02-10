@@ -139,7 +139,8 @@
         @click="toggleMobileMenu"
       >
         <div
-          class="absolute bottom-16 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl"
+          class="absolute left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl max-h-[70vh] overflow-y-auto"
+          :style="{ bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }"
           @click.stop
         >
           <!-- User Info Header -->
