@@ -220,38 +220,11 @@ async def match_violations_to_products(
             folder_groups[violation.folder_path] = []
         folder_groups[violation.folder_path].append(violation)
 
-    # 3단계: AI로 파일명 명확성 판단 (자동 매칭에만 적용)
-    if not skip_clarity_check:
-        clear_folder_groups = {}
-        for folder_path, violations_list in folder_groups.items():
-            # 대표 파일명으로 명확성 판단 (첫 번째 파일)
-            sample_filename = violations_list[0].file_name
-            folder_name = os.path.basename(folder_path)
-
-            try:
-                is_clear = await generator.is_filename_clear_for_matching(
-                    sample_filename,
-                    folder_name
-                )
-
-                if is_clear:
-                    # 명확한 파일명만 자동 매칭 대상에 포함
-                    clear_folder_groups[folder_path] = violations_list
-                # else: 불명확한 파일명은 검색된 목록에 남김
-
-            except Exception as e:
-                # AI 판단 실패 시 안전하게 True로 간주
-                clear_folder_groups[folder_path] = violations_list
-                results["errors"].append(f"Clarity check failed for {folder_path}: {str(e)}")
-    else:
-        # 수동 매칭은 명확성 검사 건너뜀
-        clear_folder_groups = folder_groups
-
-    # 4단계: Product 생성 및 Version 매칭
+    # 3단계: Product 생성 및 Version 매칭
     api_error_occurred = False  # API 오류 발생 시 나머지 폴더 건너뛰기
     api_error_info = None
 
-    for folder_path, violations_list in clear_folder_groups.items():
+    for folder_path, violations_list in folder_groups.items():
         # API 오류(rate_limit, quota 등)가 발생했으면 나머지 폴더 건너뛰기
         if api_error_occurred:
             results["failed"] += len(violations_list)
@@ -307,7 +280,22 @@ async def match_violations_to_products(
                     duplicate_reason = f"'{similar_product.title}' 제품과 유사하여 중복으로 판단되었습니다."
                     logger.info(f"유사 제품 발견: {search_title} → {similar_product.title}")
                 else:
-                    # ===== 3단계: 새 제품 - 메타데이터 준비 =====
+                    # ===== 3단계: 파일명 명확성 검사 (자동 매칭에만, AI 호출) =====
+                    if not skip_clarity_check:
+                        sample_filename = violations_list[0].file_name
+                        try:
+                            is_clear = await generator.is_filename_clear_for_matching(
+                                sample_filename,
+                                folder_name
+                            )
+                            if not is_clear:
+                                # 불명확한 파일명은 검색된 목록에 남김 (스킵)
+                                continue
+                        except Exception as e:
+                            # AI 판단 실패 시 안전하게 계속 진행
+                            results["errors"].append(f"Clarity check failed for {folder_path}: {str(e)}")
+
+                    # ===== 4단계: 새 제품 - 메타데이터 준비 =====
                     if provided_metadata:
                         # 수동 매칭: 사용자가 제공한 메타데이터 사용
                         metadata = provided_metadata
@@ -345,7 +333,7 @@ async def match_violations_to_products(
                             'detailed_description': ai_metadata.get('description_detailed') or ai_metadata.get('detailed_description')
                         }
 
-                    # ===== 4단계: 새 Product 생성 =====
+                    # ===== 5단계: 새 Product 생성 =====
                     # 포터블 여부 감지
                     is_portable = False
                     if violations_list:

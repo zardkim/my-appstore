@@ -270,16 +270,14 @@
                 :class="tabClass('versions')"
                 class="text-sm sm:text-base whitespace-nowrap"
               >
-                <span class="hidden sm:inline">{{ t('product.tabs.versions') }} ({{ product.versions?.length || 0 }})</span>
-                <span class="sm:hidden">{{ t('product.tabs.versions') }}</span>
+                {{ t('product.tabs.versions') }} ({{ product.versions?.length || 0 }})
               </button>
               <button
                 @click="activeTab = 'screenshots'"
                 :class="tabClass('screenshots')"
                 class="text-sm sm:text-base whitespace-nowrap"
               >
-                <span class="hidden sm:inline">{{ t('product.tabs.screenshots') }} ({{ product.screenshots?.length || 0 }})</span>
-                <span class="sm:hidden">{{ t('product.tabs.screenshots') }}</span>
+                {{ t('product.tabs.screenshots') }} ({{ product.screenshots?.length || 0 }})
               </button>
               <button
                 @click="activeTab = 'installation'"
