@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-10
+
+### Added
+- **Version-Aware AI Matching**: AI auto-matcher now differentiates products by version (e.g., Office 2003/2007/2010 as separate products)
+  - Added `extract_version_from_title()` for year/version extraction
+  - Pre-check existing products before making AI API calls to reduce costs
+- **PWA Scroll Containment**: Fixed mobile PWA scroll bounce issues
+  - Added `overscroll-behavior: none` and `position: fixed` on html
+  - Safe area support with `env(safe-area-inset-bottom)` for iPhone home indicator
+  - `touch-action: pan-x` on bottom nav to prevent vertical gesture conflicts
+- **Missing i18n Key**: Added `openaiPricingTitle` translation key for both Korean and English
+- **Standard PWA Meta Tag**: Added `mobile-web-app-capable` alongside existing Apple-specific tag
+
+### Changed
+- **Mobile Optimization**: Comprehensive responsive improvements across multiple pages
+  - Home/Favorites/Scraps: Scrollable headers on mobile (no longer fixed), reduced banner height
+  - FilenameViolations: Split action buttons for mobile/desktop, compact stats cards
+  - ChangePassword: Responsive padding, back button, mobile-friendly inputs
+  - Discover: Separated search input from sort/cleanup buttons on mobile
+  - Settings: Registration settings flex-col layout on mobile
+  - ViolationAISearchDialog: Full-screen on mobile with always-visible apply button
+  - ImageManager: Responsive padding and text sizes
+
+### Fixed
+- **Image Upload Display**: API now returns relative paths instead of full URLs for proper proxy routing
+  - Logo upload/download endpoints return `/static/...` paths
+  - Frontend `getIconUrl()`/`getScreenshotUrl()` extract relative paths from legacy full URLs
+- **AI Matching Duplicates**: Existing product check moved before AI call to prevent waste
+- **Apply Button Not Clickable**: ViolationAISearchDialog modal restructured with flex column layout
+- **Debug Console Logs**: Removed 4 debug `console.log` statements from Settings.vue
+
 ## [1.2.2-beta] - 2026-01-19
 
 ### Added
