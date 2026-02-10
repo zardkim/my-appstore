@@ -1,38 +1,46 @@
 <template>
   <div class="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-6">
-      <div class="flex items-center justify-between">
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
+      <div class="flex items-center gap-3">
+        <button
+          @click="goBack"
+          class="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('changePassword.title') }}</h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('changePassword.description') }}</p>
+          <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">{{ t('changePassword.title') }}</h1>
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('changePassword.description') }}</p>
         </div>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto px-8 py-6">
+    <div class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 lg:pb-8">
       <div class="max-w-2xl mx-auto">
         <!-- Change Password Form -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
           <form @submit.prevent="handleChangePassword" class="space-y-6">
             <!-- Current Password -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                 {{ t('changePassword.currentPassword') }} *
               </label>
               <input
                 v-model="form.currentPassword"
                 type="password"
                 required
-                class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
                 :placeholder="t('changePassword.currentPasswordPlaceholder')"
               />
             </div>
 
             <!-- New Password -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                 {{ t('changePassword.newPassword') }} *
               </label>
               <input
@@ -40,22 +48,22 @@
                 type="password"
                 required
                 minlength="8"
-                class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
                 :placeholder="t('changePassword.newPasswordPlaceholder')"
               />
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ t('changePassword.newPasswordHint') }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">{{ t('changePassword.newPasswordHint') }}</p>
             </div>
 
             <!-- Confirm New Password -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                 {{ t('changePassword.confirmPassword') }} *
               </label>
               <input
                 v-model="form.confirmPassword"
                 type="password"
                 required
-                class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
                 :placeholder="t('changePassword.confirmPasswordPlaceholder')"
               />
             </div>
@@ -102,14 +110,14 @@
               <button
                 type="button"
                 @click="goBack"
-                class="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+                class="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors text-sm sm:text-base"
               >
                 {{ t('changePassword.cancel') }}
               </button>
               <button
                 type="submit"
                 :disabled="loading"
-                class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
                 <span v-if="loading">{{ t('changePassword.changing') }}</span>
                 <span v-else>{{ t('changePassword.changeButton') }}</span>
@@ -119,7 +127,7 @@
         </div>
 
         <!-- Additional Info -->
-        <div class="mt-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-4">
+        <div class="mt-4 sm:mt-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg sm:rounded-xl p-3 sm:p-4">
           <div class="flex items-start">
             <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />

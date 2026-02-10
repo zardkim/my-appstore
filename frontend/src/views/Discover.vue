@@ -65,7 +65,8 @@
 
         <!-- Search & Sort -->
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-3 sm:p-4 mb-4 sm:mb-6">
-          <div class="flex items-center gap-2 sm:gap-3">
+          <!-- 검색 입력 (모바일: 전체 너비) -->
+          <div class="flex items-center gap-2 mb-2 sm:mb-0">
             <!-- Category Button (Mobile only) -->
             <button
               @click="showCategoryModal = true"
@@ -79,7 +80,7 @@
 
             <div class="relative flex-1">
               <div class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -88,13 +89,15 @@
                 v-model="searchQuery"
                 type="text"
                 :placeholder="t('discover.searchPlaceholder')"
-                class="block w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                class="block w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 @input="handleSearch"
               />
             </div>
+
+            <!-- 데스크톱: 정렬/정리 버튼을 검색 옆에 -->
             <select
               v-model="sortBy"
-              class="px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white flex-shrink-0"
+              class="hidden sm:block px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white flex-shrink-0"
               @change="loadProducts"
             >
               <option value="id">{{ t('discover.sortByLatest') }}</option>
@@ -102,18 +105,41 @@
               <option value="category">{{ t('discover.sortByCategory') }}</option>
             </select>
 
-            <!-- 삭제된 파일 일괄 정리 버튼 (관리자 전용) -->
             <button
               v-if="authStore.user?.role === 'admin'"
               @click="cleanupDeletedFiles"
-              class="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg font-medium text-sm flex-shrink-0"
+              class="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg font-medium text-sm flex-shrink-0"
             >
               <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              <span class="hidden sm:inline">{{ t('discover.cleanupDeleted') }}</span>
-              <span class="sm:hidden">{{ t('discover.cleanup') }}</span>
+              <span>{{ t('discover.cleanupDeleted') }}</span>
+            </button>
+          </div>
+
+          <!-- 모바일: 정렬/정리 버튼을 아래 줄에 -->
+          <div class="flex sm:hidden items-center gap-2">
+            <select
+              v-model="sortBy"
+              class="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              @change="loadProducts"
+            >
+              <option value="id">{{ t('discover.sortByLatest') }}</option>
+              <option value="title">{{ t('discover.sortByName') }}</option>
+              <option value="category">{{ t('discover.sortByCategory') }}</option>
+            </select>
+
+            <button
+              v-if="authStore.user?.role === 'admin'"
+              @click="cleanupDeletedFiles"
+              class="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all font-medium text-sm flex-shrink-0"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              {{ t('discover.cleanup') }}
             </button>
           </div>
         </div>

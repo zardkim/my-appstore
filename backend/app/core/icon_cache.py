@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 from pathlib import Path
 from typing import Optional, List, Dict
 import hashlib
+import re
 from urllib.parse import urlparse
 
 
@@ -40,20 +41,39 @@ class IconCache:
         except Exception as e:
             logger.warning(f"Could not create screenshot cache directory {self.screenshot_cache_dir}: {e}")
 
+    @staticmethod
+    def _sanitize_title(title: str, max_length: int = 50) -> str:
+        """제품 타이틀을 파일명으로 사용할 수 있도록 정리"""
+        sanitized = re.sub(r'[^\w\s-]', '', title)
+        sanitized = re.sub(r'[\s]+', '_', sanitized)
+        sanitized = sanitized.strip('_')
+        if len(sanitized) > max_length:
+            sanitized = sanitized[:max_length].rstrip('_')
+        return sanitized if sanitized else 'unnamed'
+
+    def _make_icon_filename(self, product_id: int, ext: str, product_title: str = None) -> str:
+        """로고 파일명 생성: {title}_{id}{ext}"""
+        if product_title:
+            safe_title = self._sanitize_title(product_title)
+            return f"{safe_title}_{product_id}{ext}"
+        return f"{product_id}{ext}"
+
     async def download_and_cache(
         self,
         url: str,
-        product_id: int
+        product_id: int,
+        product_title: str = None
     ) -> Optional[str]:
         """
         URL에서 아이콘 다운로드 후 로컬에 저장
 
         Args:
             url: 아이콘 이미지 URL
-            product_id: 제품 ID (파일명으로 사용)
+            product_id: 제품 ID
+            product_title: 제품 타이틀 (파일명에 사용)
 
         Returns:
-            로컬 파일 경로 (예: /static/icons/1.png) 또는 None
+            로컬 파일 경로 (예: /static/icons/Adobe_Photoshop_1.png) 또는 None
         """
         if not url or not url.strip():
             return None
@@ -95,8 +115,8 @@ class IconCache:
                     # 파일 확장자 결정
                     ext = self._get_extension(url, content_type, response.content)
 
-                    # 파일명 생성 (product_id 기반)
-                    filename = f"{product_id}{ext}"
+                    # 파일명 생성 (제품명_ID 기반)
+                    filename = self._make_icon_filename(product_id, ext, product_title)
                     file_path = self.cache_dir / filename
 
                     # 파일 저장
@@ -228,19 +248,23 @@ class IconCache:
         Returns:
             삭제 성공 여부
         """
-        # 가능한 모든 확장자 확인
-        extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']
-
         deleted = False
 
-        # 패턴 1: {product_id}{ext} (현재 표준 패턴)
+        # 패턴 1: {product_id}{ext} (레거시 숫자 패턴)
+        extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.avif']
         for ext in extensions:
             file_path = self.cache_dir / f"{product_id}{ext}"
             if file_path.exists():
                 file_path.unlink()
                 deleted = True
 
-        # 패턴 2: {product_id}_*_icon{ext} (이전 패턴 - 하위 호환성)
+        # 패턴 2: *_{product_id}{ext} (이름 기반 패턴: Title_ID.ext)
+        for file_path in self.cache_dir.glob(f"*_{product_id}.*"):
+            if file_path.is_file():
+                file_path.unlink()
+                deleted = True
+
+        # 패턴 3: {product_id}_*_icon{ext} (이전 패턴 - 하위 호환성)
         for file_path in self.cache_dir.glob(f"{product_id}_*_icon.*"):
             if file_path.is_file():
                 file_path.unlink()
@@ -258,8 +282,13 @@ class IconCache:
         Returns:
             아이콘 경로 또는 None
         """
-        extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']
+        # 이름 기반 패턴 우선: *_{product_id}.*
+        for file_path in self.cache_dir.glob(f"*_{product_id}.*"):
+            if file_path.is_file():
+                return f"/static/icons/{file_path.name}"
 
+        # 레거시 숫자 패턴: {product_id}{ext}
+        extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.avif']
         for ext in extensions:
             file_path = self.cache_dir / f"{product_id}{ext}"
             if file_path.exists():

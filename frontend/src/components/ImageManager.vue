@@ -1,15 +1,15 @@
 <template>
-  <div class="image-manager border border-gray-300 dark:border-gray-600 rounded-lg p-6 mt-6">
-    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">🖼️ {{ t('imageManager.title') }}</h3>
+  <div class="image-manager border border-gray-300 dark:border-gray-600 rounded-lg p-3 sm:p-6 mt-4 sm:mt-6">
+    <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">🖼️ {{ t('imageManager.title') }}</h3>
 
     <!-- Tabs -->
-    <div class="flex space-x-2 border-b border-gray-200 dark:border-gray-700 mb-4">
+    <div class="flex space-x-1 sm:space-x-2 border-b border-gray-200 dark:border-gray-700 mb-3 sm:mb-4">
       <button
         v-for="tab in tabs"
         :key="tab.id"
         @click="activeTab = tab.id"
         :class="[
-          'px-4 py-2 font-medium transition-colors',
+          'px-3 sm:px-4 py-1.5 sm:py-2 font-medium transition-colors text-sm sm:text-base',
           activeTab === tab.id
             ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'

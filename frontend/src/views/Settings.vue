@@ -273,17 +273,17 @@
 
           <!-- Registration Settings -->
           <div v-if="isAdmin" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center">
-                  <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="min-w-0">
+                <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white flex items-center">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                   </svg>
                   {{ t('settings.users.registrationSettings') }}
                 </h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('settings.users.registrationSettingsDesc') }}</p>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">{{ t('settings.users.registrationSettingsDesc') }}</p>
               </div>
-              <label class="relative inline-flex items-center cursor-pointer">
+              <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
                 <input
                   type="checkbox"
                   v-model="registrationOpen"
@@ -291,7 +291,7 @@
                   class="sr-only peer"
                 />
                 <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                <span class="ml-3 text-sm font-medium" :class="registrationOpen ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'">
+                <span class="ml-3 text-sm font-medium whitespace-nowrap" :class="registrationOpen ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'">
                   {{ registrationOpen ? t('settings.users.registrationOpen') : t('settings.users.registrationClosed') }}
                 </span>
               </label>
@@ -2347,7 +2347,7 @@ const saveExceptionSettings = async () => {
 const loadExceptionSettings = async () => {
   try {
     const response = await scanApi.getScanExclusions()
-    console.log('✅ Exception settings response:', response.data)
+
 
     if (response && response.data) {
       // 폴더 예외
@@ -2372,7 +2372,7 @@ const loadExceptionSettings = async () => {
         exceptionPaths.value = response.data.paths
       }
 
-      console.log('✅ Exceptions loaded - Folders:', exceptionFolders.value.length, 'Patterns:', exceptionPatterns.value.length)
+
     } else {
       console.warn('❌ No exception data in response')
       // 기본값 설정
@@ -2416,7 +2416,7 @@ const loadUsers = async () => {
   try {
     loadingUsers.value = true
     const result = await usersApi.getAll()
-    console.log('✅ Users loaded:', result)
+
     users.value = result
   } catch (error) {
     console.error('❌ 사용자 목록 로드 오류:', error)
@@ -2999,7 +2999,7 @@ onMounted(async () => {
     // 카테고리 설정
     if (config.categories && Array.isArray(config.categories)) {
       categories.value = config.categories
-      console.log('✅ Categories loaded:', categories.value.length, 'items')
+
     } else {
       console.warn('❌ No categories in config:', config.categories)
     }

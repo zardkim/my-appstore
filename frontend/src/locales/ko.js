@@ -764,6 +764,7 @@ export default {
       // 요금 정보
       pricingInfo: '💰 요금 정보',
       openaiPricing: 'OpenAI (모두 유료):',
+      openaiPricingTitle: 'OpenAI (모두 유료):',
       geminiPricing: 'Gemini (무료 할당량 제공 ⭐):',
       geminiFreeQuota: '무료 할당량: 분당 15회, 일일 1,500회',
       geminiPricingTitle: 'Gemini (무료 할당량 제공 ⭐):',

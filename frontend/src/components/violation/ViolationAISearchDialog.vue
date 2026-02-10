@@ -1,58 +1,57 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 z-50 overflow-y-auto"
+    class="fixed inset-0 z-50"
     @click.self="close"
   >
-    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-      <!-- Background overlay -->
-      <div
-        class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
-        @click="close"
-      ></div>
+    <!-- Background overlay -->
+    <div
+      class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
+      @click="close"
+    ></div>
 
-      <!-- Modal content -->
-      <div class="inline-block w-full max-w-4xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-2xl rounded-2xl">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xl font-bold text-white flex items-center gap-2">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              {{ t('violationAISearchDialog.title') }}
-            </h3>
-            <button
-              @click="close"
-              class="text-white hover:text-gray-200 transition-colors p-2 hover:bg-white/10 rounded-lg"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+    <!-- Modal content — 모바일: 전체화면, 데스크톱: 중앙 정렬 -->
+    <div class="fixed inset-0 sm:inset-4 md:inset-y-6 md:inset-x-auto md:mx-auto md:max-w-4xl flex flex-col bg-white dark:bg-gray-800 sm:rounded-2xl shadow-2xl overflow-hidden">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base sm:text-xl font-bold text-white flex items-center gap-2">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            {{ t('violationAISearchDialog.title') }}
+          </h3>
+          <button
+            @click="close"
+            class="text-white hover:text-gray-200 transition-colors p-1.5 sm:p-2 hover:bg-white/10 rounded-lg"
+          >
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
+      </div>
 
-        <!-- Body -->
-        <div class="px-6 py-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+      <!-- Body (스크롤 영역) -->
+      <div class="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6">
           <!-- Violation Info -->
-          <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg space-y-2">
+          <div class="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg space-y-1.5 sm:space-y-2">
             <p class="text-sm text-blue-900 dark:text-blue-300">
               <strong>{{ t('violationAISearchDialog.searchTarget') }}:</strong> {{ softwareName }}
             </p>
-            <p class="text-xs text-blue-700 dark:text-blue-400">
+            <p class="text-xs text-blue-700 dark:text-blue-400 truncate">
               <strong>{{ t('violationAISearchDialog.folder') }}:</strong> {{ violation?.folder_path || '' }}
             </p>
-            <p class="text-xs text-blue-700 dark:text-blue-400">
+            <p class="text-xs text-blue-700 dark:text-blue-400 truncate">
               <strong>{{ t('violationAISearchDialog.file') }}:</strong> {{ violation?.file_name || '' }}
             </p>
           </div>
 
           <!-- Loading -->
-          <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
-            <p class="text-gray-600 dark:text-gray-400">{{ t('violationAISearchDialog.generating') }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">{{ t('violationAISearchDialog.maxTime') }}</p>
+          <div v-if="loading" class="flex flex-col items-center justify-center py-8 sm:py-12">
+            <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">{{ t('violationAISearchDialog.generating') }}</p>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-500 mt-2">{{ t('violationAISearchDialog.maxTime') }}</p>
           </div>
 
           <!-- Error -->
@@ -74,7 +73,7 @@
               <button
                 @click="testApiConnection"
                 :disabled="testingApi"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex items-center gap-2 disabled:opacity-50"
+                class="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 disabled:opacity-50"
               >
                 <svg v-if="testingApi" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -87,7 +86,7 @@
               </button>
               <button
                 @click="goToSettings"
-                class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm flex items-center gap-2"
+                class="px-3 sm:px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -97,7 +96,7 @@
               </button>
               <button
                 @click="startAISearch"
-                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm flex items-center gap-2"
+                class="px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -131,26 +130,59 @@
           </div>
 
           <!-- Success - Metadata Display -->
-          <div v-else-if="metadata" class="space-y-6">
-            <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg text-green-700 dark:text-green-400 text-sm">
+          <div v-else-if="metadata" class="space-y-4 sm:space-y-6">
+            <div class="p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg text-green-700 dark:text-green-400 text-sm">
               ✓ {{ t('violationAISearchDialog.generationComplete') }}
             </div>
 
-            <!-- Metadata Table -->
-            <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <!-- Metadata: 모바일 카드 / 데스크톱 테이블 -->
+            <!-- 모바일 카드 레이아웃 -->
+            <div class="sm:hidden space-y-2">
+              <div
+                v-for="(value, key) in filteredMetadata"
+                :key="key"
+                class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-100 dark:border-gray-600"
+              >
+                <p class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">{{ key }}</p>
+                <div class="text-sm text-gray-900 dark:text-gray-200 break-words">
+                  <!-- Array values -->
+                  <div v-if="Array.isArray(value)" class="space-y-0.5">
+                    <div v-for="(item, index) in value" :key="index" class="flex items-start">
+                      <span class="text-blue-500 mr-1.5">•</span>
+                      <span class="text-xs">{{ typeof item === 'object' ? JSON.stringify(item) : item }}</span>
+                    </div>
+                    <span v-if="value.length === 0" class="text-gray-400 text-xs">[ ]</span>
+                  </div>
+                  <!-- Objects -->
+                  <div v-else-if="typeof value === 'object' && value !== null" class="space-y-0.5">
+                    <div v-for="(v, k) in value" :key="k" class="text-xs">
+                      <span class="font-medium text-gray-600 dark:text-gray-400">{{ k }}:</span>
+                      <span class="ml-1">{{ typeof v === 'object' ? JSON.stringify(v) : v }}</span>
+                    </div>
+                  </div>
+                  <!-- Empty values -->
+                  <span v-else-if="value === '' || value === null" class="text-gray-400 text-xs">{{ t('violationAISearchDialog.empty') }}</span>
+                  <!-- Normal values -->
+                  <span v-else class="text-sm">{{ value }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 데스크톱 테이블 레이아웃 -->
+            <div class="hidden sm:block border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
               <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-1/4">{{ t('violationAISearchDialog.field') }}</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">{{ t('violationAISearchDialog.value') }}</th>
+                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase w-1/4">{{ t('violationAISearchDialog.field') }}</th>
+                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">{{ t('violationAISearchDialog.value') }}</th>
                   </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   <tr v-for="(value, key) in filteredMetadata" :key="key">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
+                    <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
                       {{ key }}
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    <td class="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-700 dark:text-gray-300">
                       <!-- Array values -->
                       <div v-if="Array.isArray(value)" class="space-y-1">
                         <div v-for="(item, index) in value" :key="index" class="flex items-start">
@@ -188,37 +220,36 @@
           </div>
 
           <!-- Initial state -->
-          <div v-else class="text-center py-12">
-            <svg class="w-16 h-16 mx-auto mb-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div v-else class="text-center py-8 sm:py-12">
+            <svg class="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">{{ t('violationAISearchDialog.startSearch') }}</p>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4">{{ t('violationAISearchDialog.startSearch') }}</p>
             <button
               @click="startAISearch"
-              class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium"
+              class="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium text-sm sm:text-base"
             >
               {{ t('violationAISearchDialog.startButton') }}
             </button>
           </div>
         </div>
 
-        <!-- Footer -->
-        <div class="sticky bottom-0 bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600 flex justify-between gap-3">
-          <button
-            @click="close"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
-          >
-            {{ t('violationAISearchDialog.cancel') }}
-          </button>
-          <button
-            v-if="metadata"
-            @click="saveMetadata"
-            :disabled="saving"
-            class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ saving ? t('violationAISearchDialog.saving') : t('violationAISearchDialog.createAndMatch') }}
-          </button>
-        </div>
+      <!-- Footer (항상 하단 고정) -->
+      <div class="flex-shrink-0 bg-gray-50 dark:bg-gray-700 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-600 flex justify-between items-center gap-3">
+        <button
+          @click="close"
+          class="px-3 sm:px-4 py-2 sm:py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm sm:text-base"
+        >
+          {{ t('violationAISearchDialog.cancel') }}
+        </button>
+        <button
+          v-if="metadata"
+          @click="saveMetadata"
+          :disabled="saving"
+          class="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+        >
+          {{ saving ? t('violationAISearchDialog.saving') : t('violationAISearchDialog.createAndMatch') }}
+        </button>
       </div>
     </div>
   </div>

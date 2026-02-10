@@ -42,7 +42,8 @@ ALLOWED_MIME_TYPES = [
     "image/jpg",
     "image/gif",
     "image/svg+xml",
-    "image/webp"
+    "image/webp",
+    "image/avif"
 ]
 
 # 파일 크기 제한 (100 bytes ~ 5 MB)
@@ -317,22 +318,14 @@ async def upload_logo(
         content = await file.read()
         file_ext = Path(file.filename).suffix.lower()
         if not file_ext:
-            # content_type에서 확장자 추정
-            if "png" in file.content_type:
-                file_ext = ".png"
-            elif "jpeg" in file.content_type or "jpg" in file.content_type:
-                file_ext = ".jpg"
-            elif "gif" in file.content_type:
-                file_ext = ".gif"
-            elif "svg" in file.content_type:
-                file_ext = ".svg"
-            elif "webp" in file.content_type:
-                file_ext = ".webp"
-            else:
-                file_ext = ".png"
+            ext_map = {
+                "png": ".png", "jpeg": ".jpg", "jpg": ".jpg",
+                "gif": ".gif", "svg": ".svg", "webp": ".webp", "avif": ".avif"
+            }
+            file_ext = next((v for k, v in ext_map.items() if k in file.content_type), ".png")
 
-        # 파일명 생성 (icon_cache.py와 동일한 패턴 사용)
-        filename = f"{product_id}{file_ext}"
+        # 제품명 기반 파일명 생성 (Title_ID.ext)
+        filename = icon_cache._make_icon_filename(product_id, file_ext, product.title)
         file_path = Path(settings.ICON_CACHE_DIR) / filename
 
         with open(file_path, 'wb') as f:
@@ -448,6 +441,67 @@ async def upload_screenshots(
         )
 
 
+@router.post("/upload-screenshot-file/{product_id}", response_model=ImageUploadResponse)
+async def upload_screenshot_file(
+    product_id: int,
+    file: UploadFile = File(...),
+    slot: int = Query(0, description="Screenshot slot index (0-3)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    단일 스크린샷 파일 업로드 (특정 슬롯에만 저장, 기존 슬롯 파일은 삭제)
+    DB의 screenshots 배열에서 해당 슬롯만 교체합니다.
+    """
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    if slot < 0 or slot > 3:
+        raise HTTPException(status_code=400, detail="Slot must be 0-3")
+
+    validate_image_file(file)
+
+    try:
+        content = await file.read()
+        file_ext = Path(file.filename).suffix.lower()
+        if not file_ext:
+            ext_map = {
+                "png": ".png", "jpeg": ".jpg", "jpg": ".jpg",
+                "gif": ".gif", "svg": ".svg", "webp": ".webp", "avif": ".avif"
+            }
+            file_ext = next((v for k, v in ext_map.items() if k in file.content_type), ".png")
+
+        filename = f"{product_id}_screenshot_{slot}{file_ext}"
+        screenshot_dir = Path(settings.SCREENSHOT_CACHE_DIR)
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+
+        # 해당 슬롯의 기존 파일 삭제 (확장자가 다를 수 있음)
+        for old_file in screenshot_dir.glob(f"{product_id}_screenshot_{slot}.*"):
+            old_file.unlink()
+
+        file_path = screenshot_dir / filename
+        with open(file_path, 'wb') as f:
+            f.write(content)
+
+        local_path = f"/static/screenshots/{filename}"
+
+        # DB screenshots 배열에서 해당 슬롯만 교체
+        current_screenshots = list(product.screenshots or [])
+        while len(current_screenshots) <= slot:
+            current_screenshots.append(None)
+        current_screenshots[slot] = {"type": "local", "url": local_path}
+        # None 값 제거하지 않음 (슬롯 인덱스 유지)
+        product.screenshots = current_screenshots
+        db.commit()
+
+        return ImageUploadResponse(success=True, url=local_path)
+
+    except Exception as e:
+        db.rollback()
+        return ImageUploadResponse(success=False, error=str(e))
+
+
 @router.post("/download-logo/{product_id}", response_model=ImageUploadResponse)
 async def download_logo_from_url(
     product_id: int,
@@ -474,17 +528,19 @@ async def download_logo_from_url(
     try:
         icon_cache = get_icon_cache()
 
+        # 제품 정보 가져오기 (파일명에 제품명 사용)
+        product = db.query(Product).filter(Product.id == product_id).first()
+
         # 기존 로고 삭제
         icon_cache.delete_icon(product_id)
 
-        # URL에서 다운로드
-        local_path = await icon_cache.download_and_cache(url, product_id)
+        # URL에서 다운로드 (제품명 전달)
+        local_path = await icon_cache.download_and_cache(url, product_id, product.title if product else None)
 
         if local_path:
             logger.debug(f"Download Logo] Local path: {local_path}")
 
             # 제품이 존재하면 DB 업데이트 (상대 경로만 저장)
-            product = db.query(Product).filter(Product.id == product_id).first()
             if product:
                 product.icon_url = local_path
                 db.commit()

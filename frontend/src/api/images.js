@@ -48,6 +48,20 @@ export const imagesApi = {
   },
 
   /**
+   * 단일 스크린샷 파일 업로드 (특정 슬롯)
+   * @param {number} productId - 제품 ID
+   * @param {File} file - 업로드할 이미지 파일
+   * @param {number} slot - 슬롯 인덱스 (0-3)
+   */
+  uploadScreenshotFile(productId, file, slot = 0) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return client.post(`/images/upload-screenshot-file/${productId}?slot=${slot}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+
+  /**
    * URL에서 로고 다운로드 후 저장
    * @param {number} productId - 제품 ID
    * @param {string} url - 다운로드할 이미지 URL

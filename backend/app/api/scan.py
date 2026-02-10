@@ -222,7 +222,8 @@ async def regenerate_metadata(
         if metadata.get('icon_url'):
             cached_icon = await icon_cache.download_and_cache(
                 metadata['icon_url'],
-                product.id
+                product.id,
+                metadata.get('title', product.title)
             )
             if cached_icon:
                 product.icon_url = cached_icon

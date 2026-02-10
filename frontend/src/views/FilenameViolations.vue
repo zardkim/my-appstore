@@ -87,56 +87,56 @@
 
       <!-- Stats -->
       <div class="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+        <div class="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
           <!-- 전체 항목 -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('detectedList.totalItems') }}</p>
-              <p class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {{ stats.total }}
-              </p>
+          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-3 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1">{{ t('detectedList.totalItems') }}</p>
+                <p class="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  {{ stats.total }}
+                </p>
+              </div>
+              <div class="hidden sm:block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-xl sm:rounded-2xl">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
             </div>
-            <div class="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-xl sm:rounded-2xl">
-              <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-          </div>
           </div>
 
           <!-- 스캔된 항목 -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('detectedList.scannedItems') }}</p>
-              <p class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                {{ stats.scanned }}
-              </p>
+          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-3 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1">{{ t('detectedList.scannedItems') }}</p>
+                <p class="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                  {{ stats.scanned }}
+                </p>
+              </div>
+              <div class="hidden sm:block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-xl sm:rounded-2xl">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
             </div>
-            <div class="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-xl sm:rounded-2xl">
-              <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
           </div>
 
           <!-- 불일치 항목 -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('detectedList.mismatchedItems') }}</p>
-              <p class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                {{ stats.mismatched }}
-              </p>
+          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-3 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1">{{ t('detectedList.mismatchedItems') }}</p>
+                <p class="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                  {{ stats.mismatched }}
+                </p>
+              </div>
+              <div class="hidden sm:block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900 dark:to-orange-900 rounded-xl sm:rounded-2xl">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
             </div>
-            <div class="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900 dark:to-orange-900 rounded-xl sm:rounded-2xl">
-              <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-          </div>
           </div>
         </div>
       </div>
@@ -166,34 +166,114 @@
             class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl sm:rounded-2xl shadow-sm p-3 sm:p-4 lg:p-6 hover:shadow-lg transition-all"
             :class="{ 'ring-2 ring-blue-500': isSelected(violation.id) }"
           >
-            <div class="flex items-start justify-between gap-2 sm:gap-4">
+            <!-- 상단: 체크박스 + 파일 정보 -->
+            <div class="flex items-start gap-2 sm:gap-3 lg:gap-4">
               <!-- Checkbox -->
-              <div class="flex items-start gap-2 sm:gap-3 lg:gap-4 flex-1">
-                <input
-                  type="checkbox"
-                  :checked="isSelected(violation.id)"
-                  @change="toggleSelection(violation.id)"
-                  class="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
-                />
-                <div class="flex-1 min-w-0">
+              <input
+                type="checkbox"
+                :checked="isSelected(violation.id)"
+                @change="toggleSelection(violation.id)"
+                class="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer flex-shrink-0"
+              />
+              <div class="flex-1 min-w-0">
                 <!-- 파일명 (일반 모드) -->
-                <div v-if="editingId !== violation.id" class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <!-- 매칭 여부에 따른 아이콘 -->
-                  <svg v-if="violation.product_id" class="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <svg v-else class="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  <h3 class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white break-all">{{ violation.file_name }}</h3>
+                <div v-if="editingId !== violation.id">
+                  <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <!-- 매칭 여부에 따른 아이콘 -->
+                    <svg v-if="violation.product_id" class="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <svg v-else class="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h3 class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white break-all">{{ violation.file_name }}</h3>
 
-                  <!-- 매칭 상태 뱃지 -->
-                  <span v-if="violation.product_id" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] sm:text-xs rounded-full flex-shrink-0">
-                    {{ t('detectedList.registered') }}
-                  </span>
-                  <span v-else class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-[10px] sm:text-xs rounded-full flex-shrink-0">
-                    {{ getViolationTypeLabel(violation.violation_type) }}
-                  </span>
+                    <!-- 매칭 상태 뱃지 -->
+                    <span v-if="violation.product_id" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] sm:text-xs rounded-full flex-shrink-0">
+                      {{ t('detectedList.registered') }}
+                    </span>
+                    <span v-else class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-[10px] sm:text-xs rounded-full flex-shrink-0">
+                      {{ getViolationTypeLabel(violation.violation_type) }}
+                    </span>
+                  </div>
+
+                  <!-- 경로 -->
+                  <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+                    📁 {{ violation.folder_path }}
+                  </p>
+
+                  <!-- 위반 내용 -->
+                  <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">{{ t('detectedList.problem') }}</span> {{ violation.violation_details }}
+                  </p>
+
+                  <!-- 제안 -->
+                  <div v-if="violation.suggestion" class="mt-2 p-2 sm:p-3 rounded-lg" :class="violation.file_name === violation.suggestion ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'">
+                    <span class="text-xs sm:text-sm font-medium" :class="violation.file_name === violation.suggestion ? 'text-green-700 dark:text-green-400' : 'text-blue-700 dark:text-blue-400'">
+                      {{ violation.file_name === violation.suggestion ? '✓ 일치' : t('detectedList.suggestion') }}
+                    </span>
+                    <span v-if="violation.file_name !== violation.suggestion" class="text-xs sm:text-sm text-blue-600 dark:text-blue-300 ml-1 sm:ml-2 break-all">{{ violation.suggestion }}</span>
+                  </div>
+
+                  <!-- 날짜 + 액션 버튼 (모바일에서 하단 배치) -->
+                  <div class="mt-2 sm:mt-3 flex items-center justify-between gap-2">
+                    <span class="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
+                      {{ t('detectedList.discoveredAt') }} {{ formatDate(violation.created_at) }}
+                    </span>
+                    <!-- 모바일 액션 버튼 (하단) -->
+                    <div class="flex items-center gap-0.5 sm:hidden">
+                      <button
+                        v-if="violation.product_id"
+                        @click="goToProduct(violation.product_id)"
+                        :title="t('detectedList.viewInStore')"
+                        class="p-1.5 text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+                      <button
+                        v-else
+                        @click="openAIMatchingDialog(violation)"
+                        :title="t('detectedList.aiMatching')"
+                        class="p-1.5 text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                      </button>
+                      <button
+                        v-if="violation.suggestion && violation.file_name !== violation.suggestion"
+                        @click="renameSingle(violation)"
+                        class="p-1.5 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                        </svg>
+                      </button>
+                      <button @click="startEdit(violation)" class="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button @click="addToExclusions(violation)" class="p-1.5 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                      </button>
+                      <button @click="resolveViolation(violation.id)" class="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </button>
+                      <button @click="deleteViolation(violation.id)" class="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- 파일명 (편집 모드) -->
@@ -202,12 +282,12 @@
                     <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400">{{ t('detectedList.editingTitle') }}</h3>
+                    <h3 class="text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400">{{ t('detectedList.editingTitle') }}</h3>
                   </div>
                   <input
                     v-model="editingFilename"
                     type="text"
-                    class="w-full px-4 py-2 border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-3 sm:px-4 py-2 border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                     :placeholder="t('detectedList.filenamePlaceholder')"
                     @keyup.enter="saveEdit(violation.id)"
                     @keyup.esc="cancelEdit"
@@ -215,114 +295,86 @@
                   <div class="flex gap-2">
                     <button
                       @click="saveEdit(violation.id)"
-                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                      class="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                     >
                       {{ t('detectedList.save') }}
                     </button>
                     <button
                       @click="cancelEdit"
-                      class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg text-sm font-medium transition-colors"
+                      class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg text-sm font-medium transition-colors"
                     >
                       {{ t('detectedList.cancel') }}
                     </button>
                   </div>
                 </div>
-
-                <!-- 경로 -->
-                <div v-if="editingId !== violation.id" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  📁 {{ violation.folder_path }}
-                </div>
-
-                <!-- 위반 내용 -->
-                <div v-if="editingId !== violation.id" class="mt-3 text-sm text-gray-700 dark:text-gray-300">
-                  <span class="font-medium">{{ t('detectedList.problem') }}</span> {{ violation.violation_details }}
-                </div>
-
-                <!-- 제안 -->
-                <div v-if="editingId !== violation.id && violation.suggestion" class="mt-2 p-3 rounded-lg" :class="violation.file_name === violation.suggestion ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'">
-                  <span class="text-sm font-medium" :class="violation.file_name === violation.suggestion ? 'text-green-700 dark:text-green-400' : 'text-blue-700 dark:text-blue-400'">
-                    {{ violation.file_name === violation.suggestion ? '✓ 일치' : t('detectedList.suggestion') }}
-                  </span>
-                  <span v-if="violation.file_name !== violation.suggestion" class="text-sm text-blue-600 dark:text-blue-300 ml-2">{{ violation.suggestion }}</span>
-                </div>
-
-                <!-- 날짜 -->
-                <div v-if="editingId !== violation.id" class="mt-3 text-xs text-gray-500 dark:text-gray-500">
-                  {{ t('detectedList.discoveredAt') }} {{ formatDate(violation.created_at) }}
-                </div>
-                </div>
               </div>
 
-              <!-- Actions -->
-              <div v-if="editingId !== violation.id" class="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-2 flex-shrink-0">
-                <!-- 스토어 보기 버튼 (이미 매칭된 경우) -->
+              <!-- 데스크톱 액션 버튼 (우측) -->
+              <div v-if="editingId !== violation.id" class="hidden sm:flex items-center gap-1 sm:gap-2 ml-2 flex-shrink-0">
                 <button
                   v-if="violation.product_id"
                   @click="goToProduct(violation.product_id)"
                   :title="t('detectedList.viewInStore')"
-                  class="p-1.5 sm:p-2 lg:p-3 text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:shadow-lg rounded-lg sm:rounded-xl transition-all"
+                  class="p-2 lg:p-3 text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:shadow-lg rounded-lg sm:rounded-xl transition-all"
                 >
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 </button>
-
-                            <!-- AI 매칭 버튼 (아직 매칭되지 않은 경우) -->
                 <button
                   v-else
                   @click="openAIMatchingDialog(violation)"
                   :title="t('detectedList.aiMatching')"
-                  class="p-1.5 sm:p-2 lg:p-3 text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg rounded-lg sm:rounded-xl transition-all"
+                  class="p-2 lg:p-3 text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg rounded-lg sm:rounded-xl transition-all"
                 >
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </button>
-
                 <button
                   v-if="violation.suggestion && violation.file_name !== violation.suggestion"
                   @click="renameSingle(violation)"
                   :title="t('detectedList.applySuggestion')"
-                  class="p-1.5 sm:p-2 lg:p-3 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
+                  class="p-2 lg:p-3 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
                 >
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
                   </svg>
                 </button>
                 <button
                   @click="startEdit(violation)"
                   :title="t('detectedList.editFilename')"
-                  class="p-1.5 sm:p-2 lg:p-3 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
+                  class="p-2 lg:p-3 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
                 >
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </button>
                 <button
                   @click="addToExclusions(violation)"
                   :title="t('detectedList.addToExclusions')"
-                  class="p-1.5 sm:p-2 lg:p-3 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
+                  class="p-2 lg:p-3 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
                 >
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                   </svg>
                 </button>
                 <button
                   @click="resolveViolation(violation.id)"
                   :title="t('detectedList.markResolved')"
-                  class="p-1.5 sm:p-2 lg:p-3 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
+                  class="p-2 lg:p-3 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
                 >
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                   </svg>
                 </button>
                 <button
                   @click="deleteViolation(violation.id)"
                   :title="t('detectedList.deleteItem')"
-                  class="p-1.5 sm:p-2 lg:p-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
+                  class="p-2 lg:p-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
                 >
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>

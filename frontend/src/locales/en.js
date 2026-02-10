@@ -762,6 +762,7 @@ export default {
       // Pricing info
       pricingInfo: '💰 Pricing Information',
       openaiPricing: 'OpenAI (All Paid):',
+      openaiPricingTitle: 'OpenAI (All Paid):',
       geminiPricing: 'Gemini (Free Tier Available ⭐):',
       geminiFreeQuota: 'Free Quota: 15 requests/minute, 1,500 requests/day',
       geminiPricingTitle: 'Gemini (Free Tier Available ⭐):',

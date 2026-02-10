@@ -1,15 +1,15 @@
 <template>
-  <div class="h-full flex flex-col">
+  <div class="h-full overflow-y-auto lg:overflow-hidden lg:flex lg:flex-col">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-700 dark:to-orange-800 px-8 py-12 text-white">
+    <div class="bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-700 dark:to-orange-800 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-8 text-white">
       <div class="max-w-7xl">
-        <h1 class="text-4xl font-bold mb-2">📌 {{ t('scraps.title') }}</h1>
-        <p class="text-amber-100 dark:text-amber-200">{{ t('scraps.description') }}</p>
+        <h1 class="text-xl sm:text-2xl lg:text-4xl font-bold mb-0.5 sm:mb-1 lg:mb-2">📌 {{ t('scraps.title') }}</h1>
+        <p class="text-amber-100 dark:text-amber-200 text-xs sm:text-sm lg:text-base">{{ t('scraps.description') }}</p>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto px-8 py-8">
+    <div class="lg:flex-1 lg:overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       <div class="max-w-7xl mx-auto">
         <!-- Loading -->
         <div v-if="loading" class="flex items-center justify-center py-20">

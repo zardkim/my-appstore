@@ -1,15 +1,15 @@
 <template>
-  <div class="h-full flex flex-col">
+  <div class="h-full overflow-y-auto lg:overflow-hidden lg:flex lg:flex-col">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 text-white">
+    <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-8 text-white">
       <div class="max-w-7xl">
-        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">{{ t('home.welcome') }}! 👋</h1>
-        <p class="text-blue-100 text-sm sm:text-base lg:text-lg">{{ t('auth.personalLibrary') }}</p>
+        <h1 class="text-xl sm:text-2xl lg:text-4xl font-bold mb-0.5 sm:mb-1 lg:mb-2">{{ t('home.welcome') }}! 👋</h1>
+        <p class="text-blue-100 text-xs sm:text-sm lg:text-lg">{{ t('auth.personalLibrary') }}</p>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+    <div class="lg:flex-1 lg:overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
