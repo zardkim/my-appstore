@@ -76,43 +76,40 @@ def _get_fernet_legacy() -> Fernet:
 
 
 def encrypt_value(value: str) -> str:
-    """Encrypt a string value. Returns prefixed encrypted string."""
-    if not value or value.startswith(ENCRYPTED_PREFIX):
+    """Store value as plaintext (no encryption - personal NAS use).
+    Previously used Fernet encryption which caused key-mismatch issues on restart."""
+    if not value:
         return value
-    try:
-        f = _get_fernet()
-        encrypted = f.encrypt(value.encode('utf-8')).decode('utf-8')
-        return f"{ENCRYPTED_PREFIX}{encrypted}"
-    except Exception as e:
-        logger.error(f"Encryption failed: {e}")
+    # If already plaintext (no ENC: prefix), return as-is
+    if not value.startswith(ENCRYPTED_PREFIX):
         return value
+    # If it's already an ENC: value (legacy), keep as-is until next save
+    return value
 
 
 def decrypt_value(value: str) -> str:
-    """Decrypt an encrypted string value. Returns plain text."""
-    if not value or not value.startswith(ENCRYPTED_PREFIX):
+    """Return plaintext value. Handles legacy ENC:-prefixed encrypted values."""
+    if not value:
         return value
+    # Plaintext value - return as-is
+    if not value.startswith(ENCRYPTED_PREFIX):
+        return value
+    # Legacy encrypted value - try to decrypt for migration
     encrypted_data = value[len(ENCRYPTED_PREFIX):]
-    # Try file-based key first
     try:
         f = _get_fernet()
-        return f.decrypt(encrypted_data.encode('utf-8')).decode('utf-8')
-    except InvalidToken:
+        plain = f.decrypt(encrypted_data.encode('utf-8')).decode('utf-8')
+        logger.info("Decrypted legacy ENC: value - will be stored as plaintext on next save")
+        return plain
+    except Exception:
         pass
-    except Exception as e:
-        logger.error(f"Decryption failed with file key: {e}")
-
-    # Fallback: try SECRET_KEY-based key (migration from older versions)
     try:
         f_legacy = _get_fernet_legacy()
         plain = f_legacy.decrypt(encrypted_data.encode('utf-8')).decode('utf-8')
-        logger.info("Decrypted with legacy SECRET_KEY - will re-encrypt with file key on next save")
+        logger.info("Decrypted legacy SECRET_KEY value - will be stored as plaintext on next save")
         return plain
-    except InvalidToken:
-        logger.warning("Failed to decrypt value - key mismatch (re-enter API key)")
-        return ""
-    except Exception as e:
-        logger.error(f"Decryption failed with legacy key: {e}")
+    except Exception:
+        logger.warning("Failed to decrypt legacy ENC: value - please re-enter the API key in Settings")
         return ""
 
 
@@ -238,7 +235,10 @@ def get_default_config() -> Dict[str, Any]:
             "scanMethod": "ai",
             "aiProvider": "openai",
             "aiModel": "gpt-4o-mini",
-            "apiKey": "",
+            "openaiApiKey": "",
+            "geminiApiKey": "",
+            "googleApiKey": "",
+            "googleSearchEngineId": "",
             "autoDescription": True,
             "autoIcon": True
         },
@@ -288,35 +288,87 @@ def _has_unencrypted_sensitive(data: Any) -> bool:
     return False
 
 
+def _migrate_config(config: Dict[str, Any]) -> tuple:
+    """Migrate legacy config fields. Returns (migrated_config, needs_save)."""
+    needs_save = False
+    # Migrate: metadata.apiKey → metadata.openaiApiKey (field rename)
+    if 'metadata' in config and isinstance(config['metadata'], dict):
+        meta = config['metadata']
+        if 'apiKey' in meta and 'openaiApiKey' not in meta:
+            meta['openaiApiKey'] = meta.pop('apiKey')
+            logger.info("Migrated metadata.apiKey → metadata.openaiApiKey")
+            needs_save = True
+        elif 'apiKey' in meta and meta['apiKey']:
+            # Both exist but old apiKey has value - copy if new is empty
+            if not meta.get('openaiApiKey'):
+                meta['openaiApiKey'] = meta.pop('apiKey')
+                logger.info("Migrated non-empty metadata.apiKey → metadata.openaiApiKey")
+            else:
+                meta.pop('apiKey')
+            needs_save = True
+        elif 'apiKey' in meta:
+            meta.pop('apiKey')
+            needs_save = True
+    return config, needs_save
+
+
+def _has_encrypted_sensitive(data: Any) -> bool:
+    """Check if data has any ENC:-prefixed sensitive fields that need migration to plaintext"""
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key in SENSITIVE_FIELDS and isinstance(value, str) and value.startswith(ENCRYPTED_PREFIX):
+                return True
+            if isinstance(value, (dict, list)) and _has_encrypted_sensitive(value):
+                return True
+    elif isinstance(data, list):
+        for item in data:
+            if _has_encrypted_sensitive(item):
+                return True
+    return False
+
+
 def load_config() -> Dict[str, Any]:
-    """Load config from JSON file with decryption of sensitive fields"""
+    """Load config from JSON file. Decrypts legacy ENC: values and migrates field names."""
     ensure_config_exists()
 
     try:
         with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
             config = json.load(f)
 
-        # Auto-migrate: encrypt any plaintext sensitive fields
-        if _has_unencrypted_sensitive(config):
-            logger.info("Migrating plaintext sensitive fields to encrypted format")
-            encrypted_config = encrypt_sensitive_fields(config)
-            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(encrypted_config, f, ensure_ascii=False, indent=2)
+        # Decrypt any legacy ENC: values first
+        if _has_encrypted_sensitive(config):
+            logger.info("Decrypting legacy ENC: sensitive fields to plaintext")
+            config = decrypt_sensitive_fields(config)
+            needs_resave = True
+        else:
+            needs_resave = False
 
-        return decrypt_sensitive_fields(config)
+        # Migrate field names (e.g. apiKey → openaiApiKey)
+        config, migrated = _migrate_config(config)
+        needs_resave = needs_resave or migrated
+
+        # Re-save as plaintext if any migrations happened
+        if needs_resave:
+            try:
+                with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(config, f, ensure_ascii=False, indent=2)
+                logger.info("Config migrated and saved as plaintext")
+            except Exception as e:
+                logger.warning(f"Could not save migrated config: {e}")
+
+        return config
     except Exception as e:
         logger.debug(f"Error loading config: {e}")
         return get_default_config()
 
 
 def save_config(config: Dict[str, Any]):
-    """Save config to JSON file with encryption of sensitive fields"""
+    """Save config to JSON file as plaintext (no encryption)."""
     ensure_config_exists()
 
     try:
-        encrypted_config = encrypt_sensitive_fields(config)
         with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-            json.dump(encrypted_config, f, ensure_ascii=False, indent=2)
+            json.dump(config, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.debug(f"Error saving config: {e}")
         raise HTTPException(status_code=500, detail="Failed to save config")

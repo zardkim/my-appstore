@@ -79,8 +79,8 @@
         </div>
 
         <!-- Post Content -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 mb-6">
-          <div class="prose prose-lg dark:prose-invert max-w-none text-gray-900 dark:text-gray-100" v-html="post.content"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 lg:p-8 mb-6 overflow-hidden">
+          <div class="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none text-gray-900 dark:text-gray-100 tinymce-content" v-html="post.content"></div>
         </div>
 
         <!-- Attachments Section -->
@@ -574,8 +574,39 @@ const deleteAttachment = async (index) => {
 </script>
 
 <style scoped>
-/* 유튜브 및 비디오 iframe 반응형 처리 */
-:deep(.prose iframe) {
+/* TinyMCE 컨텐츠 모바일 최적화 */
+:deep(.tinymce-content img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+:deep(.tinymce-content table) {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+:deep(.tinymce-content pre),
+:deep(.tinymce-content code) {
+  overflow-x: auto;
+  max-width: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+:deep(.tinymce-content p),
+:deep(.tinymce-content li),
+:deep(.tinymce-content td),
+:deep(.tinymce-content th) {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* iframe 반응형 */
+:deep(.tinymce-content iframe) {
   max-width: 100%;
   width: 100%;
   height: auto;
@@ -583,35 +614,35 @@ const deleteAttachment = async (index) => {
   border-radius: 0.75rem;
 }
 
-/* 모바일 최적화 */
 @media (max-width: 640px) {
-  :deep(.prose iframe) {
-    aspect-ratio: 16 / 9;
-    height: auto;
+  :deep(.tinymce-content iframe) {
     min-height: 200px;
   }
+
+  :deep(.tinymce-content h1) { font-size: 1.4rem; }
+  :deep(.tinymce-content h2) { font-size: 1.2rem; }
+  :deep(.tinymce-content h3) { font-size: 1.1rem; }
 }
 
-/* TinyMCE 또는 기타 에디터에서 삽입된 비디오 컨테이너 처리 */
-:deep(.prose .mce-object-iframe),
-:deep(.prose .video-container),
-:deep(.prose .embed-container) {
+/* TinyMCE 비디오 컨테이너 */
+:deep(.tinymce-content .mce-object-iframe),
+:deep(.tinymce-content .video-container),
+:deep(.tinymce-content .embed-container) {
   position: relative;
   width: 100%;
-  padding-bottom: 56.25%; /* 16:9 비율 */
+  padding-bottom: 56.25%;
   height: 0;
   overflow: hidden;
   border-radius: 0.75rem;
 }
 
-:deep(.prose .mce-object-iframe iframe),
-:deep(.prose .video-container iframe),
-:deep(.prose .embed-container iframe) {
+:deep(.tinymce-content .mce-object-iframe iframe),
+:deep(.tinymce-content .video-container iframe),
+:deep(.tinymce-content .embed-container iframe) {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 0.75rem;
 }
 </style>
