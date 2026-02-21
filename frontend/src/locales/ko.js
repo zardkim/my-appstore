@@ -687,7 +687,7 @@ export default {
       troubleshooting: '🔧 인식이 안 될 때',
       trouble1: '파일명이 너무 복잡한 경우 → 폴더명을 명확하게 작성',
       trouble2: '버전 인식 실패 → 폴더명에 버전 포함',
-      trouble3: '제품명 불명확 → AI 매칭 사용 권장',
+      trouble3: '제품명 불명확 → AI 검색 사용 권장',
       trouble4: '특수 케이스 → 검색된 목록에서 수동 매칭 가능',
 
       // 요약
@@ -1052,7 +1052,7 @@ export default {
     attachmentsLabel: '첨부파일 (선택사항)',
     dragDropFiles: '파일을 드래그 앤 드롭하거나 클릭하여 선택하세요',
     selectFiles: '파일 선택',
-    fileLimit: '최대 10MB, 최대 5개 파일',
+    fileLimit: '최대 500MB, 최대 20개 파일',
     beforePostingTitle: '작성 전 확인사항',
     guidelineAppropriate: '제목과 내용이 게시판 주제에 적합한지 확인해주세요',
     guidelineRespect: '타인을 비방하거나 욕설이 포함된 내용은 삭제될 수 있습니다',
@@ -1191,7 +1191,7 @@ export default {
 
     // Tooltips
     viewInStore: '스토어에서 보기',
-    aiMatching: 'AI 메타데이터 생성 및 스토어 등록',
+    aiMatching: 'AI 검색 및 스토어 등록',
     applySuggestion: '제안으로 변경',
     editFilename: '파일명 수정',
     markResolved: '해결됨으로 표시',
@@ -1205,7 +1205,7 @@ export default {
     deleteSuccess: '삭제되었습니다.',
     deleteFailed: '삭제에 실패했습니다.',
     enterFilename: '파일명을 입력해주세요.',
-    renameSuccess: '파일명이 성공적으로 변경되었습니다.\nAI 매칭 버튼을 클릭하여 스토어에 등록할 수 있습니다.',
+    renameSuccess: '파일명이 성공적으로 변경되었습니다.\nAI 검색 버튼을 클릭하여 스토어에 등록할 수 있습니다.',
     renameFailed: '파일명 변경에 실패했습니다.',
     noSuggestion: '제안된 파일명이 없습니다.',
     renameConfirm: '"{filename}"로 변경하시겠습니까?',
@@ -1426,7 +1426,7 @@ export default {
 
   // 제품 카드
   productCard: {
-    aiMatching: 'AI 매칭',
+    aiMatching: 'AI 검색',
     manualEdit: '수동 수정',
     deleteProduct: '제품 삭제',
     deleteProductConfirm: '이 제품과 모든 버전을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',

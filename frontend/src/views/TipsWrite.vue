@@ -231,8 +231,8 @@ const attachments = ref([])
 const isDragging = ref(false)
 const fileInput = ref(null)
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-const MAX_FILES = 5
+const MAX_FILE_SIZE = 500 * 1024 * 1024 // 500MB
+const MAX_FILES = 20
 
 // TinyMCE 스크립트 로드 및 초기화
 const initTinyMCE = () => {
@@ -466,6 +466,10 @@ onMounted(async () => {
         content: postData.content,
         tags: postData.tags || '',
         is_notice: postData.is_notice
+      }
+      // TinyMCE가 이미 초기화되었으면 내용 설정
+      if (editorInstance) {
+        editorInstance.setContent(post.value.content)
       }
     } catch (error) {
       console.error('Failed to load post:', error)

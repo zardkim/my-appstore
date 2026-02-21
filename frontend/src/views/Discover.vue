@@ -98,7 +98,7 @@
             <select
               v-model="sortBy"
               class="hidden sm:block px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white flex-shrink-0"
-              @change="loadProducts"
+              @change="resetAndLoad"
             >
               <option value="id">{{ t('discover.sortByLatest') }}</option>
               <option value="title">{{ t('discover.sortByName') }}</option>
@@ -123,7 +123,7 @@
             <select
               v-model="sortBy"
               class="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              @change="loadProducts"
+              @change="resetAndLoad"
             >
               <option value="id">{{ t('discover.sortByLatest') }}</option>
               <option value="title">{{ t('discover.sortByName') }}</option>
@@ -179,44 +179,16 @@
               />
             </div>
 
-            <!-- Pagination -->
-            <div v-if="totalProducts > pageSize" class="mt-8 flex justify-center">
-              <nav class="flex items-center gap-1">
-                <button
-                  @click="goToPage(currentPage - 1)"
-                  :disabled="currentPage === 1"
-                  class="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-
-                <button
-                  v-for="page in visiblePages"
-                  :key="page"
-                  @click="goToPage(page)"
-                  :class="[
-                    'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                    page === currentPage
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  ]"
-                >
-                  {{ page }}
-                </button>
-
-                <button
-                  @click="goToPage(currentPage + 1)"
-                  :disabled="currentPage === totalPages"
-                  class="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </nav>
+            <!-- Infinite Scroll: Loading More -->
+            <div v-if="loadingMore" class="mt-6 flex justify-center py-4">
+              <div class="flex items-center gap-3">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-400"></div>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('common.loading') }}</span>
+              </div>
             </div>
+
+            <!-- Infinite Scroll: Observer Target -->
+            <div ref="scrollObserverTarget" class="h-4"></div>
           </div>
         </div>
       </div>
@@ -308,7 +280,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { productsApi } from '../api/products'
@@ -356,8 +328,15 @@ const products = ref([])
 const totalProducts = ref(0)
 const categoryStats = ref({})
 const loading = ref(true)
+const loadingMore = ref(false)
 const currentPage = ref(1)
 const pageSize = 20
+
+// Infinite scroll
+const scrollObserverTarget = ref(null)
+let scrollObserver = null
+
+const hasMore = computed(() => products.value.length < totalProducts.value)
 
 // Dialog state
 const aiSearchDialogOpen = ref(false)
@@ -366,19 +345,6 @@ const imageSearchDialogOpen = ref(false)
 const selectedProduct = ref(null)
 const showCategoryModal = ref(false)
 
-const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize))
-
-const visiblePages = computed(() => {
-  const pages = []
-  const start = Math.max(1, currentPage.value - 2)
-  const end = Math.min(totalPages.value, currentPage.value + 2)
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  return pages
-})
-
 let searchTimeout = null
 
 const handleSearch = () => {
@@ -386,13 +352,22 @@ const handleSearch = () => {
     clearTimeout(searchTimeout)
   }
   searchTimeout = setTimeout(() => {
-    currentPage.value = 1
-    loadProducts()
+    resetAndLoad()
   }, 500)
 }
 
-const loadProducts = async () => {
-  loading.value = true
+const resetAndLoad = () => {
+  currentPage.value = 1
+  products.value = []
+  loadProducts()
+}
+
+const loadProducts = async (append = false) => {
+  if (append) {
+    loadingMore.value = true
+  } else {
+    loading.value = true
+  }
   try {
     const params = {
       skip: (currentPage.value - 1) * pageSize,
@@ -410,15 +385,28 @@ const loadProducts = async () => {
     }
 
     const response = await productsApi.getAll(params)
-    products.value = response.data.products
+    if (append) {
+      products.value = [...products.value, ...response.data.products]
+    } else {
+      products.value = response.data.products
+    }
     totalProducts.value = response.data.total
   } catch (error) {
     console.error('Failed to load products:', error)
-    products.value = []
-    totalProducts.value = 0
+    if (!append) {
+      products.value = []
+      totalProducts.value = 0
+    }
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
+}
+
+const loadMore = () => {
+  if (loadingMore.value || !hasMore.value) return
+  currentPage.value++
+  loadProducts(true)
 }
 
 // 삭제된 파일 일괄 정리
@@ -435,7 +423,7 @@ const cleanupDeletedFiles = async () => {
     await alert.success(t('discover.cleanupSuccess', { deleted_versions, deleted_products }))
 
     // 목록 새로고침
-    await loadProducts()
+    resetAndLoad()
     await loadCategoryStats()
   } catch (error) {
     console.error('Failed to cleanup deleted files:', error)
@@ -445,8 +433,9 @@ const cleanupDeletedFiles = async () => {
 
 // 제품 삭제 후 처리
 const handleProductDeleted = async (productId) => {
-  // 목록 새로고침
-  await loadProducts()
+  // 삭제된 제품을 목록에서 제거
+  products.value = products.value.filter(p => p.id !== productId)
+  totalProducts.value = Math.max(0, totalProducts.value - 1)
   await loadCategoryStats()
 }
 
@@ -469,23 +458,13 @@ const getCategoryCount = (category) => {
 
 const selectCategory = (category) => {
   selectedCategory.value = category
-  currentPage.value = 1
-  loadProducts()
+  resetAndLoad()
 }
 
 const selectCategoryMobile = (category) => {
   selectedCategory.value = category
-  currentPage.value = 1
   showCategoryModal.value = false
-  loadProducts()
-}
-
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    loadProducts()
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  resetAndLoad()
 }
 
 const goToScan = () => {
@@ -510,7 +489,7 @@ const closeAISearchDialog = () => {
 
 const handleMetadataSaved = async (metadata) => {
   // Refresh the product list to show updated data
-  await loadProducts()
+  resetAndLoad()
 }
 
 const closeManualEditDialog = () => {
@@ -520,7 +499,7 @@ const closeManualEditDialog = () => {
 
 const handleManualEditSaved = async (data) => {
   // Refresh the product list to show updated data
-  await loadProducts()
+  resetAndLoad()
 }
 
 const closeImageSearchDialog = () => {
@@ -530,18 +509,43 @@ const closeImageSearchDialog = () => {
 
 const handleImagesSaved = async () => {
   // Refresh the product list to show updated data
-  await loadProducts()
+  resetAndLoad()
 }
 
-onMounted(() => {
+const setupScrollObserver = () => {
+  if (scrollObserver) scrollObserver.disconnect()
+
+  scrollObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasMore.value && !loading.value && !loadingMore.value) {
+        loadMore()
+      }
+    },
+    { rootMargin: '200px' }
+  )
+
+  if (scrollObserverTarget.value) {
+    scrollObserver.observe(scrollObserverTarget.value)
+  }
+}
+
+onMounted(async () => {
   if (route.query.category) {
     selectedCategory.value = route.query.category
   }
   if (route.query.search) {
     searchQuery.value = route.query.search
   }
-  loadProducts()
+  await loadProducts()
   loadCategoryStats()
+  await nextTick()
+  setupScrollObserver()
+})
+
+onUnmounted(() => {
+  if (scrollObserver) {
+    scrollObserver.disconnect()
+  }
 })
 
 watch(
@@ -549,8 +553,7 @@ watch(
   (newQuery) => {
     if (newQuery.category !== selectedCategory.value) {
       selectedCategory.value = newQuery.category || null
-      currentPage.value = 1
-      loadProducts()
+      resetAndLoad()
     }
   }
 )

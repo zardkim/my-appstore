@@ -13,7 +13,6 @@ from app.models.filename_violation import FilenameViolation
 from app.core.metadata_enricher import MetadataEnricher
 from app.core.icon_cache import IconCache
 from app.core.parser import FilenameParser
-from app.core.filename_validator import FilenameValidator
 from app.config import settings
 import logging
 logger = logging.getLogger(__name__)
@@ -135,38 +134,6 @@ class FileScanner:
                 return True
 
         return False
-
-    def _validate_filename(self, filename: str, folder_path: str):
-        """
-        파일명이 표준 규칙을 따르는지 검증하고, 위반사항을 DB에 저장
-
-        Args:
-            filename: 검증할 파일명
-            folder_path: 파일이 속한 폴더 경로
-        """
-        validator = FilenameValidator()
-        result = validator.validate_filename(filename)
-
-        if not result["is_valid"]:
-            # 기존 위반사항 삭제 (같은 파일에 대해 중복 저장 방지)
-            self.db.query(FilenameViolation).filter(
-                FilenameViolation.folder_path == folder_path,
-                FilenameViolation.file_name == filename
-            ).delete()
-
-            # 새로운 위반사항 저장
-            for violation in result["violations"]:
-                db_violation = FilenameViolation(
-                    folder_path=folder_path,
-                    file_name=filename,
-                    violation_type=violation["type"],
-                    violation_details=violation["details"],
-                    suggestion=violation.get("suggestion", ""),
-                    is_resolved=False
-                )
-                self.db.add(db_violation)
-
-            self.db.flush()
 
     async def scan_directory_async(self, base_path: str) -> Dict:
         """
@@ -388,44 +355,6 @@ class FileScanner:
             self._add_scanned_file(file_path, folder_path_str, results)
             scanned_files.add(str(file_path.absolute()))
 
-    def _process_file(self, file_path: Path, product: Product, results: Dict):
-        """
-        Process a single file (represents a version)
-
-        Args:
-            file_path: Path to the file
-            product: Product this file belongs to
-            results: Results dictionary to update
-        """
-        file_path_str = str(file_path.absolute())
-
-        # 파일명 규칙 검증
-        self._validate_filename(file_path.name, str(file_path.parent.absolute()))
-
-        # Check if version already exists
-        existing = self.db.query(Version).filter(
-            Version.file_path == file_path_str
-        ).first()
-
-        if existing:
-            return  # Skip already registered files
-
-        # Extract version from filename using parser
-        parsed = self.parser.parse(file_path.name, file_path.parent.name)
-        version_name = parsed.get('version') or 'Unknown'
-        is_portable = parsed.get('is_portable', False)
-
-        # Create new version entry
-        version = Version(
-            product_id=product.id,
-            file_name=file_path.name,
-            file_path=file_path_str,
-            file_size=file_path.stat().st_size,
-            version_name=version_name,
-            is_portable=is_portable
-        )
-        self.db.add(version)
-        results["new_versions"] += 1
 
     def _add_scanned_file(self, file_path: Path, folder_path_str: str, results: Dict):
         """
@@ -454,28 +383,13 @@ class FileScanner:
             Version.file_path == file_path_str
         ).first()
 
-        # Validate filename and determine violation type
-        validator = FilenameValidator()
-        validation_result = validator.validate_filename(file_name)
-
-        if validation_result["is_valid"]:
-            # Valid filename - add as "scanned" type
-            violation_type = "scanned"
-            violation_details = "스캔된 파일 (AI 매칭 대기중)"
-            suggestion = file_name  # No change needed
-        else:
-            # Invalid filename - use actual violation type
-            violation_type = validation_result["violations"][0]["type"]
-            violation_details = validation_result["violations"][0]["details"]
-            suggestion = validation_result["violations"][0].get("suggestion", "")
-
-        # Create FilenameViolation
+        # 파일명 규칙 검사 없이 모두 "scanned" 타입으로 추가 (스캔 예외 규칙만 적용됨)
         violation = FilenameViolation(
             folder_path=folder_path_str,
             file_name=file_name,
-            violation_type=violation_type,
-            violation_details=violation_details,
-            suggestion=suggestion if suggestion else file_name,
+            violation_type="scanned",
+            violation_details="스캔된 파일 (AI 매칭 대기중)",
+            suggestion=file_name,
             is_resolved=False
         )
 
@@ -576,11 +490,7 @@ class FileScanner:
 
                             for violation in violations:
                                 violation.file_name = new_filename
-                                # 새 파일명으로 다시 검증하여 제안 업데이트
-                                validation_result = FilenameValidator.validate_filename(new_filename)
-                                if validation_result['violations']:
-                                    first_violation = validation_result['violations'][0]
-                                    violation.suggestion = first_violation.get('suggestion', '')
+                                violation.suggestion = new_filename
 
                             renamed_count += 1
 

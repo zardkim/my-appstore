@@ -815,7 +815,7 @@ async def process_post_content(
 
         try:
             # 외부 이미지 다운로드
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, verify=False) as client:
                 response = await client.get(img_url)
                 response.raise_for_status()
 
@@ -846,9 +846,9 @@ async def process_post_content(
                 with open(file_path, 'wb') as f:
                     f.write(response.content)
 
-                # 로컬 URL 생성
+                # 로컬 URL 생성 (백엔드 URL 포함)
                 local_url = f"/static/eximage/{filename}"
-                full_local_url = f"{settings.BACKEND_URL}{local_url}"
+                full_local_url = f"{settings.get_backend_url()}{local_url}"
 
                 # HTML에서 외부 URL을 로컬 URL로 교체
                 updated_content = updated_content.replace(img_url, full_local_url)
@@ -910,9 +910,9 @@ async def upload_tinymce_image(
         with open(file_path, 'wb') as f:
             f.write(content)
 
-        # 로컬 URL 생성
+        # 로컬 URL 생성 (백엔드 URL 포함)
         local_url = f"/static/eximage/{filename}"
-        full_local_url = f"{settings.BACKEND_URL}{local_url}"
+        full_local_url = f"{settings.get_backend_url()}{local_url}"
 
         logger.debug(f"Upload TinyMCE Image] Saved: {filename}")
 

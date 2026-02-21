@@ -6,14 +6,112 @@ from pydantic import BaseModel
 from typing import Dict, Any, Optional, List, Union
 import json
 import os
+import base64
+import hashlib
 from pathlib import Path
 import logging
+from cryptography.fernet import Fernet, InvalidToken
+
 logger = logging.getLogger(__name__)
 
 
 from app.dependencies import get_current_user, get_current_admin_user
 from app.models.user import User
 from app.config import settings
+
+# --- API Key Encryption ---
+# Sensitive field names that should be encrypted in config.json
+SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "googleApiKey", "smtpPassword"}
+ENCRYPTED_PREFIX = "ENC:"
+
+
+def _get_fernet() -> Fernet:
+    """Derive Fernet key from SECRET_KEY"""
+    key_bytes = settings.SECRET_KEY.encode('utf-8')
+    # Use SHA-256 to derive a 32-byte key, then base64 encode for Fernet
+    derived = hashlib.sha256(key_bytes).digest()
+    fernet_key = base64.urlsafe_b64encode(derived)
+    return Fernet(fernet_key)
+
+
+def encrypt_value(value: str) -> str:
+    """Encrypt a string value. Returns prefixed encrypted string."""
+    if not value or value.startswith(ENCRYPTED_PREFIX):
+        return value
+    try:
+        f = _get_fernet()
+        encrypted = f.encrypt(value.encode('utf-8')).decode('utf-8')
+        return f"{ENCRYPTED_PREFIX}{encrypted}"
+    except Exception as e:
+        logger.error(f"Encryption failed: {e}")
+        return value
+
+
+def decrypt_value(value: str) -> str:
+    """Decrypt an encrypted string value. Returns plain text."""
+    if not value or not value.startswith(ENCRYPTED_PREFIX):
+        return value
+    try:
+        f = _get_fernet()
+        encrypted_data = value[len(ENCRYPTED_PREFIX):]
+        return f.decrypt(encrypted_data.encode('utf-8')).decode('utf-8')
+    except InvalidToken:
+        logger.warning("Failed to decrypt value - invalid token (SECRET_KEY may have changed)")
+        return ""
+    except Exception as e:
+        logger.error(f"Decryption failed: {e}")
+        return ""
+
+
+def encrypt_sensitive_fields(data: Any) -> Any:
+    """Recursively encrypt sensitive fields in config data"""
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            if key in SENSITIVE_FIELDS and isinstance(value, str):
+                result[key] = encrypt_value(value)
+            elif isinstance(value, (dict, list)):
+                result[key] = encrypt_sensitive_fields(value)
+            else:
+                result[key] = value
+        return result
+    elif isinstance(data, list):
+        return [encrypt_sensitive_fields(item) for item in data]
+    return data
+
+
+def decrypt_sensitive_fields(data: Any) -> Any:
+    """Recursively decrypt sensitive fields in config data"""
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            if key in SENSITIVE_FIELDS and isinstance(value, str):
+                result[key] = decrypt_value(value)
+            elif isinstance(value, (dict, list)):
+                result[key] = decrypt_sensitive_fields(value)
+            else:
+                result[key] = value
+        return result
+    elif isinstance(data, list):
+        return [decrypt_sensitive_fields(item) for item in data]
+    return data
+
+
+def mask_sensitive_fields(data: Any) -> Any:
+    """Recursively mask sensitive fields for non-admin users"""
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            if key in SENSITIVE_FIELDS and isinstance(value, str):
+                result[key] = "***" if value else ""
+            elif isinstance(value, (dict, list)):
+                result[key] = mask_sensitive_fields(value)
+            else:
+                result[key] = value
+        return result
+    elif isinstance(data, list):
+        return [mask_sensitive_fields(item) for item in data]
+    return data
 
 router = APIRouter()
 
@@ -121,25 +219,50 @@ def ensure_config_exists():
             json.dump(get_default_config(), f, ensure_ascii=False, indent=2)
 
 
+def _has_unencrypted_sensitive(data: Any) -> bool:
+    """Check if data has any unencrypted sensitive fields that need migration"""
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key in SENSITIVE_FIELDS and isinstance(value, str) and value and not value.startswith(ENCRYPTED_PREFIX):
+                return True
+            if isinstance(value, (dict, list)) and _has_unencrypted_sensitive(value):
+                return True
+    elif isinstance(data, list):
+        for item in data:
+            if _has_unencrypted_sensitive(item):
+                return True
+    return False
+
+
 def load_config() -> Dict[str, Any]:
-    """Load config from JSON file"""
+    """Load config from JSON file with decryption of sensitive fields"""
     ensure_config_exists()
 
     try:
         with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            config = json.load(f)
+
+        # Auto-migrate: encrypt any plaintext sensitive fields
+        if _has_unencrypted_sensitive(config):
+            logger.info("Migrating plaintext sensitive fields to encrypted format")
+            encrypted_config = encrypt_sensitive_fields(config)
+            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+                json.dump(encrypted_config, f, ensure_ascii=False, indent=2)
+
+        return decrypt_sensitive_fields(config)
     except Exception as e:
         logger.debug(f"Error loading config: {e}")
         return get_default_config()
 
 
 def save_config(config: Dict[str, Any]):
-    """Save config to JSON file"""
+    """Save config to JSON file with encryption of sensitive fields"""
     ensure_config_exists()
 
     try:
+        encrypted_config = encrypt_sensitive_fields(config)
         with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-            json.dump(config, f, ensure_ascii=False, indent=2)
+            json.dump(encrypted_config, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.debug(f"Error saving config: {e}")
         raise HTTPException(status_code=500, detail="Failed to save config")
@@ -153,10 +276,9 @@ async def get_config(current_user: User = Depends(get_current_user)):
     """
     config = load_config()
 
-    # Hide API key from non-admin users
+    # Hide sensitive fields from non-admin users
     if current_user.role != "admin":
-        if "metadata" in config and "apiKey" in config["metadata"]:
-            config["metadata"]["apiKey"] = "***" if config["metadata"]["apiKey"] else ""
+        config = mask_sensitive_fields(config)
 
     return config
 
@@ -177,10 +299,9 @@ async def get_config_section(
 
     data = config[section]
 
-    # Hide API key from non-admin users
-    if section == "metadata" and current_user.role != "admin":
-        if "apiKey" in data:
-            data["apiKey"] = "***" if data["apiKey"] else ""
+    # Hide sensitive fields from non-admin users
+    if current_user.role != "admin":
+        data = mask_sensitive_fields(data)
 
     return data
 
@@ -197,8 +318,7 @@ async def update_config_section(
     Data can be dict (most sections) or list (categories)
     """
     logger.info(f"Updating config section: {section}")
-    logger.info(f"Received data type: {type(data)}")
-    logger.info(f"Received data: {data}")
+    logger.debug(f"Received data type: {type(data)}")
 
     config = load_config()
 
@@ -240,8 +360,12 @@ async def update_config_section(
                 detail=f"Following paths do not exist: {', '.join(invalid_paths)}"
             )
 
-    # Update the section
-    config[section] = data
+    # Update the section - deep merge for dict, full replace for list
+    if isinstance(data, dict) and section in config and isinstance(config[section], dict):
+        # Deep merge: preserve existing fields not in the update
+        config[section].update(data)
+    else:
+        config[section] = data
 
     # Save to file
     try:

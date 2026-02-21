@@ -6,7 +6,7 @@
 
 *파일 이름만으로 자동으로 아름다운 앱 스토어를 만들어줍니다*
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/zardkim/my-appstore/releases/tag/v1.2.0)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/zardkim/my-appstore/releases/tag/v1.3.0)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](https://hub.docker.com/u/zardkim)
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)

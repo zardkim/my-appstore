@@ -17,6 +17,13 @@ function decodeJwt(token) {
   }
 }
 
+// Helper to check if token is expired
+function isTokenExpired(decoded) {
+  if (!decoded || !decoded.exp) return true
+  // decoded.exp is in seconds (Unix timestamp)
+  return Date.now() >= decoded.exp * 1000
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('access_token') || null)
   const user = ref(null)
@@ -26,8 +33,12 @@ export const useAuthStore = defineStore('auth', () => {
   // Initialize user from token if available
   if (token.value) {
     const decodedToken = decodeJwt(token.value)
-    if (decodedToken) {
+    if (decodedToken && !isTokenExpired(decodedToken)) {
       user.value = { username: decodedToken.sub, role: decodedToken.role }
+    } else {
+      // Token expired or invalid - clear it
+      token.value = null
+      localStorage.removeItem('access_token')
     }
   }
 
@@ -54,7 +65,7 @@ export const useAuthStore = defineStore('auth', () => {
   function checkAuth() {
     if (token.value) {
       const decodedToken = decodeJwt(token.value)
-      if (decodedToken) {
+      if (decodedToken && !isTokenExpired(decodedToken)) {
         user.value = { username: decodedToken.sub, role: decodedToken.role }
       } else {
         logout()

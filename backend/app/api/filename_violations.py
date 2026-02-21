@@ -545,10 +545,16 @@ async def create_product_from_violation(
         )
 
     try:
+        # 같은 폴더의 미해결 violations를 모두 함께 매칭
+        same_folder_violations = db.query(FilenameViolation).filter(
+            FilenameViolation.folder_path == violation.folder_path,
+            FilenameViolation.is_resolved == False
+        ).all()
+
         # 통합 매칭 로직 호출 (수동 매칭 모드: 명확성 검사 건너뜀, AI가 메타데이터 생성)
         results = await match_violations_to_products(
             db=db,
-            violations=[violation],
+            violations=same_folder_violations if same_folder_violations else [violation],
             ai_provider=ai_provider,
             ai_model=ai_model,
             api_key=api_key,
@@ -558,12 +564,23 @@ async def create_product_from_violation(
 
         if results["matched"] > 0 and results["products"]:
             product_info = results["products"][0]
+            matched_count = len(same_folder_violations) if same_folder_violations else 1
+
+            # 중복 제품 정보 확인
+            is_duplicate = len(results.get("duplicates", [])) > 0
+            duplicate_info = results["duplicates"][0] if is_duplicate else None
+
             return {
                 "success": True,
-                "message": "Product가 성공적으로 생성되었습니다.",
+                "message": "기존 제품에 버전이 추가되었습니다." if is_duplicate else f"Product가 성공적으로 생성되었습니다. (같은 폴더 {matched_count}개 파일 매칭)",
                 "product_id": product_info["id"],
                 "violation_id": violation_id,
-                "product": product_info
+                "product": {
+                    **product_info,
+                    "is_duplicate": is_duplicate,
+                    "duplicate_reason": duplicate_info["reason"] if duplicate_info else None
+                },
+                "matched_files": matched_count
             }
         else:
             # API 오류 정보가 있으면 구체적 메시지 반환
@@ -627,10 +644,16 @@ async def create_product_from_violation_with_metadata(
     ai_model = metadata_config.get('aiModel', 'gemini-2.5-flash')
 
     try:
+        # 같은 폴더의 미해결 violations를 모두 함께 매칭
+        same_folder_violations = db.query(FilenameViolation).filter(
+            FilenameViolation.folder_path == violation.folder_path,
+            FilenameViolation.is_resolved == False
+        ).all()
+
         # 통합 매칭 로직 호출 (수동 매칭 모드: 사용자 제공 메타데이터 사용)
         results = await match_violations_to_products(
             db=db,
-            violations=[violation],
+            violations=same_folder_violations if same_folder_violations else [violation],
             ai_provider=ai_provider,
             ai_model=ai_model,
             api_key="",  # 사용자 제공 메타데이터 사용 시 API key 불필요
