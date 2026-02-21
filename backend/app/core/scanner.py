@@ -171,12 +171,33 @@ class FileScanner:
         await self._scan_folder_recursive_async(base_path, results, scanned_files)
 
         # 파일명 변경 감지 및 업데이트 (삭제 전에 먼저 실행)
-        self._detect_renamed_files(str(base_path.absolute()), scanned_files, results)
+        try:
+            self._detect_renamed_files(str(base_path.absolute()), scanned_files, results)
+        except Exception as e:
+            logger.error(f"Error detecting renamed files: {e}")
+            results["errors"].append(f"Rename detection error: {str(e)}")
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
 
         # 삭제된 파일 정리
-        self._cleanup_deleted_files(str(base_path.absolute()), scanned_files, results)
+        try:
+            self._cleanup_deleted_files(str(base_path.absolute()), scanned_files, results)
+        except Exception as e:
+            logger.error(f"Error cleaning up deleted files: {e}")
+            results["errors"].append(f"Cleanup error: {str(e)}")
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
 
-        self.db.commit()
+        try:
+            self.db.commit()
+        except Exception as e:
+            logger.error(f"Error committing scan results: {e}")
+            self.db.rollback()
+            results["errors"].append(f"Commit error: {str(e)}")
         return results
 
     async def _scan_folder_recursive_async(self, folder: Path, results: Dict, scanned_files: set):
@@ -248,12 +269,33 @@ class FileScanner:
         self._scan_folder_recursive(base_path, results, scanned_files)
 
         # 파일명 변경 감지 및 업데이트 (삭제 전에 먼저 실행)
-        self._detect_renamed_files(str(base_path.absolute()), scanned_files, results)
+        try:
+            self._detect_renamed_files(str(base_path.absolute()), scanned_files, results)
+        except Exception as e:
+            logger.error(f"Error detecting renamed files: {e}")
+            results["errors"].append(f"Rename detection error: {str(e)}")
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
 
         # 삭제된 파일 정리
-        self._cleanup_deleted_files(str(base_path.absolute()), scanned_files, results)
+        try:
+            self._cleanup_deleted_files(str(base_path.absolute()), scanned_files, results)
+        except Exception as e:
+            logger.error(f"Error cleaning up deleted files: {e}")
+            results["errors"].append(f"Cleanup error: {str(e)}")
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
 
-        self.db.commit()
+        try:
+            self.db.commit()
+        except Exception as e:
+            logger.error(f"Error committing scan results: {e}")
+            self.db.rollback()
+            results["errors"].append(f"Commit error: {str(e)}")
         return results
 
     def _scan_folder_recursive(self, folder: Path, results: Dict, scanned_files: set):
@@ -320,8 +362,13 @@ class FileScanner:
         for file_path in valid_files:
             logger.debug(f"Processing file: {file_path.name}")
             results["scanned_files"] += 1
-            self._add_scanned_file(file_path, folder_path_str, results)
-            scanned_files.add(str(file_path.absolute()))
+            try:
+                with self.db.begin_nested():
+                    self._add_scanned_file(file_path, folder_path_str, results)
+                scanned_files.add(str(file_path.absolute()))
+            except Exception as e:
+                logger.warning(f"Failed to scan file {file_path.name}: {e}")
+                results["errors"].append(f"File error {file_path.name}: {str(e)}")
 
     def _process_folder(self, folder: Path, results: Dict, scanned_files: set):
         """
@@ -352,8 +399,13 @@ class FileScanner:
         for file_path in valid_files:
             logger.debug(f"Processing file: {file_path.name}")
             results["scanned_files"] += 1
-            self._add_scanned_file(file_path, folder_path_str, results)
-            scanned_files.add(str(file_path.absolute()))
+            try:
+                with self.db.begin_nested():
+                    self._add_scanned_file(file_path, folder_path_str, results)
+                scanned_files.add(str(file_path.absolute()))
+            except Exception as e:
+                logger.warning(f"Failed to scan file {file_path.name}: {e}")
+                results["errors"].append(f"File error {file_path.name}: {str(e)}")
 
 
     def _add_scanned_file(self, file_path: Path, folder_path_str: str, results: Dict):
