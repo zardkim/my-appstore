@@ -632,42 +632,7 @@
                     <span>{{ t('product.screenshots.searchButton') }}</span>
                   </button>
 
-                  <!-- URL로 스크린샷 추가 -->
-                  <button
-                    @click="showScreenshotUrlInput = !showScreenshotUrlInput"
-                    class="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
-                  >
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
-                    <span>{{ t('product.screenshots.addByUrl') || 'URL' }}</span>
-                  </button>
                 </div>
-              </div>
-
-              <!-- Screenshot URL Input -->
-              <div v-if="showScreenshotUrlInput" class="mt-3 flex items-center gap-2">
-                <input
-                  v-model="screenshotUrl"
-                  type="url"
-                  placeholder="https://example.com/screenshot.png"
-                  class="flex-1 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
-                  @keyup.enter="addScreenshotByUrl"
-                />
-                <button
-                  @click="addScreenshotByUrl"
-                  :disabled="!screenshotUrl || addingScreenshotUrl"
-                  class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
-                >
-                  <div v-if="addingScreenshotUrl" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span v-else>{{ t('common.add') || '추가' }}</span>
-                </button>
-                <button
-                  @click="showScreenshotUrlInput = false; screenshotUrl = ''"
-                  class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
               </div>
 
               <div>
@@ -690,10 +655,21 @@
                       />
 
                       <!-- 스크린샷이 없는 경우 -->
-                      <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800">
-                        <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div v-else class="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800">
+                        <svg class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
+                        <!-- Admin: URL로 추가 버튼 (슬롯별) -->
+                        <button
+                          v-if="authStore.user?.role === 'admin'"
+                          @click.stop="activeUrlSlot = (activeUrlSlot === idx - 1 ? null : idx - 1); screenshotSlotUrl = ''"
+                          class="flex items-center gap-1 px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors"
+                        >
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                          </svg>
+                          {{ t('product.screenshots.addByUrl') || 'URL' }}
+                        </button>
                       </div>
 
                       <div v-if="!isEditing && getScreenshotAtIndex(idx - 1)" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity flex items-center justify-center">
@@ -728,6 +704,27 @@
                     </div>
                     <div class="p-3 sm:p-4 bg-white dark:bg-gray-800">
                       <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('product.screenshots.screenshot') }} {{ idx }}</p>
+                      <!-- 슬롯별 URL 입력창 -->
+                      <div v-if="activeUrlSlot === idx - 1" class="mt-2 flex items-center gap-1.5" @click.stop>
+                        <input
+                          v-model="screenshotSlotUrl"
+                          type="url"
+                          placeholder="https://example.com/image.png"
+                          class="flex-1 min-w-0 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                          @keyup.enter="addScreenshotBySlotUrl(idx - 1)"
+                        />
+                        <button
+                          @click.stop="addScreenshotBySlotUrl(idx - 1)"
+                          :disabled="!screenshotSlotUrl || addingScreenshotUrl"
+                          class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium disabled:opacity-50 flex-shrink-0"
+                        >
+                          <div v-if="addingScreenshotUrl" class="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                          <span v-else>{{ t('common.add') }}</span>
+                        </button>
+                        <button @click.stop="activeUrlSlot = null; screenshotSlotUrl = ''" class="p-1 text-gray-400 hover:text-gray-600 flex-shrink-0">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1332,9 +1329,12 @@ const currentScreenshot = ref('')
 const iconTimestamp = ref(Date.now()) // 로고 캐시 버스팅용 타임스탬프
 const isWritingGuide = ref(false) // 설치방법 가이드 작성 모드
 const screenshotFileInputs = ref([]) // 스크린샷 파일 input refs
-const showScreenshotUrlInput = ref(false) // 스크린샷 URL 입력 표시
-const screenshotUrl = ref('') // 스크린샷 URL 입력값
+const activeUrlSlot = ref(null) // 현재 URL 입력 중인 슬롯 인덱스 (0~3, null=없음)
+const screenshotSlotUrl = ref('') // 슬롯별 URL 입력값
 const addingScreenshotUrl = ref(false) // 스크린샷 URL 추가 중
+// 하위 호환성 (기존 코드 참조 방지)
+const showScreenshotUrlInput = ref(false)
+const screenshotUrl = ref('')
 const showLogoUrlDialog = ref(false) // 로고 URL 입력 다이얼로그
 const logoUrlInput = ref('') // 로고 URL 입력값
 const configCategories = ref([]) // config에서 가져온 카테고리 목록
@@ -2018,11 +2018,11 @@ const uploadScreenshot = async (event, index) => {
   }
 }
 
-// URL로 스크린샷 추가
-const addScreenshotByUrl = async () => {
-  if (!screenshotUrl.value || addingScreenshotUrl.value) return
+// URL로 스크린샷 추가 (슬롯별)
+const addScreenshotBySlotUrl = async (slotIndex) => {
+  if (!screenshotSlotUrl.value || addingScreenshotUrl.value) return
 
-  const url = screenshotUrl.value.trim()
+  const url = screenshotSlotUrl.value.trim()
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     await alert.warning('올바른 URL을 입력해주세요.')
     return
@@ -2032,11 +2032,10 @@ const addScreenshotByUrl = async () => {
   try {
     const response = await imagesApi.downloadScreenshots(product.value.id, [url])
     if (response.data.success || response.data.saved_count > 0) {
-      // Product 다시 로드
       const updatedProduct = await productsApi.getById(product.value.id)
       product.value = updatedProduct.data
-      screenshotUrl.value = ''
-      showScreenshotUrlInput.value = false
+      screenshotSlotUrl.value = ''
+      activeUrlSlot.value = null
       await alert.success(t('product.screenshots.urlAddSuccess') || '스크린샷이 추가되었습니다.')
     } else {
       await alert.error(response.data.error || t('product.screenshots.urlAddFailed') || '스크린샷 추가에 실패했습니다.')
@@ -2048,6 +2047,9 @@ const addScreenshotByUrl = async () => {
     addingScreenshotUrl.value = false
   }
 }
+
+// 하위 호환성 유지 (기존 전역 버튼이 제거되었으므로 빈 함수)
+const addScreenshotByUrl = async () => {}
 
 // Attachments (패치/크랙 파일) 관련
 const attachments = ref([])

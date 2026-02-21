@@ -428,7 +428,12 @@ class FileScanner:
         ).first()
 
         if existing_violation:
-            return  # Skip already scanned files
+            # 기존 violation이 resolved 상태이지만 연결된 product/version이 없으면 리셋
+            # (product 삭제 시 CASCADE SET NULL로 product_id가 NULL이 되었지만 is_resolved가 True로 남은 경우)
+            if existing_violation.is_resolved and existing_violation.product_id is None and existing_violation.version_id is None:
+                existing_violation.is_resolved = False
+                existing_violation.violation_details = "스캔된 파일 (AI 매칭 대기중)"
+            return  # Skip creating a new violation record
 
         # Check if Version already exists (이미 매칭된 파일)
         existing_version = self.db.query(Version).filter(
@@ -604,6 +609,15 @@ class FileScanner:
                     deleted_product_ids.append(product_id)
 
             if deleted_product_ids:
+                # FilenameViolation 리셋 (CASCADE SET NULL 전에 먼저 실행 - 재스캔 가능하도록)
+                self.db.query(FilenameViolation).filter(
+                    FilenameViolation.product_id.in_(deleted_product_ids)
+                ).update({
+                    "is_resolved": False,
+                    "product_id": None,
+                    "version_id": None,
+                    "violation_details": "스캔된 파일 (AI 매칭 대기중)"
+                }, synchronize_session=False)
                 self.db.query(Product).filter(Product.id.in_(deleted_product_ids)).delete(synchronize_session=False)
                 results["deleted_products"] = len(deleted_product_ids)
                 logger.info(f"Deleted {len(deleted_product_ids)} products with no versions")

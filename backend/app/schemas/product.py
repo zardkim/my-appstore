@@ -45,6 +45,7 @@ class ProductResponse(ProductBase):
     folder_path: str
     is_portable: bool = False
     versions: List[VersionResponse] = []
+    created_at: Optional[datetime] = None
 
     # 확장 메타데이터
     official_website: Optional[str] = None

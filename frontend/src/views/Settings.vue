@@ -2975,7 +2975,7 @@ onMounted(async () => {
   try {
     // URL 쿼리 파라미터에서 섹션 확인
     const section = route.query.section
-    if (section && sections.some(s => s.id === section)) {
+    if (section && sections.value.some(s => s.id === section)) {
       activeSection.value = section
     }
 

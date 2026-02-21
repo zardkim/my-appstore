@@ -506,6 +506,15 @@ async def cleanup_deleted_files(
                 deleted_product_ids.append(product_id)
 
         if deleted_product_ids:
+            # FilenameViolation 리셋 (CASCADE SET NULL 전에 먼저 실행 - 재스캔 가능하도록)
+            db.query(FilenameViolation).filter(
+                FilenameViolation.product_id.in_(deleted_product_ids)
+            ).update({
+                "is_resolved": False,
+                "product_id": None,
+                "version_id": None,
+                "violation_details": "스캔된 파일 (AI 매칭 대기중)"
+            }, synchronize_session=False)
             # 관련 Favorite 먼저 삭제 (외래키 제약 조건 방지)
             db.query(Favorite).filter(Favorite.product_id.in_(deleted_product_ids)).delete(synchronize_session=False)
             # Product 삭제

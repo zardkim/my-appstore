@@ -25,6 +25,35 @@
 
     <!-- Menu Items -->
     <nav class="flex-1 overflow-y-auto py-4 px-2 scrollbar-hide">
+      <!-- Search Bar -->
+      <div v-if="!isCollapsed" class="mb-2 px-1">
+        <div class="relative">
+          <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            v-model="sidebarSearch"
+            @keyup.enter="handleSearch"
+            type="text"
+            :placeholder="$t('nav.searchPlaceholder')"
+            class="w-full pl-8 pr-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-xl border border-transparent focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:bg-white dark:focus:bg-gray-600 transition-all"
+          />
+        </div>
+      </div>
+      <!-- 접힌 상태: 검색 아이콘 버튼 -->
+      <button
+        v-else
+        @click="handleSearchIconClick"
+        class="menu-item group justify-center w-full mb-1"
+        :title="$t('nav.search')"
+      >
+        <div class="menu-icon">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </button>
+
       <!-- Home -->
       <button
         @click="goToHome"
@@ -340,6 +369,7 @@ const localeStore = useLocaleStore()
 
 const isCollapsed = ref(false)
 const showUserMenu = ref(false)
+const sidebarSearch = ref('')
 
 const username = computed(() => authStore.user?.username || 'User')
 const userRole = computed(() => authStore.user?.role || 'user')
@@ -359,6 +389,23 @@ const toggleUserMenu = () => {
 
 const goToHome = () => {
   router.push('/')
+}
+
+const handleSearch = () => {
+  const q = sidebarSearch.value.trim()
+  if (q) {
+    router.push(`/discover?search=${encodeURIComponent(q)}`)
+    sidebarSearch.value = ''
+  }
+}
+
+const handleSearchIconClick = () => {
+  // 접힌 상태에서 검색 아이콘 클릭 시 사이드바 펼치고 검색바 포커스
+  isCollapsed.value = false
+  setTimeout(() => {
+    const input = document.querySelector('.sidebar-search-input')
+    if (input) input.focus()
+  }, 100)
 }
 
 const logout = () => {

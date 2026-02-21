@@ -11,7 +11,7 @@
     ></div>
 
     <!-- Modal content — 모바일: 전체화면, 데스크톱: 중앙 정렬 -->
-    <div class="fixed inset-0 sm:inset-4 md:inset-y-6 md:inset-x-auto md:mx-auto md:max-w-4xl flex flex-col bg-white dark:bg-gray-800 sm:rounded-2xl shadow-2xl overflow-hidden">
+    <div class="fixed inset-0 sm:inset-4 md:inset-y-6 md:inset-x-0 md:mx-auto md:max-w-4xl flex flex-col bg-white dark:bg-gray-800 sm:rounded-2xl shadow-2xl overflow-hidden">
       <!-- Header -->
       <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
         <div class="flex items-center justify-between">

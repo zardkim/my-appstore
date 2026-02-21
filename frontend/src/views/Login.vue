@@ -30,7 +30,7 @@
           />
         </div>
 
-        <div class="mb-6">
+        <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('auth.password') }}</label>
           <input
             v-model="password"
@@ -40,6 +40,19 @@
             :placeholder="t('auth.passwordPlaceholder')"
             required
           />
+        </div>
+
+        <!-- Remember Me -->
+        <div class="mb-6 flex items-center gap-2">
+          <input
+            id="rememberMe"
+            v-model="rememberMe"
+            type="checkbox"
+            class="w-4 h-4 text-blue-500 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 cursor-pointer"
+          />
+          <label for="rememberMe" class="text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
+            {{ t('auth.rememberMe') }}
+          </label>
         </div>
 
         <button
@@ -82,6 +95,7 @@ const password = ref('')
 const error = ref('')
 const loading = ref(false)
 const registrationOpen = ref(false)
+const rememberMe = ref(true)
 
 // Selected language (synced with localeStore)
 const selectedLanguage = ref(localeStore.locale)
@@ -122,7 +136,7 @@ const handleLogin = async () => {
   loading.value = true
 
   try {
-    await authStore.login(username.value, password.value)
+    await authStore.login(username.value, password.value, rememberMe.value)
     router.push('/')
   } catch (err) {
     error.value = t('auth.loginFailed')

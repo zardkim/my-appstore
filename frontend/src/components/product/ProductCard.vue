@@ -1,5 +1,13 @@
 <template>
   <div class="relative">
+    <!-- NEW 배지 -->
+    <div
+      v-if="isNew"
+      class="absolute top-2 left-2 z-20 px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded shadow-md pointer-events-none"
+    >
+      NEW
+    </div>
+
     <router-link
       :to="`/product/${product.id}`"
       class="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-500 block transform hover:-translate-y-1"
@@ -162,6 +170,13 @@ const isFavorite = ref(false)
 const showMenu = ref(false)
 
 const isAdmin = computed(() => authStore.user?.role === 'admin')
+
+const isNew = computed(() => {
+  if (!props.product.created_at) return false
+  const date = new Date(props.product.created_at)
+  const diffDays = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24))
+  return diffDays <= 3
+})
 
 const iconUrl = computed(() => {
   if (imageError.value) return ''

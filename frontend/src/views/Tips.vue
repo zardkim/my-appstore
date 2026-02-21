@@ -139,11 +139,11 @@
         <!-- Mobile Card View -->
         <div class="md:hidden space-y-3">
           <!-- Notice Posts -->
-          <div
+          <router-link
             v-for="post in noticePosts"
             :key="'notice-' + post.id"
-            @click="goToDetail(post.id)"
-            class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 cursor-pointer active:scale-[0.98] transition-all"
+            :to="'/tips/' + post.id"
+            class="block bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 active:scale-[0.98] transition-all"
           >
             <div class="flex items-start justify-between gap-2 mb-2">
               <div class="flex items-center gap-2 flex-wrap">
@@ -161,14 +161,14 @@
               </div>
               <span>{{ formatDate(post.created_at) }}</span>
             </div>
-          </div>
+          </router-link>
 
           <!-- Normal Posts -->
-          <div
+          <router-link
             v-for="post in paginatedPosts"
             :key="post.id"
-            @click="goToDetail(post.id)"
-            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
+            :to="'/tips/' + post.id"
+            class="block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-md active:scale-[0.98] transition-all"
           >
             <div class="flex items-start justify-between gap-2 mb-2">
               <div class="flex items-center gap-2 flex-wrap flex-1">
@@ -196,7 +196,7 @@
               </div>
               <span>{{ formatDate(post.created_at) }}</span>
             </div>
-          </div>
+          </router-link>
 
           <!-- Empty State -->
           <div v-if="paginatedPosts.length === 0 && noticePosts.length === 0" class="bg-white dark:bg-gray-800 rounded-xl p-12 text-center">

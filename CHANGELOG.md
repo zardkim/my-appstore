@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.5] - 2026-02-21
+
+### Added
+- **사이드바 통합검색**: 데스크탑 사이드바 상단에 검색바 추가, 검색어 입력 후 Enter로 스토어 페이지 이동
+- **모바일 검색**: 모바일 하단 네비에 검색 아이콘 추가, 탭 시 검색 오버레이 표시 후 스토어 이동
+- **스토어 URL 검색 파라미터**: `/discover?search=키워드` URL로 검색 상태 전달 지원
+- **로그인 30일 유지**: 로그인 페이지에 "로그인 상태 유지 (30일)" 체크박스 추가 — 체크 시 localStorage, 미체크 시 sessionStorage 사용
+- **스토어 NEW 배지**: 등록 후 3일 이내 신규 제품에 카드 좌상단 NEW 배지 표시
+
+### Changed
+- **Scraps 모바일 최적화**: 모바일에서 카드뷰 표시 (router-link 기반), 데스크탑은 기존 테이블뷰 유지
+- **스크린샷 URL 추가 슬롯별 적용**: 전역 "URL로 추가" 버튼 제거, 각 빈 슬롯(1~4)에 개별 URL 입력창 추가
+- **팁&테크 모바일 클릭 수정**: 모바일 카드 `<div @click>` → `<router-link>` 변경으로 iOS 클릭 딜레이 해소
+- **Discover 무한스크롤 모바일 수정**: IntersectionObserver root를 `.main-content-area` 스크롤 컨테이너로 지정
+
+## [1.3.4] - 2026-02-21
+
+### Fixed
+- **i18n Missing Keys in Product Edit**: Added `featuresHint`, `featuresPlaceholder`, `addRequirement`, `formatsHint`, `formatsPlaceholder` keys to `ko.js` and `en.js`; product detail edit mode now shows properly translated placeholder/hint text instead of raw key strings
+- **Rescan After Product Delete**: `cleanup_deleted_files()` API and `_cleanup_deleted_files()` scanner function now reset `FilenameViolation.is_resolved=False` before deleting products (previously only `delete_product()` did this); also fixed `_add_scanned_file()` to reset orphaned violations (is_resolved=True but product_id=NULL after CASCADE) so files always re-appear in detected list after product deletion
+
+## [1.3.3] - 2026-02-21
+
+### Fixed
+- **Settings Navigation from AI Error**: `sections.some()` was called on a Vue computed ref (not an array) in `onMounted`, throwing a `TypeError` that caused the entire settings initialization to fail — fixing this also resolves the next two issues
+- **URL Overwrite After AI Error**: Because `onMounted` threw early, `accessUrl` and `apiUrl` were never updated from `config.json`, staying at their `VITE_APP_URL`/`VITE_BACKEND_URL` ENV defaults (e.g., `https://app.nuripc.kr`); now fixed by the above
+- **API Key Disappears After AI Error**: Same root cause — config was never loaded, so metadata settings (including API key) displayed empty; now fixed
+- **AI Search Dialog Positioning**: Changed `md:inset-x-auto` → `md:inset-x-0` so the modal has proper left/right anchors; with `mx-auto` and `max-w-4xl`, the dialog now centers horizontally on desktop
+
 ## [1.3.2] - 2026-02-21
 
 ### Fixed
