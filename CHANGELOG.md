@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-02-21
+
+### Fixed
+- **Attachment Upload in Docker**: `ATTACHMENTS_DIR` was hardcoded to dev path (`/home/nuricom/.../attachments`); fixed to use `settings.ATTACHMENTS_DIR` and added env var to `docker-compose.yml` (`/app/data/attachments`)
+- **API Key Singleton**: `_get_fernet()` now uses a module-level singleton (`_fernet_instance`) so the same Fernet key is used throughout the process lifetime, preventing key mismatch when file persistence fails
+- **Scan Exclusion Validation**: Software file extensions (`.exe`, `.iso`, `.zip` etc.) can no longer be added to file pattern exclusions; validated in both frontend and backend
+
 ## [1.3.1] - 2026-02-21
 
 ### Fixed

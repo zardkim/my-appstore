@@ -60,6 +60,7 @@ services:
       - SCREENSHOT_CACHE_DIR=/app/data/screenshots
       - EXIMAGE_DIR=/app/data/eximage
       - PATCHES_DIR=/app/data/patches
+      - ATTACHMENTS_DIR=/app/data/attachments
       - CONFIG_DATA_DIR=/app/data
       - LOG_DIR=/app/data/logs
       - SCAN_EXCLUSIONS_FILE=/app/data/scan_exclusions.txt

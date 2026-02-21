@@ -885,6 +885,7 @@ export default {
       diskImages: '디스크 이미지',
       scripts: '스크립트',
       others: '기타',
+      cannotExcludeSupportedExt: '{ext} 은(는) 스캔 대상 소프트웨어 파일 형식입니다. 파일 패턴 예외에 추가할 수 없습니다.',
     },
     // 시스템 정보
     system: {

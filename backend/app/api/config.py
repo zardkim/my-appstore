@@ -24,29 +24,47 @@ from app.config import settings
 SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "googleApiKey", "smtpPassword"}
 ENCRYPTED_PREFIX = "ENC:"
 
+# 프로세스 내 Fernet 키 싱글톤 - 매 호출마다 다른 키가 생성되는 문제 방지
+_fernet_instance: Optional[Fernet] = None
+
 
 def _get_fernet() -> Fernet:
-    """Get or create a stable Fernet key stored in the data directory.
-    This ensures API keys survive Docker rebuilds regardless of SECRET_KEY changes."""
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    """Get or create a stable Fernet key.
+    Uses a module-level singleton to ensure the SAME key is used throughout
+    the process lifetime. Also persists the key to a file for cross-restart durability."""
+    global _fernet_instance
 
+    # 싱글톤: 이미 초기화된 키 재사용 (매 호출마다 다른 키 생성 방지)
+    if _fernet_instance is not None:
+        return _fernet_instance
+
+    try:
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
+
+    # 파일에서 기존 키 로드
     if ENCRYPTION_KEY_FILE.exists():
         try:
             with open(ENCRYPTION_KEY_FILE, 'rb') as f:
                 key = f.read().strip()
-            return Fernet(key)
+            _fernet_instance = Fernet(key)
+            logger.debug("Loaded encryption key from file")
+            return _fernet_instance
         except Exception as e:
             logger.warning(f"Failed to load encryption key file, regenerating: {e}")
 
-    # Generate a new stable key and save it
+    # 새 키 생성
     key = Fernet.generate_key()
     try:
         with open(ENCRYPTION_KEY_FILE, 'wb') as f:
             f.write(key)
         logger.info("Created new encryption key file")
     except Exception as e:
-        logger.error(f"Failed to save encryption key file: {e}")
-    return Fernet(key)
+        logger.error(f"Failed to save encryption key file (key will reset on restart): {e}")
+
+    _fernet_instance = Fernet(key)
+    return _fernet_instance
 
 
 def _get_fernet_legacy() -> Fernet:

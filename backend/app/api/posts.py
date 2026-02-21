@@ -248,8 +248,8 @@ async def upload_attachment(
     """
     첨부파일 업로드
     """
-    # 첨부파일 저장 디렉토리
-    ATTACHMENTS_DIR = Path("/home/nuricom/project/myappStore/data/attachments")
+    # 첨부파일 저장 디렉토리 (settings에서 가져오기 - Docker 환경 호환)
+    ATTACHMENTS_DIR = Path(settings.ATTACHMENTS_DIR)
     ATTACHMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
     # 파일 크기 제한 (500MB)
@@ -290,7 +290,7 @@ async def download_attachment(
     """
     첨부파일 다운로드
     """
-    ATTACHMENTS_DIR = Path("/home/nuricom/project/myappStore/data/attachments")
+    ATTACHMENTS_DIR = Path(settings.ATTACHMENTS_DIR)
     file_path = ATTACHMENTS_DIR / filename
 
     if not file_path.exists():

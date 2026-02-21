@@ -2301,12 +2301,31 @@ const changePassword = async () => {
 }
 
 // Exception management
-const addExceptionPattern = () => {
+const addExceptionPattern = async () => {
   const pattern = newExceptionPattern.value.trim()
-  if (pattern && !exceptionPatterns.value.includes(pattern)) {
-    exceptionPatterns.value.push(pattern)
-    newExceptionPattern.value = ''
+  if (!pattern) return
+  if (exceptionPatterns.value.includes(pattern)) return
+
+  // 지원되는 소프트웨어 확장자 패턴 추가 차단
+  const extMatch = pattern.match(/\*(\.[a-zA-Z0-9]+)$/)
+  if (extMatch) {
+    const ext = extMatch[1].toLowerCase()
+    // supportedExtensions에서 플랫 배열 생성, 없으면 기본값 사용
+    const allSupported = Object.values(supportedExtensions.value).flat().length > 0
+      ? Object.values(supportedExtensions.value).flat()
+      : ['.exe', '.msi', '.msp', '.msu', '.app', '.dmg', '.deb', '.rpm',
+         '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.cab',
+         '.iso', '.img', '.vhd', '.vmdk', '.vdi', '.vmx', '.ova', '.ovf',
+         '.sh', '.bat', '.cmd', '.ps1', '.py',
+         '.apk', '.ipa', '.jar', '.war', '.bin', '.run']
+    if (allSupported.includes(ext)) {
+      await alert.warning(t('settings.exceptions.cannotExcludeSupportedExt', { ext }))
+      return
+    }
   }
+
+  exceptionPatterns.value.push(pattern)
+  newExceptionPattern.value = ''
 }
 
 const addExceptionFolder = () => {
