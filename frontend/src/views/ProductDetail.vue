@@ -828,7 +828,7 @@
               </div>
 
               <!-- HTML Content (보기 모드) -->
-              <div v-else class="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none" v-html="product.installation_guide"></div>
+              <div v-else class="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none tinymce-content overflow-hidden" v-html="product.installation_guide"></div>
             </div>
 
             <!-- Patches Tab -->
@@ -2245,3 +2245,54 @@ onBeforeUnmount(() => {
   }
 })
 </script>
+
+<style scoped>
+/* TinyMCE 컨텐츠 모바일 최적화 */
+:deep(.tinymce-content img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+:deep(.tinymce-content table) {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+:deep(.tinymce-content pre),
+:deep(.tinymce-content code) {
+  overflow-x: auto;
+  max-width: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+:deep(.tinymce-content p),
+:deep(.tinymce-content li),
+:deep(.tinymce-content td),
+:deep(.tinymce-content th) {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+:deep(.tinymce-content iframe) {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  :deep(.tinymce-content iframe) {
+    min-height: 180px;
+  }
+
+  :deep(.tinymce-content h1) { font-size: 1.3rem; }
+  :deep(.tinymce-content h2) { font-size: 1.15rem; }
+  :deep(.tinymce-content h3) { font-size: 1.05rem; }
+}
+</style>

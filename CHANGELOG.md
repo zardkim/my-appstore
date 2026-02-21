@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.6] - 2026-02-22
+
+### Fixed
+- **API Key Not Saving**: Removed Fernet encryption from config storage — encryption key file didn't persist across Docker restarts causing decryption failures; API keys are now stored as plaintext in config.json (personal NAS use)
+- **API Key Field Name Mismatch**: Default config used `apiKey` but code saved/read `openaiApiKey`; added auto-migration on load (`apiKey` → `openaiApiKey`) and updated default config
+- **AI 400 Error in FilenameViolations**: Added `apiKey` fallback when reading OpenAI key so legacy configs still work after migration
+- **docker-compose.yml Version Tag**: Changed hardcoded `1.2.1` → `latest` so Synology Container Manager detects image updates automatically
+
+### Changed
+- **TinyMCE Mobile Optimization (TipsDetail)**: Responsive prose size (`prose-sm/base/lg`), reduced padding on mobile, added CSS for table overflow-scroll, image max-width, code word-wrap, heading size scaling
+- **TinyMCE Mobile Optimization (ProductDetail Install)**: Added `.tinymce-content` CSS class with same mobile-responsive rules for installation guide tab
+
 ## [1.3.5] - 2026-02-21
 
 ### Added

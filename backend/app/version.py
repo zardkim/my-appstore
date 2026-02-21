@@ -5,11 +5,11 @@ This file is automatically updated by the release process.
 Do not edit manually.
 """
 
-__version__ = "1.3.5"
-__version_info__ = (1, 3, 5)
+__version__ = "1.3.6"
+__version_info__ = (1, 3, 6)
 
 # Build information (optional, can be set during build process)
-__build_date__ = "2026-02-21"
+__build_date__ = "2026-02-22"
 __git_commit__ = ""  # Set during build if needed
 
 def get_version() -> str:

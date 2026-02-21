@@ -532,7 +532,7 @@ async def create_product_from_violation(
                 detail="Gemini API 키가 설정되지 않았습니다. 설정 페이지에서 API 키를 입력해주세요."
             )
     elif ai_provider == 'openai':
-        api_key = metadata_config.get('openaiApiKey', '')
+        api_key = metadata_config.get('openaiApiKey', '') or metadata_config.get('apiKey', '')
         if not api_key or not api_key.strip():
             raise HTTPException(
                 status_code=400,
