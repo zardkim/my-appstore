@@ -515,13 +515,19 @@ const handleImagesSaved = async () => {
 const setupScrollObserver = () => {
   if (scrollObserver) scrollObserver.disconnect()
 
+  // 모바일에서도 동작하도록 main-content-area를 root로 지정
+  const scrollContainer = document.querySelector('.main-content-area')
+
   scrollObserver = new IntersectionObserver(
     (entries) => {
       if (entries[0].isIntersecting && hasMore.value && !loading.value && !loadingMore.value) {
         loadMore()
       }
     },
-    { rootMargin: '200px' }
+    {
+      root: scrollContainer || null,
+      rootMargin: '200px'
+    }
   )
 
   if (scrollObserverTarget.value) {
@@ -551,10 +557,16 @@ onUnmounted(() => {
 watch(
   () => route.query,
   (newQuery) => {
-    if (newQuery.category !== selectedCategory.value) {
+    let changed = false
+    if ((newQuery.category || null) !== selectedCategory.value) {
       selectedCategory.value = newQuery.category || null
-      resetAndLoad()
+      changed = true
     }
+    if ((newQuery.search || '') !== searchQuery.value) {
+      searchQuery.value = newQuery.search || ''
+      changed = true
+    }
+    if (changed) resetAndLoad()
   }
 )
 </script>

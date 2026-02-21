@@ -25,7 +25,8 @@ function isTokenExpired(decoded) {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem('access_token') || null)
+  // 로컬스토리지 우선, 없으면 세션스토리지 확인 (remember me 지원)
+  const token = ref(localStorage.getItem('access_token') || sessionStorage.getItem('access_token') || null)
   const user = ref(null)
 
   const isAuthenticated = computed(() => !!token.value)
@@ -39,13 +40,23 @@ export const useAuthStore = defineStore('auth', () => {
       // Token expired or invalid - clear it
       token.value = null
       localStorage.removeItem('access_token')
+      sessionStorage.removeItem('access_token')
     }
   }
 
-  async function login(username, password) {
+  async function login(username, password, remember = true) {
     const response = await authApi.login(username, password)
     token.value = response.data.access_token
-    localStorage.setItem('access_token', token.value)
+
+    if (remember) {
+      // 30일 유지: localStorage에 저장
+      localStorage.setItem('access_token', token.value)
+      sessionStorage.removeItem('access_token')
+    } else {
+      // 브라우저 닫으면 만료: sessionStorage에 저장
+      sessionStorage.setItem('access_token', token.value)
+      localStorage.removeItem('access_token')
+    }
 
     const decodedToken = decodeJwt(token.value)
     if (decodedToken) {
@@ -60,6 +71,7 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     user.value = null
     localStorage.removeItem('access_token')
+    sessionStorage.removeItem('access_token')
   }
 
   function checkAuth() {

@@ -34,6 +34,19 @@
           <span class="mobile-nav-text">{{ $t('nav.home') }}</span>
         </router-link>
 
+        <!-- Search -->
+        <button
+          @click="toggleSearchOverlay"
+          class="mobile-nav-item flex-shrink-0"
+          :class="{ 'active': showSearchOverlay }"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span class="mobile-nav-text">{{ $t('nav.search') }}</span>
+        </button>
+
         <!-- Discover -->
         <router-link
           to="/discover"
@@ -131,6 +144,42 @@
       </div>
     </nav>
 
+    <!-- Mobile Search Overlay -->
+    <transition name="slide-up">
+      <div
+        v-if="showSearchOverlay"
+        class="lg:hidden fixed left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-xl z-40 px-4 py-3"
+        :style="{ bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }"
+      >
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              ref="mobileSearchInput"
+              v-model="mobileSearchQuery"
+              @keyup.enter="handleMobileSearch"
+              type="text"
+              :placeholder="$t('nav.searchPlaceholder')"
+              class="w-full pl-9 pr-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-xl border border-transparent focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:bg-white dark:focus:bg-gray-600 transition-all"
+            />
+          </div>
+          <button
+            @click="handleMobileSearch"
+            class="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors"
+          >
+            {{ $t('nav.search') }}
+          </button>
+          <button @click="showSearchOverlay = false" class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </transition>
+
     <!-- Mobile Full Menu (More 클릭 시) -->
     <transition name="slide-up">
       <div
@@ -218,7 +267,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
@@ -232,6 +281,9 @@ const themeStore = useThemeStore()
 const localeStore = useLocaleStore()
 
 const showMobileMenu = ref(false)
+const showSearchOverlay = ref(false)
+const mobileSearchQuery = ref('')
+const mobileSearchInput = ref(null)
 
 const username = computed(() => authStore.user?.username || 'User')
 const userRole = computed(() => authStore.user?.role || 'user')
@@ -240,6 +292,23 @@ const userInitial = computed(() => username.value.charAt(0).toUpperCase())
 
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
+}
+
+const toggleSearchOverlay = async () => {
+  showSearchOverlay.value = !showSearchOverlay.value
+  if (showSearchOverlay.value) {
+    await nextTick()
+    mobileSearchInput.value?.focus()
+  }
+}
+
+const handleMobileSearch = () => {
+  const q = mobileSearchQuery.value.trim()
+  if (q) {
+    router.push(`/discover?search=${encodeURIComponent(q)}`)
+    mobileSearchQuery.value = ''
+    showSearchOverlay.value = false
+  }
 }
 
 const toggleLanguage = () => {
