@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-02-21
+
+### Fixed
+- **Scanner SQL Transaction**: Each file's DB operation now wrapped in savepoint (`begin_nested()`), preventing `InFailedSqlTransaction` when one file fails
+- **API Key Persistence**: Encryption key now stored in `data/.encryption_key` file (volume-mounted), survives Docker rebuilds; legacy SECRET_KEY-encrypted values auto-migrate on next save
+- **Mobile Home Spacing**: Increased bottom padding from `pb-20` to `pb-28` to prevent bottom nav overlap
+- **Docker Image URL**: TinyMCE external images now saved with relative path `/static/eximage/...` instead of full `http://localhost:8110/...`, fixing broken image links in Docker/reverse proxy environments
+- **Login Token Expiry**: Fixed `ACCESS_TOKEN_EXPIRE_MINUTES` default in `docker-compose.yml` to 43200 (30 days)
+
 ## [1.3.0] - 2026-02-21
 
 ### Added

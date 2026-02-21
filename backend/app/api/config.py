@@ -26,9 +26,32 @@ ENCRYPTED_PREFIX = "ENC:"
 
 
 def _get_fernet() -> Fernet:
-    """Derive Fernet key from SECRET_KEY"""
+    """Get or create a stable Fernet key stored in the data directory.
+    This ensures API keys survive Docker rebuilds regardless of SECRET_KEY changes."""
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+
+    if ENCRYPTION_KEY_FILE.exists():
+        try:
+            with open(ENCRYPTION_KEY_FILE, 'rb') as f:
+                key = f.read().strip()
+            return Fernet(key)
+        except Exception as e:
+            logger.warning(f"Failed to load encryption key file, regenerating: {e}")
+
+    # Generate a new stable key and save it
+    key = Fernet.generate_key()
+    try:
+        with open(ENCRYPTION_KEY_FILE, 'wb') as f:
+            f.write(key)
+        logger.info("Created new encryption key file")
+    except Exception as e:
+        logger.error(f"Failed to save encryption key file: {e}")
+    return Fernet(key)
+
+
+def _get_fernet_legacy() -> Fernet:
+    """Fallback: derive Fernet key from SECRET_KEY (for migrating old encrypted values)"""
     key_bytes = settings.SECRET_KEY.encode('utf-8')
-    # Use SHA-256 to derive a 32-byte key, then base64 encode for Fernet
     derived = hashlib.sha256(key_bytes).digest()
     fernet_key = base64.urlsafe_b64encode(derived)
     return Fernet(fernet_key)
@@ -51,15 +74,27 @@ def decrypt_value(value: str) -> str:
     """Decrypt an encrypted string value. Returns plain text."""
     if not value or not value.startswith(ENCRYPTED_PREFIX):
         return value
+    encrypted_data = value[len(ENCRYPTED_PREFIX):]
+    # Try file-based key first
     try:
         f = _get_fernet()
-        encrypted_data = value[len(ENCRYPTED_PREFIX):]
         return f.decrypt(encrypted_data.encode('utf-8')).decode('utf-8')
     except InvalidToken:
-        logger.warning("Failed to decrypt value - invalid token (SECRET_KEY may have changed)")
+        pass
+    except Exception as e:
+        logger.error(f"Decryption failed with file key: {e}")
+
+    # Fallback: try SECRET_KEY-based key (migration from older versions)
+    try:
+        f_legacy = _get_fernet_legacy()
+        plain = f_legacy.decrypt(encrypted_data.encode('utf-8')).decode('utf-8')
+        logger.info("Decrypted with legacy SECRET_KEY - will re-encrypt with file key on next save")
+        return plain
+    except InvalidToken:
+        logger.warning("Failed to decrypt value - key mismatch (re-enter API key)")
         return ""
     except Exception as e:
-        logger.error(f"Decryption failed: {e}")
+        logger.error(f"Decryption failed with legacy key: {e}")
         return ""
 
 
@@ -118,6 +153,7 @@ router = APIRouter()
 # Config file path - 환경변수에서 가져오기
 CONFIG_DIR = Path(settings.CONFIG_DATA_DIR)
 CONFIG_FILE = CONFIG_DIR / "config.json"
+ENCRYPTION_KEY_FILE = CONFIG_DIR / ".encryption_key"
 
 def get_default_config() -> Dict[str, Any]:
     """

@@ -265,6 +265,12 @@ onMounted(async () => {
     const response = await postsApi.getPost(postId)
     post.value = response.data
 
+    // 기존에 저장된 절대 URL(http://localhost:PORT/static/...)을 상대 경로로 변환
+    // Docker/리버스 프록시 환경에서 이미지가 올바르게 표시되도록
+    if (post.value.content) {
+      post.value.content = post.value.content.replace(/http:\/\/localhost:\d+\/static\//g, '/static/')
+    }
+
     // localStorage에서 게시판 설정 불러오기
     const savedSettings = localStorage.getItem('boardSettings')
     if (savedSettings) {

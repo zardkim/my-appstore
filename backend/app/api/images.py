@@ -846,12 +846,11 @@ async def process_post_content(
                 with open(file_path, 'wb') as f:
                     f.write(response.content)
 
-                # 로컬 URL 생성 (백엔드 URL 포함)
+                # 로컬 URL 생성 (상대 경로 - 리버스 프록시/Docker 환경 호환)
                 local_url = f"/static/eximage/{filename}"
-                full_local_url = f"{settings.get_backend_url()}{local_url}"
 
                 # HTML에서 외부 URL을 로컬 URL로 교체
-                updated_content = updated_content.replace(img_url, full_local_url)
+                updated_content = updated_content.replace(img_url, local_url)
 
                 downloaded_images.append(local_url)
                 logger.debug(f"Process Post Content] Downloaded: {filename}")
@@ -910,14 +909,13 @@ async def upload_tinymce_image(
         with open(file_path, 'wb') as f:
             f.write(content)
 
-        # 로컬 URL 생성 (백엔드 URL 포함)
+        # 로컬 URL 생성 (상대 경로 - 리버스 프록시/Docker 환경 호환)
         local_url = f"/static/eximage/{filename}"
-        full_local_url = f"{settings.get_backend_url()}{local_url}"
 
         logger.debug(f"Upload TinyMCE Image] Saved: {filename}")
 
         return {
-            "location": full_local_url
+            "location": local_url
         }
 
     except Exception as e:

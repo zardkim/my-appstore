@@ -9,7 +9,7 @@
     </div>
 
     <!-- Content -->
-    <div class="lg:flex-1 lg:overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-20 lg:pb-8">
+    <div class="lg:flex-1 lg:overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-28 lg:pb-8">
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
