@@ -382,13 +382,24 @@
                   <span class="mr-2 text-lg sm:text-xl">✨</span>
                   {{ t('product.info.keyFeatures') }}
                 </h3>
-                <div v-if="product.features && product.features.length > 0" class="space-y-1.5 sm:space-y-2">
-                  <div v-for="(feature, idx) in product.features" :key="idx" class="flex items-start">
-                    <span class="text-blue-500 mr-2 sm:mr-3 mt-0.5 text-sm sm:text-base">•</span>
-                    <span class="text-sm sm:text-base text-gray-700 dark:text-gray-300">{{ feature }}</span>
+                <template v-if="isEditing">
+                  <textarea
+                    v-model="editForm.features"
+                    rows="5"
+                    :placeholder="t('product.info.featuresPlaceholder') || '한 줄에 하나씩 입력'"
+                    class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
+                  ></textarea>
+                  <p class="text-xs text-gray-400 mt-1">{{ t('product.info.featuresHint') || '한 줄에 하나의 기능을 입력하세요' }}</p>
+                </template>
+                <template v-else>
+                  <div v-if="product.features && product.features.length > 0" class="space-y-1.5 sm:space-y-2">
+                    <div v-for="(feature, idx) in product.features" :key="idx" class="flex items-start">
+                      <span class="text-blue-500 mr-2 sm:mr-3 mt-0.5 text-sm sm:text-base">•</span>
+                      <span class="text-sm sm:text-base text-gray-700 dark:text-gray-300">{{ feature }}</span>
+                    </div>
                   </div>
-                </div>
-                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noFeatures') }}</p>
+                  <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noFeatures') }}</p>
+                </template>
               </div>
 
               <!-- System Requirements -->
@@ -397,13 +408,39 @@
                   <span class="mr-2 text-lg sm:text-xl">💻</span>
                   {{ t('product.info.systemRequirements') }}
                 </h3>
-                <div v-if="product.system_requirements && Object.keys(product.system_requirements).length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div v-for="(value, key) in product.system_requirements" :key="key">
-                    <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">{{ key }}</h4>
-                    <p class="text-sm sm:text-base text-gray-900 dark:text-white">{{ typeof value === 'object' ? JSON.stringify(value) : value }}</p>
+                <template v-if="isEditing">
+                  <div class="space-y-2">
+                    <div v-for="(value, key) in editForm.system_requirements" :key="key" class="flex items-center gap-2">
+                      <input
+                        :value="key"
+                        @change="renameSystemReqKey(key, $event.target.value)"
+                        class="w-1/3 px-2 py-1.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                        placeholder="항목명"
+                      />
+                      <input
+                        v-model="editForm.system_requirements[key]"
+                        class="flex-1 px-2 py-1.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                        placeholder="값"
+                      />
+                      <button @click="removeSystemReqKey(key)" class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+                    <button @click="addSystemReqKey" class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                      {{ t('product.info.addRequirement') || '항목 추가' }}
+                    </button>
                   </div>
-                </div>
-                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noSystemRequirements') }}</p>
+                </template>
+                <template v-else>
+                  <div v-if="product.system_requirements && Object.keys(product.system_requirements).length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div v-for="(value, key) in product.system_requirements" :key="key">
+                      <h4 class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">{{ key }}</h4>
+                      <p class="text-sm sm:text-base text-gray-900 dark:text-white">{{ typeof value === 'object' ? JSON.stringify(value) : value }}</p>
+                    </div>
+                  </div>
+                  <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noSystemRequirements') }}</p>
+                </template>
               </div>
 
               <!-- Supported Formats -->
@@ -412,12 +449,23 @@
                   <span class="mr-2 text-lg sm:text-xl">📂</span>
                   {{ t('product.info.supportedFormats') }}
                 </h3>
-                <div v-if="product.supported_formats && product.supported_formats.length > 0" class="flex flex-wrap gap-1.5 sm:gap-2">
-                  <span v-for="(format, idx) in product.supported_formats" :key="idx" class="inline-block px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-blue-700 dark:text-blue-300 rounded-lg text-xs sm:text-sm font-medium border border-blue-200 dark:border-blue-700">
-                    {{ format }}
-                  </span>
-                </div>
-                <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noSupportedFormats') }}</p>
+                <template v-if="isEditing">
+                  <textarea
+                    v-model="editForm.supported_formats"
+                    rows="3"
+                    :placeholder="t('product.info.formatsPlaceholder') || 'PSD, AI, PDF, JPG, PNG'"
+                    class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
+                  ></textarea>
+                  <p class="text-xs text-gray-400 mt-1">{{ t('product.info.formatsHint') || '쉼표 또는 줄바꿈으로 구분하여 입력하세요' }}</p>
+                </template>
+                <template v-else>
+                  <div v-if="product.supported_formats && product.supported_formats.length > 0" class="flex flex-wrap gap-1.5 sm:gap-2">
+                    <span v-for="(format, idx) in product.supported_formats" :key="idx" class="inline-block px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-blue-700 dark:text-blue-300 rounded-lg text-xs sm:text-sm font-medium border border-blue-200 dark:border-blue-700">
+                      {{ format }}
+                    </span>
+                  </div>
+                  <p v-else class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ t('product.info.noSupportedFormats') }}</p>
+                </template>
               </div>
 
               <!-- Installation Info -->
@@ -583,7 +631,43 @@
                     </svg>
                     <span>{{ t('product.screenshots.searchButton') }}</span>
                   </button>
+
+                  <!-- URL로 스크린샷 추가 -->
+                  <button
+                    @click="showScreenshotUrlInput = !showScreenshotUrlInput"
+                    class="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
+                  >
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <span>{{ t('product.screenshots.addByUrl') || 'URL' }}</span>
+                  </button>
                 </div>
+              </div>
+
+              <!-- Screenshot URL Input -->
+              <div v-if="showScreenshotUrlInput" class="mt-3 flex items-center gap-2">
+                <input
+                  v-model="screenshotUrl"
+                  type="url"
+                  placeholder="https://example.com/screenshot.png"
+                  class="flex-1 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  @keyup.enter="addScreenshotByUrl"
+                />
+                <button
+                  @click="addScreenshotByUrl"
+                  :disabled="!screenshotUrl || addingScreenshotUrl"
+                  class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                >
+                  <div v-if="addingScreenshotUrl" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span v-else>{{ t('common.add') || '추가' }}</span>
+                </button>
+                <button
+                  @click="showScreenshotUrlInput = false; screenshotUrl = ''"
+                  class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
               </div>
 
               <div>
@@ -1248,6 +1332,9 @@ const currentScreenshot = ref('')
 const iconTimestamp = ref(Date.now()) // 로고 캐시 버스팅용 타임스탬프
 const isWritingGuide = ref(false) // 설치방법 가이드 작성 모드
 const screenshotFileInputs = ref([]) // 스크린샷 파일 input refs
+const showScreenshotUrlInput = ref(false) // 스크린샷 URL 입력 표시
+const screenshotUrl = ref('') // 스크린샷 URL 입력값
+const addingScreenshotUrl = ref(false) // 스크린샷 URL 추가 중
 const showLogoUrlDialog = ref(false) // 로고 URL 입력 다이얼로그
 const logoUrlInput = ref('') // 로고 URL 입력값
 const configCategories = ref([]) // config에서 가져온 카테고리 목록
@@ -1546,6 +1633,23 @@ watch(isWritingGuide, (newValue) => {
   }
 })
 
+// 시스템 요구사항 편집 도우미
+const addSystemReqKey = () => {
+  const newKey = `항목${Object.keys(editForm.value.system_requirements).length + 1}`
+  editForm.value.system_requirements[newKey] = ''
+}
+
+const removeSystemReqKey = (key) => {
+  delete editForm.value.system_requirements[key]
+}
+
+const renameSystemReqKey = (oldKey, newKey) => {
+  if (!newKey.trim() || oldKey === newKey) return
+  const value = editForm.value.system_requirements[oldKey]
+  delete editForm.value.system_requirements[oldKey]
+  editForm.value.system_requirements[newKey.trim()] = value
+}
+
 // 편집 시작
 const startEdit = () => {
   isEditing.value = true
@@ -1563,6 +1667,9 @@ const startEdit = () => {
     installation_guide: product.value.installation_guide || '',
     release_date: product.value.release_date || '',
     release_notes: product.value.release_notes || '',
+    features: product.value.features ? product.value.features.join('\n') : '',
+    system_requirements: product.value.system_requirements ? { ...product.value.system_requirements } : {},
+    supported_formats: product.value.supported_formats ? product.value.supported_formats.join(', ') : '',
     screenshots: product.value.screenshots ? [...product.value.screenshots] : []
   }
 
@@ -1689,6 +1796,9 @@ const cancelEdit = () => {
     installation_guide: '',
     release_date: '',
     release_notes: '',
+    features: '',
+    system_requirements: {},
+    supported_formats: '',
     screenshots: []
   }
 }
@@ -1702,7 +1812,20 @@ const saveEdit = async () => {
 
   saving.value = true
   try {
-    await productsApi.updateProduct(product.value.id, editForm.value)
+    // features, system_requirements, supported_formats를 적절한 형식으로 변환
+    const updateData = { ...editForm.value }
+
+    // features: 줄바꿈으로 구분된 문자열 → 배열
+    if (typeof updateData.features === 'string') {
+      updateData.features = updateData.features.split('\n').map(f => f.trim()).filter(f => f)
+    }
+
+    // supported_formats: 쉼표/줄바꿈으로 구분된 문자열 → 배열
+    if (typeof updateData.supported_formats === 'string') {
+      updateData.supported_formats = updateData.supported_formats.split(/[,\n]/).map(f => f.trim()).filter(f => f)
+    }
+
+    await productsApi.updateProduct(product.value.id, updateData)
 
     const response = await productsApi.getById(product.value.id)
     product.value = response.data
@@ -1892,6 +2015,37 @@ const uploadScreenshot = async (event, index) => {
     await alert.error(t('productDetail.screenshotUploadFailed'))
   } finally {
     event.target.value = ''
+  }
+}
+
+// URL로 스크린샷 추가
+const addScreenshotByUrl = async () => {
+  if (!screenshotUrl.value || addingScreenshotUrl.value) return
+
+  const url = screenshotUrl.value.trim()
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    await alert.warning('올바른 URL을 입력해주세요.')
+    return
+  }
+
+  addingScreenshotUrl.value = true
+  try {
+    const response = await imagesApi.downloadScreenshots(product.value.id, [url])
+    if (response.data.success || response.data.saved_count > 0) {
+      // Product 다시 로드
+      const updatedProduct = await productsApi.getById(product.value.id)
+      product.value = updatedProduct.data
+      screenshotUrl.value = ''
+      showScreenshotUrlInput.value = false
+      await alert.success(t('product.screenshots.urlAddSuccess') || '스크린샷이 추가되었습니다.')
+    } else {
+      await alert.error(response.data.error || t('product.screenshots.urlAddFailed') || '스크린샷 추가에 실패했습니다.')
+    }
+  } catch (error) {
+    console.error('Screenshot URL add error:', error)
+    await alert.error(t('product.screenshots.urlAddFailed') || '스크린샷 추가에 실패했습니다.')
+  } finally {
+    addingScreenshotUrl.value = false
   }
 }
 

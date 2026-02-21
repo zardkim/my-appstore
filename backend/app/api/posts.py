@@ -252,15 +252,15 @@ async def upload_attachment(
     ATTACHMENTS_DIR = Path("/home/nuricom/project/myappStore/data/attachments")
     ATTACHMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 파일 크기 제한 (10MB)
-    MAX_FILE_SIZE = 10 * 1024 * 1024
+    # 파일 크기 제한 (500MB)
+    MAX_FILE_SIZE = 500 * 1024 * 1024
 
     # 파일 내용 읽기
     contents = await file.read()
     file_size = len(contents)
 
     if file_size > MAX_FILE_SIZE:
-        raise HTTPException(status_code=413, detail="파일 크기는 10MB를 초과할 수 없습니다.")
+        raise HTTPException(status_code=413, detail="파일 크기는 500MB를 초과할 수 없습니다.")
 
     # 파일명 생성 (UUID + 원본 파일명)
     file_extension = Path(file.filename).suffix

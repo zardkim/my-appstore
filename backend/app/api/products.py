@@ -554,6 +554,16 @@ async def delete_product(
         if not product:
             raise HTTPException(status_code=404, detail="제품을 찾을 수 없습니다")
 
+        # 관련 FilenameViolation 리셋 (재스캔 가능하도록)
+        db.query(FilenameViolation).filter(
+            FilenameViolation.product_id == product_id
+        ).update({
+            "is_resolved": False,
+            "product_id": None,
+            "version_id": None,
+            "violation_details": "스캔된 파일 (AI 매칭 대기중)"
+        }, synchronize_session=False)
+
         # 관련 Favorite 삭제 (외래키 제약 조건 방지)
         db.query(Favorite).filter(Favorite.product_id == product_id).delete(synchronize_session=False)
 

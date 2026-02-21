@@ -31,13 +31,13 @@
         </div>
 
         <!-- Scraps List -->
-        <div v-else class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div v-else class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
           <table class="w-full">
             <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               <tr>
-                <th class="text-left py-4 px-6 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('scraps.titleColumn') }}</th>
-                <th class="text-left py-4 px-6 text-sm font-semibold text-gray-700 dark:text-gray-300 w-40">{{ t('scraps.scrapDateColumn') }}</th>
-                <th class="text-center py-4 px-6 text-sm font-semibold text-gray-700 dark:text-gray-300 w-32">{{ t('scraps.actionsColumn') }}</th>
+                <th class="text-left py-2.5 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('scraps.titleColumn') }}</th>
+                <th class="text-left py-2.5 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300 w-32 hidden sm:table-cell">{{ t('scraps.scrapDateColumn') }}</th>
+                <th class="text-center py-2.5 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300 w-20">{{ t('scraps.actionsColumn') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -47,23 +47,23 @@
                 class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                 @click="goToPost(scrap.post_id)"
               >
-                <td class="py-4 px-6">
+                <td class="py-2 px-4">
                   <div class="flex items-center">
-                    <svg class="w-5 h-5 text-amber-500 dark:text-amber-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-amber-500 dark:text-amber-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
-                    <p class="text-gray-900 dark:text-white font-medium line-clamp-1">
+                    <p class="text-sm text-gray-900 dark:text-white font-medium line-clamp-1">
                       {{ scrap.post_title || `${t('scraps.postFallback')}${scrap.post_id}` }}
                     </p>
                   </div>
                 </td>
-                <td class="py-4 px-6 text-sm text-gray-500 dark:text-gray-400">
+                <td class="py-2 px-4 text-xs text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                   {{ formatDate(scrap.created_at) }}
                 </td>
-                <td class="py-4 px-6 text-center">
+                <td class="py-2 px-4 text-center">
                   <button
                     @click.stop="removeScrap(scrap.post_id)"
-                    class="px-4 py-2 text-sm border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 hover:text-red-600 dark:hover:text-red-400 transition-all font-medium"
+                    class="px-2.5 py-1 text-xs border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 hover:text-red-600 dark:hover:text-red-400 transition-all font-medium"
                   >
                     {{ t('scraps.deleteButton') }}
                   </button>

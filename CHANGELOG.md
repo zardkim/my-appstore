@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-21
+
+### Added
+- **Infinite Scroll**: Store(Discover) page replaced pagination with IntersectionObserver-based infinite scroll
+- **Product Detail Edit**: Features, System Requirements, Supported Formats now editable in product detail edit mode
+- **Screenshot URL Add**: Added URL input to add screenshots by URL in product detail page
+- **Same-folder File Grouping**: Files in the same folder are now recognized as the same product during AI matching
+- **Duplicate Detection Message**: AI matching now shows clear duplicate info when a similar product already exists
+- **Login Persistence**: Token expiry extended to 30 days; frontend validates JWT `exp` claim on startup
+- **Screenshot URL API**: `addScreenshotByUrl()` function connects to `downloadScreenshots` API endpoint
+
+### Changed
+- **AI Search Text**: Renamed "AI 매칭" → "AI 검색" throughout UI (ko/en locales, tooltips, messages)
+- **Tips Attachment Limits**: Max file size 10MB → 500MB, max file count 5 → 20 (frontend + backend)
+- **Filename Rule Check Removed**: Scanner no longer validates filename naming conventions; only scan exclusion rules apply
+- **Favorites Layout**: Reduced card size (6-column grid, 48px icon, compact padding)
+- **Scraps Layout**: Reduced table row height and font size; date column hidden on mobile
+- **Home Mobile Spacing**: Added `pb-20` bottom padding on mobile to prevent content cutoff
+
+### Fixed
+- **TinyMCE Edit Mode**: Content now displayed correctly when editing Tips posts (added `setContent()` after API load)
+- **External Image Save**: Fixed httpx client with `follow_redirects=True, verify=False`; use `get_backend_url()` instead of empty `BACKEND_URL`
+- **Product Rescan After Delete**: `delete_product()` now resets `FilenameViolation.is_resolved` to `False` so files can be rescanned
+- **AI Matching Duplicate Order**: `create-product` response now includes `is_duplicate`/`duplicate_reason` fields; frontend shows info dialog on duplicates
+- **Same-folder AI Matching**: Both `create-product` and `create-product-with-metadata` endpoints now group and match all unresolved violations in the same folder together
+
 ## [1.2.0] - 2026-02-10
 
 ### Added

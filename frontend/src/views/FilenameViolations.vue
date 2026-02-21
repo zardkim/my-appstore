@@ -843,20 +843,42 @@ const closeAIMatchingDialog = () => {
 }
 
 const handleAIMatchingSaved = async (data) => {
-  // 목록에서 해당 항목 제거
+  // 같은 폴더의 항목도 함께 제거 (같은 폴더 파일은 함께 매칭됨)
+  const matchedCount = data.matched_files || 1
   if (selectedViolation.value?.id) {
-    violations.value = violations.value.filter(v => v.id !== selectedViolation.value.id)
+    const folderPath = selectedViolation.value.folder_path
+    if (folderPath && matchedCount > 1) {
+      // 같은 폴더의 resolved된 항목 모두 제거
+      const beforeCount = violations.value.length
+      violations.value = violations.value.filter(v => v.folder_path !== folderPath)
+      const removedCount = beforeCount - violations.value.length
 
-    // 통계 업데이트
-    if (stats.value) {
-      stats.value.scanned = Math.max(0, stats.value.scanned - 1)
-      stats.value.total = Math.max(0, stats.value.total - 1)
+      if (stats.value) {
+        stats.value.scanned = Math.max(0, stats.value.scanned - removedCount)
+        stats.value.total = Math.max(0, stats.value.total - removedCount)
+      }
+    } else {
+      violations.value = violations.value.filter(v => v.id !== selectedViolation.value.id)
+      if (stats.value) {
+        stats.value.scanned = Math.max(0, stats.value.scanned - 1)
+        stats.value.total = Math.max(0, stats.value.total - 1)
+      }
     }
   }
 
   // 성공 메시지 표시
   const productTitle = data.product?.title || '제품'
-  await alert.success(`${t('detectedList.productCreateSuccess')}\n\n제품명: ${productTitle}`)
+  if (data.product?.is_duplicate) {
+    await alert.info(
+      `이미 존재하는 제품입니다.\n\n` +
+      `제품명: ${productTitle}\n` +
+      `${data.product.duplicate_reason || '버전만 추가되었습니다.'}\n\n` +
+      `제품 상세페이지의 버전 탭에서 확인하세요.`
+    )
+  } else {
+    const fileMsg = matchedCount > 1 ? ` (같은 폴더 ${matchedCount}개 파일)` : ''
+    await alert.success(`${t('detectedList.productCreateSuccess')}\n\n제품명: ${productTitle}${fileMsg}`)
+  }
 
   // 목록이 비었으면 다시 로드
   if (violations.value.length === 0) {

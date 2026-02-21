@@ -31,25 +31,25 @@
         </div>
 
         <!-- Favorites Grid -->
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           <div
             v-for="favorite in favorites"
             :key="favorite.id"
-            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all group cursor-pointer"
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all group cursor-pointer"
             @click="goToProduct(favorite.product_id)"
           >
-            <div class="p-6">
+            <div class="p-3">
               <!-- Icon -->
-              <div class="w-20 h-20 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+              <div class="w-12 h-12 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl flex items-center justify-center mb-2 mx-auto">
                 <img
                   v-if="favorite.product?.icon_url"
                   :src="getIconUrl(favorite.product?.icon_url)"
                   :alt="favorite.product?.title"
-                  class="w-full h-full object-contain p-3"
+                  class="w-full h-full object-contain p-1.5"
                 />
                 <svg
                   v-else
-                  class="w-10 h-10 text-blue-500 dark:text-blue-400"
+                  class="w-6 h-6 text-blue-500 dark:text-blue-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -59,26 +59,19 @@
               </div>
 
               <!-- Title -->
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white text-center mb-2 line-clamp-2 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+              <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white text-center mb-1 line-clamp-2 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
                 {{ favorite.product?.title || t('favorites.unknown') }}
               </h3>
 
               <!-- Vendor -->
-              <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-3">
+              <p class="text-xs text-gray-500 dark:text-gray-400 text-center mb-2 line-clamp-1">
                 {{ favorite.product?.vendor || t('favorites.unknownVendor') }}
               </p>
-
-              <!-- Category -->
-              <div class="flex items-center justify-center mb-4">
-                <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
-                  {{ favorite.product?.category || t('favorites.uncategorized') }}
-                </span>
-              </div>
 
               <!-- Remove Button -->
               <button
                 @click.stop="removeFavorite(favorite.product_id)"
-                class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 hover:text-red-600 dark:hover:text-red-400 transition-all text-sm font-medium"
+                class="w-full px-2 py-1 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 hover:text-red-600 dark:hover:text-red-400 transition-all text-xs font-medium"
               >
                 {{ t('favorites.removeButton') }}
               </button>
