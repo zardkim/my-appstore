@@ -316,6 +316,19 @@ async def save_scan_exclusions(
     Admin only
     """
     import json
+    import re
+
+    # 파일 패턴에서 지원되는 소프트웨어 확장자 차단
+    if request.patterns:
+        for pattern in request.patterns:
+            ext_match = re.search(r'\*(\.[a-zA-Z0-9]+)$', pattern)
+            if ext_match:
+                ext = ext_match.group(1).lower()
+                if ext in SOFTWARE_EXTENSIONS:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"'{ext}' is a supported software file extension and cannot be added to exclusion patterns."
+                    )
 
     try:
         exclusions_file = Path(settings.SCAN_EXCLUSIONS_FILE)
@@ -334,8 +347,20 @@ async def save_scan_exclusions(
             json.dump(data, f, ensure_ascii=False, indent=2)
 
         return {"success": True, "message": "Scan exclusions saved successfully"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save scan exclusions: {str(e)}")
+
+
+# 스캔 대상 소프트웨어 확장자 (파일 패턴 예외로 추가 불가)
+SOFTWARE_EXTENSIONS = {
+    '.exe', '.msi', '.msp', '.msu', '.app', '.dmg', '.deb', '.rpm',
+    '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.cab',
+    '.iso', '.img', '.vhd', '.vmdk', '.vdi', '.vmx', '.ova', '.ovf',
+    '.sh', '.bat', '.cmd', '.ps1', '.py',
+    '.apk', '.ipa', '.jar', '.war', '.bin', '.run',
+}
 
 
 @router.post("/exclusions/add")
@@ -348,6 +373,18 @@ async def add_scan_exclusion(
     Admin only
     """
     import json
+    import re
+
+    # 파일 패턴에서 지원되는 소프트웨어 확장자 차단
+    if request.type == 'pattern':
+        ext_match = re.search(r'\*(\.[a-zA-Z0-9]+)$', request.pattern)
+        if ext_match:
+            ext = ext_match.group(1).lower()
+            if ext in SOFTWARE_EXTENSIONS:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"'{ext}' is a supported software file extension and cannot be added to exclusion patterns."
+                )
 
     try:
         exclusions_file = Path(settings.SCAN_EXCLUSIONS_FILE)

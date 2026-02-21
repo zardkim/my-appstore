@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     SCREENSHOT_CACHE_DIR: str = "/home/nuricom/project/myappStore/data/screenshots"
     EXIMAGE_DIR: str = "/home/nuricom/project/myappStore/data/eximage"
     PATCHES_DIR: str = "/home/nuricom/project/myappStore/data/patches"
+    ATTACHMENTS_DIR: str = "/home/nuricom/project/myappStore/data/attachments"
     CONFIG_DATA_DIR: str = "/home/nuricom/project/myappStore/data"
     SCAN_EXCLUSIONS_FILE: str = "/home/nuricom/project/myappStore/data/scan_exclusions.txt"
 

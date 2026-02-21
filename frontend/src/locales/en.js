@@ -933,6 +933,7 @@ Use empty values for unknown fields. Respond in JSON format only.`,
       diskImages: 'Disk Images',
       scripts: 'Scripts',
       others: 'Others',
+      cannotExcludeSupportedExt: '{ext} is a supported software file type and cannot be added to file pattern exceptions.',
     },
     // System information
     system: {
