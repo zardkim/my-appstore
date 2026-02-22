@@ -35,7 +35,6 @@ class GoogleImageSearcher:
             [{"url": str, "title": str, "thumbnail": str}, ...]
         """
         filters = {
-            "imgType": "clipart",  # 로고/클립아트 우선
             "imgSize": "medium",
             "safe": "active"
         }

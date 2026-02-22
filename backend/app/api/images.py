@@ -206,13 +206,12 @@ async def search_logo(
     except Exception as e:
         if "GOOGLE_SEARCH_ENGINE_MISCONFIGURED" in str(e):
             error_msg = (
-                "Google 검색엔진이 올바르게 설정되지 않았습니다.\n\n"
+                "Google 검색엔진에서 이미지 검색 결과가 없습니다.\n\n"
                 "해결 방법:\n"
                 "1. https://programmablesearchengine.google.com 접속\n"
                 "2. 해당 검색엔진 선택 → '수정'\n"
-                "3. '검색할 사이트' 탭에서 '전체 웹 검색' 활성화\n"
-                "4. '검색 기능' 탭에서 '이미지 검색' 활성화\n"
-                "5. 저장 후 다시 시도"
+                "3. '검색 기능' 탭에서 '이미지 검색' 활성화\n"
+                "4. 저장 후 다시 시도"
             )
         else:
             error_msg = f"검색 중 오류 발생: {str(e)}"
@@ -281,13 +280,12 @@ async def search_screenshots(
     except Exception as e:
         if "GOOGLE_SEARCH_ENGINE_MISCONFIGURED" in str(e):
             error_msg = (
-                "Google 검색엔진이 올바르게 설정되지 않았습니다.\n\n"
+                "Google 검색엔진에서 이미지 검색 결과가 없습니다.\n\n"
                 "해결 방법:\n"
                 "1. https://programmablesearchengine.google.com 접속\n"
                 "2. 해당 검색엔진 선택 → '수정'\n"
-                "3. '검색할 사이트' 탭에서 '전체 웹 검색' 활성화\n"
-                "4. '검색 기능' 탭에서 '이미지 검색' 활성화\n"
-                "5. 저장 후 다시 시도"
+                "3. '검색 기능' 탭에서 '이미지 검색' 활성화\n"
+                "4. 저장 후 다시 시도"
             )
         else:
             error_msg = f"검색 중 오류 발생: {str(e)}"
