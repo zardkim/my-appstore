@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.8] - 2026-02-22
+
+### Fixed
+- **API Key Not Persisting (Root Fix)**: Completely removed Fernet encryption from config.py — was the root cause of all API key issues since Docker restart regenerated the encryption key making stored ENC: values unreadable
+- **API Key Overwrite Prevention**: `update_config_section` now preserves existing non-empty sensitive fields when incoming value is empty string — prevents accidental key overwrite when saving other settings
+- **Legacy ENC: Cleanup**: `_migrate_config()` now detects and clears unreadable ENC:-prefixed values on load (user prompted to re-enter)
+
+### Changed
+- **API Key UX in Settings**: API key fields now show "저장됨 ✓" green badge instead of actual key value — click "수정" button to change, "취소" to cancel — key is never sent to frontend after save, preventing exposure and accidental overwrite
+
 ## [1.3.7] - 2026-02-22
 
 ### Fixed
