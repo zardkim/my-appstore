@@ -54,38 +54,23 @@ async def test_metadata_generation(
         생성된 메타데이터
     """
     try:
-        # 요청에서 제공된 설정 사용, 없으면 config 파일에서 로드
-        if request.ai_provider and request.ai_model:
-            # 프론트엔드에서 제공한 현재 설정 사용
-            ai_provider = request.ai_provider
-            ai_model = request.ai_model
+        # API 키는 항상 config 파일에서 로드 (보안: 키가 프론트엔드를 거치지 않음)
+        # provider/model은 요청에서 제공된 값 우선, 없으면 config에서 로드
+        config = load_config()
+        metadata_config = config.get('metadata', {})
 
-            # Provider별 API 키 선택
-            if ai_provider == 'gemini':
-                api_key = request.gemini_api_key or ''
-            elif ai_provider == 'openai':
-                api_key = request.openai_api_key or ''
-            else:
-                api_key = ''
+        ai_provider = (request.ai_provider or metadata_config.get('aiProvider', 'gemini')).strip()
+        ai_model = (request.ai_model or metadata_config.get('aiModel', 'gemini-2.5-flash')).strip()
 
-            logger.debug(f"📋 프론트엔드 설정 사용: provider={ai_provider}, model={ai_model}, hasKey={bool(api_key)}")
+        # Provider별 API 키는 항상 config에서 직접 읽기
+        if ai_provider == 'gemini':
+            api_key = metadata_config.get('geminiApiKey', '').strip()
+        elif ai_provider == 'openai':
+            api_key = (metadata_config.get('openaiApiKey', '') or metadata_config.get('apiKey', '')).strip()
         else:
-            # config 파일에서 로드 (하위 호환성)
-            config = load_config()
-            metadata_config = config.get('metadata', {})
+            api_key = ''
 
-            ai_provider = metadata_config.get('aiProvider', 'gemini')
-            ai_model = metadata_config.get('aiModel', 'gemini-2.5-flash')
-
-            # Provider별 API 키 선택
-            if ai_provider == 'gemini':
-                api_key = metadata_config.get('geminiApiKey', '')
-            elif ai_provider == 'openai':
-                api_key = metadata_config.get('openaiApiKey', '')
-            else:
-                api_key = ''
-
-            logger.debug(f"📋 Config 파일 설정 사용: provider={ai_provider}, model={ai_model}, hasKey={bool(api_key)}")
+        logger.debug(f"📋 Config 파일에서 키 로드: provider={ai_provider}, model={ai_model}, hasKey={bool(api_key)}, keyLen={len(api_key)}")
 
         if not api_key or not api_key.strip():
             return MetadataTestResponse(

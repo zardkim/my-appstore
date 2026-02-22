@@ -293,11 +293,9 @@ const testingApi = ref(false)
 const apiTestResult = ref(null)
 const metadata = ref(null)
 
-// AI 설정
+// AI 설정 (API 키는 서버가 config에서 직접 읽음 - 프론트에서 키를 보관하지 않음)
 const aiProvider = ref('gemini')
 const aiModel = ref('gemini-2.5-flash')
-const geminiApiKey = ref('')
-const openaiApiKey = ref('')
 const useCustomPrompt = ref(false)
 const customPromptOpenai = ref('')
 const customPromptGemini = ref('')
@@ -309,16 +307,14 @@ const softwareName = computed(() => {
   return parts[parts.length - 1] || ''
 })
 
-// 설정 로드
+// 설정 로드 (API 키는 서버가 config에서 직접 읽으므로 provider/model만 로드)
 onMounted(async () => {
   try {
     const response = await configApi.getSection('metadata')
     if (response.data) {
       aiProvider.value = response.data.aiProvider || 'gemini'
       aiModel.value = response.data.aiModel || 'gemini-2.5-flash'
-      geminiApiKey.value = response.data.geminiApiKey || ''
-      openaiApiKey.value = response.data.openaiApiKey || ''
-      useCustomPrompt.value = response.data.useCustomPrompt || false
+      useCustomPrompt.value = !(response.data.useDefaultPrompt !== false)
       customPromptOpenai.value = response.data.customPromptOpenai || ''
       customPromptGemini.value = response.data.customPromptGemini || ''
     }
@@ -398,14 +394,12 @@ const startAISearch = async () => {
   metadata.value = null
 
   try {
-    // 설정을 다시 확인 (최신 설정 반영)
+    // 설정을 다시 확인 (최신 설정 반영) - 키는 서버가 config에서 직접 읽으므로 provider/model만 갱신
     const configResponse = await configApi.getSection('metadata')
     if (configResponse.data) {
       aiProvider.value = configResponse.data.aiProvider || 'gemini'
       aiModel.value = configResponse.data.aiModel || 'gemini-2.5-flash'
-      geminiApiKey.value = configResponse.data.geminiApiKey || ''
-      openaiApiKey.value = configResponse.data.openaiApiKey || ''
-      useCustomPrompt.value = configResponse.data.useCustomPrompt || false
+      useCustomPrompt.value = !(configResponse.data.useDefaultPrompt !== false)
       customPromptOpenai.value = configResponse.data.customPromptOpenai || ''
       customPromptGemini.value = configResponse.data.customPromptGemini || ''
     }
@@ -413,14 +407,12 @@ const startAISearch = async () => {
     // 현재 provider에 맞는 커스텀 프롬프트 선택
     const customPrompt = aiProvider.value === 'openai' ? customPromptOpenai.value : customPromptGemini.value
 
-    // 메타데이터 생성 요청
+    // 메타데이터 생성 요청 (API 키는 서버가 config에서 직접 읽음)
     const response = await metadataApi.testGeneration(
       softwareName.value.trim(),
       {
         aiProvider: aiProvider.value,
         aiModel: aiModel.value,
-        geminiApiKey: geminiApiKey.value,
-        openaiApiKey: openaiApiKey.value,
         useCustomPrompt: useCustomPrompt.value,
         customPrompt: useCustomPrompt.value ? customPrompt : null
       }

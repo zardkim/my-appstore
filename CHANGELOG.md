@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.10] - 2026-02-23
+
+### Fixed
+- **AI Metadata 400 Error (Root Fix)**: `/metadata/test` endpoint was receiving API key from frontend — but `GET /api/config/metadata` returns `***` (masked) for non-admin users, so `***` was sent to Gemini → "API key not valid". Fixed: backend now ALWAYS reads API key directly from `config.json` (same as `/scan/test-ai-api` which worked). Frontend no longer sends API keys — only sends `ai_provider` / `ai_model` / `custom_prompt`.
+- **MetadataTestDialog / ViolationAISearchDialog**: Removed `geminiApiKey`/`openaiApiKey` refs and config reads for sensitive fields; server sources keys from config internally.
+
 ## [1.3.9] - 2026-02-22
 
 ### Fixed
