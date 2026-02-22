@@ -1046,31 +1046,35 @@
                   Gemini API 키
                   <span class="text-xs text-gray-500">(Google AI Studio API Key)</span>
                 </label>
-                <div class="relative">
+                <!-- 저장됨 상태 표시 (키가 있고 편집 모드가 아닐 때) -->
+                <div v-if="hasGeminiKey && !editingGeminiKey" class="flex items-center gap-2">
+                  <div class="flex-1 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl">
+                    <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono tracking-widest">AIzaSy••••••••••••••••••••••••••••</span>
+                  </div>
+                  <button @click="editingGeminiKey = true; geminiApiKey = ''" type="button"
+                    class="px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    수정
+                  </button>
+                </div>
+                <!-- 입력 모드 (키가 없거나 편집 중) -->
+                <div v-else class="flex items-center gap-2">
                   <input
                     v-model="geminiApiKey"
-                    :type="showGeminiApiKey ? 'text' : 'password'"
+                    type="password"
                     placeholder="AIzaSy..."
-                    class="w-full px-4 py-2 pr-12 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
-                  <button
-                    @click="showGeminiApiKey = !showGeminiApiKey"
-                    type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  >
-                    <!-- Eye Icon (show) -->
-                    <svg v-if="!showGeminiApiKey" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <!-- Eye Slash Icon (hide) -->
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
+                  <button v-if="editingGeminiKey" @click="editingGeminiKey = false; geminiApiKey = ''" type="button"
+                    class="px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    취소
                   </button>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   Gemini API 키는 https://aistudio.google.com/apikey 에서 발급받을 수 있습니다.
+                  <span v-if="hasGeminiKey && !editingGeminiKey" class="text-green-600 dark:text-green-400">• 저장됨</span>
                 </p>
               </div>
 
@@ -1080,31 +1084,35 @@
                   OpenAI API 키
                   <span class="text-xs text-gray-500">(OpenAI API Key)</span>
                 </label>
-                <div class="relative">
+                <!-- 저장됨 상태 표시 -->
+                <div v-if="hasOpenaiKey && !editingOpenaiKey" class="flex items-center gap-2">
+                  <div class="flex-1 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl">
+                    <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono tracking-widest">sk-••••••••••••••••••••••••••••••</span>
+                  </div>
+                  <button @click="editingOpenaiKey = true; openaiApiKey = ''" type="button"
+                    class="px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    수정
+                  </button>
+                </div>
+                <!-- 입력 모드 -->
+                <div v-else class="flex items-center gap-2">
                   <input
                     v-model="openaiApiKey"
-                    :type="showOpenaiApiKey ? 'text' : 'password'"
+                    type="password"
                     placeholder="sk-..."
-                    class="w-full px-4 py-2 pr-12 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
-                  <button
-                    @click="showOpenaiApiKey = !showOpenaiApiKey"
-                    type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  >
-                    <!-- Eye Icon (show) -->
-                    <svg v-if="!showOpenaiApiKey" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <!-- Eye Slash Icon (hide) -->
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
+                  <button v-if="editingOpenaiKey" @click="editingOpenaiKey = false; openaiApiKey = ''" type="button"
+                    class="px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    취소
                   </button>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   OpenAI API 키는 https://platform.openai.com/api-keys 에서 발급받을 수 있습니다.
+                  <span v-if="hasOpenaiKey && !editingOpenaiKey" class="text-green-600 dark:text-green-400">• 저장됨</span>
                 </p>
               </div>
 
@@ -1146,27 +1154,30 @@
                   {{ t('settings.metadata.googleApiKeyLabel') }}
                   <span class="text-xs text-gray-500">{{ t('settings.metadata.googleApiKeySubLabel') }}</span>
                 </label>
-                <div class="relative">
+                <!-- 저장됨 상태 표시 -->
+                <div v-if="hasGoogleKey && !editingGoogleKey" class="flex items-center gap-2">
+                  <div class="flex-1 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl">
+                    <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono tracking-widest">AIzaSy••••••••••••••••••••••••••••</span>
+                  </div>
+                  <button @click="editingGoogleKey = true; googleApiKey = ''" type="button"
+                    class="px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    수정
+                  </button>
+                </div>
+                <!-- 입력 모드 -->
+                <div v-else class="flex items-center gap-2">
                   <input
                     v-model="googleApiKey"
-                    :type="showGoogleApiKey ? 'text' : 'password'"
+                    type="password"
                     placeholder="AIzaSy..."
-                    class="w-full px-4 py-2 pr-12 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
-                  <button
-                    @click="showGoogleApiKey = !showGoogleApiKey"
-                    type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  >
-                    <!-- Eye Icon (show) -->
-                    <svg v-if="!showGoogleApiKey" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <!-- Eye Slash Icon (hide) -->
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
+                  <button v-if="editingGoogleKey" @click="editingGoogleKey = false; googleApiKey = ''" type="button"
+                    class="px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    취소
                   </button>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -1174,6 +1185,7 @@
                   <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
                     {{ t('settings.metadata.googleApiKeyLink') }}
                   </a>
+                  <span v-if="hasGoogleKey && !editingGoogleKey" class="text-green-600 dark:text-green-400">• 저장됨</span>
                 </p>
               </div>
 
@@ -2199,11 +2211,15 @@ const aiProvider = ref('gemini')
 const aiModel = ref('gemini-2.5-flash')
 const geminiApiKey = ref('')
 const openaiApiKey = ref('')
-const showGeminiApiKey = ref(false)
-const showOpenaiApiKey = ref(false)
 const googleApiKey = ref('')
 const googleSearchEngineId = ref('')
-const showGoogleApiKey = ref(false)
+// API 키 상태 관리: 저장 여부 + 편집 모드
+const hasGeminiKey = ref(false)
+const hasOpenaiKey = ref(false)
+const hasGoogleKey = ref(false)
+const editingGeminiKey = ref(false)
+const editingOpenaiKey = ref(false)
+const editingGoogleKey = ref(false)
 const useDefaultPrompt = ref(true) // 기본값 사용 체크박스 (기본적으로 체크됨)
 const customPromptOpenai = ref('')
 const customPromptGemini = ref('')
@@ -2831,9 +2847,10 @@ const saveMetadataSettings = async () => {
       scanMethod: scanMethod.value,
       aiProvider: aiProvider.value,
       aiModel: aiModel.value,
-      geminiApiKey: geminiApiKey.value,
-      openaiApiKey: openaiApiKey.value,
-      googleApiKey: googleApiKey.value,
+      // 편집 모드일 때만 새 값 전송, 아니면 빈 문자열 (백엔드가 기존 값 보존)
+      geminiApiKey: editingGeminiKey.value ? geminiApiKey.value : '',
+      openaiApiKey: editingOpenaiKey.value ? openaiApiKey.value : '',
+      googleApiKey: editingGoogleKey.value ? googleApiKey.value : '',
       googleSearchEngineId: googleSearchEngineId.value,
       useDefaultPrompt: useDefaultPrompt.value,
       customPromptOpenai: customPromptOpenai.value,
@@ -2841,6 +2858,24 @@ const saveMetadataSettings = async () => {
     }
 
     await configApi.updateSection('metadata', data)
+
+    // 저장 후 편집 모드 해제 및 상태 업데이트
+    if (editingGeminiKey.value && geminiApiKey.value) {
+      hasGeminiKey.value = true
+      editingGeminiKey.value = false
+      geminiApiKey.value = ''
+    }
+    if (editingOpenaiKey.value && openaiApiKey.value) {
+      hasOpenaiKey.value = true
+      editingOpenaiKey.value = false
+      openaiApiKey.value = ''
+    }
+    if (editingGoogleKey.value && googleApiKey.value) {
+      hasGoogleKey.value = true
+      editingGoogleKey.value = false
+      googleApiKey.value = ''
+    }
+
     await alert.success(t('settings.metadata.saved'))
   } catch (error) {
     console.error('Metadata settings save failed:', error)
@@ -3028,9 +3063,17 @@ onMounted(async () => {
       scanMethod.value = config.metadata.scanMethod || 'ai'
       aiProvider.value = config.metadata.aiProvider || 'gemini'
       aiModel.value = config.metadata.aiModel || 'gemini-2.5-flash'
-      geminiApiKey.value = config.metadata.geminiApiKey || ''
-      openaiApiKey.value = config.metadata.openaiApiKey || ''
-      googleApiKey.value = config.metadata.googleApiKey || ''
+      // API 키: 실제 값을 UI에 표시하지 않음 - 저장 여부만 체크
+      // 저장됨 표시 후 "수정" 버튼을 눌러야만 변경 가능
+      hasGeminiKey.value = !!(config.metadata.geminiApiKey)
+      hasOpenaiKey.value = !!(config.metadata.openaiApiKey)
+      hasGoogleKey.value = !!(config.metadata.googleApiKey)
+      geminiApiKey.value = ''
+      openaiApiKey.value = ''
+      googleApiKey.value = ''
+      editingGeminiKey.value = false
+      editingOpenaiKey.value = false
+      editingGoogleKey.value = false
       googleSearchEngineId.value = config.metadata.googleSearchEngineId || ''
       // useDefaultPrompt가 설정되어 있으면 그 값을 사용, 없으면 true (기본값)
       useDefaultPrompt.value = config.metadata.useDefaultPrompt !== undefined
