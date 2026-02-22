@@ -72,12 +72,12 @@ async def auto_match_scanned_files(db: Session) -> dict:
     if not auto_match:
         return {"matched": 0, "failed": 0, "errors": [], "message": "Auto-match is disabled"}
 
-    use_ai = metadata_config.get('useAI', False)
+    use_ai = metadata_config.get('scanMethod', 'manual') == 'ai'
     ai_provider = metadata_config.get('aiProvider', 'openai')
     ai_model = metadata_config.get('aiModel', 'gpt-4o-mini')
 
     if not use_ai:
-        return {"matched": 0, "failed": 0, "errors": [], "message": "AI is disabled"}
+        return {"matched": 0, "failed": 0, "errors": [], "message": "AI is disabled (scanMethod != 'ai')"}
 
     # AI Provider에 따라 적절한 API key 가져오기
     if ai_provider == 'gemini':

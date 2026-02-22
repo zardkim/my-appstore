@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.9] - 2026-02-22
+
+### Fixed
+- **AI Matching Always Blocked**: `filename_violations.py` and `scan.py` were checking `metadata_config.get('useAI', False)` — but config stores `scanMethod: 'ai'`, never `useAI: true` → always `False` → all AI matching blocked with "AI 비활성화" error. Fixed to `scanMethod == 'ai'`
+- **API Key Never Saved (First Entry)**: Settings.vue `saveMetadataSettings` sent `geminiApiKey: editingGeminiKey ? value : ''` — when no key existed yet (`hasGeminiKey=false`), `editingGeminiKey` was also `false` → sent `''` → backend preserved existing `''` → key never written. Fixed: also sends value when `!hasGeminiKey` (first-time entry)
+- **ViolationAISearchDialog Mobile**: Error action buttons now stack vertically on mobile (`grid grid-cols-1 sm:grid-cols-3`); save button expands to full width on mobile; modal height constrained with `max-height: 100dvh`
+
 ## [1.3.8] - 2026-02-22
 
 ### Fixed

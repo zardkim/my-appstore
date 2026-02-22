@@ -2847,10 +2847,10 @@ const saveMetadataSettings = async () => {
       scanMethod: scanMethod.value,
       aiProvider: aiProvider.value,
       aiModel: aiModel.value,
-      // 편집 모드일 때만 새 값 전송, 아니면 빈 문자열 (백엔드가 기존 값 보존)
-      geminiApiKey: editingGeminiKey.value ? geminiApiKey.value : '',
-      openaiApiKey: editingOpenaiKey.value ? openaiApiKey.value : '',
-      googleApiKey: editingGoogleKey.value ? googleApiKey.value : '',
+      // 편집 모드이거나 기존 키가 없을 때(최초 입력) 새 값 전송, 그 외 빈 문자열 (백엔드가 기존 값 보존)
+      geminiApiKey: (editingGeminiKey.value || !hasGeminiKey.value) ? geminiApiKey.value : '',
+      openaiApiKey: (editingOpenaiKey.value || !hasOpenaiKey.value) ? openaiApiKey.value : '',
+      googleApiKey: (editingGoogleKey.value || !hasGoogleKey.value) ? googleApiKey.value : '',
       googleSearchEngineId: googleSearchEngineId.value,
       useDefaultPrompt: useDefaultPrompt.value,
       customPromptOpenai: customPromptOpenai.value,
@@ -2859,18 +2859,18 @@ const saveMetadataSettings = async () => {
 
     await configApi.updateSection('metadata', data)
 
-    // 저장 후 편집 모드 해제 및 상태 업데이트
-    if (editingGeminiKey.value && geminiApiKey.value) {
+    // 저장 후 편집 모드 해제 및 상태 업데이트 (최초 입력 또는 편집 모드)
+    if ((editingGeminiKey.value || !hasGeminiKey.value) && geminiApiKey.value) {
       hasGeminiKey.value = true
       editingGeminiKey.value = false
       geminiApiKey.value = ''
     }
-    if (editingOpenaiKey.value && openaiApiKey.value) {
+    if ((editingOpenaiKey.value || !hasOpenaiKey.value) && openaiApiKey.value) {
       hasOpenaiKey.value = true
       editingOpenaiKey.value = false
       openaiApiKey.value = ''
     }
-    if (editingGoogleKey.value && googleApiKey.value) {
+    if ((editingGoogleKey.value || !hasGoogleKey.value) && googleApiKey.value) {
       hasGoogleKey.value = true
       editingGoogleKey.value = false
       googleApiKey.value = ''

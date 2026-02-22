@@ -11,7 +11,7 @@
     ></div>
 
     <!-- Modal content — 모바일: 전체화면, 데스크톱: 중앙 정렬 -->
-    <div class="fixed inset-0 sm:inset-4 md:inset-y-6 md:inset-x-0 md:mx-auto md:max-w-4xl flex flex-col bg-white dark:bg-gray-800 sm:rounded-2xl shadow-2xl overflow-hidden">
+    <div class="fixed inset-0 sm:inset-4 md:inset-y-6 md:inset-x-0 md:mx-auto md:max-w-4xl flex flex-col bg-white dark:bg-gray-800 sm:rounded-2xl shadow-2xl overflow-hidden" style="max-height: 100dvh; max-height: 100vh;">
       <!-- Header -->
       <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
         <div class="flex items-center justify-between">
@@ -69,26 +69,26 @@
             </div>
 
             <!-- API Error Actions -->
-            <div v-if="isApiError" class="flex flex-wrap gap-2">
+            <div v-if="isApiError" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 @click="testApiConnection"
                 :disabled="testingApi"
-                class="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 disabled:opacity-50"
+                class="w-full px-3 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <svg v-if="testingApi" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <svg v-if="testingApi" class="animate-spin w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-else class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 {{ t('violationAISearchDialog.testApiConnection') }}
               </button>
               <button
                 @click="goToSettings"
-                class="px-3 sm:px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2"
+                class="w-full px-3 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -96,9 +96,9 @@
               </button>
               <button
                 @click="startAISearch"
-                class="px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2"
+                class="w-full px-3 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 {{ t('violationAISearchDialog.retry') }}
@@ -235,18 +235,19 @@
         </div>
 
       <!-- Footer (항상 하단 고정) -->
-      <div class="flex-shrink-0 bg-gray-50 dark:bg-gray-700 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-600 flex justify-between items-center gap-3">
+      <div class="flex-shrink-0 bg-gray-50 dark:bg-gray-700 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-600 flex items-center gap-2 sm:gap-3">
         <button
           @click="close"
-          class="px-3 sm:px-4 py-2 sm:py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm sm:text-base"
+          class="px-3 sm:px-4 py-2 sm:py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm whitespace-nowrap"
         >
           {{ t('violationAISearchDialog.cancel') }}
         </button>
+        <div class="flex-1"></div>
         <button
           v-if="metadata"
           @click="saveMetadata"
           :disabled="saving"
-          class="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+          class="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base text-center"
         >
           {{ saving ? t('violationAISearchDialog.saving') : t('violationAISearchDialog.createAndMatch') }}
         </button>
