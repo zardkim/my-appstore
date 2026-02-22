@@ -513,14 +513,14 @@ async def create_product_from_violation(
     config = load_config()
     metadata_config = config.get('metadata', {})
 
-    use_ai = metadata_config.get('useAI', False)
+    use_ai = metadata_config.get('scanMethod', 'manual') == 'ai'
     ai_provider = metadata_config.get('aiProvider', 'openai')
     ai_model = metadata_config.get('aiModel', 'gpt-4o-mini')
 
     if not use_ai:
         raise HTTPException(
             status_code=400,
-            detail="AI 메타데이터 생성이 비활성화되어 있습니다. 설정에서 활성화해주세요."
+            detail="AI 메타데이터 생성이 비활성화되어 있습니다. 설정 > 메타데이터 설정에서 스캔 방법을 'AI'로 변경해주세요."
         )
 
     # AI Provider에 따라 적절한 API key 가져오기
