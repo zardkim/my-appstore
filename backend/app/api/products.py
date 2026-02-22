@@ -401,9 +401,15 @@ async def regenerate_product_metadata(
     config = load_config()
     metadata_config = config.get('metadata', {})
 
-    api_key = metadata_config.get('apiKey', '')
+    ai_provider = metadata_config.get('aiProvider', 'openai')
     ai_model = metadata_config.get('aiModel', 'gpt-4o-mini')
     use_ai = metadata_config.get('useAI', False)
+
+    # Provider별 API 키 읽기
+    if ai_provider == 'gemini':
+        api_key = metadata_config.get('geminiApiKey', '')
+    else:
+        api_key = metadata_config.get('openaiApiKey', '') or metadata_config.get('apiKey', '')
 
     if not use_ai:
         raise HTTPException(
@@ -414,28 +420,33 @@ async def regenerate_product_metadata(
     if not api_key or not api_key.strip():
         raise HTTPException(
             status_code=400,
-            detail="OpenAI API 키가 설정되지 않았습니다."
+            detail=f"{ai_provider.upper()} API 키가 설정되지 않았습니다. 설정 페이지에서 API 키를 입력해주세요."
         )
 
     try:
-        # folder_path에서 폴더 이름 추출 (파서로 소프트웨어 이름 추출)
+        # folder_path에서 폴더 이름 추출
         folder_name = os.path.basename(product.folder_path)
-        parser = FilenameParser()
-        parsed_info = parser.parse_filename(folder_name)
-        software_name = parsed_info.get('software_name', folder_name)
 
-        # AI 메타데이터 생성
-        generator = AIMetadataGenerator()
-        generator.api_key = api_key
-        generator.model = ai_model
+        # AI 메타데이터 생성 (provider/model/key 명시적으로 전달)
+        generator = AIMetadataGenerator(
+            provider=ai_provider,
+            api_key=api_key,
+            model=ai_model
+        )
 
-        metadata = await generator.generate_metadata(software_name)
+        metadata = await generator.generate_detailed_metadata(folder_name)
 
-        # Product 업데이트
+        # Product 업데이트 (generate_detailed_metadata 반환 필드 매핑)
         if metadata:
             product.title = metadata.get('title', product.title)
-            product.description = metadata.get('description', product.description)
-            product.vendor = metadata.get('vendor', product.vendor)
+            # description_short 또는 description 사용
+            desc = metadata.get('description_short') or metadata.get('description', '')
+            if desc:
+                product.description = desc
+            # developer 또는 vendor
+            vendor = metadata.get('developer') or metadata.get('vendor', '')
+            if vendor:
+                product.vendor = vendor
             product.category = metadata.get('category', product.category)
 
             # icon_url이 있고 비어있지 않으면 업데이트
