@@ -134,7 +134,15 @@ class GoogleImageSearcher:
                     if response.status_code == 200:
                         data = response.json()
                         items = data.get("items", [])
-                        logger.debug(f"Google Search] Found {len(items)} results in this batch")
+                        total_results = data.get("searchInformation", {}).get("totalResults", "-1")
+                        logger.debug(f"Google Search] Found {len(items)} results in this batch (totalResults={total_results})")
+
+                        # totalResults가 "0"이면 검색엔진이 전체 웹 검색으로 설정되지 않은 것
+                        # (첫 번째 배치에서만 체크 — 후속 배치는 합법적으로 비어있을 수 있음)
+                        if batch["start"] == start_index and total_results == "0" and not items:
+                            raise Exception(
+                                "GOOGLE_SEARCH_ENGINE_MISCONFIGURED"
+                            )
 
                         for item in items:
                             all_results.append({

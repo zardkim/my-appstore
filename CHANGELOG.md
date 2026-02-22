@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.11] - 2026-02-23
+
+### Fixed
+- **Google Image Search Misconfiguration Detection**: When Google Programmable Search Engine returns `totalResults: "0"` (indicating it is NOT configured for "Search the entire web"), now raises a clear error instead of showing "검색 결과가 없습니다". New message guides user to: (1) visit https://programmablesearchengine.google.com, (2) enable "전체 웹 검색", (3) enable "이미지 검색" feature.
+- **Image search error propagation**: `GOOGLE_SEARCH_ENGINE_MISCONFIGURED` sentinel exception propagates from `google_image_search.py` through `images.py` with actionable setup instructions.
+
 ## [1.3.10] - 2026-02-23
 
 ### Fixed
