@@ -202,21 +202,47 @@ async def regenerate_metadata(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
+    from app.api.config import load_config
+
+    # 설정 로드 (provider/key 읽기)
+    config = load_config()
+    metadata_config = config.get('metadata', {})
+    ai_provider = metadata_config.get('aiProvider', 'openai')
+    ai_model = metadata_config.get('aiModel', 'gpt-4o-mini')
+    if ai_provider == 'gemini':
+        api_key = metadata_config.get('geminiApiKey', '')
+    else:
+        api_key = metadata_config.get('openaiApiKey', '') or metadata_config.get('apiKey', '')
+
+    if not api_key or not api_key.strip():
+        raise HTTPException(
+            status_code=400,
+            detail=f"{ai_provider.upper()} API 키가 설정되지 않았습니다. 설정 페이지에서 API 키를 입력해주세요."
+        )
+
     try:
-        ai_generator = AIMetadataGenerator()
+        ai_generator = AIMetadataGenerator(
+            provider=ai_provider,
+            api_key=api_key,
+            model=ai_model
+        )
         icon_cache = IconCache()
 
         # Get folder name from path
         folder_name = product.folder_path.split('/')[-1]
 
         # Generate new metadata
-        metadata = await ai_generator.generate_metadata(folder_name)
+        metadata = await ai_generator.generate_detailed_metadata(folder_name)
 
-        # Update product
-        product.title = metadata['title']
-        product.description = metadata['description']
-        product.vendor = metadata['vendor']
-        product.category = metadata['category']
+        # Update product (generate_detailed_metadata 반환 필드 매핑)
+        product.title = metadata.get('title', product.title)
+        desc = metadata.get('description_short') or metadata.get('description', '')
+        if desc:
+            product.description = desc
+        vendor = metadata.get('developer') or metadata.get('vendor', '')
+        if vendor:
+            product.vendor = vendor
+        product.category = metadata.get('category', product.category)
 
         # Download icon if available
         if metadata.get('icon_url'):
@@ -242,6 +268,8 @@ async def regenerate_metadata(
                 "icon_url": product.icon_url
             }
         }
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Metadata regeneration failed: {str(e)}")

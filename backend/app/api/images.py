@@ -77,21 +77,19 @@ def sanitize_filename(name: str, max_length: int = 50) -> str:
 
 def get_google_searcher() -> GoogleImageSearcher:
     """Google Image Searcher 인스턴스 생성"""
-    # config.json에서 Google API 설정 읽기
-    config_path = Path(settings.CONFIG_DATA_DIR) / "config.json"
+    from app.api.config import load_config
     google_api_key = settings.GOOGLE_CUSTOM_SEARCH_API_KEY
     google_search_engine_id = settings.GOOGLE_SEARCH_ENGINE_ID
 
     try:
-        if config_path.exists():
-            with open(config_path, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                metadata_config = config.get('metadata', {})
-                # config.json에 설정이 있으면 우선 사용
-                if metadata_config.get('googleApiKey'):
-                    google_api_key = metadata_config['googleApiKey']
-                if metadata_config.get('googleSearchEngineId'):
-                    google_search_engine_id = metadata_config['googleSearchEngineId']
+        # load_config() 사용 - ENC: 암호화된 레거시 값도 자동 복호화됨
+        config = load_config()
+        metadata_config = config.get('metadata', {})
+        # config에 설정이 있으면 환경변수보다 우선 사용
+        if metadata_config.get('googleApiKey'):
+            google_api_key = metadata_config['googleApiKey']
+        if metadata_config.get('googleSearchEngineId'):
+            google_search_engine_id = metadata_config['googleSearchEngineId']
     except Exception as e:
         logger.debug(f"Error reading Google API config: {e}")
 

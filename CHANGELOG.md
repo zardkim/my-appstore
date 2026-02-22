@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.7] - 2026-02-22
+
+### Fixed
+- **AI Matching 400 Error (Critical)**: `products.py` and `scan.py` regenerate-metadata endpoints were creating `AIMetadataGenerator()` without `provider` parameter, defaulting to OpenAI even when Gemini is configured — Gemini API key was sent to OpenAI endpoint → 400 "API key not valid"
+- **Wrong API Key Field**: `products.py` read `'apiKey'` (old legacy field) instead of `'openaiApiKey'`/`'geminiApiKey'`; now reads provider-specific key
+- **Wrong Method Call**: `generate_metadata()` (non-existent) → `generate_detailed_metadata()` with proper field mapping (`developer`→`vendor`, `description_short`→`description`)
+- **Google Image Search ENC: Values**: `images.py` read `config.json` directly, bypassing ENC: decryption; now uses `load_config()` which handles legacy encrypted values
+
 ## [1.3.6] - 2026-02-22
 
 ### Fixed
