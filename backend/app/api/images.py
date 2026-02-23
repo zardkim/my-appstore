@@ -494,6 +494,79 @@ async def upload_screenshot_file(
         return ImageUploadResponse(success=False, error=str(e))
 
 
+@router.post("/download-screenshot-slot/{product_id}", response_model=ImageUploadResponse)
+async def download_screenshot_by_slot(
+    product_id: int,
+    slot: int = Query(0, description="Screenshot slot index (0-3)"),
+    url: str = Query(..., description="Image URL to download"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    URL에서 스크린샷을 다운로드하여 특정 슬롯에 저장 (기존 슬롯 파일 삭제)
+    """
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    if slot < 0 or slot > 3:
+        raise HTTPException(status_code=400, detail="Slot must be 0-3")
+
+    try:
+        screenshot_dir = Path(settings.SCREENSHOT_CACHE_DIR)
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+
+        # 기존 슬롯 파일 삭제
+        for old_file in screenshot_dir.glob(f"{product_id}_screenshot_{slot}.*"):
+            old_file.unlink()
+
+        # URL에서 다운로드
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+            response = await client.get(url)
+            if response.status_code != 200:
+                return ImageUploadResponse(
+                    success=False,
+                    error=f"이미지 다운로드 실패: HTTP {response.status_code}"
+                )
+            content = response.content
+
+        # 확장자 결정
+        content_type = response.headers.get('content-type', '').split(';')[0].strip()
+        ext_map = {
+            'image/png': '.png', 'image/jpeg': '.jpg', 'image/gif': '.gif',
+            'image/webp': '.webp', 'image/avif': '.avif', 'image/svg+xml': '.svg'
+        }
+        file_ext = ext_map.get(content_type, '.jpg')
+        # URL 경로 확장자 우선 확인
+        url_path = url.split('?')[0].lower()
+        for ext in ('.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg'):
+            if url_path.endswith(ext):
+                file_ext = '.jpg' if ext == '.jpeg' else ext
+                break
+
+        filename = f"{product_id}_screenshot_{slot}{file_ext}"
+        file_path = screenshot_dir / filename
+        with open(file_path, 'wb') as f:
+            f.write(content)
+
+        local_path = f"/static/screenshots/{filename}"
+
+        # DB 슬롯 교체
+        current_screenshots = list(product.screenshots or [])
+        while len(current_screenshots) <= slot:
+            current_screenshots.append(None)
+        current_screenshots[slot] = {"type": "local", "url": local_path}
+        product.screenshots = current_screenshots
+        db.commit()
+
+        return ImageUploadResponse(success=True, url=local_path)
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Download screenshot slot error: {e}")
+        return ImageUploadResponse(success=False, error=str(e))
+
+
 @router.post("/download-logo/{product_id}", response_model=ImageUploadResponse)
 async def download_logo_from_url(
     product_id: int,

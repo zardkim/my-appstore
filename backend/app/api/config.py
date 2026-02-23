@@ -97,7 +97,7 @@ def get_default_config() -> Dict[str, Any]:
             "openaiApiKey": "",
             "geminiApiKey": "",
             "bingApiKey": "",
-            "bingImageSearch": True,
+            "bingImageSearch": False,
             "autoDescription": True,
             "autoIcon": True
         },
@@ -154,9 +154,9 @@ def _migrate_config(config: Dict[str, Any]) -> tuple:
                 logger.info(f"Removed obsolete config field: {old_key}")
                 needs_save = True
 
-        # Ensure bingImageSearch flag exists (default: True)
+        # Ensure bingImageSearch flag exists (default: False)
         if 'bingImageSearch' not in meta:
-            meta['bingImageSearch'] = True
+            meta['bingImageSearch'] = False
             needs_save = True
 
     return config, needs_save

@@ -723,10 +723,10 @@
                           type="url"
                           placeholder="https://example.com/image.png"
                           class="flex-1 min-w-0 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
-                          @keyup.enter="addScreenshotBySlotUrl(idx - 1)"
+                          @keyup.enter="addScreenshotBySlotUrl(activeUrlSlot)"
                         />
                         <button
-                          @click.stop="addScreenshotBySlotUrl(idx - 1)"
+                          @click.stop="addScreenshotBySlotUrl(activeUrlSlot)"
                           :disabled="!screenshotSlotUrl || addingScreenshotUrl"
                           class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium disabled:opacity-50 flex-shrink-0"
                         >

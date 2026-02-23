@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.15] - 2026-02-23
+
+### Fixed
+- **로그인 상태 유지 30일 미작동 수정**: `.env`의 `ACCESS_TOKEN_EXPIRE_MINUTES=30`(분)이 기본값(30일)을 덮어써 항상 30분 후 로그아웃되던 문제 수정. 백엔드 로그인에 `remember_me` 파라미터 추가 — 체크 시 30일, 미체크 시 설정값 토큰 발급
+- **API 클라이언트 sessionStorage 토큰 누락 수정**: request interceptor가 `localStorage`만 확인하여 세션 미유지 사용자의 API 요청에 Authorization 헤더 누락. `sessionStorage` fallback 추가 및 401 시 양쪽 스토리지 동시 정리
+- **스캔 예외 추가 실패 수정**: 소프트웨어 확장자 파일에 `*.ext` 와일드카드 패턴 시도 시 백엔드 차단 오류 발생. 항상 파일명 자체를 예외 패턴으로 등록하도록 수정
+- **파일명 위반 목록 위반 유형 레이블 수정**: 검색된 목록에 "언더스코어 과다" 등 위반 유형 메시지 표시 → "스캔됨" 파란 뱃지로 통일
+- **스크린샷 슬롯별 URL 추가 수정**: v-for 내 이벤트 핸들러 `idx` 클로저 캡처 문제로 항상 슬롯1에만 저장되던 문제 수정. `activeUrlSlot` ref 사용으로 교체
+
 ## [1.3.14] - 2026-02-23
 
 ### Added

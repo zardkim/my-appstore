@@ -192,8 +192,8 @@
                     <span v-if="violation.product_id" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] sm:text-xs rounded-full flex-shrink-0">
                       {{ t('detectedList.registered') }}
                     </span>
-                    <span v-else class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-[10px] sm:text-xs rounded-full flex-shrink-0">
-                      {{ getViolationTypeLabel(violation.violation_type) }}
+                    <span v-else class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] sm:text-xs rounded-full flex-shrink-0">
+                      {{ t('detectedList.violationTypes.scanned') }}
                     </span>
                   </div>
 
@@ -609,23 +609,9 @@ const deleteViolation = async (id) => {
 
 const addToExclusions = async (violation) => {
   const fileName = violation.file_name
-  const fileExt = fileName.includes('.') ? fileName.substring(fileName.lastIndexOf('.')) : ''
 
-  let selectedPattern = fileName
-
-  // 확장자가 있으면 패턴 선택 옵션 제공
-  if (fileExt) {
-    const useExtension = await confirm.info(
-      t('detectedList.selectExclusionPattern', { fileName, extension: `*${fileExt}` })
-    )
-
-    if (useExtension === null) {
-      // 취소됨
-      return
-    }
-
-    selectedPattern = useExtension ? `*${fileExt}` : fileName
-  }
+  // 소프트웨어 파일 확장자는 와일드카드 패턴으로 추가 불가하므로 항상 파일명 사용
+  const selectedPattern = fileName
 
   try {
     // 스캔 예외에 추가

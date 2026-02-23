@@ -1,10 +1,11 @@
 import apiClient from './client'
 
 export const authApi = {
-  async login(username, password) {
+  async login(username, password, rememberMe = false) {
     const formData = new FormData()
     formData.append('username', username)
     formData.append('password', password)
+    formData.append('remember_me', String(rememberMe))
 
     return apiClient.post('auth/login', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
