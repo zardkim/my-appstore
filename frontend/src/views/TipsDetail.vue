@@ -1,36 +1,36 @@
 <template>
   <div class="h-full flex flex-col">
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-4">
-      <div class="flex items-center justify-between">
-        <button @click="goBack" class="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-8 py-3 sm:py-4">
+      <div class="flex items-center justify-between gap-2">
+        <button @click="goBack" class="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex-shrink-0">
+          <svg class="w-5 h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
-          {{ t('tips.backToList') }}
+          <span class="text-sm sm:text-base">{{ t('tips.backToList') }}</span>
         </button>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center gap-1">
           <!-- 스크랩 버튼 (인증된 사용자만) -->
           <button
             v-if="authStore.isAuthenticated"
             @click="toggleScrap"
-            class="px-4 py-2 flex items-center space-x-2 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors font-medium text-sm"
+            class="p-2 sm:px-4 sm:py-2 flex items-center gap-1 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors font-medium text-sm"
             :class="isScraped ? 'text-amber-600 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'"
           >
-            <svg class="w-5 h-5" :fill="isScraped ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 flex-shrink-0" :fill="isScraped ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
-            <span>{{ isScraped ? t('tips.scraped') : t('tips.scrap') }}</span>
+            <span class="hidden sm:inline">{{ isScraped ? t('tips.scraped') : t('tips.scrap') }}</span>
           </button>
           <!-- 수정/삭제 버튼 (본인 또는 관리자만) -->
-          <button v-if="canEditPost" @click="editPost" class="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium text-sm">{{ t('tips.edit') }}</button>
-          <button v-if="canEditPost" @click="deletePost" class="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors font-medium text-sm">{{ t('tips.delete') }}</button>
+          <button v-if="canEditPost" @click="editPost" class="px-2 py-1.5 sm:px-4 sm:py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium text-xs sm:text-sm">{{ t('tips.edit') }}</button>
+          <button v-if="canEditPost" @click="deletePost" class="px-2 py-1.5 sm:px-4 sm:py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors font-medium text-xs sm:text-sm">{{ t('tips.delete') }}</button>
         </div>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto px-8 py-6">
+    <div class="flex-1 overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center h-64">
         <div class="text-center">
@@ -42,25 +42,23 @@
       <!-- Post Content -->
       <div v-else-if="post">
       <!-- Post Header -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 mb-6">
-          <div class="mb-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+          <div class="mb-3">
             <span :class="getCategoryStyle(post.category)">{{ getCategoryLabel(post.category) }}</span>
             <span v-if="post.is_notice" class="ml-2 inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-red-500 dark:bg-red-600 text-white">{{ t('tips.notice') }}</span>
           </div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">{{ post.title }}</h1>
-          <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pb-4 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center space-x-4">
-              <div class="flex items-center">
-                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-3">
-                  <span class="text-sm font-bold text-white">{{ post.author_username.charAt(0).toUpperCase() }}</span>
-                </div>
-                <div>
-                  <p class="font-medium text-gray-700 dark:text-gray-300">{{ post.author_username }}</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(post.created_at) }}</p>
-                </div>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">{{ post.title }}</h1>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-gray-500 dark:text-gray-400 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <span class="text-sm font-bold text-white">{{ post.author_username.charAt(0).toUpperCase() }}</span>
+              </div>
+              <div>
+                <p class="font-medium text-gray-700 dark:text-gray-300">{{ post.author_username }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(post.created_at) }}</p>
               </div>
             </div>
-            <div class="flex items-center space-x-4 text-gray-500 dark:text-gray-400">
+            <div class="flex items-center gap-3 text-gray-500 dark:text-gray-400">
               <div class="flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -84,7 +82,7 @@
         </div>
 
         <!-- Attachments Section -->
-        <div v-if="allowAttachments && attachments.length > 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 mb-6">
+        <div v-if="allowAttachments && attachments.length > 0" class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
           <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
             <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
@@ -145,11 +143,11 @@
         </div>
 
         <!-- Comments Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ t('tips.comments') }} {{ comments.length }}</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
+          <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">{{ t('tips.comments') }} {{ comments.length }}</h3>
 
           <!-- Comment Input -->
-          <div class="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="mb-4 sm:mb-8 pb-4 sm:pb-6 border-b border-gray-200 dark:border-gray-700">
             <textarea v-model="newComment" rows="4" class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" :placeholder="t('tips.commentPlaceholder')"></textarea>
             <div class="flex justify-end mt-3">
               <button @click="submitComment" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md font-medium">{{ t('tips.submitComment') }}</button>

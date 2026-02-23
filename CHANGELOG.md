@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.17] - 2026-02-24
+
+### Fixed
+- **팁&테크 목록 모바일 필터 2줄 레이아웃**: 카테고리/정렬 셀렉트가 모바일에서 세로로 쌓이던 문제 수정 — 1줄: 카테고리+정렬 나란히, 2줄: 검색창 전체 너비로 배치
+- **TipsWrite 모바일 패딩 최적화**: 헤더/컨텐츠/폼 카드 고정 `px-8`/`p-8`을 모바일 반응형(`px-4 sm:px-8`, `p-4 sm:p-6 lg:p-8`)으로 변경. 헤더 취소 버튼 모바일에서 아이콘만 표시. 카테고리+공지 행 모바일 세로 스택 처리
+- **TipsDetail 모바일 패딩/텍스트 최적화**: 헤더/포스트 카드/첨부파일/댓글 섹션 고정 패딩을 반응형으로 변경. 제목 `text-3xl` → `text-xl sm:text-2xl lg:text-3xl`. 스크랩 버튼 모바일 아이콘만 표시. 작성자/조회수 정보 모바일 세로 스택 처리
+
 ## [1.3.16] - 2026-02-23
 
 ### Fixed

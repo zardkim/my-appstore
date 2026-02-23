@@ -1,20 +1,20 @@
 <template>
   <div class="h-full flex flex-col">
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <button @click="goBack" class="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mr-4">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-8 py-3 sm:py-4">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center min-w-0">
+          <button @click="goBack" class="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mr-3 flex-shrink-0">
+            <svg class="w-5 h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-            {{ t('tips.cancel') }}
+            <span class="hidden sm:inline">{{ t('tips.cancel') }}</span>
           </button>
-          <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ isEdit ? t('tips.editPost') : t('tips.writePost') }}</h1>
+          <h1 class="text-base sm:text-xl font-bold text-gray-900 dark:text-white truncate">{{ isEdit ? t('tips.editPost') : t('tips.writePost') }}</h1>
         </div>
-        <div class="flex items-center space-x-3">
-          <button @click="saveDraft" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">{{ t('tips.saveDraft') }}</button>
-          <button @click="submitPost" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md font-medium">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <button @click="saveDraft" class="px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm">{{ t('tips.saveDraft') }}</button>
+          <button @click="submitPost" class="px-4 py-1.5 sm:px-6 sm:py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md font-medium text-sm">
             {{ isEdit ? t('tips.updateButton') : t('tips.publishButton') }}
           </button>
         </div>
@@ -22,11 +22,11 @@
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto px-8 py-6">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
+    <div class="flex-1 overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
           <form @submit.prevent="submitPost" class="space-y-6">
             <!-- Category & Notice -->
-            <div class="flex items-center space-x-4">
+            <div class="flex flex-col sm:flex-row sm:items-end gap-3">
               <div class="flex-1">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('tips.categoryLabel') }}</label>
                 <select v-model="post.category" required class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -39,7 +39,7 @@
                   <option value="news">📰 {{ t('tips.categoryNews') }}</option>
                 </select>
               </div>
-              <div v-if="isAdmin" class="pt-8">
+              <div v-if="isAdmin" class="pb-1">
                 <label class="flex items-center cursor-pointer">
                   <input type="checkbox" v-model="post.is_notice" class="w-5 h-5 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500">
                   <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('tips.publishAsNotice') }}</span>
