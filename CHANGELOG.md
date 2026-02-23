@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.14] - 2026-02-23
+
+### Added
+- **스크린샷 슬롯별 URL 교체**: 제품 상세 → 스크린샷 탭에서 이미지가 채워진 슬롯에도 링크(URL) 아이콘 버튼 추가 (호버 시 슬롯 좌하단 표시). 빈 슬롯/채워진 슬롯 모두 URL로 추가/교체 가능
+- **`POST /images/download-screenshot-slot/{id}?slot={slot}&url={url}`** 엔드포인트: 특정 슬롯에 URL 이미지를 다운로드하여 저장 (기존 슬롯 파일 자동 삭제 후 교체)
+- **`imagesApi.downloadScreenshotBySlot(productId, url, slot)`**: 프론트엔드 API 클라이언트 메서드 추가
+
+### Changed
+- **Bing Image Search 기본값 OFF**: `bingImageSearch` 기본값을 `true` → `false`로 변경 (설정에서 명시적으로 활성화해야 사용 가능)
+
 ## [1.3.13] - 2026-02-23
 
 ### Fixed

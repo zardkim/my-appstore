@@ -678,6 +678,18 @@
                         </svg>
                       </div>
 
+                      <!-- Admin 전용: URL로 교체 버튼 (이미지 있는 슬롯) -->
+                      <button
+                        v-if="authStore.user?.role === 'admin' && getScreenshotAtIndex(idx - 1)"
+                        @click.stop="activeUrlSlot = (activeUrlSlot === idx - 1 ? null : idx - 1); screenshotSlotUrl = ''"
+                        class="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 p-1.5 sm:p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-lg transition-colors opacity-0 group-hover:opacity-100"
+                        :title="t('product.screenshots.addByUrl') || 'URL로 교체'"
+                      >
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                      </button>
+
                       <!-- Admin 전용: 업로드 버튼 -->
                       <button
                         v-if="authStore.user?.role === 'admin'"
@@ -2030,8 +2042,8 @@ const addScreenshotBySlotUrl = async (slotIndex) => {
 
   addingScreenshotUrl.value = true
   try {
-    const response = await imagesApi.downloadScreenshots(product.value.id, [url])
-    if (response.data.success || response.data.saved_count > 0) {
+    const response = await imagesApi.downloadScreenshotBySlot(product.value.id, url, slotIndex)
+    if (response.data.success) {
       const updatedProduct = await productsApi.getById(product.value.id)
       product.value = updatedProduct.data
       screenshotSlotUrl.value = ''

@@ -81,6 +81,16 @@ export const imagesApi = {
   },
 
   /**
+   * URL에서 스크린샷을 다운로드하여 특정 슬롯에 저장 (기존 슬롯 교체)
+   * @param {number} productId - 제품 ID
+   * @param {string} url - 다운로드할 이미지 URL
+   * @param {number} slot - 슬롯 인덱스 (0-3)
+   */
+  downloadScreenshotBySlot(productId, url, slot = 0) {
+    return client.post(`/images/download-screenshot-slot/${productId}?slot=${slot}&url=${encodeURIComponent(url)}`)
+  },
+
+  /**
    * 제품 이미지 삭제
    * @param {number} productId - 제품 ID
    * @param {string} imageType - 'logo', 'screenshots', 'all'
