@@ -3,15 +3,47 @@
     <!-- Header -->
     <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
       <div class="flex items-center justify-between gap-2">
-        <button
-          @click="$router.back()"
-          class="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm sm:text-base"
-        >
-          <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          <span class="hidden sm:inline">{{ t('productDetail.back') }}</span>
-        </button>
+        <div class="flex items-center gap-1">
+          <button
+            @click="$router.back()"
+            class="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm sm:text-base"
+          >
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span class="hidden sm:inline">{{ t('productDetail.back') }}</span>
+          </button>
+
+          <!-- 이전/다음 제품 이동 버튼 -->
+          <div class="flex items-center gap-0.5 ml-1 border-l border-gray-200 dark:border-gray-600 pl-1.5 sm:pl-2">
+            <button
+              @click="goToPrev"
+              :disabled="!adjacentProducts.prev"
+              :title="adjacentProducts.prev ? adjacentProducts.prev.title : ''"
+              class="p-1.5 rounded-lg transition-colors"
+              :class="adjacentProducts.prev
+                ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              @click="goToNext"
+              :disabled="!adjacentProducts.next"
+              :title="adjacentProducts.next ? adjacentProducts.next.title : ''"
+              class="p-1.5 rounded-lg transition-colors"
+              :class="adjacentProducts.next
+                ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
 
         <!-- 편집 모드 토글 버튼 -->
         <div v-if="authStore.user?.role === 'admin'" class="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
@@ -92,7 +124,25 @@
     </div>
 
     <!-- Content -->
-    <div v-else-if="product" class="flex-1 overflow-y-auto pb-20 lg:pb-8">
+    <div
+      v-else-if="product"
+      class="flex-1 overflow-y-auto pb-20 lg:pb-8"
+      @touchstart.passive="handleTouchStart"
+      @touchend.passive="handleTouchEnd"
+    >
+      <!-- Mobile swipe indicator -->
+      <div v-if="adjacentProducts.prev || adjacentProducts.next" class="lg:hidden flex items-center justify-between px-4 py-1.5 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 text-xs text-gray-400 dark:text-gray-500">
+        <span v-if="adjacentProducts.prev" class="flex items-center gap-1">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          <span class="truncate max-w-[120px]">{{ adjacentProducts.prev.title }}</span>
+        </span>
+        <span v-else></span>
+        <span v-if="adjacentProducts.next" class="flex items-center gap-1">
+          <span class="truncate max-w-[120px]">{{ adjacentProducts.next.title }}</span>
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </span>
+        <span v-else></span>
+      </div>
       <!-- Product Header -->
       <div class="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-700 dark:to-purple-800 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 text-white mb-4 sm:mb-6">
         <div class="max-w-7xl mx-auto">
@@ -1308,7 +1358,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { productsApi } from '../api/products'
 import { imagesApi } from '../api/images'
@@ -1322,6 +1372,7 @@ import ProductImageSearchDialog from '../components/product/ProductImageSearchDi
 import { useDialog } from '../composables/useDialog'
 
 const route = useRoute()
+const router = useRouter()
 const { t, locale } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
@@ -1350,6 +1401,54 @@ const screenshotUrl = ref('')
 const showLogoUrlDialog = ref(false) // 로고 URL 입력 다이얼로그
 const logoUrlInput = ref('') // 로고 URL 입력값
 const configCategories = ref([]) // config에서 가져온 카테고리 목록
+
+// 이전/다음 제품 네비게이션
+const adjacentProducts = ref({ prev: null, next: null })
+// 터치 스와이프 감지
+const touchStartX = ref(0)
+const touchStartY = ref(0)
+const swipeTransition = ref('') // 'left' | 'right' | ''
+
+const loadAdjacentProducts = async () => {
+  try {
+    const response = await productsApi.getAdjacent(route.params.id)
+    adjacentProducts.value = response.data
+  } catch (e) {
+    console.error('Failed to load adjacent products:', e)
+  }
+}
+
+const goToPrev = () => {
+  if (adjacentProducts.value.prev) {
+    router.push(`/product/${adjacentProducts.value.prev.id}`)
+  }
+}
+
+const goToNext = () => {
+  if (adjacentProducts.value.next) {
+    router.push(`/product/${adjacentProducts.value.next.id}`)
+  }
+}
+
+const handleTouchStart = (e) => {
+  touchStartX.value = e.touches[0].clientX
+  touchStartY.value = e.touches[0].clientY
+}
+
+const handleTouchEnd = (e) => {
+  const deltaX = e.changedTouches[0].clientX - touchStartX.value
+  const deltaY = e.changedTouches[0].clientY - touchStartY.value
+  // 수평 스와이프가 수직보다 크고 60px 이상일 때만 동작
+  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 60) {
+    if (deltaX < 0 && adjacentProducts.value.next) {
+      // 왼쪽 스와이프 → 다음 제품
+      goToNext()
+    } else if (deltaX > 0 && adjacentProducts.value.prev) {
+      // 오른쪽 스와이프 → 이전 제품
+      goToPrev()
+    }
+  }
+}
 
 // 로고 URL에 타임스탬프 추가 (브라우저 캐시 우회)
 const iconUrlWithTimestamp = computed(() => {
@@ -2249,6 +2348,33 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+
+  // 인접 제품 로드
+  await loadAdjacentProducts()
+})
+
+// 라우트 변경 시 제품 재로드 (이전/다음 네비게이션)
+watch(() => route.params.id, async (newId, oldId) => {
+  if (newId === oldId) return
+  loading.value = true
+  error.value = null
+  product.value = null
+  adjacentProducts.value = { prev: null, next: null }
+  isEditing.value = false
+
+  try {
+    const response = await productsApi.getById(newId)
+    product.value = response.data
+    await loadAttachments()
+    loadPatchLinks()
+  } catch (err) {
+    console.error('Failed to load product:', err)
+    error.value = err.response?.data?.detail || err.message || '제품을 불러오는데 실패했습니다.'
+  } finally {
+    loading.value = false
+  }
+
+  await loadAdjacentProducts()
 })
 
 onBeforeUnmount(() => {

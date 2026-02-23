@@ -51,5 +51,9 @@ export const productsApi = {
 
   async deleteProduct(id) {
     return apiClient.delete(`/products/${id}`)
+  },
+
+  async getAdjacent(id) {
+    return apiClient.get(`/products/${id}/adjacent`)
   }
 }

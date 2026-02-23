@@ -184,6 +184,36 @@ async def get_product(
     return product
 
 
+@router.get("/{product_id}/adjacent")
+async def get_adjacent_products(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Get previous and next products by ID (list order: id desc)"""
+    # prev = higher id (appears before current in desc-sorted list)
+    prev_product = db.query(Product).filter(
+        Product.id > product_id
+    ).order_by(Product.id.asc()).first()
+
+    # next = lower id (appears after current in desc-sorted list)
+    next_product = db.query(Product).filter(
+        Product.id < product_id
+    ).order_by(Product.id.desc()).first()
+
+    def _to_info(p):
+        if not p:
+            return None
+        _validate_icon_url(p)
+        icon_url = getattr(p, 'icon_url', None)
+        return {"id": p.id, "title": p.title, "icon_url": icon_url}
+
+    return {
+        "prev": _to_info(prev_product),
+        "next": _to_info(next_product)
+    }
+
+
 @router.get("/stats/overview")
 @cache_response(prefix="stats_overview", ttl=60)
 async def get_stats(
