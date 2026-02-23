@@ -422,18 +422,31 @@
 
           <!-- 폴더 관리 안내 -->
           <div v-if="isAdmin" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-            <div class="flex items-start">
-              <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <div class="text-sm text-blue-800 dark:text-blue-300 space-y-2">
+              <div class="text-sm text-blue-800 dark:text-blue-300 space-y-3 min-w-0 flex-1">
                 <p class="font-semibold">{{ t('settings.folders.guideTitle') }}</p>
-                <ul class="list-disc list-inside space-y-1 ml-2">
-                  <li><strong>{{ t('settings.folders.dockerMount') }}</strong> <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">-v /path/to/your/software:/library/MyFolder</code></li>
-                  <li><strong>{{ t('settings.folders.symbolicLink') }}</strong> <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">ln -s /path/to/your/software /library/MyFolder</code></li>
-                  <li><strong>{{ t('settings.folders.directAdd') }}</strong> {{ t('settings.folders.directAddDesc') }}</li>
+                <ul class="space-y-3">
+                  <li>
+                    <strong class="block mb-1">{{ t('settings.folders.dockerMount') }}</strong>
+                    <div class="overflow-x-auto rounded bg-blue-100 dark:bg-blue-800">
+                      <code class="block px-2 py-1 text-xs whitespace-nowrap">-v /path/to/your/software:/library/MyFolder</code>
+                    </div>
+                  </li>
+                  <li>
+                    <strong class="block mb-1">{{ t('settings.folders.symbolicLink') }}</strong>
+                    <div class="overflow-x-auto rounded bg-blue-100 dark:bg-blue-800">
+                      <code class="block px-2 py-1 text-xs whitespace-nowrap">ln -s /path/to/your/software /library/MyFolder</code>
+                    </div>
+                  </li>
+                  <li>
+                    <strong class="block mb-0.5">{{ t('settings.folders.directAdd') }}</strong>
+                    <span class="text-xs">{{ t('settings.folders.directAddDesc') }}</span>
+                  </li>
                 </ul>
-                <p class="text-xs text-blue-700 dark:text-blue-400 mt-2">
+                <p class="text-xs text-blue-700 dark:text-blue-400">
                   {{ t('settings.folders.guideTip') }}
                 </p>
               </div>
@@ -1047,28 +1060,28 @@
                   <span class="text-xs text-gray-500">(Google AI Studio API Key)</span>
                 </label>
                 <!-- 저장됨 상태 표시 (키가 있고 편집 모드가 아닐 때) -->
-                <div v-if="hasGeminiKey && !editingGeminiKey" class="flex items-center gap-2">
-                  <div class="flex-1 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl">
+                <div v-if="hasGeminiKey && !editingGeminiKey" class="flex items-center gap-2 min-w-0">
+                  <div class="flex-1 min-w-0 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl overflow-hidden">
                     <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="text-sm text-green-700 dark:text-green-400 font-mono tracking-widest">AIzaSy••••••••••••••••••••••••••••</span>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono truncate">AIzaSy••••••••••••••••••••••••••••</span>
                   </div>
                   <button @click="editingGeminiKey = true; geminiApiKey = ''" type="button"
-                    class="px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     수정
                   </button>
                 </div>
                 <!-- 입력 모드 (키가 없거나 편집 중) -->
-                <div v-else class="flex items-center gap-2">
+                <div v-else class="flex items-center gap-2 min-w-0">
                   <input
                     v-model="geminiApiKey"
                     type="password"
                     placeholder="AIzaSy..."
-                    class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    class="flex-1 min-w-0 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                   <button v-if="editingGeminiKey" @click="editingGeminiKey = false; geminiApiKey = ''" type="button"
-                    class="px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     취소
                   </button>
                 </div>
@@ -1085,28 +1098,28 @@
                   <span class="text-xs text-gray-500">(OpenAI API Key)</span>
                 </label>
                 <!-- 저장됨 상태 표시 -->
-                <div v-if="hasOpenaiKey && !editingOpenaiKey" class="flex items-center gap-2">
-                  <div class="flex-1 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl">
+                <div v-if="hasOpenaiKey && !editingOpenaiKey" class="flex items-center gap-2 min-w-0">
+                  <div class="flex-1 min-w-0 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl overflow-hidden">
                     <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="text-sm text-green-700 dark:text-green-400 font-mono tracking-widest">sk-••••••••••••••••••••••••••••••</span>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono truncate">sk-••••••••••••••••••••••••••••••</span>
                   </div>
                   <button @click="editingOpenaiKey = true; openaiApiKey = ''" type="button"
-                    class="px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     수정
                   </button>
                 </div>
                 <!-- 입력 모드 -->
-                <div v-else class="flex items-center gap-2">
+                <div v-else class="flex items-center gap-2 min-w-0">
                   <input
                     v-model="openaiApiKey"
                     type="password"
                     placeholder="sk-..."
-                    class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    class="flex-1 min-w-0 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                   <button v-if="editingOpenaiKey" @click="editingOpenaiKey = false; openaiApiKey = ''" type="button"
-                    class="px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     취소
                   </button>
                 </div>
@@ -1172,28 +1185,28 @@
                   <span class="text-xs text-gray-500">{{ t('settings.metadata.bingApiKeySubLabel') }}</span>
                 </label>
                 <!-- 저장됨 상태 표시 -->
-                <div v-if="hasBingKey && !editingBingKey" class="flex items-center gap-2">
-                  <div class="flex-1 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl">
+                <div v-if="hasBingKey && !editingBingKey" class="flex items-center gap-2 min-w-0">
+                  <div class="flex-1 min-w-0 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl overflow-hidden">
                     <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="text-sm text-green-700 dark:text-green-400 font-mono tracking-widest">••••••••••••••••••••••••••••••••</span>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono truncate">••••••••••••••••••••••••••••••••</span>
                   </div>
                   <button @click="editingBingKey = true; bingApiKey = ''" type="button"
-                    class="px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     수정
                   </button>
                 </div>
                 <!-- 입력 모드 -->
-                <div v-else class="flex items-center gap-2">
+                <div v-else class="flex items-center gap-2 min-w-0">
                   <input
                     v-model="bingApiKey"
                     type="password"
                     :placeholder="t('settings.metadata.bingApiKeyPlaceholder')"
-                    class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    class="flex-1 min-w-0 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                   <button v-if="editingBingKey" @click="editingBingKey = false; bingApiKey = ''" type="button"
-                    class="px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     취소
                   </button>
                 </div>
