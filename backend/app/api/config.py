@@ -17,7 +17,7 @@ from app.models.user import User
 from app.config import settings
 
 # Sensitive field names - these are preserved (not overwritten) when incoming value is empty
-SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "googleApiKey", "smtpPassword"}
+SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "googleApiKey", "bingApiKey", "smtpPassword"}
 
 router = APIRouter()
 
@@ -96,8 +96,7 @@ def get_default_config() -> Dict[str, Any]:
             "aiModel": "gpt-4o-mini",
             "openaiApiKey": "",
             "geminiApiKey": "",
-            "googleApiKey": "",
-            "googleSearchEngineId": "",
+            "bingApiKey": "",
             "autoDescription": True,
             "autoIcon": True
         },

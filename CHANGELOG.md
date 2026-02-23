@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.12] - 2026-02-23
+
+### Changed
+- **이미지 검색 엔진 교체**: Google Custom Search API → **Bing Image Search API** (Azure Cognitive Services)
+  - Google Programmable Search Engine의 "전체 웹 검색" 옵션 폐지로 실질적 검색 불가 문제 해결
+  - Bing은 전체 웹 이미지 검색 지원, 월 1,000건 무료 (F0 티어)
+  - `backend/app/core/bing_image_search.py` 신규 생성
+  - `images.py`: `GoogleImageSearcher` → `BingImageSearcher`, `bingApiKey` config 읽기
+  - `config.py`: `SENSITIVE_FIELDS`에 `bingApiKey` 추가, 기본값에서 Google 키 제거
+  - `Settings.vue`: Google API 키 + Search Engine ID 섹션 → Bing API 키 단일 입력으로 교체
+  - `ko.js` / `en.js`: 로케일 문자열 Bing 기준으로 업데이트
+
 ## [1.3.11] - 2026-02-23
 
 ### Fixed
