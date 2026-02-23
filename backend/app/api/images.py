@@ -22,7 +22,7 @@ from app.schemas.image import (
     ImageUploadResponse,
     ImageDeleteResponse
 )
-from app.core.google_image_search import GoogleImageSearcher
+from app.core.bing_image_search import BingImageSearcher
 from app.core.icon_cache import IconCache
 from app.config import settings
 import json
@@ -75,28 +75,19 @@ def sanitize_filename(name: str, max_length: int = 50) -> str:
     return sanitized if sanitized else 'unnamed'
 
 
-def get_google_searcher() -> GoogleImageSearcher:
-    """Google Image Searcher 인스턴스 생성"""
+def get_bing_searcher() -> BingImageSearcher:
+    """Bing Image Searcher 인스턴스 생성"""
     from app.api.config import load_config
-    google_api_key = settings.GOOGLE_CUSTOM_SEARCH_API_KEY
-    google_search_engine_id = settings.GOOGLE_SEARCH_ENGINE_ID
+    bing_api_key = ""
 
     try:
-        # load_config() 사용 - ENC: 암호화된 레거시 값도 자동 복호화됨
         config = load_config()
         metadata_config = config.get('metadata', {})
-        # config에 설정이 있으면 환경변수보다 우선 사용
-        if metadata_config.get('googleApiKey'):
-            google_api_key = metadata_config['googleApiKey']
-        if metadata_config.get('googleSearchEngineId'):
-            google_search_engine_id = metadata_config['googleSearchEngineId']
+        bing_api_key = metadata_config.get('bingApiKey', '')
     except Exception as e:
-        logger.debug(f"Error reading Google API config: {e}")
+        logger.debug(f"Error reading Bing API config: {e}")
 
-    return GoogleImageSearcher(
-        api_key=google_api_key,
-        search_engine_id=google_search_engine_id
-    )
+    return BingImageSearcher(api_key=bing_api_key)
 
 
 def get_icon_cache() -> IconCache:
@@ -170,15 +161,10 @@ async def search_logo(
     logger.debug(f"Images API] Query: '{request.query}'")
     logger.debug(f"Images API] Limit: {request.limit}, Offset: {request.offset}")
 
-    searcher = get_google_searcher()
+    searcher = get_bing_searcher()
 
     if not searcher.is_configured():
-        # OAuth 클라이언트 ID 형식 감지
-        if '.apps.googleusercontent.com' in searcher.search_engine_id:
-            error_msg = "❌ Search Engine ID가 잘못되었습니다.\n\n현재 입력된 값은 OAuth 클라이언트 ID입니다.\n\n올바른 설정:\n1. https://programmablesearchengine.google.com 방문\n2. 새 검색엔진 생성 (이미지 검색 활성화 필수)\n3. 생성된 검색엔진 ID를 복사하여 입력\n\n예시: 017576662512468239146:omuauf_lfve"
-        else:
-            error_msg = "Google Custom Search API가 설정되지 않았습니다. Settings → Metadata에서 API Key와 Search Engine ID를 설정해주세요."
-
+        error_msg = "Bing Image Search API가 설정되지 않았습니다. Settings → Metadata에서 Bing API 키를 설정해주세요."
         logger.error(f"Images API] ERROR: {error_msg}")
         return GoogleImageSearchResponse(
             success=False,
@@ -195,7 +181,7 @@ async def search_logo(
             return GoogleImageSearchResponse(
                 success=True,
                 images=[],
-                error="검색 결과가 없습니다. 다른 검색어를 시도하거나, Google Programmable Search Engine에 검색 대상 사이트가 설정되어 있는지 확인해주세요."
+                error="검색 결과가 없습니다. 다른 검색어를 시도해보세요."
             )
 
         return GoogleImageSearchResponse(
@@ -221,28 +207,16 @@ async def search_screenshots(
     current_user: User = Depends(get_current_admin_user)
 ):
     """
-    Google Custom Search API로 스크린샷 검색
-
-    Args:
-        request: 검색 요청 (query, limit)
-        current_user: 현재 관리자 사용자
-
-    Returns:
-        검색 결과
+    Bing Image Search API로 스크린샷 검색
     """
     logger.debug(f"\n[Images API] Screenshot search request received")
     logger.debug(f"Images API] Query: '{request.query}'")
     logger.debug(f"Images API] Limit: {request.limit}, Offset: {request.offset}")
 
-    searcher = get_google_searcher()
+    searcher = get_bing_searcher()
 
     if not searcher.is_configured():
-        # OAuth 클라이언트 ID 형식 감지
-        if '.apps.googleusercontent.com' in searcher.search_engine_id:
-            error_msg = "❌ Search Engine ID가 잘못되었습니다.\n\n현재 입력된 값은 OAuth 클라이언트 ID입니다.\n\n올바른 설정:\n1. https://programmablesearchengine.google.com 방문\n2. 새 검색엔진 생성 (이미지 검색 활성화 필수)\n3. 생성된 검색엔진 ID를 복사하여 입력\n\n예시: 017576662512468239146:omuauf_lfve"
-        else:
-            error_msg = "Google Custom Search API가 설정되지 않았습니다. Settings → Metadata에서 API Key와 Search Engine ID를 설정해주세요."
-
+        error_msg = "Bing Image Search API가 설정되지 않았습니다. Settings → Metadata에서 Bing API 키를 설정해주세요."
         logger.error(f"Images API] ERROR: {error_msg}")
         return GoogleImageSearchResponse(
             success=False,
@@ -259,7 +233,7 @@ async def search_screenshots(
             return GoogleImageSearchResponse(
                 success=True,
                 images=[],
-                error="검색 결과가 없습니다. 다른 검색어를 시도하거나, Google Programmable Search Engine에 검색 대상 사이트가 설정되어 있는지 확인해주세요."
+                error="검색 결과가 없습니다. 다른 검색어를 시도해보세요."
             )
 
         return GoogleImageSearchResponse(

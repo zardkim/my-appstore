@@ -1140,29 +1140,29 @@
             </div>
           </div>
 
-          <!-- Google Custom Search API Settings -->
+          <!-- Bing Image Search API Settings -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.metadata.googleCustomSearchTitle') }}</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.metadata.bingImageSearchTitle') }}</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              {{ t('settings.metadata.googleCustomSearchDesc') }}
+              {{ t('settings.metadata.bingImageSearchDesc') }}
             </p>
 
             <div class="space-y-4">
-              <!-- Google API Key -->
+              <!-- Bing API Key -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {{ t('settings.metadata.googleApiKeyLabel') }}
-                  <span class="text-xs text-gray-500">{{ t('settings.metadata.googleApiKeySubLabel') }}</span>
+                  {{ t('settings.metadata.bingApiKeyLabel') }}
+                  <span class="text-xs text-gray-500">{{ t('settings.metadata.bingApiKeySubLabel') }}</span>
                 </label>
                 <!-- 저장됨 상태 표시 -->
-                <div v-if="hasGoogleKey && !editingGoogleKey" class="flex items-center gap-2">
+                <div v-if="hasBingKey && !editingBingKey" class="flex items-center gap-2">
                   <div class="flex-1 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl">
                     <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="text-sm text-green-700 dark:text-green-400 font-mono tracking-widest">AIzaSy••••••••••••••••••••••••••••</span>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono tracking-widest">••••••••••••••••••••••••••••••••</span>
                   </div>
-                  <button @click="editingGoogleKey = true; googleApiKey = ''" type="button"
+                  <button @click="editingBingKey = true; bingApiKey = ''" type="button"
                     class="px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     수정
                   </button>
@@ -1170,64 +1170,33 @@
                 <!-- 입력 모드 -->
                 <div v-else class="flex items-center gap-2">
                   <input
-                    v-model="googleApiKey"
+                    v-model="bingApiKey"
                     type="password"
-                    placeholder="AIzaSy..."
+                    :placeholder="t('settings.metadata.bingApiKeyPlaceholder')"
                     class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
-                  <button v-if="editingGoogleKey" @click="editingGoogleKey = false; googleApiKey = ''" type="button"
+                  <button v-if="editingBingKey" @click="editingBingKey = false; bingApiKey = ''" type="button"
                     class="px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     취소
                   </button>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  {{ t('settings.metadata.googleApiKeyHelper') }}
-                  <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
-                    {{ t('settings.metadata.googleApiKeyLink') }}
-                  </a>
-                  <span v-if="hasGoogleKey && !editingGoogleKey" class="text-green-600 dark:text-green-400">• 저장됨</span>
-                </p>
-              </div>
-
-              <!-- Search Engine ID -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {{ t('settings.metadata.searchEngineIdLabel') }}
-                  <span class="text-xs text-gray-500">{{ t('settings.metadata.searchEngineIdSubLabel') }}</span>
-                </label>
-                <input
-                  v-model="googleSearchEngineId"
-                  type="text"
-                  placeholder="a1b2c3d4e5f6g7h8i..."
-                  class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                />
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  {{ t('settings.metadata.searchEngineIdHelper') }}
-                  <a href="https://programmablesearchengine.google.com/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
-                    {{ t('settings.metadata.searchEngineIdLink') }}
+                  {{ t('settings.metadata.bingApiKeyHelper') }}
+                  <a href="https://portal.azure.com/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
+                    {{ t('settings.metadata.bingApiKeyLink') }}
                   </a>
                 </p>
               </div>
 
               <!-- Info Box -->
-              <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4">
-                <h4 class="text-sm font-semibold text-green-900 dark:text-green-300 mb-2">{{ t('settings.metadata.setupGuideTitle') }}</h4>
-                <div class="text-xs text-green-800 dark:text-green-400 space-y-2">
-                  <p><strong>{{ t('settings.metadata.setupGuideStep1') }}</strong></p>
-                  <ul class="list-disc ml-5 space-y-1">
-                    <li>{{ t('settings.metadata.step1Item1') }}</li>
-                    <li>{{ t('settings.metadata.step1Item2') }}</li>
-                    <li>{{ t('settings.metadata.step1Item3') }}</li>
-                  </ul>
-                  <p class="mt-2"><strong>{{ t('settings.metadata.setupGuideStep2') }}</strong></p>
-                  <ul class="list-disc ml-5 space-y-1">
-                    <li>{{ t('settings.metadata.step2Item1') }}</li>
-                    <li>{{ t('settings.metadata.step2Item2') }}</li>
-                    <li>{{ t('settings.metadata.step2Item3') }}</li>
-                    <li>{{ t('settings.metadata.step2Item4') }}</li>
-                  </ul>
+              <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+                <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">{{ t('settings.metadata.bingSetupGuideTitle') }}</h4>
+                <div class="text-xs text-blue-800 dark:text-blue-400 space-y-1">
+                  <p>{{ t('settings.metadata.bingSetupStep1') }}</p>
+                  <p>{{ t('settings.metadata.bingSetupStep2') }}</p>
+                  <p>{{ t('settings.metadata.bingSetupStep3') }}</p>
                   <p class="mt-2">
-                    <strong>{{ t('settings.metadata.freeQuotaLabel') }}</strong> {{ t('settings.metadata.freeQuotaValue') }}
+                    <strong>{{ t('settings.metadata.bingFreeQuotaLabel') }}</strong> {{ t('settings.metadata.bingFreeQuotaValue') }}
                   </p>
                 </div>
               </div>
@@ -2211,15 +2180,14 @@ const aiProvider = ref('gemini')
 const aiModel = ref('gemini-2.5-flash')
 const geminiApiKey = ref('')
 const openaiApiKey = ref('')
-const googleApiKey = ref('')
-const googleSearchEngineId = ref('')
+const bingApiKey = ref('')
 // API 키 상태 관리: 저장 여부 + 편집 모드
 const hasGeminiKey = ref(false)
 const hasOpenaiKey = ref(false)
-const hasGoogleKey = ref(false)
+const hasBingKey = ref(false)
 const editingGeminiKey = ref(false)
 const editingOpenaiKey = ref(false)
-const editingGoogleKey = ref(false)
+const editingBingKey = ref(false)
 const useDefaultPrompt = ref(true) // 기본값 사용 체크박스 (기본적으로 체크됨)
 const customPromptOpenai = ref('')
 const customPromptGemini = ref('')
@@ -2850,8 +2818,7 @@ const saveMetadataSettings = async () => {
       // 편집 모드이거나 기존 키가 없을 때(최초 입력) 새 값 전송, 그 외 빈 문자열 (백엔드가 기존 값 보존)
       geminiApiKey: (editingGeminiKey.value || !hasGeminiKey.value) ? geminiApiKey.value : '',
       openaiApiKey: (editingOpenaiKey.value || !hasOpenaiKey.value) ? openaiApiKey.value : '',
-      googleApiKey: (editingGoogleKey.value || !hasGoogleKey.value) ? googleApiKey.value : '',
-      googleSearchEngineId: googleSearchEngineId.value,
+      bingApiKey: (editingBingKey.value || !hasBingKey.value) ? bingApiKey.value : '',
       useDefaultPrompt: useDefaultPrompt.value,
       customPromptOpenai: customPromptOpenai.value,
       customPromptGemini: customPromptGemini.value
@@ -2870,10 +2837,10 @@ const saveMetadataSettings = async () => {
       editingOpenaiKey.value = false
       openaiApiKey.value = ''
     }
-    if ((editingGoogleKey.value || !hasGoogleKey.value) && googleApiKey.value) {
-      hasGoogleKey.value = true
-      editingGoogleKey.value = false
-      googleApiKey.value = ''
+    if ((editingBingKey.value || !hasBingKey.value) && bingApiKey.value) {
+      hasBingKey.value = true
+      editingBingKey.value = false
+      bingApiKey.value = ''
     }
 
     await alert.success(t('settings.metadata.saved'))
@@ -3067,14 +3034,13 @@ onMounted(async () => {
       // 저장됨 표시 후 "수정" 버튼을 눌러야만 변경 가능
       hasGeminiKey.value = !!(config.metadata.geminiApiKey)
       hasOpenaiKey.value = !!(config.metadata.openaiApiKey)
-      hasGoogleKey.value = !!(config.metadata.googleApiKey)
+      hasBingKey.value = !!(config.metadata.bingApiKey)
       geminiApiKey.value = ''
       openaiApiKey.value = ''
-      googleApiKey.value = ''
+      bingApiKey.value = ''
       editingGeminiKey.value = false
       editingOpenaiKey.value = false
-      editingGoogleKey.value = false
-      googleSearchEngineId.value = config.metadata.googleSearchEngineId || ''
+      editingBingKey.value = false
       // useDefaultPrompt가 설정되어 있으면 그 값을 사용, 없으면 true (기본값)
       useDefaultPrompt.value = config.metadata.useDefaultPrompt !== undefined
         ? config.metadata.useDefaultPrompt
