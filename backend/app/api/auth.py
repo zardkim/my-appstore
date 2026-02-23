@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -42,10 +42,11 @@ class ChangePasswordRequest(BaseModel):
 @router.post("/login", response_model=Token)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
+    remember_me: bool = Form(default=False),
     db: Session = Depends(get_db)
 ):
     """User login endpoint"""
-    logger.debug(f"LOGIN] 로그인 시도 - Username: {form_data.username}")
+    logger.debug(f"LOGIN] 로그인 시도 - Username: {form_data.username}, RememberMe: {remember_me}")
 
     user = db.query(User).filter(User.username == form_data.username).first()
 
@@ -70,7 +71,12 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    # 로그인 상태 유지 체크 시 30일, 미체크 시 설정값(기본 30분) 적용
+    if remember_me:
+        access_token_expires = timedelta(days=30)
+    else:
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
     access_token = create_access_token(
         data={"sub": user.username, "role": user.role.value},
         expires_delta=access_token_expires
