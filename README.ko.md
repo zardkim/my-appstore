@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**Personal Software Library Manager for NAS**
+**NAS 기반 개인 소프트웨어 라이브러리 관리 시스템**
 
 [![Version](https://img.shields.io/badge/version-1.3.15-blue.svg)](https://github.com/zardkim/my-appstore/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -14,9 +14,9 @@
 
 ---
 
-## 🐳 Docker Installation
+## 🐳 Docker 설치
 
-### 1. Download Files
+### 1. 파일 다운로드
 
 ```bash
 mkdir myappstore && cd myappstore
@@ -25,72 +25,72 @@ wget https://raw.githubusercontent.com/zardkim/my-appstore/main/docker-compose.y
 wget https://raw.githubusercontent.com/zardkim/my-appstore/main/.env.example
 ```
 
-### 2. Configure Environment Variables
+### 2. 환경 변수 설정
 
 ```bash
 cp .env.example .env
 nano .env
 ```
 
-### 3. Create Required Directories
+### 3. 필수 폴더 생성
 
 ```bash
 mkdir -p db redis data/library
 ```
 
-### 4. Start
+### 4. 실행
 
 ```bash
 docker-compose up -d
 
-# Check status
+# 상태 확인
 docker-compose ps
 
-# View logs
+# 로그 확인
 docker-compose logs -f
 ```
 
-### 5. Access
+### 5. 접속
 
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:5900 |
-| Backend API | http://localhost:8110 |
-| API Docs | http://localhost:8110/docs |
+| 서비스 | URL |
+|--------|-----|
+| 프론트엔드 | http://localhost:5900 |
+| 백엔드 API | http://localhost:8110 |
+| API 문서 | http://localhost:8110/docs |
 
-> On first access, an admin account setup wizard will run.
+> 첫 접속 시 관리자 계정 생성 마법사가 실행됩니다.
 
 ---
 
-## ⚙️ Environment Variables (.env)
+## ⚙️ 환경 변수 (.env)
 
-### Required
+### 필수 설정
 
 ```bash
-# Secret key (must change — generate with the command below)
+# 보안 키 (필수 변경 — 아래 명령으로 생성)
 # openssl rand -hex 32
 SECRET_KEY=your-secret-key-change-this-in-production
 
-# Database password
+# 데이터베이스 비밀번호
 POSTGRES_PASSWORD=password
 ```
 
-### Network
+### 네트워크 설정
 
 ```bash
-# Ports (default values recommended)
+# 포트 (기본값 유지 권장)
 BACKEND_PORT=8110
 FRONTEND_PORT=5900
-POSTGRES_PORT=5433   # Avoids conflict with Synology's built-in PostgreSQL
+POSTGRES_PORT=5433   # Synology 기본 PostgreSQL 충돌 방지
 REDIS_PORT=6380
 
-# CORS (internal NAS: allow * / external domain: specify actual domain)
+# CORS (내부 NAS 환경: * 허용 / 외부 도메인: 실제 도메인 지정)
 CORS_ORIGINS=*
 ```
 
-### Access from Other Devices (Optional)
+### 외부 기기 접속 (선택)
 
-To access from other devices (PC, mobile) on the same network, set your NAS IP:
+같은 네트워크의 다른 기기(PC, 모바일)에서 접속하려면 NAS IP 주소로 설정:
 
 ```bash
 VITE_API_BASE_URL=http://192.168.0.100:8110/api
@@ -98,14 +98,14 @@ VITE_BACKEND_URL=http://192.168.0.100:8110
 VITE_APP_URL=http://192.168.0.100:5900
 ```
 
-> Not required if using a reverse proxy (Nginx, Synology, etc.)
+> 역방향 프록시(Nginx, Synology 등) 사용 시 이 항목은 설정 불필요
 
 ---
 
-## 🤖 AI API Key Setup
+## 🤖 AI API 키 설정
 
-API keys are required to use AI-powered metadata generation (description, publisher, category).
-Only **one** of OpenAI or Gemini is needed.
+AI 메타데이터 자동 생성(설명, 제조사, 카테고리) 기능을 사용하려면 API 키가 필요합니다.
+OpenAI 또는 Gemini 중 **하나만** 설정해도 됩니다.
 
 ```bash
 # OpenAI (GPT-4o-mini)
@@ -115,19 +115,19 @@ OPENAI_API_KEY=sk-...
 GEMINI_API_KEY=AI...
 ```
 
-### Get API Keys
+### API 키 발급
 
-| Service | URL |
-|---------|-----|
+| 서비스 | 발급 URL |
+|--------|---------|
 | OpenAI | https://platform.openai.com/api-keys |
 | Google Gemini | https://aistudio.google.com/app/apikey |
 | Bing Image Search | https://portal.azure.com (Cognitive Services) |
 
-> API keys can be set in the `.env` file or entered directly in **Settings → Metadata** after logging in.
+> API 키는 `.env` 파일에 저장하거나, 앱 접속 후 **Settings → Metadata** 메뉴에서 직접 입력할 수 있습니다.
 
 ---
 
-## 🔄 Update
+## 🔄 업데이트
 
 ```bash
 docker-compose pull && docker-compose up -d
@@ -135,7 +135,7 @@ docker-compose pull && docker-compose up -d
 
 ---
 
-## 📦 Docker Images
+## 📦 Docker 이미지
 
 - `zardkim/myappstore-backend:latest`
 - `zardkim/myappstore-frontend:latest`
