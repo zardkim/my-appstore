@@ -97,6 +97,7 @@ def get_default_config() -> Dict[str, Any]:
             "openaiApiKey": "",
             "geminiApiKey": "",
             "bingApiKey": "",
+            "bingImageSearch": True,
             "autoDescription": True,
             "autoIcon": True
         },
@@ -146,6 +147,18 @@ def _migrate_config(config: Dict[str, Any]) -> tuple:
             del meta['apiKey']
             needs_save = True
 
+        # Migrate: remove obsolete Google search fields (replaced by Bing Image Search)
+        for old_key in ('googleApiKey', 'googleSearchEngineId'):
+            if old_key in meta:
+                del meta[old_key]
+                logger.info(f"Removed obsolete config field: {old_key}")
+                needs_save = True
+
+        # Ensure bingImageSearch flag exists (default: True)
+        if 'bingImageSearch' not in meta:
+            meta['bingImageSearch'] = True
+            needs_save = True
+
     return config, needs_save
 
 
@@ -190,7 +203,7 @@ def save_config(config: Dict[str, Any]):
 async def get_config(current_user: User = Depends(get_current_user)):
     """Get all configuration. Requires authentication."""
     config = load_config()
-    if current_user.role != "admin":
+    if current_user.role.value != "admin":
         config = mask_sensitive_fields(config)
     return config
 
@@ -207,7 +220,7 @@ async def get_config_section(
         raise HTTPException(status_code=404, detail=f"Section '{section}' not found")
 
     data = config[section]
-    if current_user.role != "admin":
+    if current_user.role.value != "admin":
         data = mask_sensitive_fields(data)
 
     return data

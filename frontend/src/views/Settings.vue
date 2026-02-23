@@ -1142,12 +1142,29 @@
 
           <!-- Bing Image Search API Settings -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('settings.metadata.bingImageSearchTitle') }}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              {{ t('settings.metadata.bingImageSearchDesc') }}
-            </p>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.metadata.bingImageSearchTitle') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('settings.metadata.bingImageSearchDesc') }}</p>
+              </div>
+              <!-- ON/OFF 토글 -->
+              <label class="flex items-center gap-2 cursor-pointer flex-shrink-0 ml-4">
+                <span class="text-sm font-medium" :class="bingImageSearch ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'">
+                  {{ bingImageSearch ? 'ON' : 'OFF' }}
+                </span>
+                <div class="relative">
+                  <input type="checkbox" v-model="bingImageSearch" class="sr-only" />
+                  <div class="w-12 h-6 rounded-full transition-colors duration-200"
+                    :class="bingImageSearch ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'">
+                  </div>
+                  <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+                    :class="bingImageSearch ? 'translate-x-6' : 'translate-x-0'">
+                  </div>
+                </div>
+              </label>
+            </div>
 
-            <div class="space-y-4">
+            <div v-if="bingImageSearch" class="space-y-4">
               <!-- Bing API Key -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -2181,6 +2198,7 @@ const aiModel = ref('gemini-2.5-flash')
 const geminiApiKey = ref('')
 const openaiApiKey = ref('')
 const bingApiKey = ref('')
+const bingImageSearch = ref(true)
 // API 키 상태 관리: 저장 여부 + 편집 모드
 const hasGeminiKey = ref(false)
 const hasOpenaiKey = ref(false)
@@ -2819,6 +2837,7 @@ const saveMetadataSettings = async () => {
       geminiApiKey: (editingGeminiKey.value || !hasGeminiKey.value) ? geminiApiKey.value : '',
       openaiApiKey: (editingOpenaiKey.value || !hasOpenaiKey.value) ? openaiApiKey.value : '',
       bingApiKey: (editingBingKey.value || !hasBingKey.value) ? bingApiKey.value : '',
+      bingImageSearch: bingImageSearch.value,
       useDefaultPrompt: useDefaultPrompt.value,
       customPromptOpenai: customPromptOpenai.value,
       customPromptGemini: customPromptGemini.value
@@ -3035,6 +3054,7 @@ onMounted(async () => {
       hasGeminiKey.value = !!(config.metadata.geminiApiKey)
       hasOpenaiKey.value = !!(config.metadata.openaiApiKey)
       hasBingKey.value = !!(config.metadata.bingApiKey)
+      bingImageSearch.value = config.metadata.bingImageSearch !== false  // 기본값 true
       geminiApiKey.value = ''
       openaiApiKey.value = ''
       bingApiKey.value = ''

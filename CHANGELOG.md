@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.13] - 2026-02-23
+
+### Fixed
+- **config.py 어드민 판별 enum 버그 수정**: `current_user.role != "admin"` (enum vs 문자열 비교 → 항상 True) → `current_user.role.value != "admin"` 으로 수정. 이 버그로 인해 어드민 포함 모든 사용자가 항상 마스킹된 config를 받았고, 로그인 후 API 키 "저장됨" 표시가 정상 동작하지 않던 근본 원인
+
+### Changed
+- **Bing Image Search ON/OFF 토글**: Settings → Metadata에서 이미지 검색 기능 자체를 활성화/비활성화할 수 있는 토글 추가. 토글 OFF 시 API 키 입력 영역 숨김 및 검색 엔드포인트에서 비활성화 응답 반환
+- **config.json 마이그레이션**: 서버 시작 시 `googleApiKey`, `googleSearchEngineId` 필드 자동 삭제 및 `bingImageSearch: true` 기본값 추가
+
 ## [1.3.12] - 2026-02-23
 
 ### Changed

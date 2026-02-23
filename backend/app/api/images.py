@@ -161,6 +161,16 @@ async def search_logo(
     logger.debug(f"Images API] Query: '{request.query}'")
     logger.debug(f"Images API] Limit: {request.limit}, Offset: {request.offset}")
 
+    # bingImageSearch 활성화 여부 확인
+    from app.api.config import load_config as _load_cfg
+    _meta = _load_cfg().get('metadata', {})
+    if not _meta.get('bingImageSearch', True):
+        return GoogleImageSearchResponse(
+            success=False,
+            images=[],
+            error="이미지 검색이 비활성화되어 있습니다. Settings → Metadata에서 활성화해주세요."
+        )
+
     searcher = get_bing_searcher()
 
     if not searcher.is_configured():
@@ -212,6 +222,16 @@ async def search_screenshots(
     logger.debug(f"\n[Images API] Screenshot search request received")
     logger.debug(f"Images API] Query: '{request.query}'")
     logger.debug(f"Images API] Limit: {request.limit}, Offset: {request.offset}")
+
+    # bingImageSearch 활성화 여부 확인
+    from app.api.config import load_config as _load_cfg
+    _meta = _load_cfg().get('metadata', {})
+    if not _meta.get('bingImageSearch', True):
+        return GoogleImageSearchResponse(
+            success=False,
+            images=[],
+            error="이미지 검색이 비활성화되어 있습니다. Settings → Metadata에서 활성화해주세요."
+        )
 
     searcher = get_bing_searcher()
 
