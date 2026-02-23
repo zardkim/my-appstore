@@ -52,6 +52,10 @@ jobs:
             echo "Generated auto version: ${AUTO_VERSION}"
           fi
 
+      - name: Get build date (ISO 8601)
+        id: build_date
+        run: echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
       - name: Generate Backend image tags
         id: backend_tags
         run: |
@@ -73,6 +77,10 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: ${{ steps.backend_tags.outputs.tags }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+            BUILD_DATE=${{ steps.build_date.outputs.date }}
+            VCS_REF=${{ github.sha }}
           cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
 
@@ -83,6 +91,10 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: ${{ steps.frontend_tags.outputs.tags }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+            BUILD_DATE=${{ steps.build_date.outputs.date }}
+            VCS_REF=${{ github.sha }}
           cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
 
@@ -93,6 +105,8 @@ jobs:
           echo "=========================================="
           echo ""
           echo "Version: ${{ steps.version.outputs.version }}"
+          echo "Build Date: ${{ steps.build_date.outputs.date }}"
+          echo "Git SHA: ${{ github.sha }}"
           echo ""
           echo "Backend Image:"
           echo "  - ${{ env.BACKEND_IMAGE }}:${{ steps.version.outputs.version }}"
@@ -103,7 +117,7 @@ jobs:
           echo "  - ${{ env.FRONTEND_IMAGE }}:latest"
           echo ""
           echo "=========================================="
-          echo "Update command:"
-          echo "  docker-compose pull"
-          echo "  docker-compose up -d"
+          echo "Synology Container Manager update:"
+          echo "  Container Manager > 레지스트리 > 이미지 선택 > 업데이트 확인"
+          echo "  또는 SSH: docker-compose pull && docker-compose up -d"
           echo "=========================================="

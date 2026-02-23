@@ -2,6 +2,21 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Build arguments for image metadata
+ARG VERSION=latest
+ARG BUILD_DATE
+ARG VCS_REF
+
+# OCI standard labels (Synology Container Manager uses these for update detection)
+LABEL org.opencontainers.image.title="MyAppStore Backend"
+LABEL org.opencontainers.image.description="NAS-based personal software library management system"
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.created="${BUILD_DATE}"
+LABEL org.opencontainers.image.revision="${VCS_REF}"
+LABEL org.opencontainers.image.source="https://github.com/zardkim/my-appstore"
+LABEL org.opencontainers.image.url="https://hub.docker.com/r/zardkim/myappstore-backend"
+LABEL maintainer="zardkim"
+
 # Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

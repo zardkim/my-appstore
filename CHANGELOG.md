@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.19] - 2026-02-24
+
+### Fixed
+- **시놀로지 Container Manager 이미지 업데이트 감지 수정**: Dockerfile에 OCI 표준 라벨(`org.opencontainers.image.*`) 추가. Container Manager가 버전·빌드일시·Git 커밋을 읽어 업데이트 여부를 올바르게 감지
+- **GitHub Actions 빌드 메타데이터 전달**: `VERSION`·`BUILD_DATE`·`VCS_REF`를 build-args로 Dockerfile에 주입. Docker 이미지 라벨에 버전 정보 포함
+
 ## [1.3.18] - 2026-02-24
 
 ### Added
