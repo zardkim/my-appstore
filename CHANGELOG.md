@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.18] - 2026-02-24
+
+### Added
+- **제품 상세 이전/다음 이동**: 헤더에 ◄ ► 버튼 추가 — 인접 제품으로 이동 가능. 버튼 비활성화 시 흐리게 표시, 호버 시 제품명 툴팁
+- **모바일 스와이프 네비게이션**: 제품 상세 페이지에서 좌/우 스와이프(60px 이상)로 이전/다음 제품 이동. 수직 스크롤과 구분됨
+- **모바일 인접 제품 표시줄**: 콘텐츠 상단에 이전/다음 제품명 표시 바 (모바일 전용, `lg:hidden`)
+- **백엔드 `GET /products/{id}/adjacent`**: 이전(더 높은 id)/다음(더 낮은 id) 제품 정보 반환 엔드포인트
+
 ## [1.3.17] - 2026-02-24
 
 ### Fixed
