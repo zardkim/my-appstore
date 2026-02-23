@@ -144,12 +144,12 @@
       </div>
     </nav>
 
-    <!-- Mobile Search Overlay -->
-    <transition name="slide-up">
+    <!-- Mobile Search Overlay (상단 고정) -->
+    <transition name="slide-down">
       <div
         v-if="showSearchOverlay"
-        class="lg:hidden fixed left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-xl z-40 px-4 py-3"
-        :style="{ bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }"
+        class="lg:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-xl z-50 px-4 pb-3"
+        :style="{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0.75rem))' }"
       >
         <div class="flex items-center gap-2">
           <div class="relative flex-1">
@@ -167,11 +167,11 @@
           </div>
           <button
             @click="handleMobileSearch"
-            class="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors"
+            class="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors flex-shrink-0"
           >
             {{ $t('nav.search') }}
           </button>
-          <button @click="showSearchOverlay = false" class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          <button @click="showSearchOverlay = false" class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex-shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -382,6 +382,18 @@ const logout = () => {
 .slide-up-enter-active .absolute,
 .slide-up-leave-active .absolute {
   transition: transform 0.3s ease-out;
+}
+
+/* Slide-down transition (모바일 검색창 상단) */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  transform: translateY(-100%);
+  opacity: 0;
 }
 
 /* Safe area for mobile devices (iOS notch) */

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.16] - 2026-02-23
+
+### Fixed
+- **모바일 검색창 상단 이동**: 하단 내비게이션의 검색 버튼 클릭 시 검색창이 하단 바 위에 표시되던 것을 화면 최상단에 고정되도록 변경. slide-down 애니메이션 및 iOS safe-area 대응
+- **설정 - 메타데이터 API 키 모바일 오버플로우 수정**: 마스킹된 API 키 텍스트(`AIzaSy••`, `sk-••` 등)가 화면 너비를 초과하던 문제 수정. `min-w-0` + `truncate` 적용으로 말줄임 처리
+- **설정 - 폴더 추가 안내문구 모바일 최적화**: 긴 명령어 코드(`-v /path/...`, `ln -s /path/...`)가 화면을 벗어나던 문제 수정. 코드 블록을 항목 아래 별도 줄에 배치하고 가로 스크롤로 처리
+
 ## [1.3.15] - 2026-02-23
 
 ### Fixed
