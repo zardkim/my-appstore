@@ -40,16 +40,41 @@
             <p class="text-sm text-blue-900 dark:text-blue-300">
               <strong>{{ t('aiSearchDialog.searchTarget') }}:</strong> {{ activeSearchTerm || product?.title || t('aiSearchDialog.unknown') }}
             </p>
-            <!-- 파일명으로 재검색 버튼 (검색 완료 후 파일명이 있을 때만 표시) -->
-            <div v-if="!loading && filenameForSearch && (metadata || errorMessage)" class="mt-2 flex items-center gap-2 flex-wrap">
-              <span class="text-xs text-blue-600 dark:text-blue-400">{{ t('aiSearchDialog.reSearchByFilename') }}:</span>
-              <button
-                @click="startAISearch(filenameForSearch)"
-                class="px-2.5 py-1 text-xs bg-white dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors font-mono truncate max-w-xs"
-                :title="filenameForSearch"
-              >
-                🔄 {{ filenameForSearch }}
-              </button>
+            <!-- 파일명으로 재검색 (검색 완료 후 파일명이 있을 때만 표시) -->
+            <div v-if="!loading && filenameForSearch && (metadata || errorMessage)" class="mt-3">
+              <!-- 재검색 버튼 -->
+              <div v-if="!showFilenameInput" class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs text-blue-600 dark:text-blue-400">{{ t('aiSearchDialog.reSearchByFilename') }}:</span>
+                <button
+                  @click="openFilenameInput"
+                  class="px-2.5 py-1 text-xs bg-white dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors font-mono truncate max-w-xs"
+                  :title="filenameForSearch"
+                >
+                  🔄 {{ filenameForSearch }}
+                </button>
+              </div>
+              <!-- 파일명 확인 입력 -->
+              <div v-else class="flex items-center gap-2 mt-1">
+                <input
+                  v-model="customFilename"
+                  type="text"
+                  class="flex-1 min-w-0 px-3 py-1.5 text-sm border border-blue-300 dark:border-blue-500 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  @keydown.enter="confirmFilenameSearch"
+                  autofocus
+                />
+                <button
+                  @click="confirmFilenameSearch"
+                  class="flex-shrink-0 px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  {{ t('aiSearchDialog.search') }}
+                </button>
+                <button
+                  @click="showFilenameInput = false"
+                  class="flex-shrink-0 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  {{ t('aiSearchDialog.cancel') }}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -189,6 +214,8 @@ const saving = ref(false)
 const errorMessage = ref('')
 const metadata = ref(null)
 const activeSearchTerm = ref('')
+const showFilenameInput = ref(false)
+const customFilename = ref('')
 
 // 파일명으로 재검색용 - 첫 번째 버전의 파일명(확장자 제외)
 const filenameForSearch = computed(() => {
@@ -264,6 +291,7 @@ const startAISearch = async (term = null) => {
   }
 
   activeSearchTerm.value = queryTerm
+  showFilenameInput.value = false
   loading.value = true
   errorMessage.value = ''
   metadata.value = null
@@ -441,10 +469,23 @@ const handleScreenshotsUpdate = (screenshots) => {
   }
 }
 
+const openFilenameInput = () => {
+  customFilename.value = filenameForSearch.value
+  showFilenameInput.value = true
+}
+
+const confirmFilenameSearch = () => {
+  if (customFilename.value.trim()) {
+    startAISearch(customFilename.value.trim())
+  }
+}
+
 const close = () => {
   metadata.value = null
   errorMessage.value = ''
   activeSearchTerm.value = ''
+  showFilenameInput.value = false
+  customFilename.value = ''
   emit('close')
 }
 </script>
