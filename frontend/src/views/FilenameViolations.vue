@@ -773,7 +773,7 @@ const openAIMatchingDialog = async (violation) => {
     for (const searchName of searchNames) {
       if (!searchName || searchName.length < 2) continue
 
-      const searchResponse = await productsApi.getProducts({ search: searchName, limit: 20 })
+      const searchResponse = await productsApi.getAll({ search: searchName, limit: 20 })
       const products = searchResponse.data.items || searchResponse.data
 
       if (!products || products.length === 0) continue

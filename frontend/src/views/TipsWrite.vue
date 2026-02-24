@@ -216,6 +216,7 @@ const editorLanguage = computed(() => {
 })
 
 let editorInstance = null
+let editorReady = false
 
 const post = ref({
   category: '',
@@ -322,7 +323,8 @@ const initEditor = () => {
     setup: (editor) => {
       editorInstance = editor
       editor.on('init', () => {
-        // 초기 내용 설정
+        editorReady = true
+        // 초기 내용 설정 (API 로드가 먼저 완료된 경우)
         if (post.value.content) {
           editor.setContent(post.value.content)
         }
@@ -467,8 +469,9 @@ onMounted(async () => {
         tags: postData.tags || '',
         is_notice: postData.is_notice
       }
-      // TinyMCE가 이미 초기화되었으면 내용 설정
-      if (editorInstance) {
+      // 에디터가 완전히 초기화(init 이벤트 완료)된 경우에만 내용 설정
+      // 미완료 시에는 init 핸들러에서 post.value.content를 읽어 자동 설정됨
+      if (editorInstance && editorReady) {
         editorInstance.setContent(post.value.content)
       }
     } catch (error) {
@@ -492,6 +495,8 @@ onBeforeUnmount(() => {
   // 에디터 정리
   if (editorInstance) {
     editorInstance.remove()
+    editorInstance = null
+    editorReady = false
   }
 })
 
