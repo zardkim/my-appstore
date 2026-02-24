@@ -78,8 +78,48 @@
             </div>
           </div>
 
+          <!-- 버전 병합 중 -->
+          <div v-if="merging" class="flex flex-col items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-green-500 dark:border-green-400 mb-4"></div>
+            <p class="text-gray-600 dark:text-gray-400">{{ t('aiSearchDialog.merging') }}</p>
+          </div>
+
+          <!-- 버전 병합 완료 -->
+          <div v-else-if="mergeResult" class="space-y-4">
+            <div class="p-5 bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-600 rounded-lg">
+              <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p class="text-sm font-semibold text-green-800 dark:text-green-300">{{ t('aiSearchDialog.mergeSuccess') }}</p>
+                  <p class="text-sm text-green-700 dark:text-green-400 mt-1">{{ mergeResult.message }}</p>
+                  <div v-if="mergeResult.moved_file_names?.length" class="mt-2 space-y-1">
+                    <p class="text-xs text-green-600 dark:text-green-500 font-medium">{{ t('aiSearchDialog.addedVersions') }}:</p>
+                    <p v-for="fname in mergeResult.moved_file_names" :key="fname" class="text-xs text-green-600 dark:text-green-500 font-mono">• {{ fname }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-end gap-3">
+              <a
+                :href="`/product/${mergeResult.target_product_id}`"
+                target="_blank"
+                class="px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors border border-blue-300 dark:border-blue-600"
+              >
+                {{ t('aiSearchDialog.viewProduct') }}
+              </a>
+              <button
+                @click="close"
+                class="px-4 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                {{ t('aiSearchDialog.close') }}
+              </button>
+            </div>
+          </div>
+
           <!-- 중복 검사 중 -->
-          <div v-if="checkingDuplicates" class="flex flex-col items-center justify-center py-12">
+          <div v-else-if="checkingDuplicates" class="flex flex-col items-center justify-center py-12">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500 dark:border-yellow-400 mb-4"></div>
             <p class="text-gray-600 dark:text-gray-400">{{ t('aiSearchDialog.checkingDuplicates') }}</p>
           </div>
@@ -98,7 +138,7 @@
               </div>
             </div>
 
-            <!-- 중복 목록 -->
+            <!-- 중복 목록 (행마다 "이 제품에 버전 추가" 버튼) -->
             <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
               <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
@@ -107,6 +147,7 @@
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">{{ t('aiSearchDialog.field') }}</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Vendor</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Category</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase"></th>
                   </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -119,6 +160,14 @@
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ dup.vendor || '-' }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ dup.category || '-' }}</td>
+                    <td class="px-4 py-3">
+                      <button
+                        @click="mergeVersionsTo(dup)"
+                        class="px-3 py-1.5 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium whitespace-nowrap"
+                      >
+                        {{ t('aiSearchDialog.addVersionToProduct') }}
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -285,6 +334,10 @@ const checkingDuplicates = ref(false)
 const duplicates = ref([])
 const showDuplicateWarning = ref(false)
 
+// 버전 병합
+const merging = ref(false)
+const mergeResult = ref(null)
+
 // 파일명으로 재검색용 - 첫 번째 버전의 파일명(확장자 제외)
 const filenameForSearch = computed(() => {
   if (!props.product?.versions?.length) return ''
@@ -384,6 +437,25 @@ const proceedWithAISearch = () => {
   showDuplicateWarning.value = false
   duplicates.value = []
   startAISearch()
+}
+
+const mergeVersionsTo = async (targetProduct) => {
+  if (!props.product?.id) return
+
+  merging.value = true
+  showDuplicateWarning.value = false
+
+  try {
+    const response = await productsApi.mergeVersionsTo(props.product.id, targetProduct.id)
+    mergeResult.value = response.data
+    emit('saved', { merged: true, targetProductId: targetProduct.id })
+  } catch (error) {
+    console.error('버전 병합 오류:', error)
+    errorMessage.value = error.response?.data?.detail || t('aiSearchDialog.mergeFailed')
+    showDuplicateWarning.value = true
+  } finally {
+    merging.value = false
+  }
 }
 
 const startAISearch = async (term = null) => {
@@ -591,6 +663,8 @@ const close = () => {
   customFilename.value = ''
   duplicates.value = []
   showDuplicateWarning.value = false
+  merging.value = false
+  mergeResult.value = null
   emit('close')
 }
 </script>
