@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.21] - 2026-02-24
+
+### Fixed
+- **401 리디렉션 루프 방지**: `frontend/src/api/client.js`의 401 핸들러가 공개 페이지(`/login`, `/register`, `/setup`)에 이미 있을 때 로그인 페이지로 리디렉션하지 않도록 수정 — 회원가입 페이지에서 발생하던 무한 리디렉션 루프 해소
+- **회원가입 상태 확인 오류 처리 개선**: `frontend/src/views/Register.vue`에 "등록 마감"과 구별되는 별도의 오류 상태(`statusCheckFailed`) 추가, 재시도 버튼 추가, 상태 확인 로직을 재사용 가능한 함수로 리팩터링
+- **등록 상태 API 캐싱 방지**: `backend/app/api/auth.py`의 registration-status 엔드포인트에 `Cache-Control: no-cache` 헤더 추가 — 브라우저 캐싱으로 인한 오래된 상태 반환 문제 해소
+
+### Added
+- **i18n 키 추가 (ko.js / en.js)**: `statusCheckFailedDesc` 및 `retry` 번역 키를 한국어/영어 로케일에 추가
+
+
 ## [1.3.20] - 2026-02-24
 
 ### Fixed

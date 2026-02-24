@@ -162,9 +162,13 @@ async def change_password(
 @router.get("/registration-status")
 async def check_registration_status():
     """
-    Check if registration is open
+    Check if registration is open (no authentication required)
     """
-    return {"registration_open": get_registration_status()}
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        content={"registration_open": get_registration_status()},
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
+    )
 
 
 @router.post("/register", response_model=UserResponse)
