@@ -1505,6 +1505,7 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     metadataNotFound: 'Metadata not found.',
     saveMetadataFailed: 'Failed to save metadata.',
     reSearchByFilename: 'Re-search by Filename',
+    search: 'Search',
   },
 
   // Manual Edit Dialog

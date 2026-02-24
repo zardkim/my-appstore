@@ -1459,6 +1459,7 @@ export default {
     metadataNotFound: '메타데이터를 찾을 수 없습니다.',
     saveMetadataFailed: '메타데이터 저장에 실패했습니다.',
     reSearchByFilename: '파일명으로 재검색',
+    search: '검색',
   },
 
   // 수동 수정 다이얼로그
