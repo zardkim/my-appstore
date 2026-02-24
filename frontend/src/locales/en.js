@@ -1506,6 +1506,10 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     saveMetadataFailed: 'Failed to save metadata.',
     reSearchByFilename: 'Re-search by Filename',
     search: 'Search',
+    checkingDuplicates: 'Checking for duplicate software...',
+    duplicateFound: 'Similar software found',
+    duplicateFoundDesc: 'The following items may be duplicates. Please verify before proceeding with AI search or cancel.',
+    proceedAISearch: 'Proceed with AI Search',
   },
 
   // Manual Edit Dialog
