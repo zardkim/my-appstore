@@ -7,7 +7,7 @@ from pathlib import Path
 import logging
 
 from app.database import engine, Base
-from app.api import auth, products, users, scan, download, scheduler, filesystem, favorites, scraps, config, metadata, unmatched, posts, invitations, images, filename_violations, version, comments, cache, attachments
+from app.api import auth, products, users, scan, download, scheduler, filesystem, favorites, scraps, config, metadata, unmatched, posts, invitations, images, filename_violations, version, comments, cache, attachments, share
 from app.core.scheduler import scan_scheduler
 from app.config import settings
 
@@ -122,6 +122,10 @@ tags_metadata = [
         "name": "Attachments",
         "description": "패치/크랙 파일 관리 (업로드, 다운로드, 삭제)",
     },
+    {
+        "name": "Share",
+        "description": "제품 공유링크 생성 및 관리 (1회성, 기간 제한, 랜덤 비밀번호)",
+    },
 ]
 
 app = FastAPI(
@@ -222,6 +226,7 @@ app.include_router(filename_violations.router, tags=["Filename Violations"])
 app.include_router(version.router, prefix="/api", tags=["Version"])
 app.include_router(cache.router, prefix="/api/cache", tags=["Cache"])
 app.include_router(attachments.router, tags=["Attachments"])
+app.include_router(share.router, prefix="/api/share", tags=["Share"])
 
 
 @app.on_event("startup")

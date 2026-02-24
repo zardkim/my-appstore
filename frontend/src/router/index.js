@@ -19,6 +19,13 @@ const routes = [
     component: () => import('../views/Register.vue')
   },
   {
+    // 공유 링크 접근 페이지 (비인증)
+    path: '/share/:token',
+    name: 'ShareView',
+    component: () => import('../views/ShareView.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
     path: '/',
     component: MainLayout,
     meta: { requiresAuth: true },
@@ -90,6 +97,11 @@ const routes = [
         name: 'FilenameViolations',
         component: () => import('../views/FilenameViolations.vue'),
         meta: { requiresAdmin: true }
+      },
+      {
+        path: 'my/share-links',
+        name: 'ShareManage',
+        component: () => import('../views/ShareManage.vue')
       }
     ]
   }

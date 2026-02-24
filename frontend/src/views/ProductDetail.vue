@@ -45,8 +45,23 @@
           </div>
         </div>
 
+        <!-- 공유 + 편집 버튼 영역 -->
+        <div class="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+
+          <!-- 공유 버튼 (모든 사용자) -->
+          <button
+            v-if="product && !isEditing"
+            @click="shareDialogOpen = true"
+            class="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+            :title="t('share.title')"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+          </button>
+
         <!-- 편집 모드 토글 버튼 -->
-        <div v-if="authStore.user?.role === 'admin'" class="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+        <template v-if="authStore.user?.role === 'admin'">
           <!-- 참조사이트 아이콘 (편집 모드일 때만 표시) -->
           <button
             v-if="isEditing"
@@ -92,6 +107,7 @@
             </svg>
             {{ t('productDetail.edit') }}
           </button>
+        </template>
         </div>
       </div>
     </div>
@@ -1354,6 +1370,10 @@
     </div>
 
   </div>
+
+  <!-- 공유 다이얼로그 -->
+  <ShareDialog v-model="shareDialogOpen" :product="product" />
+
 </template>
 
 <script setup>
@@ -1369,6 +1389,7 @@ import { useThemeStore } from '../store/theme'
 import { getDownloadUrl, getIconUrl, getBackendUrl } from '../utils/env'
 import ProductLogoSearchDialog from '../components/product/ProductLogoSearchDialog.vue'
 import ProductImageSearchDialog from '../components/product/ProductImageSearchDialog.vue'
+import ShareDialog from '../components/product/ShareDialog.vue'
 import { useDialog } from '../composables/useDialog'
 
 const route = useRoute()
@@ -1386,6 +1407,7 @@ const saving = ref(false)
 const showReferenceSites = ref(false)
 const showReferenceSitesDialog = ref(false)
 const logoSearchDialogOpen = ref(false)
+const shareDialogOpen = ref(false)
 const screenshotSearchDialogOpen = ref(false)
 const screenshotViewerOpen = ref(false)
 const currentScreenshot = ref('')

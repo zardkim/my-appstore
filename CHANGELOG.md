@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-02-25
+
+### Added
+- **제품 공유 기능**: 모든 사용자가 제품을 외부에 안전하게 공유할 수 있는 기능 추가
+  - 1회성 공유 링크 (사용 후 자동 만료)
+  - 최대 5일 기간 제한 (사용자 선택 1~5일)
+  - 8자리 랜덤 비밀번호 자동 생성 (대소문자+숫자 조합)
+  - 비밀번호 5회 실패 시 링크 자동 잠금 (보안)
+  - 사용자당 활성 링크 최대 20개 제한
+  - IP 로깅으로 감사 추적
+- **ShareLink DB 모델**: `share_links` 테이블 추가
+- **공유 API** (`/api/share`):
+  - `POST /create` - 공유링크 생성
+  - `GET /my-links` - 내 공유링크 목록
+  - `DELETE /{id}` - 공유링크 삭제
+  - `GET /view/{token}` - 공유 페이지 정보 (비인증)
+  - `POST /access/{token}` - 비밀번호 인증 및 제품 정보 반환 (비인증, 1회성)
+  - `GET /admin/all` - 전체 목록 (관리자)
+- **공유 버튼**: 제품 상세 페이지 헤더에 공유 버튼 추가 (모든 사용자)
+- **ShareDialog.vue**: 공유링크 생성 다이얼로그 (기간 선택, 메모, 생성 결과 표시)
+- **ShareView.vue**: 공유 접근 페이지 (`/share/:token`, 비인증)
+- **ShareManage.vue**: 공유링크 관리 페이지 (`/my/share-links`)
+- **사이드바/모바일 메뉴**: "내 공유링크" 메뉴 항목 추가
+- **번역 키**: `share.*` 키를 ko.js/en.js에 추가
+
 ## [1.3.21] - 2026-02-24
 
 ### Fixed
