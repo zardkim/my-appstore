@@ -277,7 +277,7 @@ const initEditor = () => {
       formData.append('file', blobInfo.blob(), blobInfo.filename())
 
       try {
-        const token = localStorage.getItem('access_token')
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
         const response = await fetch(`${ENV.BACKEND_URL}/api/images/upload-tinymce`, {
           method: 'POST',
           headers: {
