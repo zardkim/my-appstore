@@ -5,15 +5,15 @@
  * Do not edit manually.
  */
 
-export const version = "1.6.1"
+export const version = "1.3.22"
 export const versionInfo = {
   major: 1,
-  minor: 6,
-  patch: 1
+  minor: 3,
+  patch: 22
 }
 
 export const buildInfo = {
-  buildDate: "2026-02-05",
+  buildDate: "2026-02-24",
   gitCommit: ""  // Set during build if needed
 }
 
