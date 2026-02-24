@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.20] - 2026-02-24
+
+### Fixed
+- **제품 버전 다운로드 안 되는 문제 수정**: `download()` 함수가 `localStorage`만 읽어 "로그인 상태 유지" 미선택 시 토큰이 null이 되어 401 오류 발생. `sessionStorage` fallback 추가
+- **TipsWrite TinyMCE 이미지 업로드 동일 오류 수정**: 에디터 내 이미지 업로드 핸들러도 같은 `localStorage`-only 문제. `sessionStorage` fallback 추가
+
 ## [1.3.19] - 2026-02-24
 
 ### Fixed

@@ -1570,7 +1570,7 @@ const handleImageError = (event) => {
 }
 
 const download = (versionId) => {
-  const token = localStorage.getItem('access_token')
+  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
   window.open(getDownloadUrl(versionId, token), '_blank')
 }
 
