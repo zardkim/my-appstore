@@ -78,8 +78,71 @@
             </div>
           </div>
 
+          <!-- 중복 검사 중 -->
+          <div v-if="checkingDuplicates" class="flex flex-col items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500 dark:border-yellow-400 mb-4"></div>
+            <p class="text-gray-600 dark:text-gray-400">{{ t('aiSearchDialog.checkingDuplicates') }}</p>
+          </div>
+
+          <!-- 중복 소프트웨어 발견 -->
+          <div v-else-if="showDuplicateWarning && duplicates.length > 0" class="space-y-4">
+            <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-600 rounded-lg">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                  <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300">{{ t('aiSearchDialog.duplicateFound') }}</p>
+                  <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-1">{{ t('aiSearchDialog.duplicateFoundDesc') }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 중복 목록 -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">#</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">{{ t('aiSearchDialog.field') }}</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Vendor</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Category</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tr v-for="(dup, idx) in duplicates" :key="dup.id">
+                    <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{{ idx + 1 }}</td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <a :href="`/product/${dup.id}`" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
+                        {{ dup.title }}
+                      </a>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ dup.vendor || '-' }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ dup.category || '-' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 진행 / 취소 버튼 -->
+            <div class="flex justify-end gap-3 pt-2">
+              <button
+                @click="close"
+                class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
+              >
+                {{ t('aiSearchDialog.cancel') }}
+              </button>
+              <button
+                @click="proceedWithAISearch"
+                class="px-4 py-2 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium"
+              >
+                {{ t('aiSearchDialog.proceedAISearch') }}
+              </button>
+            </div>
+          </div>
+
           <!-- Loading -->
-          <div v-if="loading" class="flex flex-col items-center justify-center py-12">
+          <div v-else-if="loading" class="flex flex-col items-center justify-center py-12">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
             <p class="text-gray-600 dark:text-gray-400">{{ t('aiSearchDialog.generating') }}</p>
             <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">{{ t('aiSearchDialog.maxTime') }}</p>
@@ -217,6 +280,11 @@ const activeSearchTerm = ref('')
 const showFilenameInput = ref(false)
 const customFilename = ref('')
 
+// 중복 검사
+const checkingDuplicates = ref(false)
+const duplicates = ref([])
+const showDuplicateWarning = ref(false)
+
 // 파일명으로 재검색용 - 첫 번째 버전의 파일명(확장자 제외)
 const filenameForSearch = computed(() => {
   if (!props.product?.versions?.length) return ''
@@ -251,10 +319,10 @@ onMounted(async () => {
   }
 })
 
-// Auto-start AI search when dialog opens
+// Dialog 열릴 때 중복 검사 먼저 실행
 watch(() => props.isOpen, (isOpen) => {
   if (isOpen && props.product?.title && !metadata.value) {
-    startAISearch()
+    checkDuplicates()
   }
 })
 
@@ -282,6 +350,41 @@ const filteredMetadata = computed(() => {
 
   return filtered
 })
+
+const checkDuplicates = async () => {
+  if (!props.product?.title) {
+    startAISearch()
+    return
+  }
+
+  checkingDuplicates.value = true
+  duplicates.value = []
+  showDuplicateWarning.value = false
+
+  try {
+    const response = await productsApi.getAll({ search: props.product.title, limit: 20 })
+    const found = (response.data.products || []).filter(p => p.id !== props.product.id)
+    duplicates.value = found
+
+    if (found.length > 0) {
+      showDuplicateWarning.value = true
+    } else {
+      startAISearch()
+    }
+  } catch (error) {
+    console.error('중복 검사 오류:', error)
+    // 검사 실패 시 AI 검색 진행
+    startAISearch()
+  } finally {
+    checkingDuplicates.value = false
+  }
+}
+
+const proceedWithAISearch = () => {
+  showDuplicateWarning.value = false
+  duplicates.value = []
+  startAISearch()
+}
 
 const startAISearch = async (term = null) => {
   const queryTerm = term || props.product?.title
@@ -486,6 +589,8 @@ const close = () => {
   activeSearchTerm.value = ''
   showFilenameInput.value = false
   customFilename.value = ''
+  duplicates.value = []
+  showDuplicateWarning.value = false
   emit('close')
 }
 </script>

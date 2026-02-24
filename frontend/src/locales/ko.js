@@ -1460,6 +1460,10 @@ export default {
     saveMetadataFailed: '메타데이터 저장에 실패했습니다.',
     reSearchByFilename: '파일명으로 재검색',
     search: '검색',
+    checkingDuplicates: '중복 소프트웨어 검사 중...',
+    duplicateFound: '유사한 소프트웨어가 발견되었습니다',
+    duplicateFoundDesc: '아래 항목과 중복될 수 있습니다. 중복 여부를 확인 후 계속 AI 검색을 진행하거나 취소하세요.',
+    proceedAISearch: '계속 AI 검색',
   },
 
   // 수동 수정 다이얼로그
