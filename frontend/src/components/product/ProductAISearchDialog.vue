@@ -38,8 +38,19 @@
           <!-- Software Name -->
           <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
             <p class="text-sm text-blue-900 dark:text-blue-300">
-              <strong>{{ t('aiSearchDialog.searchTarget') }}:</strong> {{ product?.title || t('aiSearchDialog.unknown') }}
+              <strong>{{ t('aiSearchDialog.searchTarget') }}:</strong> {{ activeSearchTerm || product?.title || t('aiSearchDialog.unknown') }}
             </p>
+            <!-- 파일명으로 재검색 버튼 (검색 완료 후 파일명이 있을 때만 표시) -->
+            <div v-if="!loading && filenameForSearch && (metadata || errorMessage)" class="mt-2 flex items-center gap-2 flex-wrap">
+              <span class="text-xs text-blue-600 dark:text-blue-400">{{ t('aiSearchDialog.reSearchByFilename') }}:</span>
+              <button
+                @click="startAISearch(filenameForSearch)"
+                class="px-2.5 py-1 text-xs bg-white dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors font-mono truncate max-w-xs"
+                :title="filenameForSearch"
+              >
+                🔄 {{ filenameForSearch }}
+              </button>
+            </div>
           </div>
 
           <!-- Loading -->
@@ -177,6 +188,14 @@ const loading = ref(false)
 const saving = ref(false)
 const errorMessage = ref('')
 const metadata = ref(null)
+const activeSearchTerm = ref('')
+
+// 파일명으로 재검색용 - 첫 번째 버전의 파일명(확장자 제외)
+const filenameForSearch = computed(() => {
+  if (!props.product?.versions?.length) return ''
+  const fileName = props.product.versions[0]?.file_name || ''
+  return fileName.replace(/\.[^/.]+$/, '')
+})
 
 // AI 설정
 const aiProvider = ref('gemini')
@@ -237,12 +256,14 @@ const filteredMetadata = computed(() => {
   return filtered
 })
 
-const startAISearch = async () => {
-  if (!props.product?.title) {
+const startAISearch = async (term = null) => {
+  const queryTerm = term || props.product?.title
+  if (!queryTerm) {
     errorMessage.value = t('aiSearchDialog.noProductName')
     return
   }
 
+  activeSearchTerm.value = queryTerm
   loading.value = true
   errorMessage.value = ''
   metadata.value = null
@@ -265,7 +286,7 @@ const startAISearch = async () => {
 
     // 메타데이터 생성 요청 (Settings와 동일한 API 사용)
     const response = await metadataApi.testGeneration(
-      props.product.title.trim(),
+      queryTerm.trim(),
       {
         aiProvider: aiProvider.value,
         aiModel: aiModel.value,
@@ -423,6 +444,7 @@ const handleScreenshotsUpdate = (screenshots) => {
 const close = () => {
   metadata.value = null
   errorMessage.value = ''
+  activeSearchTerm.value = ''
   emit('close')
 }
 </script>

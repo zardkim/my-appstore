@@ -1458,6 +1458,7 @@ export default {
     noProductName: '제품 이름이 없습니다.',
     metadataNotFound: '메타데이터를 찾을 수 없습니다.',
     saveMetadataFailed: '메타데이터 저장에 실패했습니다.',
+    reSearchByFilename: '파일명으로 재검색',
   },
 
   // 수동 수정 다이얼로그
@@ -1712,7 +1713,7 @@ export default {
     usernamePlaceholder: '아이디를 입력하세요',
     usernameHint: '3-20자, 영문/숫자/밑줄(_)만 사용 가능',
     email: '이메일',
-    emailPlaceholder: 'example@email.com',
+    emailPlaceholder: "example{'@'}email.com",
     password: '비밀번호',
     passwordPlaceholder: '비밀번호를 입력하세요',
     passwordHint: '최소 8자 이상',
