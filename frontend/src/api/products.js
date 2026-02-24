@@ -55,5 +55,9 @@ export const productsApi = {
 
   async getAdjacent(id) {
     return apiClient.get(`/products/${id}/adjacent`)
+  },
+
+  async mergeVersionsTo(sourceId, targetId) {
+    return apiClient.post(`/products/${sourceId}/merge-to/${targetId}`)
   }
 }

@@ -512,6 +512,68 @@ async def regenerate_product_metadata(
         )
 
 
+@router.post("/{source_product_id}/merge-to/{target_product_id}")
+async def merge_product_versions(
+    source_product_id: int,
+    target_product_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_admin_user)
+):
+    """
+    소스 제품의 모든 버전을 타겟 제품으로 이동 후 소스 제품 삭제 (Admin only)
+
+    중복 검사 시 신규 파일이 기존 제품의 새 버전임이 확인될 때 사용합니다.
+    """
+    if source_product_id == target_product_id:
+        raise HTTPException(status_code=400, detail="소스와 타겟 제품이 동일합니다.")
+
+    source = db.query(Product).filter(Product.id == source_product_id).first()
+    if not source:
+        raise HTTPException(status_code=404, detail="소스 제품을 찾을 수 없습니다.")
+
+    target = db.query(Product).filter(Product.id == target_product_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="타겟 제품을 찾을 수 없습니다.")
+
+    # 소스의 모든 버전을 타겟으로 이동
+    versions = db.query(Version).filter(Version.product_id == source_product_id).all()
+    moved_count = len(versions)
+    moved_file_names = [v.file_name for v in versions]
+
+    for version in versions:
+        version.product_id = target_product_id
+
+    # FilenameViolation의 product_id를 타겟으로 재지정 (소스 삭제 전)
+    db.query(FilenameViolation).filter(
+        FilenameViolation.product_id == source_product_id
+    ).update({"product_id": target_product_id}, synchronize_session=False)
+
+    # 소스 제품의 Favorites 삭제 후 소스 제품 삭제
+    db.query(Favorite).filter(Favorite.product_id == source_product_id).delete(synchronize_session=False)
+    db.delete(source)
+    db.commit()
+    db.refresh(target)
+
+    invalidate_cache([
+        "products_list:*",
+        "products_recent:*",
+        "products_by_category:*",
+        "product_detail:*",
+        "search_suggestions:*",
+        "stats_overview:*",
+        "stats_categories:*"
+    ])
+
+    return {
+        "success": True,
+        "message": f"'{target.title}'에 {moved_count}개의 버전이 추가되었습니다.",
+        "moved_versions": moved_count,
+        "moved_file_names": moved_file_names,
+        "target_product_id": target.id,
+        "target_product_title": target.title
+    }
+
+
 @router.post("/cleanup-deleted")
 async def cleanup_deleted_files(
     db: Session = Depends(get_db),
