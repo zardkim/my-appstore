@@ -54,7 +54,7 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('access_token')
       sessionStorage.removeItem('access_token')
       // Don't redirect if already on public pages (prevents redirect loop on /register, /setup)
-      const publicPaths = ['/login', '/register', '/setup']
+      const publicPaths = ['/login', '/register', '/setup', '/share/']
       const isPublicPage = publicPaths.some(p => window.location.pathname.startsWith(p))
       if (!isPublicPage) {
         window.location.href = '/login'
