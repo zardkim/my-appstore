@@ -1724,6 +1724,8 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     login: 'Login',
     // Error messages
     statusCheckFailed: 'Failed to check registration status.',
+    statusCheckFailedDesc: 'Could not connect to server. Please try again later.',
+    retry: 'Retry',
     invalidUsername: 'Username must be 3-20 characters, letters, numbers and underscore only.',
     invalidEmail: 'Please enter a valid email address.',
     passwordTooShort: 'Password must be at least 8 characters.',

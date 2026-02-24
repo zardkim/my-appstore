@@ -29,6 +29,29 @@
         <p class="text-gray-600 dark:text-gray-400">{{ t('register.checkingStatus') }}</p>
       </div>
 
+      <!-- Status Check Failed -->
+      <div v-else-if="statusCheckFailed" class="text-center py-8">
+        <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ t('register.statusCheckFailed') }}</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">{{ t('register.statusCheckFailedDesc') }}</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button
+            @click="retryStatusCheck"
+            class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-medium"
+          >
+            {{ t('register.retry') }}
+          </button>
+          <router-link
+            to="/login"
+            class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
+          >
+            {{ t('register.goToLogin') }}
+          </router-link>
+        </div>
+      </div>
+
       <!-- Registration Closed -->
       <div v-else-if="!registrationOpen" class="text-center py-8">
         <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,6 +157,7 @@ const { alert } = useDialog()
 
 const registrationOpen = ref(false)
 const loading = ref(true)
+const statusCheckFailed = ref(false)
 const registering = ref(false)
 const error = ref('')
 
@@ -142,17 +166,27 @@ const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
 
-onMounted(async () => {
-  // Check if registration is open
+const checkRegistrationStatus = async () => {
+  loading.value = true
+  statusCheckFailed.value = false
+  error.value = ''
   try {
     const response = await authApi.getRegistrationStatus()
     registrationOpen.value = response.data.registration_open
   } catch (err) {
     console.error('Failed to check registration status:', err)
-    error.value = t('register.statusCheckFailed')
+    statusCheckFailed.value = true
   } finally {
     loading.value = false
   }
+}
+
+const retryStatusCheck = () => {
+  checkRegistrationStatus()
+}
+
+onMounted(() => {
+  checkRegistrationStatus()
 })
 
 const register = async () => {

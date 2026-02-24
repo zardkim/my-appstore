@@ -53,7 +53,12 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('access_token')
       sessionStorage.removeItem('access_token')
-      window.location.href = '/login'
+      // Don't redirect if already on public pages (prevents redirect loop on /register, /setup)
+      const publicPaths = ['/login', '/register', '/setup']
+      const isPublicPage = publicPaths.some(p => window.location.pathname.startsWith(p))
+      if (!isPublicPage) {
+        window.location.href = '/login'
+      }
     }
 
     // Suppress console logging for HTML responses (reverse proxy misconfiguration)

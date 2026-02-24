@@ -1724,6 +1724,8 @@ export default {
     login: '로그인',
     // 에러 메시지
     statusCheckFailed: '회원가입 상태 확인에 실패했습니다.',
+    statusCheckFailedDesc: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.',
+    retry: '다시 시도',
     invalidUsername: '아이디는 3-20자, 영문/숫자/밑줄(_)만 사용 가능합니다.',
     invalidEmail: '올바른 이메일 형식을 입력해주세요.',
     passwordTooShort: '비밀번호는 최소 8자 이상이어야 합니다.',
