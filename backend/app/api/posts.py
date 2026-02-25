@@ -26,7 +26,7 @@ def get_posts(
     is_notice: Optional[bool] = None,
     search: Optional[str] = None,
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, le=100),
+    limit: int = Query(50, le=5000),
     db: Session = Depends(get_db)
 ):
     """게시글 목록 조회"""
