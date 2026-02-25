@@ -30,7 +30,7 @@
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <div class="flex-1 overflow-y-auto px-3 sm:px-6 lg:px-8 pt-4 pb-20 sm:py-6">
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center h-64">
         <div class="text-center">

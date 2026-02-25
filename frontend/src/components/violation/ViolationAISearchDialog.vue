@@ -32,6 +32,25 @@
         </div>
       </div>
 
+      <!-- 모바일 전용 액션 버튼 바 (헤더 바로 아래 - 항상 보임) -->
+      <div class="sm:hidden flex-shrink-0 bg-gray-50 dark:bg-gray-700 px-4 py-2.5 border-b border-gray-200 dark:border-gray-600 flex items-center gap-2">
+        <button
+          @click="close"
+          class="px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm whitespace-nowrap"
+        >
+          {{ t('violationAISearchDialog.cancel') }}
+        </button>
+        <div class="flex-1"></div>
+        <button
+          v-if="metadata"
+          @click="saveMetadata"
+          :disabled="saving"
+          class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        >
+          {{ saving ? t('violationAISearchDialog.saving') : t('violationAISearchDialog.createAndMatch') }}
+        </button>
+      </div>
+
       <!-- Body (스크롤 영역) -->
       <div class="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6">
           <!-- Violation Info -->
@@ -208,7 +227,8 @@
               </table>
             </div>
 
-            <!-- Image Manager -->
+            <!-- Image Manager (사용 안 함) -->
+            <!--
             <ImageManager
               v-if="metadata"
               :product-id="999999"
@@ -217,6 +237,7 @@
               @update:logo="handleLogoUpdate"
               @update:screenshots="handleScreenshotsUpdate"
             />
+            -->
           </div>
 
           <!-- Initial state -->
@@ -234,8 +255,8 @@
           </div>
         </div>
 
-      <!-- Footer (항상 하단 고정) -->
-      <div class="flex-shrink-0 bg-gray-50 dark:bg-gray-700 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-600 flex items-center gap-2 sm:gap-3">
+      <!-- Footer (데스크톱 전용 - 모바일은 상단 버튼 바 사용) -->
+      <div class="hidden sm:flex flex-shrink-0 bg-gray-50 dark:bg-gray-700 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-600 items-center gap-2 sm:gap-3">
         <button
           @click="close"
           class="px-3 sm:px-4 py-2 sm:py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm whitespace-nowrap"
@@ -264,7 +285,7 @@ import { metadataApi } from '../../api/metadata'
 import { filenameViolationsApi } from '../../api/filenameViolations'
 import { configApi } from '../../api/config'
 import { scanApi } from '../../api/scan'
-import ImageManager from '../ImageManager.vue'
+// import ImageManager from '../ImageManager.vue' // 사용 안 함
 import { useDialog } from '../../composables/useDialog'
 
 const router = useRouter()

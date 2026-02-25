@@ -12,9 +12,9 @@
       ></div>
 
       <!-- Modal content -->
-      <div class="inline-block w-full max-w-4xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-2xl rounded-2xl">
+      <div class="w-full max-w-4xl my-2 sm:my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-2xl rounded-2xl flex flex-col max-h-[calc(100vh-8rem)] sm:max-h-[calc(100vh-4rem)]">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+        <div class="flex-shrink-0 bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
           <div class="flex items-center justify-between">
             <h3 class="text-xl font-bold text-white flex items-center gap-2">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,8 +33,27 @@
           </div>
         </div>
 
+        <!-- 모바일 전용 액션 버튼 바 (헤더 바로 아래 - 항상 보임) -->
+        <div class="sm:hidden flex-shrink-0 bg-gray-50 dark:bg-gray-700 px-4 py-2.5 border-b border-gray-200 dark:border-gray-600 flex items-center gap-2">
+          <button
+            @click="close"
+            class="px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm whitespace-nowrap"
+          >
+            {{ t('aiSearchDialog.cancel') }}
+          </button>
+          <div class="flex-1"></div>
+          <button
+            v-if="metadata"
+            @click="saveMetadata"
+            :disabled="saving"
+            class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            {{ saving ? t('aiSearchDialog.saving') : t('aiSearchDialog.save') }}
+          </button>
+        </div>
+
         <!-- Body -->
-        <div class="px-6 py-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+        <div class="px-6 py-6 flex-1 min-h-0 overflow-y-auto">
           <!-- Software Name -->
           <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
             <p class="text-sm text-blue-900 dark:text-blue-300">
@@ -276,8 +295,8 @@
           </div>
         </div>
 
-        <!-- Footer -->
-        <div class="sticky bottom-0 bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600 flex justify-between gap-3">
+        <!-- Footer (데스크톱 전용 - 모바일은 상단 버튼 바 사용) -->
+        <div class="hidden sm:flex flex-shrink-0 bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600 justify-between gap-3">
           <button
             @click="close"
             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
