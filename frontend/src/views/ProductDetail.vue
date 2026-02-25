@@ -2169,7 +2169,6 @@ const addScreenshotBySlotUrl = async (slotIndex) => {
       product.value = updatedProduct.data
       screenshotSlotUrl.value = ''
       activeUrlSlot.value = null
-      await alert.success(t('product.screenshots.urlAddSuccess') || '스크린샷이 추가되었습니다.')
     } else {
       await alert.error(response.data.error || t('product.screenshots.urlAddFailed') || '스크린샷 추가에 실패했습니다.')
     }

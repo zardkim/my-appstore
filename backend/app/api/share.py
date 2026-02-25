@@ -96,9 +96,15 @@ async def create_share_link(
     db.commit()
     db.refresh(link)
 
-    # 호스트 URL 구성
-    scheme = request.url.scheme
-    host = request.headers.get("x-forwarded-host") or request.url.netloc
+    # 호스트 URL 구성 (역방향 프록시 헤더 우선 사용)
+    x_forwarded_proto = request.headers.get("x-forwarded-proto", "")
+    scheme = x_forwarded_proto.split(",")[0].strip() if x_forwarded_proto else request.url.scheme
+
+    x_forwarded_host = request.headers.get("x-forwarded-host", "")
+    host = (x_forwarded_host.split(",")[0].strip()
+            if x_forwarded_host
+            else request.headers.get("host") or request.url.netloc)
+
     share_url = f"{scheme}://{host}/share/{token}"
 
     logger.info(f"Share link created: token={token[:8]}... product_id={product_id} by user={current_user.username}")

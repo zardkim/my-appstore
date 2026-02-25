@@ -873,14 +873,6 @@ const downloadSelectedImages = async () => {
         }))
         emit('update:screenshots', screenshots)
 
-        let message = t('imageManager.success.screenshotsSaved', { count: finalUrls.length })
-        if (newUrls.length < existingUrls.length && existingUrls.length <= 4) {
-          message += ` (${t('imageManager.success.partialReplace', { replaced: newUrls.length, kept: finalUrls.length })})`
-        } else {
-          message += ` (${t('imageManager.success.fullReplace')})`
-        }
-        await alert.success(message)
-
         // 검색 결과 초기화
         searchResults.value = []
         selectedImages.value = []
@@ -939,7 +931,6 @@ const handleScreenshotUpload = async (event) => {
   try {
     const response = await imagesApi.uploadScreenshots(props.productId, files)
     if (response.data.success) {
-      uploadSuccess.value = t('imageManager.success.screenshotsUploaded', { count: files.length })
       const screenshots = (response.data.urls || []).map(url => ({ type: 'local', url }))
       emit('update:screenshots', screenshots)
       screenshotFileInput.value.value = ''
