@@ -223,7 +223,10 @@ const createLink = async () => {
   errorMsg.value = ''
   try {
     const res = await shareApi.create(props.product.id, selectedDays.value, noteText.value)
-    createdData.value = res.data
+    const data = res.data
+    // 브라우저의 현재 origin으로 URL 재구성 (scheme, host, port 모두 정확)
+    data.share_url = window.location.origin + '/share/' + data.token
+    createdData.value = data
     created.value = true
   } catch (err) {
     errorMsg.value = err.response?.data?.detail || t('common.error')

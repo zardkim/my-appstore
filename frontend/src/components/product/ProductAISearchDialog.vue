@@ -248,7 +248,8 @@
               </table>
             </div>
 
-            <!-- Image Manager -->
+            <!-- Image Manager (사용 안 함) -->
+            <!--
             <ImageManager
               v-if="metadata"
               :product-id="product?.id || 999999"
@@ -257,6 +258,7 @@
               @update:logo="handleLogoUpdate"
               @update:screenshots="handleScreenshotsUpdate"
             />
+            -->
           </div>
 
           <!-- Initial state -->
@@ -302,7 +304,7 @@ import { useI18n } from 'vue-i18n'
 import { metadataApi } from '../../api/metadata'
 import { productsApi } from '../../api/products'
 import { configApi } from '../../api/config'
-import ImageManager from '../ImageManager.vue'
+// import ImageManager from '../ImageManager.vue' // 사용 안 함
 import { useDialog } from '../../composables/useDialog'
 
 const { t } = useI18n({ useScope: 'global' })
