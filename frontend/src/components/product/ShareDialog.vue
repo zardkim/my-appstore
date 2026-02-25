@@ -34,59 +34,41 @@
             <span class="font-medium">{{ t('share.createdSuccess') }}</span>
           </div>
 
-          <!-- 공유 링크 -->
-          <div>
-            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ t('share.shareLink') }}</label>
-            <div class="flex gap-2">
-              <input
-                :value="createdData.share_url"
-                readonly
-                class="flex-1 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-300 truncate"
-              />
-              <button
-                @click="copyText(createdData.share_url, 'url')"
-                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center gap-1 transition-colors whitespace-nowrap"
-              >
-                <svg v-if="copiedUrl" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                {{ copiedUrl ? t('share.copied') : t('share.copyLink') }}
-              </button>
+          <!-- 공유 정보 박스 (링크 + 비밀번호 + 만료) -->
+          <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-4 space-y-3">
+            <!-- 링크 -->
+            <div class="flex items-start gap-2">
+              <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 w-16 flex-shrink-0 pt-0.5">🔗 링크</span>
+              <span class="text-sm text-gray-700 dark:text-gray-300 break-all leading-relaxed">{{ createdData.share_url }}</span>
+            </div>
+            <!-- 비밀번호 -->
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 w-16 flex-shrink-0">🔑 비밀번호</span>
+              <span class="font-mono text-lg font-bold text-blue-600 dark:text-blue-400 tracking-widest">{{ createdData.password }}</span>
+            </div>
+            <!-- 만료 -->
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 w-16 flex-shrink-0">⏰ 만료</span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">{{ formatDate(createdData.expires_at) }}</span>
             </div>
           </div>
 
-          <!-- 비밀번호 -->
-          <div>
-            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ t('share.password') }}</label>
-            <div class="flex gap-2">
-              <div class="flex-1 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 font-mono text-base font-bold text-blue-600 dark:text-blue-400 tracking-widest">
-                {{ createdData.password }}
-              </div>
-              <button
-                @click="copyText(createdData.password, 'password')"
-                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center gap-1 transition-colors"
-              >
-                <svg v-if="copiedPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                {{ copiedPassword ? t('share.copied') : t('share.copyPassword') }}
-              </button>
-            </div>
-          </div>
-
-          <!-- 만료 정보 -->
-          <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <!-- 한번에 복사 버튼 -->
+          <button
+            @click="copyAll"
+            class="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+            :class="copied
+              ? 'bg-green-500 text-white'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'"
+          >
+            <svg v-if="copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            {{ t('share.expiresAt') }}: {{ formatDate(createdData.expires_at) }}
-          </div>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            {{ copied ? t('share.copied') : t('share.copyAll') }}
+          </button>
 
           <!-- 경고 메시지 -->
           <div class="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
@@ -107,7 +89,7 @@
             </router-link>
             <button
               @click="close"
-              class="flex-1 px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              class="flex-1 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
             >
               {{ t('common.close') }}
             </button>
@@ -221,20 +203,17 @@ const creating = ref(false)
 const created = ref(false)
 const createdData = ref(null)
 const errorMsg = ref('')
-const copiedUrl = ref(false)
-const copiedPassword = ref(false)
+const copied = ref(false)
 
 const close = () => {
   emit('update:modelValue', false)
-  // 닫을 때 상태 초기화
   setTimeout(() => {
     created.value = false
     createdData.value = null
     selectedDays.value = 1
     noteText.value = ''
     errorMsg.value = ''
-    copiedUrl.value = false
-    copiedPassword.value = false
+    copied.value = false
   }, 300)
 }
 
@@ -253,18 +232,22 @@ const createLink = async () => {
   }
 }
 
-const copyText = async (text, type) => {
+const copyAll = async () => {
+  const d = createdData.value
+  const expireText = formatDate(d.expires_at)
+  const text = [
+    `[${props.product?.title}] ${t('share.copyTemplate.title')}`,
+    '',
+    `🔗 ${t('share.copyTemplate.link')}: ${d.share_url}`,
+    `🔑 ${t('share.copyTemplate.password')}: ${d.password}`,
+    `⏰ ${t('share.copyTemplate.expires')}: ${expireText}`,
+    '',
+    `※ ${t('share.copyTemplate.notice')}`,
+  ].join('\n')
+
   try {
     await navigator.clipboard.writeText(text)
-    if (type === 'url') {
-      copiedUrl.value = true
-      setTimeout(() => { copiedUrl.value = false }, 2000)
-    } else {
-      copiedPassword.value = true
-      setTimeout(() => { copiedPassword.value = false }, 2000)
-    }
   } catch {
-    // clipboard API 실패 시 fallback
     const el = document.createElement('textarea')
     el.value = text
     document.body.appendChild(el)
@@ -272,6 +255,8 @@ const copyText = async (text, type) => {
     document.execCommand('copy')
     document.body.removeChild(el)
   }
+  copied.value = true
+  setTimeout(() => { copied.value = false }, 2500)
 }
 
 const formatDate = (isoString) => {
