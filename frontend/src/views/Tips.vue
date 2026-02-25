@@ -422,8 +422,7 @@ const loadPosts = async () => {
   try {
     loading.value = true
     const response = await postsApi.getPosts({
-      category: selectedCategory.value !== 'all' ? selectedCategory.value : undefined,
-      search: searchQuery.value || undefined
+      limit: 5000,
     })
     posts.value = response.data
   } catch (error) {
