@@ -63,11 +63,7 @@ echo "version.py 업데이트 완료"
 # frontend/package.json 업데이트
 sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" "$PACKAGE_JSON"
 echo "package.json 업데이트 완료"
-
-# docker-compose.prod.yml 업데이트 (버전 태그 교체)
-sed -i "s|zardkim/myappstore-backend:[0-9.]*|zardkim/myappstore-backend:$NEW_VERSION|g" "$COMPOSE_FILE"
-sed -i "s|zardkim/myappstore-frontend:[0-9.]*|zardkim/myappstore-frontend:$NEW_VERSION|g" "$COMPOSE_FILE"
-echo "docker-compose.prod.yml 업데이트 완료"
+# (docker-compose.prod.yml은 :latest 태그 고정 — 시놀로지 업데이트 감지용)
 
 # Git 커밋 해시 가져오기 (커밋 전이므로 현재 HEAD)
 GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "")
@@ -101,15 +97,12 @@ if [ "$DO_COMMIT" = true ]; then
   echo ""
   echo "=== Git 커밋 중... ==="
   cd "$SCRIPT_DIR"
-  git add \
-    backend/app/version.py \
-    frontend/package.json \
-    docker-compose.prod.yml
+  git add -A
   git commit -m "release: v${NEW_VERSION}
 
 - Version bump to ${NEW_VERSION}
 - Build date: ${BUILD_DATE}
-- Docker images: backend:${NEW_VERSION}, frontend:${NEW_VERSION}"
+- Docker images: backend:${NEW_VERSION}, frontend:${NEW_VERSION} (latest 태그 동시 푸시)"
   echo "Git 커밋 완료"
 fi
 
@@ -134,5 +127,7 @@ if [ "$DO_PUSH" = true ]; then
   echo "Docker Hub에 푸시됨 (latest + $NEW_VERSION 태그)"
 fi
 echo ""
-echo "시놀로지 Container Manager에서 docker-compose.prod.yml을 재적용하면"
-echo "이미지 버전 변경을 감지하여 업데이트가 표시됩니다."
+echo "시놀로지 Container Manager:"
+echo "  docker-compose.prod.yml은 :latest 태그를 사용합니다."
+echo "  Container Manager → 프로젝트 → 업데이트 버튼 클릭 시"
+echo "  로컬 :latest digest vs Docker Hub :latest digest 비교로 업데이트 감지됩니다."
