@@ -41,8 +41,17 @@
           {{ t('violationAISearchDialog.cancel') }}
         </button>
         <div class="flex-1"></div>
+        <!-- 중복 발견 시: AI 검색으로 새 제품 생성 버튼 -->
         <button
-          v-if="metadata"
+          v-if="showDuplicateWarning && duplicates.length > 0"
+          @click="proceedWithAISearch"
+          class="px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg transition-colors font-medium text-xs"
+        >
+          새 제품 생성
+        </button>
+        <!-- 메타데이터 완료 시: 제품 등록 버튼 -->
+        <button
+          v-else-if="metadata"
           @click="saveMetadata"
           :disabled="saving"
           class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
@@ -66,8 +75,66 @@
             </p>
           </div>
 
+          <!-- 중복 검사 중 -->
+          <div v-if="checkingDuplicates" class="flex flex-col items-center justify-center py-8 sm:py-12">
+            <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-yellow-500 dark:border-yellow-400 mb-4"></div>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">중복 제품 확인 중...</p>
+          </div>
+
+          <!-- 중복 발견 -->
+          <div v-else-if="showDuplicateWarning && duplicates.length > 0" class="space-y-4">
+            <div class="p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-600 rounded-lg">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                  <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300">동일한 제품이 이미 등록되어 있습니다</p>
+                  <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-1">버전을 기존 제품에 추가하거나, AI 검색으로 새 제품을 생성할 수 있습니다.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 중복 목록 -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              <div
+                v-for="(dup, idx) in duplicates"
+                :key="dup.id"
+                class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0 bg-white dark:bg-gray-800"
+              >
+                <div class="flex-1 min-w-0 mr-3">
+                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ dup.title }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ dup.vendor || '-' }} · {{ dup.category || '-' }}</p>
+                </div>
+                <button
+                  @click="addVersionToProduct(dup)"
+                  :disabled="addingVersion"
+                  class="flex-shrink-0 px-3 py-1.5 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 whitespace-nowrap"
+                >
+                  {{ addingVersion ? '추가 중...' : '버전 추가' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- 데스크톱 버튼 -->
+            <div class="hidden sm:flex justify-end gap-3 pt-2">
+              <button
+                @click="close"
+                class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
+              >
+                {{ t('violationAISearchDialog.cancel') }}
+              </button>
+              <button
+                @click="proceedWithAISearch"
+                class="px-4 py-2 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors font-medium"
+              >
+                AI 검색으로 새 제품 생성
+              </button>
+            </div>
+          </div>
+
           <!-- Loading -->
-          <div v-if="loading" class="flex flex-col items-center justify-center py-8 sm:py-12">
+          <div v-else-if="loading" class="flex flex-col items-center justify-center py-8 sm:py-12">
             <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
             <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">{{ t('violationAISearchDialog.generating') }}</p>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-500 mt-2">{{ t('violationAISearchDialog.maxTime') }}</p>
@@ -283,6 +350,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { metadataApi } from '../../api/metadata'
 import { filenameViolationsApi } from '../../api/filenameViolations'
+import { productsApi } from '../../api/products'
 import { configApi } from '../../api/config'
 import { scanApi } from '../../api/scan'
 // import ImageManager from '../ImageManager.vue' // 사용 안 함
@@ -314,6 +382,12 @@ const testingApi = ref(false)
 const apiTestResult = ref(null)
 const metadata = ref(null)
 
+// 중복 검사
+const checkingDuplicates = ref(false)
+const duplicates = ref([])
+const showDuplicateWarning = ref(false)
+const addingVersion = ref(false)
+
 // AI 설정 (API 키는 서버가 config에서 직접 읽음 - 프론트에서 키를 보관하지 않음)
 const aiProvider = ref('gemini')
 const aiModel = ref('gemini-2.5-flash')
@@ -344,10 +418,10 @@ onMounted(async () => {
   }
 })
 
-// Auto-start AI search when dialog opens
+// 다이얼로그 열릴 때 중복 검사 먼저 실행
 watch(() => props.isOpen, (isOpen) => {
-  if (isOpen && softwareName.value && !metadata.value) {
-    startAISearch()
+  if (isOpen && softwareName.value && !metadata.value && !checkingDuplicates.value) {
+    checkDuplicates()
   }
 })
 
@@ -375,6 +449,63 @@ const filteredMetadata = computed(() => {
 
   return filtered
 })
+
+const checkDuplicates = async () => {
+  if (!softwareName.value) {
+    startAISearch()
+    return
+  }
+
+  checkingDuplicates.value = true
+  duplicates.value = []
+  showDuplicateWarning.value = false
+
+  try {
+    const response = await productsApi.getAll({ search: softwareName.value, limit: 20 })
+    const found = response.data.products || []
+
+    if (found.length > 0) {
+      duplicates.value = found
+      showDuplicateWarning.value = true
+    } else {
+      startAISearch()
+    }
+  } catch (error) {
+    console.error('중복 검사 오류:', error)
+    startAISearch()
+  } finally {
+    checkingDuplicates.value = false
+  }
+}
+
+const proceedWithAISearch = () => {
+  showDuplicateWarning.value = false
+  duplicates.value = []
+  startAISearch()
+}
+
+const addVersionToProduct = async (targetProduct) => {
+  if (!props.violation?.id) return
+
+  addingVersion.value = true
+  try {
+    const response = await filenameViolationsApi.createProductWithMetadata(
+      props.violation.id,
+      { title: targetProduct.title }
+    )
+    if (response.data.success) {
+      emit('saved', response.data)
+      close()
+    } else {
+      errorMessage.value = response.data.error || '버전 추가에 실패했습니다.'
+    }
+  } catch (error) {
+    console.error('Version add error:', error)
+    errorMessage.value = error.response?.data?.detail || '버전 추가에 실패했습니다.'
+  } finally {
+    addingVersion.value = false
+  }
+}
 
 const testApiConnection = async () => {
   testingApi.value = true
@@ -543,17 +674,7 @@ const saveMetadata = async () => {
     )
 
     if (response.data.success) {
-      // 중복 제품인 경우 알림 표시
-      if (response.data.product?.is_duplicate) {
-        const product = response.data.product
-        await alert.info(
-          `이미 존재하는 제품입니다.\n\n` +
-          `제품명: ${product.title || ''}\n` +
-          `${product.duplicate_reason || '버전만 추가되었습니다.'}\n\n` +
-          `제품 상세페이지의 버전 탭에서 확인하세요.`
-        )
-      }
-
+      // 알림은 부모(FilenameViolations.vue handleAIMatchingSaved)에서 처리
       emit('saved', response.data)
       close()
     } else {
@@ -634,6 +755,10 @@ const close = () => {
   apiErrorDetail.value = ''
   isApiError.value = false
   apiTestResult.value = null
+  checkingDuplicates.value = false
+  duplicates.value = []
+  showDuplicateWarning.value = false
+  addingVersion.value = false
   emit('close')
 }
 </script>
