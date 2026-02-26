@@ -32,6 +32,9 @@ class ScanResponse(BaseModel):
     new_products: int
     new_versions: int
     updated_products: int
+    deleted_versions: Optional[int] = 0
+    deleted_products: Optional[int] = 0
+    deleted_violations: Optional[int] = 0
     ai_generated: Optional[int] = 0
     icons_cached: Optional[int] = 0
     errors: list
