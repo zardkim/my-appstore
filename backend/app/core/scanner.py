@@ -156,6 +156,7 @@ class FileScanner:
             "updated_products": 0,
             "deleted_versions": 0,
             "deleted_products": 0,
+            "deleted_violations": 0,
             "renamed_files": 0,
             "ai_generated": 0,
             "icons_cached": 0,
@@ -256,6 +257,7 @@ class FileScanner:
             "updated_products": 0,
             "deleted_versions": 0,
             "deleted_products": 0,
+            "deleted_violations": 0,
             "renamed_files": 0,
             "scanned_folders": 0,
             "scanned_files": 0,
@@ -621,6 +623,27 @@ class FileScanner:
                 self.db.query(Product).filter(Product.id.in_(deleted_product_ids)).delete(synchronize_session=False)
                 results["deleted_products"] = len(deleted_product_ids)
                 logger.info(f"Deleted {len(deleted_product_ids)} products with no versions")
+
+            # product_id가 NULL인 FilenameViolation 중 실제 파일이 없는 것 삭제
+            # (AI 매칭 전 상태인 "scanned" 항목으로, 파일이 삭제된 경우)
+            unmatched_violations = self.db.query(FilenameViolation).filter(
+                FilenameViolation.product_id.is_(None),
+                FilenameViolation.folder_path.like(f"{base_path}%")
+            ).all()
+
+            deleted_violation_ids = []
+            for violation in unmatched_violations:
+                full_path = os.path.join(violation.folder_path, violation.file_name)
+                if not os.path.exists(full_path):
+                    deleted_violation_ids.append(violation.id)
+                    logger.info(f"Deleted unmatched violation (file gone): {full_path}")
+
+            if deleted_violation_ids:
+                self.db.query(FilenameViolation).filter(
+                    FilenameViolation.id.in_(deleted_violation_ids)
+                ).delete(synchronize_session=False)
+                results["deleted_violations"] = len(deleted_violation_ids)
+                logger.info(f"Deleted {len(deleted_violation_ids)} unmatched violations")
 
         except Exception as e:
             logger.error(f"Error cleaning up deleted files: {e}")
