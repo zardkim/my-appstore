@@ -1163,6 +1163,7 @@ export default {
     // Stats
     totalItems: '전체 항목',
     scannedItems: '스캔된 항목',
+    productItems: '제품 항목',
     mismatchedItems: '불일치 항목',
 
     // Messages
