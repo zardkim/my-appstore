@@ -511,7 +511,7 @@ const loadViolations = async () => {
     isAllSelected.value = false
   } catch (error) {
     console.error('Failed to load scan items:', error)
-    await alert.error(t('detectedList.loadFailed'))
+    violations.value = []
   } finally {
     loading.value = false
   }
