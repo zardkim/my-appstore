@@ -120,9 +120,11 @@ if [ "$DO_PUSH" = true ]; then
   docker push "${DOCKER_USER}/myappstore-frontend:latest"
   echo "Docker Hub 푸시 완료"
 
-  # GitHub 태그 푸시
+  # GitHub 커밋 + 태그 푸시
   echo ""
-  echo "=== GitHub 태그 푸시 중... ==="
+  echo "=== GitHub 푸시 중... ==="
+  git push origin main
+  echo "GitHub 커밋 푸시 완료: main"
   git push origin "v${NEW_VERSION}"
   echo "GitHub 태그 푸시 완료: v${NEW_VERSION}"
 fi
