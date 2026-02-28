@@ -5,13 +5,23 @@ from typing import List, Optional
 import os
 import shutil
 from pathlib import Path
+from pydantic import BaseModel
 
 from app.database import get_db
 from app.models.attachment import Attachment
+from app.models.version import Version
+from app.models.filename_violation import FilenameViolation
 from app.models.user import User
 from app.schemas.attachment import Attachment as AttachmentSchema, AttachmentUpdate
 from app.dependencies import get_current_user, get_current_admin_user
 from app.config import settings
+
+VALID_CLASSIFICATIONS = {"patch", "language_pack", "manual", "update"}
+
+
+class ReclassifyVersionRequest(BaseModel):
+    classification: str  # patch | language_pack | manual | update
+    note: Optional[str] = None
 
 
 router = APIRouter(prefix="/api/attachments", tags=["attachments"])
@@ -167,3 +177,70 @@ def delete_attachment(
     db.commit()
 
     return {"message": "Attachment deleted successfully"}
+
+
+@router.post("/from-version/{version_id}", response_model=AttachmentSchema)
+def reclassify_version_as_attachment(
+    version_id: int,
+    request: ReclassifyVersionRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    버전(Version)을 첨부파일(Attachment)로 분류 변환
+
+    버전 탭의 파일을 패치/언어팩/메뉴얼/업데이트로 재분류할 때 사용한다.
+    - Version 레코드를 Attachment 레코드로 변환 (물리 파일은 그대로 유지)
+    - 관련 스캔 항목(FilenameViolation)이 있으면 등록 완료로 표시
+    """
+    if request.classification not in VALID_CLASSIFICATIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"유효하지 않은 분류입니다. 허용값: {', '.join(VALID_CLASSIFICATIONS)}"
+        )
+
+    version = db.query(Version).filter(Version.id == version_id).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="버전을 찾을 수 없습니다.")
+
+    product_id = version.product_id
+
+    # 같은 경로의 첨부파일이 이미 있는지 확인
+    existing = db.query(Attachment).filter(
+        Attachment.product_id == product_id,
+        Attachment.file_path == version.file_path,
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail="이 파일은 이미 해당 제품의 첨부파일로 등록되어 있습니다."
+        )
+
+    # Attachment 생성 (물리 파일은 그대로, DB 레코드만 변환)
+    attachment = Attachment(
+        product_id=product_id,
+        file_path=version.file_path,
+        file_name=version.file_name,
+        file_size=version.file_size or 0,
+        note=request.note or "",
+        type=request.classification,
+    )
+    db.add(attachment)
+
+    # 연관된 FilenameViolation 스캔 항목 등록 완료 처리
+    scan_item = db.query(FilenameViolation).filter(
+        FilenameViolation.folder_path == str(Path(version.file_path).parent),
+        FilenameViolation.file_name == version.file_name,
+    ).first()
+    if scan_item:
+        scan_item.is_resolved = True
+        scan_item.product_id = product_id
+        scan_item.classification = request.classification
+        scan_item.violation_details = f"{request.classification} 등록 완료 (버전에서 변환)"
+
+    # Version 레코드 삭제
+    db.delete(version)
+    db.commit()
+    db.refresh(attachment)
+
+    return attachment

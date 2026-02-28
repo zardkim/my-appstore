@@ -162,6 +162,10 @@ export default {
       screenshots: '스크린샷',
       installation: '설치방법',
       patches: '패치',
+      patch: '패치',
+      language_pack: '언어팩',
+      manual: '메뉴얼',
+      update: '업데이트',
     },
     info: {
       title: '프로그램 설명',
@@ -198,6 +202,8 @@ export default {
       portable: '포터블',
       installer: '설치형',
       download: '다운로드',
+      reclassify: '분류 변경',
+      reclassifyAs: '이 파일을 다른 탭으로 이동',
     },
     screenshots: {
       title: '스크린샷',
@@ -1245,6 +1251,45 @@ export default {
     startScan: '스캔 시작',
     scanComplete: '스캔이 완료되었습니다.',
     scanFailed: '스캔에 실패했습니다.',
+  },
+
+  // 검색된 목록 (신규 ScanList)
+  scanList: {
+    pageTitle: '🔍 검색된 목록',
+    pageDescription: '스캔된 파일 목록입니다. 분류를 확인하고 등록하세요.',
+
+    // Classification
+    classification: {
+      product: '제품',
+      patch: '패치',
+      language_pack: '언어팩',
+      manual: '메뉴얼',
+      update: '업데이트',
+    },
+
+    // Filter tabs
+    filter: {
+      all: '전체',
+    },
+
+    // Actions
+    register: '등록',
+    changeClassification: '분류 변경',
+    classifyFailed: '분류 변경에 실패했습니다.',
+
+    // Register Dialog
+    registerDialog: {
+      title: '{type} 등록',
+      selectProduct: '연결할 제품 검색',
+      searchPlaceholder: '제품명 검색...',
+      noResults: '검색 결과가 없습니다.',
+      note: '메모 (선택)',
+      notePlaceholder: '메모를 입력하세요 (선택사항)',
+      register: '등록',
+      registering: '등록 중...',
+      success: '"{type}" 파일이 "{product}" 제품에 등록되었습니다.',
+      failed: '등록에 실패했습니다.',
+    },
   },
 
   // 카테고리

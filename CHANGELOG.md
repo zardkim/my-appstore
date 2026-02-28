@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.12] - 2026-02-28
+
+### Added
+- **스캔 목록 (ScanList.vue)**: 파일 스캔 후 검색된 목록 화면 전면 개편
+  - 상단 분류 탭 필터: 전체 / 제품 / 패치 / 언어팩 / 메뉴얼 / 업데이트
+  - 분류별 통계 카드 (클릭으로 바로 필터 전환)
+  - 각 항목에 분류 배지 + 드롭다운으로 수동 분류 변경 가능
+  - AI 검색 버튼 (제품 분류일 때만 표시)
+  - 패치/언어팩/메뉴얼/업데이트 등록 다이얼로그: 제품 검색 후 Attachment로 등록
+- **자동 분류**: 스캔 시 파일명·폴더명 키워드 기반 자동 분류 (`core/classifier.py`)
+- **제품 상세 탭 개편**: 자료실 탭 → 패치/언어팩/메뉴얼/업데이트 4개 탭으로 분리
+- **버전→분류 변경**: 버전 탭에서 파일을 패치/언어팩/메뉴얼/업데이트로 재분류 (Version → Attachment 변환)
+- **DB 마이그레이션**: `filename_violations.classification`, `classification_auto` 컬럼 추가
+- **API 엔드포인트**: `/api/scan-items/` (기존 `/api/filename-violations/`과 하위 호환 유지)
+  - `GET /api/scan-items/` - 분류/검색/페이지네이션 필터 지원
+  - `GET /api/scan-items/stats` - 분류별 통계
+  - `PATCH /api/scan-items/{id}/classify` - 수동 분류 변경
+  - `POST /api/scan-items/{id}/register` - 분류에 따른 등록 처리
+  - `POST /api/attachments/from-version/{version_id}` - 버전→첨부파일 변환
+
+### Changed
+- 네비게이션: 파일명 위반 목록 → 검색된 목록 (`/scan-list`)
+- `Attachment.type` 값 정규화: `crack` → `patch`, 비표준 → `patch`
+
+### Removed
+- `unmatched.py` 백엔드 라우터 제거 (UnmatchedItem 기능 사용 중단)
+- 일치/불일치 판단 UI, 해결됨 표시 기능 제거
+
 ## [1.4.0] - 2026-02-25
 
 ### Added

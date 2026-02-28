@@ -63,10 +63,23 @@ export const deleteAttachment = async (attachmentId) => {
   return response.data
 }
 
-export default {
+/**
+ * 버전을 첨부파일로 분류 변환 (버전 → 패치/언어팩/메뉴얼/업데이트)
+ * @param {number} versionId - 변환할 Version ID
+ * @param {object} data - { classification: string, note?: string }
+ */
+export const reclassifyVersion = async (versionId, data) => {
+  const response = await client.post(`/attachments/from-version/${versionId}`, data)
+  return response.data
+}
+
+export const attachmentsApi = {
   uploadAttachment,
   getProductAttachments,
   downloadAttachment,
   updateAttachment,
-  deleteAttachment
+  deleteAttachment,
+  reclassifyVersion,
 }
+
+export default attachmentsApi

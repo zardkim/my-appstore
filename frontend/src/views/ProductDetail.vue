@@ -353,12 +353,36 @@
                 {{ t('product.tabs.installation') }}
               </button>
               <button
-                @click="activeTab = 'patches'"
-                :class="tabClass('patches')"
+                @click="activeTab = 'patch'"
+                :class="tabClass('patch')"
                 class="text-sm sm:text-base whitespace-nowrap"
               >
-                <span class="hidden sm:inline">{{ t('product.tabs.patches') }} ({{ attachments?.length || 0 }})</span>
-                <span class="sm:hidden">{{ t('product.tabs.patches') }}</span>
+                <span class="hidden sm:inline">{{ t('product.tabs.patch') }} ({{ patchAttachments.length }})</span>
+                <span class="sm:hidden">{{ t('product.tabs.patch') }}</span>
+              </button>
+              <button
+                @click="activeTab = 'language_pack'"
+                :class="tabClass('language_pack')"
+                class="text-sm sm:text-base whitespace-nowrap"
+              >
+                <span class="hidden sm:inline">{{ t('product.tabs.language_pack') }} ({{ langpackAttachments.length }})</span>
+                <span class="sm:hidden">{{ t('product.tabs.language_pack') }}</span>
+              </button>
+              <button
+                @click="activeTab = 'manual'"
+                :class="tabClass('manual')"
+                class="text-sm sm:text-base whitespace-nowrap"
+              >
+                <span class="hidden sm:inline">{{ t('product.tabs.manual') }} ({{ manualAttachments.length }})</span>
+                <span class="sm:hidden">{{ t('product.tabs.manual') }}</span>
+              </button>
+              <button
+                @click="activeTab = 'update'"
+                :class="tabClass('update')"
+                class="text-sm sm:text-base whitespace-nowrap"
+              >
+                <span class="hidden sm:inline">{{ t('product.tabs.update') }} ({{ updateAttachments.length }})</span>
+                <span class="sm:hidden">{{ t('product.tabs.update') }}</span>
               </button>
             </nav>
           </div>
@@ -637,42 +661,84 @@
                       </p>
                     </div>
                   </div>
-                  <!-- 파일이 삭제된 경우 삭제 버튼 표시 (관리자만) -->
-                  <button
-                    v-if="version.file_exists === false && authStore.user?.role === 'admin'"
-                    @click="deleteVersion(version.id)"
-                    class="w-full sm:w-auto flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg font-medium text-sm sm:text-base"
-                  >
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    {{ t('productDetail.deleteFromDb') }}
-                  </button>
-                  <!-- 파일이 없는 경우 비활성화된 다운로드 버튼 (일반 사용자) -->
-                  <button
-                    v-else-if="version.file_exists === false"
-                    disabled
-                    class="w-full sm:w-auto flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg sm:rounded-xl cursor-not-allowed font-medium text-sm sm:text-base opacity-60"
-                  >
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                    </svg>
-                    {{ t('productDetail.fileNotFound') }}
-                  </button>
-                  <!-- 정상 다운로드 버튼 -->
-                  <button
-                    v-else
-                    @click="download(version.id)"
-                    class="w-full sm:w-auto flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-medium text-sm sm:text-base"
-                  >
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    {{ t('product.versions.download') }}
-                  </button>
+                  <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <!-- 파일이 삭제된 경우 삭제 버튼 표시 (관리자만) -->
+                    <button
+                      v-if="version.file_exists === false && authStore.user?.role === 'admin'"
+                      @click="deleteVersion(version.id)"
+                      class="flex-1 sm:flex-none flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg font-medium text-sm sm:text-base"
+                    >
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      {{ t('productDetail.deleteFromDb') }}
+                    </button>
+                    <!-- 파일이 없는 경우 비활성화된 다운로드 버튼 (일반 사용자) -->
+                    <button
+                      v-else-if="version.file_exists === false"
+                      disabled
+                      class="flex-1 sm:flex-none flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg sm:rounded-xl cursor-not-allowed font-medium text-sm sm:text-base opacity-60"
+                    >
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                      {{ t('productDetail.fileNotFound') }}
+                    </button>
+                    <!-- 정상 다운로드 버튼 -->
+                    <button
+                      v-else
+                      @click="download(version.id)"
+                      class="flex-1 sm:flex-none flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-medium text-sm sm:text-base"
+                    >
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      {{ t('product.versions.download') }}
+                    </button>
+
+                    <!-- 분류 변경 드롭다운 (관리자만, 파일이 있는 경우) -->
+                    <div
+                      v-if="authStore.user?.role === 'admin' && version.file_exists !== false"
+                      class="relative"
+                    >
+                      <button
+                        @click.stop="versionReclassifyMenu = versionReclassifyMenu === version.id ? null : version.id"
+                        class="flex items-center justify-center p-2.5 sm:p-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg sm:rounded-xl transition-colors"
+                        :title="t('product.versions.reclassify')"
+                      >
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                      </button>
+                      <!-- 드롭다운 메뉴 -->
+                      <div
+                        v-if="versionReclassifyMenu === version.id"
+                        class="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-20"
+                        @click.stop
+                      >
+                        <div class="p-1.5">
+                          <p class="text-xs text-gray-400 dark:text-gray-500 px-2 py-1">{{ t('product.versions.reclassifyAs') }}</p>
+                          <button
+                            v-for="cls in [
+                              { key: 'patch', icon: '🔧', label: t('product.tabs.patch') },
+                              { key: 'language_pack', icon: '🌐', label: t('product.tabs.language_pack') },
+                              { key: 'manual', icon: '📄', label: t('product.tabs.manual') },
+                              { key: 'update', icon: '⬆️', label: t('product.tabs.update') },
+                            ]"
+                            :key="cls.key"
+                            @click="reclassifyVersion(version.id, cls.key)"
+                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          >
+                            <span>{{ cls.icon }}</span>
+                            <span>{{ cls.label }}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -909,12 +975,12 @@
               <div v-else class="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none tinymce-content overflow-hidden" v-html="product.installation_guide"></div>
             </div>
 
-            <!-- Patches Tab -->
-            <div v-if="activeTab === 'patches'">
+            <!-- Patch / LanguagePack / Manual / Update Tabs (공통 구조) -->
+            <div v-if="['patch','language_pack','manual','update'].includes(activeTab)">
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
-                  <span class="mr-2 text-lg sm:text-xl">📦</span>
-                  {{ t('product.patches.title') }}
+                  <span class="mr-2 text-lg sm:text-xl">{{ tabTypeIcon(activeTab) }}</span>
+                  {{ t(`product.tabs.${activeTab}`) }}
                 </h3>
               </div>
 
@@ -978,10 +1044,10 @@
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('product.patches.fileType') }}</label>
                       <select v-model="uploadForm.type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                        <option value="patch">{{ t('product.patches.types.patch') }}</option>
-                        <option value="crack">{{ t('product.patches.types.crack') }}</option>
-                        <option value="manual">{{ t('product.patches.types.manual') }}</option>
-                        <option value="other">{{ t('product.patches.types.other') }}</option>
+                        <option value="patch">{{ t('product.tabs.patch') }}</option>
+                        <option value="language_pack">{{ t('product.tabs.language_pack') }}</option>
+                        <option value="manual">{{ t('product.tabs.manual') }}</option>
+                        <option value="update">{{ t('product.tabs.update') }}</option>
                       </select>
                     </div>
                     <div>
@@ -1020,8 +1086,8 @@
                 </div>
               </div>
 
-              <!-- 링크 관리 섹션 (관리자만) -->
-              <div v-if="authStore.user?.role === 'admin'" class="mb-6">
+              <!-- 링크 관리 섹션 (관리자만, 패치 탭만) -->
+              <div v-if="authStore.user?.role === 'admin' && activeTab === 'patch'" class="mb-6">
                 <div class="flex items-center justify-between mb-3">
                   <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1125,8 +1191,8 @@
                 </button>
               </div>
 
-              <!-- 링크 목록 (일반 사용자용 - 읽기 전용) -->
-              <div v-else-if="product?.patch_links?.length > 0" class="mb-6">
+              <!-- 링크 목록 (일반 사용자용 - 읽기 전용, 패치 탭만) -->
+              <div v-else-if="activeTab === 'patch' && product?.patch_links?.length > 0" class="mb-6">
                 <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -1151,10 +1217,10 @@
                 </div>
               </div>
 
-              <!-- 파일 목록 -->
-              <div v-if="attachments && attachments.length > 0" class="space-y-3">
+              <!-- 파일 목록 (현재 탭 분류 기준으로 필터링) -->
+              <div v-if="currentTabAttachments.length > 0" class="space-y-3">
                 <div
-                  v-for="attachment in attachments"
+                  v-for="attachment in currentTabAttachments"
                   :key="attachment.id"
                   class="flex items-center justify-between p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors"
                 >
@@ -1206,7 +1272,7 @@
               </div>
 
               <!-- 파일 없음 -->
-              <div v-else class="text-center py-12">
+              <div v-else-if="currentTabAttachments.length === 0" class="text-center py-12">
                 <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 rounded-3xl flex items-center justify-center">
                   <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1594,6 +1660,37 @@ const handleImageError = (event) => {
 const download = (versionId) => {
   const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
   window.open(getDownloadUrl(versionId, token), '_blank')
+}
+
+// 버전 → 분류 변환 (패치/언어팩/메뉴얼/업데이트로 이동)
+const reclassifyVersion = async (versionId, classification) => {
+  versionReclassifyMenu.value = null
+
+  const labelMap = {
+    patch: t('product.tabs.patch'),
+    language_pack: t('product.tabs.language_pack'),
+    manual: t('product.tabs.manual'),
+    update: t('product.tabs.update'),
+  }
+  const label = labelMap[classification] || classification
+
+  const confirmed = await confirm.warning(
+    `이 파일을 "${label}" 탭으로 이동하시겠습니까?\n버전 목록에서 제거되고 ${label} 탭에 등록됩니다.`
+  )
+  if (!confirmed) return
+
+  try {
+    const { attachmentsApi } = await import('@/api/attachments.js')
+    await attachmentsApi.reclassifyVersion(versionId, { classification })
+    await alert.success(`"${label}" 탭으로 이동되었습니다.`)
+    // 탭 이동 + 데이터 새로고침
+    activeTab.value = classification
+    await loadProduct()
+    await loadAttachments()
+  } catch (error) {
+    console.error('Reclassify version error:', error)
+    await alert.error(error.response?.data?.detail || '분류 변환에 실패했습니다.')
+  }
 }
 
 // 버전 삭제 (파일이 없는 경우)
@@ -2193,6 +2290,32 @@ const uploadForm = ref({
   type: 'patch',
   note: ''
 })
+
+// 버전 분류 변경 드롭다운 상태
+const versionReclassifyMenu = ref(null)
+
+// 탭별 분류된 첨부파일 (computed)
+const patchAttachments = computed(() => attachments.value.filter(a => a.type === 'patch'))
+const langpackAttachments = computed(() => attachments.value.filter(a => a.type === 'language_pack'))
+const manualAttachments = computed(() => attachments.value.filter(a => a.type === 'manual'))
+const updateAttachments = computed(() => attachments.value.filter(a => a.type === 'update'))
+
+// 현재 활성 탭의 첨부파일 목록
+const currentTabAttachments = computed(() => {
+  switch (activeTab.value) {
+    case 'patch': return patchAttachments.value
+    case 'language_pack': return langpackAttachments.value
+    case 'manual': return manualAttachments.value
+    case 'update': return updateAttachments.value
+    default: return []
+  }
+})
+
+// 탭 타입별 아이콘
+const tabTypeIcon = (type) => {
+  const icons = { patch: '🔧', language_pack: '🌐', manual: '📄', update: '⬆️' }
+  return icons[type] || '📦'
+}
 
 // 패치 링크 관련
 const patchLinks = ref([])

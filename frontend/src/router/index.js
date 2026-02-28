@@ -99,6 +99,12 @@ const routes = [
         meta: { requiresAdmin: true }
       },
       {
+        path: 'scan-list',
+        name: 'ScanList',
+        component: () => import('../views/ScanList.vue'),
+        meta: { requiresAdmin: true }
+      },
+      {
         path: 'my/share-links',
         name: 'ShareManage',
         component: () => import('../views/ShareManage.vue')
