@@ -11,7 +11,6 @@ from app.models.comment import Comment
 from app.models.filename_violation import FilenameViolation
 from app.models.invitation import Invitation
 from app.models.metadata_cache import MetadataCache
-from app.models.unmatched_item import UnmatchedItem
 from app.models.share_link import ShareLink
 
 __all__ = [
@@ -29,6 +28,5 @@ __all__ = [
     "FilenameViolation",
     "Invitation",
     "MetadataCache",
-    "UnmatchedItem",
     "ShareLink",
 ]

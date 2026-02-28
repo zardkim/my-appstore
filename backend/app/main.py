@@ -7,7 +7,7 @@ from pathlib import Path
 import logging
 
 from app.database import engine, Base
-from app.api import auth, products, users, scan, download, scheduler, filesystem, favorites, scraps, config, metadata, unmatched, posts, invitations, images, filename_violations, version, comments, cache, attachments, share
+from app.api import auth, products, users, scan, download, scheduler, filesystem, favorites, scraps, config, metadata, posts, invitations, images, filename_violations, version, comments, cache, attachments, share
 from app.core.scheduler import scan_scheduler
 from app.config import settings
 
@@ -218,7 +218,6 @@ app.include_router(favorites.router, prefix="/api/favorites", tags=["Favorites"]
 app.include_router(scraps.router, prefix="/api/scraps", tags=["Scraps"])
 app.include_router(config.router, prefix="/api/config", tags=["Config"])
 app.include_router(metadata.router, prefix="/api/metadata", tags=["Metadata"])
-app.include_router(unmatched.router, prefix="/api/unmatched", tags=["Unmatched"])
 app.include_router(posts.router, prefix="/api/posts", tags=["Posts"])
 app.include_router(comments.router, prefix="/api/posts", tags=["Comments"])
 app.include_router(images.router, prefix="/api/images", tags=["Images"])

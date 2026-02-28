@@ -13,6 +13,7 @@ from app.models.filename_violation import FilenameViolation
 from app.core.metadata_enricher import MetadataEnricher
 from app.core.icon_cache import IconCache
 from app.core.parser import FilenameParser
+from app.core.classifier import classify_file
 from app.config import settings
 import logging
 logger = logging.getLogger(__name__)
@@ -442,6 +443,10 @@ class FileScanner:
             Version.file_path == file_path_str
         ).first()
 
+        # 파일명 + 폴더명으로 자동 분류
+        folder_name = Path(folder_path_str).name
+        classification = classify_file(file_name, folder_name)
+
         # 파일명 규칙 검사 없이 모두 "scanned" 타입으로 추가 (스캔 예외 규칙만 적용됨)
         violation = FilenameViolation(
             folder_path=folder_path_str,
@@ -449,7 +454,9 @@ class FileScanner:
             violation_type="scanned",
             violation_details="스캔된 파일 (AI 매칭 대기중)",
             suggestion=file_name,
-            is_resolved=False
+            is_resolved=False,
+            classification=classification,
+            classification_auto=True,
         )
 
         # If Version exists, link it automatically and mark as resolved

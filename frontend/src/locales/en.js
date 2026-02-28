@@ -161,6 +161,10 @@ export default {
       screenshots: 'Screenshots',
       installation: 'Installation',
       patches: 'Patches',
+      patch: 'Patch',
+      language_pack: 'Language Pack',
+      manual: 'Manual',
+      update: 'Update',
     },
     info: {
       title: 'Program Description',
@@ -197,6 +201,8 @@ export default {
       portable: 'Portable',
       installer: 'Installer',
       download: 'Download',
+      reclassify: 'Reclassify',
+      reclassifyAs: 'Move this file to another tab',
     },
     screenshots: {
       title: 'Screenshots',
@@ -1291,6 +1297,45 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     startScan: 'Start Scan',
     scanComplete: 'Scan completed.',
     scanFailed: 'Scan failed.',
+  },
+
+  // Scan List (new ScanList view)
+  scanList: {
+    pageTitle: '🔍 Scan List',
+    pageDescription: 'Scanned files list. Check classifications and register items.',
+
+    // Classification
+    classification: {
+      product: 'Product',
+      patch: 'Patch',
+      language_pack: 'Language Pack',
+      manual: 'Manual',
+      update: 'Update',
+    },
+
+    // Filter tabs
+    filter: {
+      all: 'All',
+    },
+
+    // Actions
+    register: 'Register',
+    changeClassification: 'Change Classification',
+    classifyFailed: 'Failed to change classification.',
+
+    // Register Dialog
+    registerDialog: {
+      title: 'Register {type}',
+      selectProduct: 'Search for a product to link',
+      searchPlaceholder: 'Search products...',
+      noResults: 'No results found.',
+      note: 'Note (optional)',
+      notePlaceholder: 'Enter a note (optional)',
+      register: 'Register',
+      registering: 'Registering...',
+      success: '"{type}" has been registered to "{product}".',
+      failed: 'Registration failed.',
+    },
   },
 
   // Categories

@@ -28,7 +28,7 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer" @click="$router.push('/filename-violations')">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer" @click="$router.push('/scan-list')">
           <div class="flex items-start justify-between">
             <div>
               <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t('home.incompleteProducts') }}</p>
