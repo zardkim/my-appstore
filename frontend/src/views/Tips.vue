@@ -23,11 +23,7 @@
         <div class="flex items-stretch gap-2">
           <select v-model="selectedCategory" class="flex-1 px-3 sm:px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
             <option value="all">{{ t('tips.allCategories') }}</option>
-            <option value="tip">{{ t('tips.categoryTip') }}</option>
-            <option value="tech">{{ t('tips.categoryTech') }}</option>
-            <option value="tutorial">{{ t('tips.categoryTutorial') }}</option>
-            <option value="qna">{{ t('tips.categoryQna') }}</option>
-            <option value="news">{{ t('tips.categoryNews') }}</option>
+            <option v-for="cat in boardCategories" :key="cat.value" :value="cat.value">{{ cat.label }}</option>
           </select>
           <select v-model="sortBy" class="flex-1 px-3 sm:px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
             <option value="latest">{{ t('tips.sortLatest') }}</option>
@@ -263,6 +259,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../store/auth'
 import { scrapsApi } from '../api/scraps'
 import { postsApi } from '../api/posts'
+import { configApi } from '../api/config'
 import { useDialog } from '../composables/useDialog'
 
 const { t } = useI18n({ useScope: 'global' })
@@ -276,6 +273,26 @@ const sortBy = ref('latest')
 const searchQuery = ref('')
 const scrapedPostIds = ref(new Set())
 const loading = ref(false)
+
+// 게시판 카테고리 (설정에서 동적 로드, fallback: 기본값)
+const boardCategories = ref([
+  { value: 'tip', label: '팁', color: 'green' },
+  { value: 'tech', label: '기술', color: 'blue' },
+  { value: 'tutorial', label: '튜토리얼', color: 'purple' },
+  { value: 'qna', label: 'Q&A', color: 'yellow' },
+  { value: 'news', label: '뉴스', color: 'red' }
+])
+
+const CATEGORY_COLOR_MAP = {
+  green:  'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300',
+  blue:   'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300',
+  purple: 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300',
+  yellow: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300',
+  red:    'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300',
+  pink:   'bg-pink-100 dark:bg-pink-900/50 text-pink-800 dark:text-pink-300',
+  orange: 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300',
+  indigo: 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-300',
+}
 
 // Pagination
 const currentPage = ref(1)
@@ -344,25 +361,14 @@ const pageNumbers = computed(() => {
 })
 
 const getCategoryLabel = (category) => {
-  const labels = {
-    tip: t('tips.categoryTip'),
-    tech: t('tips.categoryTech'),
-    tutorial: t('tips.categoryTutorial'),
-    qna: t('tips.categoryQna'),
-    news: t('tips.categoryNews')
-  }
-  return labels[category] || category
+  const cat = boardCategories.value.find(c => c.value === category)
+  return cat?.label || category
 }
 
 const getCategoryStyle = (category) => {
-  const styles = {
-    tip: 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300',
-    tech: 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300',
-    tutorial: 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300',
-    qna: 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300',
-    news: 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300'
-  }
-  return styles[category] || styles.tip
+  const cat = boardCategories.value.find(c => c.value === category)
+  const colorClass = CATEGORY_COLOR_MAP[cat?.color] || CATEGORY_COLOR_MAP.blue
+  return `inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${colorClass}`
 }
 
 const formatDate = (dateStr) => {
@@ -472,7 +478,19 @@ watch([selectedCategory, searchQuery, sortBy], () => {
   currentPage.value = 1
 })
 
+const loadBoardCategories = async () => {
+  try {
+    const response = await configApi.getSection('board')
+    if (response.data?.categories?.length > 0) {
+      boardCategories.value = response.data.categories
+    }
+  } catch (error) {
+    console.error('Failed to load board categories:', error)
+  }
+}
+
 onMounted(() => {
+  loadBoardCategories()
   loadPosts()
   // Only load scraps if user is authenticated
   if (authStore.isAuthenticated) {
