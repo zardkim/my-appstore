@@ -729,7 +729,7 @@ const loadItems = async () => {
     isAllSelected.value = false
   } catch (error) {
     console.error('Failed to load scan items:', error)
-    await alert.error(t('detectedList.loadFailed'))
+    items.value = []
   } finally {
     loading.value = false
   }
