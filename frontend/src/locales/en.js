@@ -1211,6 +1211,7 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     // Stats
     totalItems: 'Total Items',
     scannedItems: 'Scanned Items',
+    productItems: 'Product Items',
     mismatchedItems: 'Mismatched Items',
 
     // Messages

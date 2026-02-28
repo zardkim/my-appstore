@@ -105,13 +105,13 @@
             </div>
           </div>
 
-          <!-- 스캔된 항목 -->
+          <!-- 제품 항목 -->
           <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-3 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1">{{ t('detectedList.scannedItems') }}</p>
+                <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1">{{ t('detectedList.productItems') }}</p>
                 <p class="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  {{ stats.scanned }}
+                  {{ stats.by_classification?.product ?? 0 }}
                 </p>
               </div>
               <div class="hidden sm:block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-xl sm:rounded-2xl">
@@ -489,9 +489,13 @@ const loading = ref(true)
 const violations = ref([])
 const stats = ref({
   total: 0,
-  scanned: 0,
-  mismatched: 0,
-  by_type: {}
+  by_classification: {
+    product: 0,
+    patch: 0,
+    language_pack: 0,
+    manual: 0,
+    update: 0
+  }
 })
 const editingId = ref(null)
 const editingFilename = ref('')
@@ -525,15 +529,15 @@ const loadViolations = async () => {
   loading.value = true
   try {
     const [violationsRes, statsRes] = await Promise.all([
-      filenameViolationsApi.getViolations(false), // 미해결 항목만
-      filenameViolationsApi.getStats()
+      filenameViolationsApi.getScanItems({ resolved: false }),
+      filenameViolationsApi.getScanStats()
     ])
     violations.value = violationsRes.data
     stats.value = statsRes.data
     selectedIds.value = []
     isAllSelected.value = false
   } catch (error) {
-    console.error('Failed to load violations:', error)
+    console.error('Failed to load scan items:', error)
     await alert.error(t('detectedList.loadFailed'))
   } finally {
     loading.value = false
@@ -607,14 +611,9 @@ const addToExclusions = async (violation) => {
     // 목록에서 해당 항목 제거
     violations.value = violations.value.filter(v => v.id !== violation.id)
 
-    // 통계 업데이트
-    if (stats.value) {
-      stats.value.scanned = Math.max(0, stats.value.scanned - 1)
-      stats.value.total = Math.max(0, stats.value.total - 1)
-    }
-
     // 성공 메시지
     await alert.success(t('detectedList.addedToExclusions', { pattern: selectedPattern }))
+    await loadViolations()
   } catch (error) {
     console.error('Failed to add to exclusions:', error)
     await alert.error(t('detectedList.addToExclusionsFailed'))
@@ -786,13 +785,8 @@ const openAIMatchingDialog = async (violation) => {
       // 목록에서 제거
       violations.value = violations.value.filter(v => v.id !== violation.id)
 
-      // 통계 업데이트
-      if (stats.value) {
-        stats.value.scanned = Math.max(0, stats.value.scanned - 1)
-        stats.value.total = Math.max(0, stats.value.total - 1)
-      }
-
       await alert.success(t('detectedList.versionAddedToProduct', { title: matchedProduct.title }))
+      await loadViolations()
       return
     } else {
       // 제품이 없으면 AI 매칭 다이얼로그 열기
@@ -819,20 +813,9 @@ const handleAIMatchingSaved = async (data) => {
     const folderPath = selectedViolation.value.folder_path
     if (folderPath && matchedCount > 1) {
       // 같은 폴더의 resolved된 항목 모두 제거
-      const beforeCount = violations.value.length
       violations.value = violations.value.filter(v => v.folder_path !== folderPath)
-      const removedCount = beforeCount - violations.value.length
-
-      if (stats.value) {
-        stats.value.scanned = Math.max(0, stats.value.scanned - removedCount)
-        stats.value.total = Math.max(0, stats.value.total - removedCount)
-      }
     } else {
       violations.value = violations.value.filter(v => v.id !== selectedViolation.value.id)
-      if (stats.value) {
-        stats.value.scanned = Math.max(0, stats.value.scanned - 1)
-        stats.value.total = Math.max(0, stats.value.total - 1)
-      }
     }
   }
 
@@ -850,10 +833,8 @@ const handleAIMatchingSaved = async (data) => {
     await alert.success(`${t('detectedList.productCreateSuccess')}\n\n제품명: ${productTitle}${fileMsg}`)
   }
 
-  // 목록이 비었으면 다시 로드
-  if (violations.value.length === 0) {
-    await loadViolations()
-  }
+  // 항상 최신 통계 반영
+  await loadViolations()
 }
 
 const goToProduct = (productId) => {
