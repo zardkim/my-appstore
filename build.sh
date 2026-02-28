@@ -92,7 +92,7 @@ docker build \
   "$FRONTEND_DIR"
 echo "프론트엔드 빌드 완료"
 
-# Git 커밋
+# Git 커밋 + 태그
 if [ "$DO_COMMIT" = true ]; then
   echo ""
   echo "=== Git 커밋 중... ==="
@@ -104,9 +104,13 @@ if [ "$DO_COMMIT" = true ]; then
 - Build date: ${BUILD_DATE}
 - Docker images: backend:${NEW_VERSION}, frontend:${NEW_VERSION} (latest 태그 동시 푸시)"
   echo "Git 커밋 완료"
+
+  # 태그 생성
+  git tag "v${NEW_VERSION}"
+  echo "Git 태그 생성: v${NEW_VERSION}"
 fi
 
-# Docker Hub 푸시
+# Docker Hub 푸시 + GitHub 푸시
 if [ "$DO_PUSH" = true ]; then
   echo ""
   echo "=== Docker Hub 푸시 중... ==="
@@ -115,6 +119,12 @@ if [ "$DO_PUSH" = true ]; then
   docker push "${DOCKER_USER}/myappstore-frontend:${NEW_VERSION}"
   docker push "${DOCKER_USER}/myappstore-frontend:latest"
   echo "Docker Hub 푸시 완료"
+
+  # GitHub 태그 푸시
+  echo ""
+  echo "=== GitHub 태그 푸시 중... ==="
+  git push origin "v${NEW_VERSION}"
+  echo "GitHub 태그 푸시 완료: v${NEW_VERSION}"
 fi
 
 echo ""
