@@ -1680,7 +1680,7 @@ const reclassifyVersion = async (versionId, classification) => {
   if (!confirmed) return
 
   try {
-    const { attachmentsApi } = await import('@/api/attachments.js')
+    const { attachmentsApi } = await import('../api/attachments.js')
     await attachmentsApi.reclassifyVersion(versionId, { classification })
     await alert.success(`"${label}" 탭으로 이동되었습니다.`)
     // 탭 이동 + 데이터 새로고침

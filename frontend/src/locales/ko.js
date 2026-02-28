@@ -1260,7 +1260,7 @@ export default {
 
     // Classification
     classification: {
-      product: '제품',
+      product: '소프트웨어',
       patch: '패치',
       language_pack: '언어팩',
       manual: '메뉴얼',
