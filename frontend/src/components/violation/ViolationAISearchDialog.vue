@@ -345,7 +345,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { metadataApi } from '../../api/metadata'
@@ -419,9 +419,12 @@ onMounted(async () => {
 })
 
 // 다이얼로그 열릴 때 중복 검사 먼저 실행
-watch(() => props.isOpen, (isOpen) => {
-  if (isOpen && softwareName.value && !metadata.value && !checkingDuplicates.value) {
-    checkDuplicates()
+watch(() => props.isOpen, async (isOpen) => {
+  if (isOpen) {
+    await nextTick() // props.violation이 완전히 반영될 때까지 대기
+    if (!metadata.value && !checkingDuplicates.value) {
+      checkDuplicates()
+    }
   }
 })
 
@@ -461,7 +464,19 @@ const checkDuplicates = async () => {
   showDuplicateWarning.value = false
 
   try {
-    const response = await productsApi.getAll({ search: softwareName.value, limit: 20 })
+    // 버전번호/연도/아키텍처 등을 제거한 정제된 검색어 생성
+    // 예: "Adobe Photoshop 2024 v25.1 (64-bit)" → "Adobe Photoshop"
+    const cleanName = softwareName.value
+      .replace(/\s*\([^)]*\)/g, '')               // (64-bit), (x64) 등 괄호 내용 제거
+      .replace(/\s+v\d+[\d.]*/gi, '')             // v25.1, v2024 형태 버전 제거
+      .replace(/\s+\d+\.\d+[\d.]*(?:\s|$)/g, ' ') // 1.2.3 형태 버전 제거
+      .replace(/\s+\d{4}(?:\s|$)/g, ' ')          // 4자리 연도 제거
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    const searchTerm = cleanName || softwareName.value
+
+    const response = await productsApi.getAll({ search: searchTerm, limit: 20 })
     const found = response.data.products || []
 
     if (found.length > 0) {
