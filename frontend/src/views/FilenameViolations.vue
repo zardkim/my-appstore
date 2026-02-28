@@ -186,11 +186,6 @@
                     📁 {{ violation.folder_path }}
                   </p>
 
-                  <!-- 위반 내용 -->
-                  <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
-                    <span class="font-medium">{{ t('detectedList.problem') }}</span> {{ violation.violation_details }}
-                  </p>
-
                   <!-- 제안 -->
                   <div v-if="violation.suggestion" class="mt-2 p-2 sm:p-3 rounded-lg" :class="violation.file_name === violation.suggestion ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'">
                     <span class="text-xs sm:text-sm font-medium" :class="violation.file_name === violation.suggestion ? 'text-green-700 dark:text-green-400' : 'text-blue-700 dark:text-blue-400'">
@@ -244,11 +239,6 @@
                       <button @click="addToExclusions(violation)" class="p-1.5 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                        </svg>
-                      </button>
-                      <button @click="resolveViolation(violation.id)" class="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                       </button>
                       <button @click="deleteViolation(violation.id)" class="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
@@ -342,15 +332,6 @@
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                  </svg>
-                </button>
-                <button
-                  @click="resolveViolation(violation.id)"
-                  :title="t('detectedList.markResolved')"
-                  class="p-2 lg:p-3 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg sm:rounded-xl transition-all hover:shadow-md"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                   </svg>
                 </button>
                 <button
@@ -512,14 +493,6 @@ const scanFolders = ref([])
 const selectedScanFolders = ref([])
 const useAI = ref(false)
 
-const getViolationTypeLabel = (type) => {
-  if (!type) return ''
-  const key = `detectedList.violationTypes.${type.toLowerCase()}`
-  const translated = t(key)
-  // vue-i18n returns the key itself if translation not found
-  return translated !== key ? translated : type
-}
-
 const formatDate = (dateString) => {
   const date = new Date(dateString)
   return date.toLocaleString('ko-KR')
@@ -566,17 +539,6 @@ const toggleSelection = (id) => {
 
 const isSelected = (id) => {
   return selectedIds.value.includes(id)
-}
-
-const resolveViolation = async (id) => {
-  try {
-    await filenameViolationsApi.resolveViolation(id)
-    await loadViolations()
-    await alert.success(t('detectedList.resolveSuccess'))
-  } catch (error) {
-    console.error('Failed to resolve violation:', error)
-    await alert.error(t('detectedList.resolveFailed'))
-  }
 }
 
 const deleteViolation = async (id) => {
