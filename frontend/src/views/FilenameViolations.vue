@@ -87,7 +87,7 @@
 
       <!-- Stats -->
       <div class="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6">
-        <div class="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
+        <div class="grid grid-cols-2 gap-2 sm:gap-4 lg:gap-6">
           <!-- 전체 항목 -->
           <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-3 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
@@ -122,22 +122,6 @@
             </div>
           </div>
 
-          <!-- 불일치 항목 -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm p-3 sm:p-5 lg:p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1">{{ t('detectedList.mismatchedItems') }}</p>
-                <p class="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                  {{ stats.mismatched }}
-                </p>
-              </div>
-              <div class="hidden sm:block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900 dark:to-orange-900 rounded-xl sm:rounded-2xl">
-                <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

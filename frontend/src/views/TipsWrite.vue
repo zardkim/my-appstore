@@ -32,11 +32,7 @@
                 <select v-model="post.category" required class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                   <option value="">{{ t('tips.selectCategory') }}</option>
                   <option v-if="isAdmin" value="notice">{{ t('tips.categoryNotice') }}</option>
-                  <option value="tip">💡 {{ t('tips.categoryTip') }}</option>
-                  <option value="tech">⚙️ {{ t('tips.categoryTech') }}</option>
-                  <option value="tutorial">📚 {{ t('tips.categoryTutorial') }}</option>
-                  <option value="qna">❓ {{ t('tips.categoryQna') }}</option>
-                  <option value="news">📰 {{ t('tips.categoryNews') }}</option>
+                  <option v-for="cat in boardCategories" :key="cat.value" :value="cat.value">{{ cat.label }}</option>
                 </select>
               </div>
               <div v-if="isAdmin" class="pb-1">
@@ -184,6 +180,7 @@ import { useThemeStore } from '../store/theme'
 import { useLocaleStore } from '../store/locale'
 import { postsApi } from '../api/posts'
 import { imagesApi } from '../api/images'
+import { configApi } from '../api/config'
 import { useDialog } from '../composables/useDialog'
 import { ENV } from '../utils/env'
 
@@ -197,6 +194,15 @@ const { alert, confirm } = useDialog()
 
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 const isEdit = computed(() => route.params.id !== undefined)
+
+// 게시판 카테고리 (설정에서 동적 로드, fallback: 기본값)
+const boardCategories = ref([
+  { value: 'tip', label: '팁', color: 'green' },
+  { value: 'tech', label: '기술', color: 'blue' },
+  { value: 'tutorial', label: '튜토리얼', color: 'purple' },
+  { value: 'qna', label: 'Q&A', color: 'yellow' },
+  { value: 'news', label: '뉴스', color: 'red' }
+])
 
 // TinyMCE 언어 매핑 (locale code -> tinymce language file)
 // 영어는 TinyMCE 기본 언어이므로 언어 파일 불필요 (undefined 반환)
@@ -444,6 +450,16 @@ const removeAttachment = (index) => {
 }
 
 onMounted(async () => {
+  // 게시판 카테고리 로드
+  try {
+    const boardConfig = await configApi.getSection('board')
+    if (boardConfig.data?.categories?.length > 0) {
+      boardCategories.value = boardConfig.data.categories
+    }
+  } catch (error) {
+    console.error('Failed to load board categories:', error)
+  }
+
   // localStorage에서 게시판 설정 불러오기
   const savedSettings = localStorage.getItem('boardSettings')
   if (savedSettings) {
