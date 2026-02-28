@@ -21,6 +21,24 @@ logger = logging.getLogger(__name__)
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+# ── 레거시 배포 호환: classification 컬럼이 없으면 직접 추가 ──────────
+# Alembic 마이그레이션 실패 또는 구 create_all() 배포 환경에서
+# classification 컬럼이 누락될 수 있으므로 앱 시작 시 직접 보장
+try:
+    from sqlalchemy import text as _text
+    with engine.connect() as _conn:
+        _conn.execute(_text(
+            "ALTER TABLE filename_violations "
+            "ADD COLUMN IF NOT EXISTS classification VARCHAR(20) NOT NULL DEFAULT 'product'"
+        ))
+        _conn.execute(_text(
+            "ALTER TABLE filename_violations "
+            "ADD COLUMN IF NOT EXISTS classification_auto BOOLEAN NOT NULL DEFAULT true"
+        ))
+        _conn.commit()
+except Exception:
+    pass  # 테이블이 아직 없거나 이미 컬럼이 있으면 무시
+
 # Ensure required directories exist before app initialization
 required_directories = [
     settings.ICON_CACHE_DIR,

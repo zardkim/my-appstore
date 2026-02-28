@@ -720,7 +720,7 @@ const loadItems = async () => {
   loading.value = true
   try {
     const [itemsRes, statsRes] = await Promise.all([
-      filenameViolationsApi.getScanItems(),
+      filenameViolationsApi.getScanItems({ resolved: false }),
       filenameViolationsApi.getScanStats()
     ])
     items.value = itemsRes.data
