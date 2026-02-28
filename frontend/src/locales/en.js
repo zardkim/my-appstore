@@ -1306,7 +1306,7 @@ Use empty values for unknown fields. Respond in JSON format only.`,
 
     // Classification
     classification: {
-      product: 'Product',
+      product: 'Software',
       patch: 'Patch',
       language_pack: 'Language Pack',
       manual: 'Manual',

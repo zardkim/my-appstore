@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.13] - 2026-02-28
+
+### Fixed
+- **ProductDetail.vue**: `@/api/attachments.js` 동적 import 오류 수정 → 상대 경로로 변경
+
+### Changed
+- **검색된 목록 분류명**: "제품" → "소프트웨어" (ko.js / en.js)
+
 ## [1.4.12] - 2026-02-28
 
 ### Added
