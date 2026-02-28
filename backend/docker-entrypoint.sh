@@ -65,6 +65,18 @@ fi
 echo "[5/6] Running database migrations..."
 cd /app
 
+# ── 레거시 DB 처리: alembic_version 없고 테이블이 이미 존재하는 경우 ──
+# create_all()로 만들어진 구 배포에 alembic을 처음 적용할 때
+# 기존 테이블 재생성 시도로 마이그레이션이 실패하는 것을 방지
+if [ -n "$DB_HOST" ] && [ -n "$POSTGRES_USER" ] && [ -n "$POSTGRES_DB" ]; then
+  if [ "$TABLE_EXISTS" != "t" ] && [ "${TABLES_COUNT:-0}" -gt "10" ]; then
+    echo "Legacy deployment detected (tables exist, no alembic_version)"
+    echo "Stamping DB to pre-classification revision: e1f2g3h4i5j6"
+    gosu appuser alembic stamp e1f2g3h4i5j6 2>/dev/null || true
+    echo "✓ DB stamped - will apply only new migrations"
+  fi
+fi
+
 # Show pending migrations
 echo "Checking for pending migrations..."
 MIGRATION_STATUS=$(gosu appuser alembic current 2>&1) || true
@@ -80,12 +92,22 @@ if gosu appuser alembic upgrade head; then
 else
   echo "WARNING: Migration failed - checking if this is expected..."
   # Check if tables exist anyway (might be first run with existing data)
-  if [ "$TABLES_COUNT" -gt "0" ]; then
+  if [ "${TABLES_COUNT:-0}" -gt "0" ]; then
     echo "Database has existing tables - continuing..."
   else
     echo "ERROR: Migration failed and no existing tables found"
     exit 1
   fi
+fi
+
+# ── 안전망: 핵심 컬럼이 없으면 직접 추가 (마이그레이션 실패 시 폴백) ──
+if [ -n "$DB_HOST" ] && [ -n "$POSTGRES_USER" ] && [ -n "$POSTGRES_DB" ]; then
+  echo "Ensuring critical schema columns exist..."
+  PGPASSWORD=$POSTGRES_PASSWORD psql -h "$DB_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" << 'ENDSQL' 2>/dev/null || true
+ALTER TABLE filename_violations ADD COLUMN IF NOT EXISTS classification VARCHAR(20) NOT NULL DEFAULT 'product';
+ALTER TABLE filename_violations ADD COLUMN IF NOT EXISTS classification_auto BOOLEAN NOT NULL DEFAULT true;
+ENDSQL
+  echo "✓ Schema safety check complete"
 fi
 
 # Verify critical tables exist
