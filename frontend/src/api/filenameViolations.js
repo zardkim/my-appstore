@@ -49,43 +49,11 @@ export const filenameViolationsApi = {
     })
   },
 
-  // ─────────────────────────────────────────────────────────────
-  // 하위 호환 메서드 (FilenameViolations.vue에서 사용)
-  // ─────────────────────────────────────────────────────────────
-
   /**
-   * 파일명 규칙 위반 목록 조회 (구 API)
-   */
-  getViolations(resolved = false) {
-    return client.get('/filename-violations/', { params: { resolved } })
-  },
-
-  /**
-   * 파일명 규칙 위반 통계 조회 (구 API)
-   */
-  getStats() {
-    return client.get('/filename-violations/stats')
-  },
-
-  /**
-   * 위반 항목을 해결됨으로 표시 (구 API)
-   */
-  resolveViolation(violationId) {
-    return client.put(`/filename-violations/${violationId}/resolve`)
-  },
-
-  /**
-   * 위반 항목 삭제
+   * 스캔 항목 삭제
    */
   deleteViolation(violationId) {
     return client.delete(`/filename-violations/${violationId}`)
-  },
-
-  /**
-   * 위반 항목 일괄 삭제
-   */
-  clearViolations(resolvedOnly = true) {
-    return client.delete('/filename-violations/', { params: { resolved_only: resolvedOnly } })
   },
 
   /**
