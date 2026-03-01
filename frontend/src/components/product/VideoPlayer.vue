@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-900 dark:bg-black rounded-xl overflow-hidden shadow-lg">
+  <div class="lg:max-w-[50%] bg-gray-900 dark:bg-black rounded-xl overflow-hidden shadow-lg">
     <!-- Video.js 플레이어 -->
     <div class="relative">
       <video
@@ -7,6 +7,9 @@
         class="video-js vjs-big-play-centered w-full"
         controls
         preload="metadata"
+        playsinline
+        webkit-playsinline
+        x5-playsinline
       >
         <source :src="videoUrl" :type="video.mime_type" />
         <p class="vjs-no-js">
@@ -156,7 +159,12 @@ onMounted(async () => {
     controls: true,
     playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
     language: document.documentElement.lang === 'ko' ? 'ko' : 'en',
-    html5: { nativeVideoTracks: false, nativeAudioTracks: false, nativeTextTracks: false },
+    playsinline: true,
+    html5: {
+      nativeVideoTracks: false,
+      nativeAudioTracks: false,
+      nativeTextTracks: false,
+    },
   })
 })
 

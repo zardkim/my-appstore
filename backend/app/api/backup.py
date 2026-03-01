@@ -1,22 +1,31 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from typing import Any
 import json
 import io
+import os
+import zipfile
 from datetime import datetime, timezone
+from pathlib import Path
 
 from app.database import get_db
 from app.models.product import Product
 from app.models.version import Version
 from app.models.setting import Setting
 from app.dependencies import get_current_admin_user
+from app.config import settings
 
 router = APIRouter()
 
+# 백업에 포함할 데이터 폴더 목록 (라이브러리, DB, Redis, 로그 제외)
+BACKUP_DATA_SUBDIRS = ["icons", "videos", "attachments", "screenshots", "eximage", "patches", "config"]
+BACKUP_DATA_FILES = ["config.json", "scan_exclusions.txt"]
+
+# 민감 설정 키 (백업 제외)
+SENSITIVE_KEYS = {"ai_api_key", "openai_api_key", "gemini_api_key"}
+
 
 def _dt_to_str(val):
-    """Convert datetime to ISO string for JSON serialization."""
     if val is None:
         return None
     if hasattr(val, 'isoformat'):
@@ -24,18 +33,8 @@ def _dt_to_str(val):
     return str(val)
 
 
-@router.get("/export")
-async def export_backup(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_admin_user)
-):
-    """
-    전체 데이터 백업 (관리자 전용)
-    - products 메타데이터 (파일 제외)
-    - versions 메타데이터
-    - settings
-    """
-    # Products
+def _build_db_snapshot(db: Session) -> dict:
+    """DB 데이터를 dict로 직렬화"""
     products = db.query(Product).all()
     products_data = []
     for p in products:
@@ -75,18 +74,15 @@ async def export_backup(
             "versions": versions_data,
         })
 
-    # Settings
     settings_rows = db.query(Setting).all()
-    # API 키 등 민감 정보는 제외
-    sensitive_keys = {"ai_api_key", "openai_api_key", "gemini_api_key"}
     settings_data = [
         {"key": s.key, "value": s.value, "description": s.description}
         for s in settings_rows
-        if s.key not in sensitive_keys
+        if s.key not in SENSITIVE_KEYS
     ]
 
-    backup = {
-        "backup_version": "1.0",
+    return {
+        "backup_version": "2.0",
         "backup_date": datetime.now(timezone.utc).isoformat(),
         "products_count": len(products_data),
         "settings_count": len(settings_data),
@@ -94,12 +90,48 @@ async def export_backup(
         "settings": settings_data,
     }
 
-    content = json.dumps(backup, ensure_ascii=False, indent=2)
-    filename = f"myappstore_backup_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
+
+@router.get("/export")
+async def export_backup(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin_user)
+):
+    """
+    전체 데이터 백업 ZIP (관리자 전용)
+    - backup.json: products 메타데이터 + settings
+    - data/: icons, videos, attachments, screenshots, eximage, patches, config
+    """
+    db_snapshot = _build_db_snapshot(db)
+    data_root = Path(settings.CONFIG_DATA_DIR)
+
+    # ZIP 파일을 메모리에 생성
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, mode='w', compression=zipfile.ZIP_DEFLATED, allowZip64=True) as zf:
+        # 1. backup.json 추가
+        zf.writestr("backup.json", json.dumps(db_snapshot, ensure_ascii=False, indent=2))
+
+        # 2. 개별 파일 추가
+        for fname in BACKUP_DATA_FILES:
+            fpath = data_root / fname
+            if fpath.exists():
+                zf.write(fpath, f"data/{fname}")
+
+        # 3. 서브 디렉토리 추가
+        for subdir in BACKUP_DATA_SUBDIRS:
+            subdir_path = data_root / subdir
+            if not subdir_path.exists():
+                continue
+            for file_path in subdir_path.rglob("*"):
+                if file_path.is_file():
+                    arcname = "data/" + str(file_path.relative_to(data_root))
+                    zf.write(file_path, arcname)
+
+    buf.seek(0)
+    filename = f"myappstore_backup_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.zip"
 
     return StreamingResponse(
-        io.BytesIO(content.encode("utf-8")),
-        media_type="application/json",
+        buf,
+        media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
@@ -112,32 +144,56 @@ async def restore_backup(
 ):
     """
     백업 파일에서 데이터 복원 (관리자 전용)
-
-    복원 정책:
-    - Settings: key 기준 upsert (민감 키 제외)
-    - Products: folder_path 기준으로 기존 레코드 업데이트 (없으면 스킵)
-    - Versions: 기존 레코드 건드리지 않음 (파일 경로 의존성 있음)
+    - ZIP (v2.0): DB + 데이터 파일 복원
+    - JSON (v1.0): DB만 복원 (하위 호환)
     """
-    if not file.filename.endswith(".json"):
-        raise HTTPException(status_code=400, detail="JSON 파일만 업로드 가능합니다.")
-
     raw = await file.read()
-    try:
-        backup = json.loads(raw.decode("utf-8"))
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="유효하지 않은 JSON 파일입니다.")
+    restored_files = 0
 
-    if backup.get("backup_version") != "1.0":
-        raise HTTPException(status_code=400, detail="지원하지 않는 백업 파일 형식입니다.")
+    if file.filename.endswith(".zip"):
+        # ZIP 처리
+        try:
+            zf = zipfile.ZipFile(io.BytesIO(raw))
+        except zipfile.BadZipFile:
+            raise HTTPException(status_code=400, detail="유효하지 않은 ZIP 파일입니다.")
+
+        try:
+            backup_json = zf.read("backup.json").decode("utf-8")
+            backup = json.loads(backup_json)
+        except (KeyError, json.JSONDecodeError):
+            raise HTTPException(status_code=400, detail="ZIP 내 backup.json을 읽을 수 없습니다.")
+
+        if backup.get("backup_version") not in ("1.0", "2.0"):
+            raise HTTPException(status_code=400, detail="지원하지 않는 백업 파일 형식입니다.")
+
+        # 데이터 파일 복원
+        data_root = Path(settings.CONFIG_DATA_DIR)
+        for name in zf.namelist():
+            if name.startswith("data/") and not name.endswith("/"):
+                rel = name[len("data/"):]
+                dest = data_root / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(zf.read(name))
+                restored_files += 1
+
+    elif file.filename.endswith(".json"):
+        try:
+            backup = json.loads(raw.decode("utf-8"))
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="유효하지 않은 JSON 파일입니다.")
+
+        if backup.get("backup_version") not in ("1.0", "2.0"):
+            raise HTTPException(status_code=400, detail="지원하지 않는 백업 파일 형식입니다.")
+    else:
+        raise HTTPException(status_code=400, detail="ZIP 또는 JSON 파일만 업로드 가능합니다.")
 
     restored_settings = 0
     restored_products = 0
     skipped_products = 0
 
     # Settings 복원
-    sensitive_keys = {"ai_api_key", "openai_api_key", "gemini_api_key"}
     for s in backup.get("settings", []):
-        if s["key"] in sensitive_keys:
+        if s["key"] in SENSITIVE_KEYS:
             continue
         existing = db.query(Setting).filter(Setting.key == s["key"]).first()
         if existing:
@@ -146,14 +202,12 @@ async def restore_backup(
             db.add(Setting(key=s["key"], value=s["value"], description=s.get("description")))
         restored_settings += 1
 
-    # Products 복원 (folder_path 기준 메타데이터 업데이트)
+    # Products 복원
     for p in backup.get("products", []):
         existing = db.query(Product).filter(Product.folder_path == p["folder_path"]).first()
         if not existing:
             skipped_products += 1
             continue
-
-        # 메타데이터만 업데이트
         fields = [
             "title", "subtitle", "description", "vendor", "icon_url", "category",
             "is_portable", "official_website", "license_type", "platform",
@@ -164,7 +218,6 @@ async def restore_backup(
         for field in fields:
             if field in p and p[field] is not None:
                 setattr(existing, field, p[field])
-
         restored_products += 1
 
     try:
@@ -173,10 +226,22 @@ async def restore_backup(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"복원 중 오류 발생: {str(e)}")
 
+    parts = []
+    if restored_settings:
+        parts.append(f"설정 {restored_settings}개")
+    if restored_products:
+        parts.append(f"제품 메타데이터 {restored_products}개")
+    if restored_files:
+        parts.append(f"데이터 파일 {restored_files}개")
+    summary = ", ".join(parts) + " 복원 완료."
+    if skipped_products:
+        summary += f" (폴더 없음으로 스킵: {skipped_products}개)"
+
     return {
         "success": True,
         "restored_settings": restored_settings,
         "restored_products": restored_products,
+        "restored_files": restored_files,
         "skipped_products": skipped_products,
-        "message": f"설정 {restored_settings}개, 제품 메타데이터 {restored_products}개 복원 완료. (스킵: {skipped_products}개)"
+        "message": summary
     }

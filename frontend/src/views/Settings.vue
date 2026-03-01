@@ -1018,7 +1018,7 @@
               @dragover.prevent
               @drop.prevent="onRestoreFileDrop"
             >
-              <input ref="restoreFileInput" type="file" accept=".json" class="hidden" @change="onRestoreFileChange" />
+              <input ref="restoreFileInput" type="file" accept=".zip,.json" class="hidden" @change="onRestoreFileChange" />
               <div v-if="restoreFile">
                 <svg class="w-8 h-8 text-green-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -2122,7 +2122,7 @@ const onRestoreFileChange = (e) => {
 
 const onRestoreFileDrop = (e) => {
   const file = e.dataTransfer.files[0]
-  if (file && file.name.endsWith('.json')) { restoreFile.value = file; restoreResult.value = null }
+  if (file && (file.name.endsWith('.zip') || file.name.endsWith('.json'))) { restoreFile.value = file; restoreResult.value = null }
 }
 
 const runRestore = async () => {
