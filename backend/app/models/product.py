@@ -48,3 +48,4 @@ class Product(Base):
     # Relationships
     versions = relationship("Version", back_populates="product", cascade="all, delete-orphan")
     attachments = relationship("Attachment", back_populates="product", cascade="all, delete-orphan")
+    videos = relationship("ProductVideo", back_populates="product", cascade="all, delete-orphan")

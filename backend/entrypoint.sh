@@ -88,6 +88,27 @@ try:
         print("✓ Schema columns verified")
     else:
         print("Note: filename_violations table not yet created (will be created by SQLAlchemy)")
+
+    # product_videos 테이블 자동 생성
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS product_videos (
+            id SERIAL PRIMARY KEY,
+            product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+            title VARCHAR(200) NOT NULL DEFAULT '',
+            description TEXT,
+            file_path VARCHAR NOT NULL,
+            file_name VARCHAR NOT NULL,
+            file_size BIGINT DEFAULT 0,
+            mime_type VARCHAR DEFAULT 'video/mp4',
+            sort_order INTEGER DEFAULT 0,
+            source VARCHAR DEFAULT 'upload',
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+    """)
+    cur.execute("CREATE INDEX IF NOT EXISTS ix_product_videos_product_id ON product_videos(product_id)")
+    conn.commit()
+    print("✓ product_videos table ready")
+
     cur.close()
     conn.close()
 except Exception as e:

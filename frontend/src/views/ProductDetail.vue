@@ -969,6 +969,14 @@
 
               <!-- HTML Content (보기 모드) -->
               <div v-else class="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none tinymce-content overflow-hidden" v-html="product.installation_guide"></div>
+
+              <!-- ── 설치 안내 영상 섹션 ── -->
+              <div class="border-t border-gray-200 dark:border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8">
+                <VideoGuideSection
+                  :product-id="product.id"
+                  :is-admin="authStore.user?.role === 'admin'"
+                />
+              </div>
             </div>
 
             <!-- Patch / LanguagePack / Manual / Update Tabs (공통 구조) -->
@@ -1476,6 +1484,7 @@ import { getDownloadUrl, getIconUrl, getBackendUrl } from '../utils/env'
 import ProductLogoSearchDialog from '../components/product/ProductLogoSearchDialog.vue'
 import ProductImageSearchDialog from '../components/product/ProductImageSearchDialog.vue'
 import ShareDialog from '../components/product/ShareDialog.vue'
+import VideoGuideSection from '../components/product/VideoGuideSection.vue'
 import { useDialog } from '../composables/useDialog'
 
 const route = useRoute()

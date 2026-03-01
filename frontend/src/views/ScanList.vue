@@ -535,18 +535,26 @@
             </div>
           </div>
 
-          <!-- Note -->
+          <!-- Note / 영상 제목 -->
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              {{ t('scanList.registerDialog.note') }}
+              {{ registerItem?.classification === 'installation_video'
+                ? t('scanList.registerDialog.videoTitle')
+                : t('scanList.registerDialog.note') }}
             </label>
             <input
               v-model="registerNote"
               type="text"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 text-sm"
-              :placeholder="t('scanList.registerDialog.notePlaceholder')"
+              :placeholder="registerItem?.classification === 'installation_video'
+                ? t('scanList.registerDialog.videoTitlePlaceholder')
+                : t('scanList.registerDialog.notePlaceholder')"
               @click.stop
             />
+            <!-- 설치영상 안내 문구 -->
+            <p v-if="registerItem?.classification === 'installation_video'" class="mt-1.5 text-xs text-rose-600 dark:text-rose-400">
+              {{ t('scanList.registerDialog.videoGuideInfo') }}
+            </p>
           </div>
 
           <!-- Actions -->
@@ -751,6 +759,16 @@ const classifications = computed(() => [
     activeBgClass: 'bg-sky-500 text-white',
     ringColor: 'sky-400',
     headerClass: 'bg-gradient-to-r from-sky-500 to-cyan-600',
+  },
+  {
+    key: 'installation_video',
+    label: t('scanList.classification.installation_video'),
+    icon: '🎬',
+    textColor: 'text-rose-600 dark:text-rose-400',
+    bgClass: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300',
+    activeBgClass: 'bg-rose-500 text-white',
+    ringColor: 'rose-400',
+    headerClass: 'bg-gradient-to-r from-rose-500 to-pink-600',
   },
 ])
 
