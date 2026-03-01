@@ -711,7 +711,7 @@
                       <!-- 드롭다운 메뉴 -->
                       <div
                         v-if="versionReclassifyMenu === version.id"
-                        class="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-20"
+                        class="absolute right-0 bottom-full mb-1 sm:bottom-auto sm:top-full sm:mb-0 sm:mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-20"
                         @click.stop
                       >
                         <div class="p-1.5">
@@ -722,6 +722,7 @@
                               { key: 'language_pack', icon: '🌐', label: t('product.tabs.language_pack') },
                               { key: 'manual', icon: '📄', label: t('product.tabs.manual') },
                               { key: 'update', icon: '⬆️', label: t('product.tabs.update') },
+                              { key: 'installation_video', icon: '🎬', label: t('scanList.classification.installation_video') },
                             ]"
                             :key="cls.key"
                             @click="reclassifyVersion(version.id, cls.key)"
@@ -1692,7 +1693,7 @@ const download = (versionId) => {
   window.open(getDownloadUrl(versionId, token), '_blank')
 }
 
-// 버전 → 분류 변환 (패치/언어팩/메뉴얼/업데이트로 이동)
+// 버전 → 분류 변환 (패치/언어팩/메뉴얼/업데이트/설치영상으로 이동)
 const reclassifyVersion = async (versionId, classification) => {
   versionReclassifyMenu.value = null
 
@@ -1701,6 +1702,7 @@ const reclassifyVersion = async (versionId, classification) => {
     language_pack: t('product.tabs.language_pack'),
     manual: t('product.tabs.manual'),
     update: t('product.tabs.update'),
+    installation_video: t('scanList.classification.installation_video'),
   }
   const label = labelMap[classification] || classification
 
@@ -1710,11 +1712,18 @@ const reclassifyVersion = async (versionId, classification) => {
   if (!confirmed) return
 
   try {
-    const { attachmentsApi } = await import('../api/attachments.js')
-    await attachmentsApi.reclassifyVersion(versionId, { classification })
-    await alert.success(`"${label}" 탭으로 이동되었습니다.`)
-    // 탭 이동 + 데이터 새로고침
-    activeTab.value = classification
+    if (classification === 'installation_video') {
+      // 설치영상: ProductVideo로 등록
+      const { productVideosApi } = await import('../api/productVideos.js')
+      await productVideosApi.fromVersion(versionId)
+      await alert.success(`"${label}" 탭으로 이동되었습니다.`)
+      activeTab.value = 'installation'
+    } else {
+      const { attachmentsApi } = await import('../api/attachments.js')
+      await attachmentsApi.reclassifyVersion(versionId, { classification })
+      await alert.success(`"${label}" 탭으로 이동되었습니다.`)
+      activeTab.value = classification
+    }
     await loadProduct()
     await loadAttachments()
   } catch (error) {

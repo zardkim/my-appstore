@@ -150,6 +150,67 @@ def update_video(
     return video
 
 
+@router.post("/from-version/{version_id}", response_model=ProductVideoSchema)
+def reclassify_version_as_video(
+    version_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """버전(Version)을 설치안내 영상으로 분류 변환"""
+    from app.models.version import Version
+    from app.models.filename_violation import FilenameViolation
+
+    version = db.query(Version).filter(Version.id == version_id).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="버전을 찾을 수 없습니다.")
+
+    ext = Path(version.file_name).suffix.lower() if version.file_name else ''
+    if ext not in ALLOWED_VIDEO_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"지원하지 않는 파일 형식입니다. 지원 형식: {', '.join(ALLOWED_VIDEO_EXTENSIONS)}",
+        )
+
+    product_id = version.product_id
+    src_path = Path(version.file_path)
+    if not src_path.exists():
+        raise HTTPException(status_code=404, detail="파일을 찾을 수 없습니다.")
+
+    # 대상 폴더 준비 및 파일 복사
+    video_dir = _get_video_dir(product_id)
+    dest_path = _unique_path(video_dir, version.file_name)
+    shutil.copy2(str(src_path), str(dest_path))
+
+    mime_type = MIME_BY_EXT.get(ext, 'video/mp4')
+    video = ProductVideo(
+        product_id=product_id,
+        title=Path(version.file_name).stem,
+        file_path=str(dest_path),
+        file_name=dest_path.name,
+        file_size=dest_path.stat().st_size,
+        mime_type=mime_type,
+        sort_order=0,
+        source='scan',
+    )
+    db.add(video)
+
+    # 연관된 스캔 항목 처리
+    scan_item = db.query(FilenameViolation).filter(
+        FilenameViolation.folder_path == str(src_path.parent),
+        FilenameViolation.file_name == version.file_name,
+    ).first()
+    if scan_item:
+        scan_item.is_resolved = True
+        scan_item.product_id = product_id
+        scan_item.classification = 'installation_video'
+        scan_item.violation_details = "installation_video 등록 완료 (버전에서 변환)"
+
+    db.delete(version)
+    db.commit()
+    db.refresh(video)
+    return video
+
+
 @router.delete("/{video_id}")
 def delete_video(
     video_id: int,

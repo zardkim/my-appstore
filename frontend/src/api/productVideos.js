@@ -19,4 +19,7 @@ export const productVideosApi = {
 
   delete: (videoId) =>
     client.delete(`/product-videos/${videoId}`),
+
+  fromVersion: (versionId) =>
+    client.post(`/product-videos/from-version/${versionId}`),
 }
