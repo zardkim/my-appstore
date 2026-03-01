@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     ATTACHMENTS_DIR: str = "/home/nuricom/project/myappStore/data/attachments"
     CONFIG_DATA_DIR: str = "/home/nuricom/project/myappStore/data"
     SCAN_EXCLUSIONS_FILE: str = "/home/nuricom/project/myappStore/data/scan_exclusions.txt"
+    VIDEOS_DIR: str = "/home/nuricom/project/myappStore/data/videos"
 
     # CORS - comma-separated string
     CORS_ORIGINS: str = "http://localhost:5900,http://localhost:3000"

@@ -12,6 +12,7 @@ from app.models.filename_violation import FilenameViolation
 from app.models.invitation import Invitation
 from app.models.metadata_cache import MetadataCache
 from app.models.share_link import ShareLink
+from app.models.product_video import ProductVideo
 
 __all__ = [
     "User",
@@ -29,4 +30,5 @@ __all__ = [
     "Invitation",
     "MetadataCache",
     "ShareLink",
+    "ProductVideo",
 ]

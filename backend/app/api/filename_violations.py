@@ -1,10 +1,10 @@
 """
 스캔 목록 (Scan Items) 관리 API
 
-파일 스캔 후 생성된 항목을 관리한다. 각 항목은 5가지 분류 중 하나로 자동 분류되며,
-분류에 따라 제품 등록(AI 매칭) 또는 첨부파일(패치/언어팩/메뉴얼/업데이트) 등록 처리를 한다.
+파일 스캔 후 생성된 항목을 관리한다. 각 항목은 6가지 분류 중 하나로 자동 분류되며,
+분류에 따라 제품 등록(AI 매칭) 또는 첨부파일(패치/언어팩/메뉴얼/업데이트) 또는 설치영상 등록 처리를 한다.
 
-분류값: product | patch | language_pack | manual | update
+분류값: product | patch | language_pack | manual | update | installation_video
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -32,7 +32,7 @@ from app.core.auto_matcher import match_violations_to_products
 # ── 하위 호환: 기존 URL (/api/filename-violations) + 신규 URL (/api/scan-items)
 router = APIRouter(tags=["Scan Items"])
 
-VALID_CLASSIFICATIONS = {"product", "patch", "language_pack", "manual", "update"}
+VALID_CLASSIFICATIONS = {"product", "patch", "language_pack", "manual", "update", "installation_video"}
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -200,6 +200,15 @@ async def register_scan_item(
     if item.classification == "product":
         return await _register_as_product(item, db)
 
+    # 설치영상 분류: ProductVideo 생성
+    if item.classification == "installation_video":
+        if not request.product_id:
+            raise HTTPException(
+                status_code=400,
+                detail="설치영상 등록 시 product_id가 필요합니다."
+            )
+        return await _register_as_video(item, request.product_id, request.note, db)
+
     # 그 외 분류: Attachment 생성
     if not request.product_id:
         raise HTTPException(
@@ -288,6 +297,81 @@ async def _register_as_product(item: FilenameViolation, db: Session):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"제품 등록 중 오류 발생: {str(e)}")
+
+
+async def _register_as_video(
+    item: FilenameViolation,
+    product_id: int,
+    note: Optional[str],
+    db: Session,
+):
+    """installation_video 분류 항목을 ProductVideo로 등록 (data/videos/ 에 복사)"""
+    import shutil
+    from app.models.product_video import ProductVideo
+    from app.config import settings
+
+    MIME_BY_EXT = {
+        '.mp4': 'video/mp4', '.webm': 'video/webm', '.ogg': 'video/ogg',
+        '.mov': 'video/quicktime', '.avi': 'video/x-msvideo', '.mkv': 'video/x-matroska',
+    }
+
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="제품을 찾을 수 없습니다.")
+
+    src_path = Path(item.folder_path) / item.file_name
+    if not src_path.exists():
+        raise HTTPException(status_code=404, detail=f"파일을 찾을 수 없습니다: {src_path}")
+
+    existing = db.query(ProductVideo).filter(
+        ProductVideo.product_id == product_id,
+        ProductVideo.file_name == item.file_name,
+    ).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="이 파일은 이미 해당 제품의 설치영상으로 등록되어 있습니다.")
+
+    # data/videos/{product_id}/ 에 복사
+    dest_dir = Path(settings.VIDEOS_DIR) / str(product_id)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest_path = dest_dir / item.file_name
+
+    # 파일명 충돌 처리
+    counter = 1
+    while dest_path.exists():
+        stem, ext = os.path.splitext(item.file_name)
+        dest_path = dest_dir / f"{stem}_{counter}{ext}"
+        counter += 1
+
+    shutil.copy2(str(src_path), str(dest_path))
+
+    ext = Path(item.file_name).suffix.lower()
+    mime_type = MIME_BY_EXT.get(ext, 'video/mp4')
+    title = note.strip() if note and note.strip() else Path(item.file_name).stem
+
+    video = ProductVideo(
+        product_id=product_id,
+        title=title,
+        file_path=str(dest_path),
+        file_name=dest_path.name,
+        file_size=dest_path.stat().st_size,
+        mime_type=mime_type,
+        source='scan',
+    )
+    db.add(video)
+
+    item.is_resolved = True
+    item.product_id = product_id
+    item.violation_details = "설치영상 등록 완료"
+
+    db.commit()
+    db.refresh(video)
+
+    return {
+        "success": True,
+        "message": "설치 안내 영상이 등록되었습니다.",
+        "video_id": video.id,
+        "product_id": product_id,
+    }
 
 
 async def _register_as_attachment(

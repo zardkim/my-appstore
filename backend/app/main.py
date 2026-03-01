@@ -7,7 +7,7 @@ from pathlib import Path
 import logging
 
 from app.database import engine, Base
-from app.api import auth, products, users, scan, download, scheduler, filesystem, favorites, scraps, config, metadata, posts, invitations, images, filename_violations, version, comments, cache, attachments, share
+from app.api import auth, products, users, scan, download, scheduler, filesystem, favorites, scraps, config, metadata, posts, invitations, images, filename_violations, version, comments, cache, attachments, share, product_videos
 from app.core.scheduler import scan_scheduler
 from app.config import settings
 
@@ -218,6 +218,7 @@ for dir_path, mount_path, name in [
     (settings.ICON_CACHE_DIR, "/static/icons", "icons"),
     (settings.SCREENSHOT_CACHE_DIR, "/static/screenshots", "screenshots"),
     (settings.EXIMAGE_DIR, "/static/eximage", "eximage"),
+    (settings.VIDEOS_DIR, "/static/videos", "videos"),
 ]:
     os.makedirs(dir_path, exist_ok=True)
     app.mount(mount_path, StaticFiles(directory=dir_path), name=name)
@@ -244,6 +245,7 @@ app.include_router(version.router, prefix="/api", tags=["Version"])
 app.include_router(cache.router, prefix="/api/cache", tags=["Cache"])
 app.include_router(attachments.router, tags=["Attachments"])
 app.include_router(share.router, prefix="/api/share", tags=["Share"])
+app.include_router(product_videos.router, tags=["product-videos"])
 
 
 @app.on_event("startup")
