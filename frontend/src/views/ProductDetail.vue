@@ -684,7 +684,7 @@
                     <!-- 정상 다운로드 버튼 -->
                     <button
                       v-else
-                      @click="download(version.id)"
+                      @click="download(version.id, version.file_name)"
                       class="flex-1 sm:flex-none flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-medium text-sm sm:text-base"
                     >
                       <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1688,9 +1688,18 @@ const handleImageError = (event) => {
   event.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif"%3E이미지를 불러올 수 없습니다%3C/text%3E%3C/svg%3E'
 }
 
-const download = (versionId) => {
+const download = (versionId, filename) => {
   const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-  window.open(getDownloadUrl(versionId, token), '_blank')
+  const url = getDownloadUrl(versionId, token)
+  // PWA/모바일 환경에서 window.open(_blank)는 차단되므로
+  // programmatic anchor click 방식으로 다운로드 (대용량 파일 메모리 문제 없음)
+  const a = document.createElement('a')
+  a.href = url
+  if (filename) a.download = filename
+  a.style.display = 'none'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
 }
 
 // 버전 → 분류 변환 (패치/언어팩/메뉴얼/업데이트/설치영상으로 이동)
