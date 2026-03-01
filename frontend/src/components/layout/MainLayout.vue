@@ -435,6 +435,12 @@ const logout = () => {
 .main-content-area {
   padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
 }
+/* 브라우저 모드(비PWA): 브라우저 UI(주소창/탭바 등)로 인한 뷰포트 압축 보정 */
+@media (display-mode: browser) {
+  .main-content-area {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px) + 2rem);
+  }
+}
 @media (min-width: 1024px) {
   .main-content-area {
     padding-bottom: 0;
