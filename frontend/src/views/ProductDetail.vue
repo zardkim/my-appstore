@@ -143,6 +143,7 @@
     <div
       v-else-if="product"
       class="flex-1 overflow-y-auto pb-20 lg:pb-8"
+      :class="swipeTransition"
       @touchstart.passive="handleTouchStart"
       @touchend.passive="handleTouchEnd"
     >
@@ -1472,7 +1473,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { productsApi } from '../api/products'
@@ -1526,7 +1527,8 @@ const adjacentProducts = ref({ prev: null, next: null })
 // 터치 스와이프 감지
 const touchStartX = ref(0)
 const touchStartY = ref(0)
-const swipeTransition = ref('') // 'left' | 'right' | ''
+const swipeTransition = ref('') // CSS 애니메이션 클래스
+const swipeDirection = ref('') // 'left' | 'right' | ''
 
 const loadAdjacentProducts = async () => {
   try {
@@ -1539,13 +1541,23 @@ const loadAdjacentProducts = async () => {
 
 const goToPrev = () => {
   if (adjacentProducts.value.prev) {
-    router.push(`/product/${adjacentProducts.value.prev.id}`)
+    swipeDirection.value = 'right'
+    swipeTransition.value = 'swipe-out-right'
+    const targetId = adjacentProducts.value.prev.id
+    setTimeout(() => {
+      router.push(`/product/${targetId}`)
+    }, 180)
   }
 }
 
 const goToNext = () => {
   if (adjacentProducts.value.next) {
-    router.push(`/product/${adjacentProducts.value.next.id}`)
+    swipeDirection.value = 'left'
+    swipeTransition.value = 'swipe-out-left'
+    const targetId = adjacentProducts.value.next.id
+    setTimeout(() => {
+      router.push(`/product/${targetId}`)
+    }, 180)
   }
 }
 
@@ -2562,6 +2574,9 @@ onMounted(async () => {
 // 라우트 변경 시 제품 재로드 (이전/다음 네비게이션)
 watch(() => route.params.id, async (newId, oldId) => {
   if (newId === oldId) return
+  const direction = swipeDirection.value
+  swipeTransition.value = ''
+  swipeDirection.value = ''
   loading.value = true
   error.value = null
   product.value = null
@@ -2580,6 +2595,13 @@ watch(() => route.params.id, async (newId, oldId) => {
     loading.value = false
   }
 
+  // 스와이프 후 진입 시 slide-in 애니메이션 적용
+  if (product.value && direction) {
+    await nextTick()
+    swipeTransition.value = direction === 'left' ? 'swipe-in-left' : 'swipe-in-right'
+    setTimeout(() => { swipeTransition.value = '' }, 300)
+  }
+
   await loadAdjacentProducts()
 })
 
@@ -2591,6 +2613,39 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+/* 스와이프 애니메이션 */
+.swipe-out-left {
+  animation: swipeOutLeft 0.18s ease forwards;
+  pointer-events: none;
+}
+.swipe-out-right {
+  animation: swipeOutRight 0.18s ease forwards;
+  pointer-events: none;
+}
+.swipe-in-left {
+  animation: swipeInLeft 0.25s ease forwards;
+}
+.swipe-in-right {
+  animation: swipeInRight 0.25s ease forwards;
+}
+
+@keyframes swipeOutLeft {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-30%); opacity: 0; }
+}
+@keyframes swipeOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(30%); opacity: 0; }
+}
+@keyframes swipeInLeft {
+  from { transform: translateX(30%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes swipeInRight {
+  from { transform: translateX(-30%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
 /* TinyMCE 컨텐츠 모바일 최적화 */
 :deep(.tinymce-content img) {
   max-width: 100%;

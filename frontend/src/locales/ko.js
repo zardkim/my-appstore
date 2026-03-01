@@ -297,7 +297,8 @@ export default {
       scheduler: '자동 스캔 스케줄러',
       categories: '카테고리 관리',
       board: '게시판 관리',
-      filingRules: '파일명 규칙 안내',
+      // filingRules: '파일명 규칙 안내', // 숨김 처리
+      dataManagement: '데이터 관리',
       metadata: '메타데이터 설정',
       exceptions: '스캔 예외 설정',
       system: '시스템 정보',
@@ -731,6 +732,27 @@ export default {
       summaryPoint3: '✓ 폴더명+파일명 조합으로 정확도 향상',
       summaryPoint4: '✓ 부가정보는 자동으로 태그 추출',
       summaryPoint5: '✓ 불명확한 경우 폴더명 활용',
+    },
+    // 데이터 관리
+    dataManagement: {
+      title: '데이터 관리',
+      description: '데이터베이스 정리 및 시스템 통계를 관리합니다',
+      statsTitle: '시스템 통계',
+      statsDesc: '현재 등록된 데이터 현황을 확인합니다',
+      totalProducts: '등록된 소프트웨어',
+      incompleteScan: '미처리 스캔 항목',
+      lastScan: '마지막 스캔',
+      refreshStats: '통계 새로고침',
+      cleanupTitle: '삭제된 파일 정리',
+      cleanupDesc: '파일 시스템에서 삭제된 파일에 해당하는 DB 레코드를 정리합니다. 실제 파일이 없는 버전 및 제품 데이터가 삭제됩니다.',
+      cleanupBtn: '삭제된 파일 정리',
+      cleanupConfirmTitle: '데이터 정리 확인',
+      cleanupConfirmMsg: '파일이 없는 버전과 제품 데이터를 삭제합니다. 이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?',
+      cleanupSuccess: '{versions}개 버전, {products}개 제품이 정리되었습니다.',
+      cleanupNone: '정리할 데이터가 없습니다.',
+      cleanupFailed: '데이터 정리에 실패했습니다.',
+      loading: '로딩 중...',
+      never: '없음',
     },
     // 메타데이터 설정
     metadata: {

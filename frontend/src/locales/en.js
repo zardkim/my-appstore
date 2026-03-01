@@ -295,7 +295,8 @@ export default {
       scheduler: 'Auto Scan Scheduler',
       categories: 'Category Management',
       board: 'Board Management',
-      filingRules: 'Filename Rules Guide',
+      // filingRules: 'Filename Rules Guide', // hidden
+      dataManagement: 'Data Management',
       metadata: 'Metadata Settings',
       exceptions: 'Scan Exceptions',
       system: 'System Information',
@@ -729,6 +730,27 @@ export default {
       summaryPoint3: '✓ Improved accuracy with folder + filename combination',
       summaryPoint4: '✓ Metadata automatically extracted as tags',
       summaryPoint5: '✓ Uses folder names when unclear',
+    },
+    // Data Management
+    dataManagement: {
+      title: 'Data Management',
+      description: 'Manage database cleanup and system statistics',
+      statsTitle: 'System Statistics',
+      statsDesc: 'View current registered data status',
+      totalProducts: 'Registered Software',
+      incompleteScan: 'Pending Scan Items',
+      lastScan: 'Last Scan',
+      refreshStats: 'Refresh Stats',
+      cleanupTitle: 'Cleanup Deleted Files',
+      cleanupDesc: 'Clean up DB records for files that no longer exist on the filesystem. Version and product data without actual files will be deleted.',
+      cleanupBtn: 'Cleanup Deleted Files',
+      cleanupConfirmTitle: 'Confirm Data Cleanup',
+      cleanupConfirmMsg: 'Versions and products without files will be deleted. This action cannot be undone. Continue?',
+      cleanupSuccess: '{versions} versions and {products} products cleaned up.',
+      cleanupNone: 'No data to clean up.',
+      cleanupFailed: 'Data cleanup failed.',
+      loading: 'Loading...',
+      never: 'Never',
     },
     // Metadata settings
     metadata: {
