@@ -322,7 +322,7 @@
       <!-- Tabs - 전체 페이지 사용 -->
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto" @touchstart.stop @touchend.stop>
             <nav class="flex gap-4 sm:gap-6 lg:gap-8 px-4 sm:px-6 lg:px-8 min-w-max">
               <button
                 @click="activeTab = 'info'"
@@ -977,10 +977,11 @@
 
             <!-- Patch / LanguagePack / Manual / Update Tabs (공통 구조) -->
             <div v-if="['patch','language_pack','manual','update'].includes(activeTab)">
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
-                  <span class="mr-2 text-lg sm:text-xl">{{ tabTypeIcon(activeTab) }}</span>
+              <div class="flex items-center justify-between gap-3 mb-4 sm:mb-6">
+                <h3 class="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                  <span class="mr-1.5 sm:mr-2 text-base sm:text-xl">{{ tabTypeIcon(activeTab) }}</span>
                   {{ t(`product.tabs.${activeTab}`) }}
+                  <span class="ml-1.5 text-xs sm:text-sm font-normal text-gray-500 dark:text-gray-400">({{ currentTabAttachments.length }})</span>
                 </h3>
               </div>
 
@@ -991,7 +992,7 @@
                   @dragover.prevent="isDragging = true"
                   @dragleave.prevent="isDragging = false"
                   :class="[
-                    'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
+                    'border-2 border-dashed rounded-lg p-4 sm:p-8 text-center transition-colors',
                     isDragging
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                       : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800'
@@ -1003,18 +1004,18 @@
                     @change="handleFileSelect"
                     class="hidden"
                   />
-                  <div class="space-y-4">
-                    <svg class="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="flex sm:flex-col items-center gap-3 sm:gap-4">
+                    <svg class="w-8 h-8 sm:w-16 sm:h-16 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
-                    <div>
+                    <div class="flex-1 sm:flex-none">
                       <button
                         @click="$refs.fileInput.click()"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
                       >
                         {{ t('common.selectFile') }}
                       </button>
-                      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{{ t('common.dragAndDrop') }}</p>
+                      <p class="hidden sm:block text-sm text-gray-600 dark:text-gray-400 mt-2">{{ t('common.dragAndDrop') }}</p>
                     </div>
                   </div>
                 </div>
@@ -1218,23 +1219,23 @@
               </div>
 
               <!-- 파일 목록 (현재 탭 분류 기준으로 필터링) -->
-              <div v-if="currentTabAttachments.length > 0" class="space-y-3">
+              <div v-if="currentTabAttachments.length > 0" class="space-y-2 sm:space-y-3">
                 <div
                   v-for="attachment in currentTabAttachments"
                   :key="attachment.id"
-                  class="flex items-center justify-between p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors"
+                  class="p-3 sm:p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors"
                 >
-                  <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="flex-shrink-0">
-                      <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 mt-0.5">
+                      <svg class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-2 mb-1">
-                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ attachment.file_name }}</p>
+                      <div class="flex items-start gap-2 mb-1 flex-wrap">
+                        <p class="font-medium text-gray-900 dark:text-white text-sm sm:text-base break-all leading-snug">{{ attachment.file_name }}</p>
                         <span :class="[
-                          'px-2 py-0.5 text-xs rounded-full flex-shrink-0',
+                          'px-1.5 py-0.5 text-[10px] sm:text-xs rounded-full flex-shrink-0',
                           attachment.type === 'patch' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
                           attachment.type === 'crack' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
                           attachment.type === 'manual' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
@@ -1243,43 +1244,66 @@
                           {{ t(`product.patches.types.${attachment.type}`) }}
                         </span>
                       </div>
-                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatFileSize(attachment.file_size) }} · {{ formatDate(attachment.created_at) }}</p>
-                      <p v-if="attachment.note" class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ attachment.note }}</p>
+                      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ formatFileSize(attachment.file_size) }} · {{ formatDate(attachment.created_at) }}</p>
+                      <p v-if="attachment.note" class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">{{ attachment.note }}</p>
+                      <!-- 모바일: 버튼 하단 배치 -->
+                      <div class="flex items-center gap-2 mt-2 sm:hidden">
+                        <button
+                          @click="downloadPatchFile(attachment.id, attachment.file_name)"
+                          class="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5 text-sm"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          {{ t('common.download') }}
+                        </button>
+                        <button
+                          v-if="authStore.user?.role === 'admin'"
+                          @click="deleteAttachment(attachment.id)"
+                          class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          :title="t('common.delete')"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <div class="flex items-center gap-2 ml-4">
-                    <button
-                      @click="downloadPatchFile(attachment.id, attachment.file_name)"
-                      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      {{ t('common.download') }}
-                    </button>
-                    <button
-                      v-if="authStore.user?.role === 'admin'"
-                      @click="deleteAttachment(attachment.id)"
-                      class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                      :title="t('common.delete')"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+                    <!-- 데스크탑: 버튼 우측 배치 -->
+                    <div class="hidden sm:flex items-center gap-2 flex-shrink-0">
+                      <button
+                        @click="downloadPatchFile(attachment.id, attachment.file_name)"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        {{ t('common.download') }}
+                      </button>
+                      <button
+                        v-if="authStore.user?.role === 'admin'"
+                        @click="deleteAttachment(attachment.id)"
+                        class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        :title="t('common.delete')"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <!-- 파일 없음 -->
-              <div v-else-if="currentTabAttachments.length === 0" class="text-center py-12">
-                <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 rounded-3xl flex items-center justify-center">
-                  <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div v-else-if="currentTabAttachments.length === 0" class="text-center py-8 sm:py-12">
+                <div class="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 rounded-2xl sm:rounded-3xl flex items-center justify-center">
+                  <svg class="w-7 h-7 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ t('product.patches.noFiles') }}</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">{{ t('product.patches.noFiles') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
                   {{ authStore.user?.role === 'admin' ? t('product.patches.noFilesAdmin') : t('product.patches.noFilesDesc') }}
                 </p>
               </div>
