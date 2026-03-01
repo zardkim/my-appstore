@@ -2487,6 +2487,12 @@ const deleteAttachment = async (attachmentId) => {
   }
 }
 
+// 제품 데이터 새로고침
+const loadProduct = async () => {
+  const response = await productsApi.getById(product.value.id)
+  product.value = response.data
+}
+
 // 패치 파일 목록 로드
 const loadAttachments = async () => {
   try {
