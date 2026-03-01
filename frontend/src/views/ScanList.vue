@@ -355,12 +355,12 @@
     <!-- Register Attachment Dialog -->
     <div
       v-if="registerDialogOpen"
-      class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-start sm:items-center justify-center z-50 p-4 overflow-y-auto"
       @click.self="closeRegisterDialog"
     >
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] my-auto">
         <!-- Dialog Header -->
-        <div class="px-6 py-4 flex items-center gap-3" :class="getRegisterHeaderClass(registerItem?.classification)">
+        <div class="px-6 py-4 flex items-center gap-3 flex-shrink-0" :class="getRegisterHeaderClass(registerItem?.classification)">
           <span class="text-2xl">{{ getClassIcon(registerItem?.classification) }}</span>
           <h3 class="text-lg font-bold text-white">
             {{ t('scanList.registerDialog.title', { type: getClassLabel(registerItem?.classification) }) }}
@@ -372,7 +372,7 @@
           </button>
         </div>
 
-        <div class="p-6 space-y-4">
+        <div class="p-6 space-y-4 overflow-y-auto flex-1">
           <!-- File info -->
           <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-sm border border-gray-100 dark:border-gray-700">
             <p class="font-medium text-gray-900 dark:text-white break-all">{{ registerItem?.file_name }}</p>
