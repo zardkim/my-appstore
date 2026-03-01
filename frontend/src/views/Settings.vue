@@ -960,65 +960,108 @@
             <p class="text-gray-500 dark:text-gray-400">{{ t('settings.dataManagement.description') }}</p>
           </div>
 
-          <!-- 시스템 통계 -->
+          <!-- 백업 -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-start gap-4 mb-5">
+              <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                </svg>
+              </div>
               <div>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('settings.dataManagement.statsTitle') }}</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('settings.dataManagement.statsDesc') }}</p>
-              </div>
-              <button
-                @click="loadDataStats"
-                :disabled="dataStatsLoading"
-                class="px-3 py-1.5 text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors disabled:opacity-50"
-              >
-                <span v-if="dataStatsLoading">{{ t('settings.dataManagement.loading') }}</span>
-                <span v-else>{{ t('settings.dataManagement.refreshStats') }}</span>
-              </button>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
-                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                  {{ dataStats ? dataStats.total_products : '-' }}
-                </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ t('settings.dataManagement.totalProducts') }}</div>
-              </div>
-              <div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 text-center">
-                <div class="text-3xl font-bold text-orange-600 dark:text-orange-400">
-                  {{ dataStats ? dataStats.incomplete_count : '-' }}
-                </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ t('settings.dataManagement.incompleteScan') }}</div>
-              </div>
-              <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
-                <div class="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-2">
-                  {{ dataStats ? (dataStats.last_scan === 'Never' ? t('settings.dataManagement.never') : dataStats.last_scan) : '-' }}
-                </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ t('settings.dataManagement.lastScan') }}</div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('settings.dataManagement.backupTitle') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('settings.dataManagement.backupDesc') }}</p>
               </div>
             </div>
-          </div>
-
-          <!-- 삭제된 파일 정리 -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ t('settings.dataManagement.cleanupTitle') }}</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ t('settings.dataManagement.cleanupDesc') }}</p>
-            <div v-if="cleanupResult" class="mb-4 p-3 rounded-lg text-sm" :class="cleanupResult.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'">
-              {{ cleanupResult.message }}
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-5 text-sm text-blue-700 dark:text-blue-300 space-y-1">
+              <div class="flex items-center gap-2"><span>✓</span> {{ t('settings.dataManagement.backupInclude1') }}</div>
+              <div class="flex items-center gap-2"><span>✓</span> {{ t('settings.dataManagement.backupInclude2') }}</div>
+              <div class="flex items-center gap-2"><span>✗</span> {{ t('settings.dataManagement.backupExclude1') }}</div>
             </div>
             <button
-              @click="runCleanup"
-              :disabled="cleanupLoading"
-              class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+              @click="downloadBackup"
+              :disabled="backupLoading"
+              class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
             >
-              <svg v-if="cleanupLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <svg v-if="backupLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
               </svg>
               <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              {{ t('settings.dataManagement.cleanupBtn') }}
+              {{ t('settings.dataManagement.backupBtn') }}
             </button>
+          </div>
+
+          <!-- 복원 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-start gap-4 mb-5">
+              <div class="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('settings.dataManagement.restoreTitle') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('settings.dataManagement.restoreDesc') }}</p>
+              </div>
+            </div>
+
+            <!-- 파일 업로드 영역 -->
+            <div
+              class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors mb-5"
+              :class="restoreFile
+                ? 'border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-900/20'
+                : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500'"
+              @click="$refs.restoreFileInput.click()"
+              @dragover.prevent
+              @drop.prevent="onRestoreFileDrop"
+            >
+              <input ref="restoreFileInput" type="file" accept=".json" class="hidden" @change="onRestoreFileChange" />
+              <div v-if="restoreFile">
+                <svg class="w-8 h-8 text-green-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-sm font-medium text-green-700 dark:text-green-400">{{ restoreFile.name }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ formatFileSize(restoreFile.size) }}</p>
+              </div>
+              <div v-else>
+                <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('settings.dataManagement.restoreDropHint') }}</p>
+              </div>
+            </div>
+
+            <!-- 결과 메시지 -->
+            <div v-if="restoreResult" class="mb-4 p-3 rounded-lg text-sm" :class="restoreResult.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'">
+              {{ restoreResult.message }}
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button
+                @click="runRestore"
+                :disabled="!restoreFile || restoreLoading"
+                class="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <svg v-if="restoreLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                {{ t('settings.dataManagement.restoreBtn') }}
+              </button>
+              <button
+                v-if="restoreFile"
+                @click="restoreFile = null; restoreResult = null"
+                class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium text-sm transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
+                {{ t('common.cancel') }}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2032,48 +2075,82 @@ const userInfo = computed(() => authStore.user || { username: '', role: 'user' }
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 const isLoadingConfig = ref(false) // config 로딩 중 플래그
 
-// Data Management
-const dataStats = ref(null)
-const dataStatsLoading = ref(false)
-const cleanupLoading = ref(false)
-const cleanupResult = ref(null)
+// Data Management - Backup & Restore
+const backupLoading = ref(false)
+const restoreFile = ref(null)
+const restoreLoading = ref(false)
+const restoreResult = ref(null)
 
-const loadDataStats = async () => {
-  dataStatsLoading.value = true
+const formatFileSize = (bytes) => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+const downloadBackup = async () => {
+  backupLoading.value = true
   try {
-    const response = await apiClient.get('/products/stats/overview')
-    dataStats.value = response.data
+    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+    const response = await apiClient.get('/backup/export', {
+      responseType: 'blob',
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    const disposition = response.headers['content-disposition'] || ''
+    const match = disposition.match(/filename="(.+)"/)
+    const filename = match ? match[1] : `myappstore_backup_${new Date().toISOString().slice(0, 10)}.json`
+    const url = URL.createObjectURL(new Blob([response.data], { type: 'application/json' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.style.display = 'none'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    await alert.success(t('settings.dataManagement.backupSuccess'))
   } catch (e) {
-    console.error('Failed to load stats:', e)
+    await alert.error(t('settings.dataManagement.backupFailed'))
   } finally {
-    dataStatsLoading.value = false
+    backupLoading.value = false
   }
 }
 
-const runCleanup = async () => {
+const onRestoreFileChange = (e) => {
+  const file = e.target.files[0]
+  if (file) { restoreFile.value = file; restoreResult.value = null }
+}
+
+const onRestoreFileDrop = (e) => {
+  const file = e.dataTransfer.files[0]
+  if (file && file.name.endsWith('.json')) { restoreFile.value = file; restoreResult.value = null }
+}
+
+const runRestore = async () => {
+  if (!restoreFile.value) return
   const confirmed = await showConfirm({
-    title: t('settings.dataManagement.cleanupConfirmTitle'),
-    message: t('settings.dataManagement.cleanupConfirmMsg'),
+    title: t('settings.dataManagement.restoreConfirmTitle'),
+    message: t('settings.dataManagement.restoreConfirmMsg'),
     type: 'warning',
-    confirmText: t('settings.dataManagement.cleanupBtn'),
+    confirmText: t('settings.dataManagement.restoreBtn'),
     cancelText: t('common.cancel')
   })
   if (!confirmed) return
 
-  cleanupLoading.value = true
-  cleanupResult.value = null
+  restoreLoading.value = true
+  restoreResult.value = null
   try {
-    const response = await apiClient.post('/products/cleanup-deleted')
-    const data = response.data
-    const msg = data.deleted_versions === 0 && data.deleted_products === 0
-      ? t('settings.dataManagement.cleanupNone')
-      : t('settings.dataManagement.cleanupSuccess', { versions: data.deleted_versions, products: data.deleted_products })
-    cleanupResult.value = { success: true, message: msg }
-    await loadDataStats()
+    const formData = new FormData()
+    formData.append('file', restoreFile.value)
+    const response = await apiClient.post('/backup/restore', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    restoreResult.value = { success: true, message: response.data.message }
+    restoreFile.value = null
   } catch (e) {
-    cleanupResult.value = { success: false, message: t('settings.dataManagement.cleanupFailed') }
+    const msg = e.response?.data?.detail || t('settings.dataManagement.restoreFailed')
+    restoreResult.value = { success: false, message: msg }
   } finally {
-    cleanupLoading.value = false
+    restoreLoading.value = false
   }
 }
 
@@ -3234,13 +3311,10 @@ onMounted(async () => {
   }
 })
 
-// Watch activeSection for cache and data-management
+// Watch activeSection for cache
 watch(activeSection, (newSection) => {
   if (newSection === 'cache' && isAdmin.value) {
     loadCacheStats()
-  }
-  if (newSection === 'data-management' && isAdmin.value) {
-    loadDataStats()
   }
 })
 
