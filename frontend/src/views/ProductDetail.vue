@@ -160,12 +160,12 @@
         <span v-else></span>
       </div>
       <!-- Product Header -->
-      <div class="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-700 dark:to-purple-800 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 text-white mb-4 sm:mb-6">
+      <div class="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-700 dark:to-purple-800 px-4 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-12 text-white mb-4 sm:mb-6">
         <div class="max-w-7xl mx-auto">
-          <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 lg:gap-8">
+          <div class="flex flex-row items-start gap-3 sm:gap-6 lg:gap-8">
             <!-- 아이콘 (클릭하여 검색 가능) -->
             <div
-              class="relative w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl flex-shrink-0 flex items-center justify-center overflow-hidden p-4 sm:p-5 lg:p-6 shadow-xl group"
+              class="relative w-16 h-16 sm:w-32 sm:h-32 lg:w-40 lg:h-40 bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl flex-shrink-0 flex items-center justify-center overflow-hidden p-2.5 sm:p-5 lg:p-6 shadow-xl group"
               :class="{ 'cursor-pointer hover:ring-2 hover:ring-blue-500': authStore.user?.role === 'admin' }"
             >
               <img
@@ -176,7 +176,7 @@
               />
               <svg
                 v-else
-                class="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-blue-500"
+                class="w-8 h-8 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-blue-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -232,33 +232,33 @@
               />
             </div>
 
-            <div class="flex-1">
+            <div class="flex-1 min-w-0">
               <!-- 제목 (편집 가능) -->
-              <div class="mb-1 sm:mb-2">
+              <div class="mb-0.5 sm:mb-2">
                 <input
                   v-if="isEditing"
                   v-model="editForm.title"
                   type="text"
-                  class="w-full text-xl sm:text-2xl lg:text-4xl font-bold bg-white/10 border-2 border-white/30 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-white placeholder-white/50 focus:outline-none focus:border-white/60"
+                  class="w-full text-base sm:text-2xl lg:text-4xl font-bold bg-white/10 border-2 border-white/30 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-white placeholder-white/50 focus:outline-none focus:border-white/60"
                   placeholder="제품명 (예: Hancom Office)"
                 />
-                <h1 v-else class="text-xl sm:text-2xl lg:text-4xl font-bold">{{ product.title }}</h1>
+                <h1 v-else class="text-base sm:text-2xl lg:text-4xl font-bold leading-tight">{{ product.title }}</h1>
               </div>
 
               <!-- 부제목 (편집 가능) -->
-              <div class="mb-2 sm:mb-3">
+              <div class="mb-1 sm:mb-3">
                 <input
                   v-if="isEditing"
                   v-model="editForm.subtitle"
                   type="text"
-                  class="w-full text-sm sm:text-base lg:text-xl bg-white/10 border-2 border-white/30 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-blue-100 placeholder-white/50 focus:outline-none focus:border-white/60"
+                  class="w-full text-xs sm:text-base lg:text-xl bg-white/10 border-2 border-white/30 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-blue-100 placeholder-white/50 focus:outline-none focus:border-white/60"
                   placeholder="부제목 (예: 한컴오피스)"
                 />
-                <p v-else-if="product.subtitle" class="text-sm sm:text-base lg:text-xl text-blue-100">{{ product.subtitle }}</p>
+                <p v-else-if="product.subtitle" class="text-xs sm:text-base lg:text-xl text-blue-100 truncate">{{ product.subtitle }}</p>
               </div>
 
               <!-- 개발사 & 공식 웹사이트 -->
-              <div class="mb-3 sm:mb-4">
+              <div class="mb-1.5 sm:mb-4">
                 <div v-if="isEditing" class="space-y-2">
                   <input
                     v-model="editForm.vendor"
@@ -273,19 +273,18 @@
                     :placeholder="t('productDetail.officialWebsitePlaceholder')"
                   />
                 </div>
-                <div v-else class="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <p class="text-blue-100 text-sm sm:text-base lg:text-lg">{{ product.vendor || 'Unknown Vendor' }}</p>
-
+                <div v-else class="flex flex-wrap items-center gap-1.5 sm:gap-3">
+                  <p class="text-blue-100 text-xs sm:text-base lg:text-lg truncate max-w-full">{{ product.vendor || 'Unknown Vendor' }}</p>
                   <!-- 공식 웹사이트 링크 -->
                   <a
                     v-if="product.official_website"
                     :href="product.official_website"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="flex items-center px-2 sm:px-3 py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-lg text-xs sm:text-sm font-medium transition-colors"
+                    class="flex items-center px-1.5 sm:px-3 py-1 sm:py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-lg text-[10px] sm:text-sm font-medium transition-colors"
                     :title="t('productDetail.officialWebsiteTitle')"
                   >
-                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                     </svg>
                     <span class="hidden sm:inline">{{ t('productDetail.officialSite') }}</span>
@@ -293,24 +292,24 @@
                 </div>
               </div>
 
-              <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div class="flex flex-wrap items-center gap-1.5 sm:gap-3">
                 <!-- 카테고리 (편집 가능) -->
                 <select
                   v-if="isEditing"
                   v-model="editForm.category"
-                  class="px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white backdrop-blur-sm border border-white/30 text-gray-900 focus:outline-none focus:border-blue-500"
+                  class="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white backdrop-blur-sm border border-white/30 text-gray-900 focus:outline-none focus:border-blue-500"
                 >
                   <option value="" class="text-gray-900">{{ t('productDetail.selectCategory') }}</option>
                   <option v-for="cat in categories" :key="cat" :value="cat" class="text-gray-900">{{ getCategoryIcon(cat) }} {{ getCategoryLabel(cat) }}</option>
                 </select>
                 <span
                   v-else-if="product.category"
-                  class="inline-flex items-center px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white/20 backdrop-blur-sm border border-white/30"
+                  class="inline-flex items-center px-2 sm:px-3 lg:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-sm font-medium bg-white/20 backdrop-blur-sm border border-white/30"
                 >
                   <span class="mr-1">{{ getCategoryIcon(product.category) }}</span>
                   <span class="hidden sm:inline">{{ getCategoryLabel(product.category) }}</span>
                 </span>
-                <span class="inline-flex items-center px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium bg-white/20 backdrop-blur-sm border border-white/30">
+                <span class="inline-flex items-center px-2 sm:px-3 lg:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-sm font-medium bg-white/20 backdrop-blur-sm border border-white/30">
                   {{ product.versions?.length || 0 }} {{ t('productDetail.versions') }}
                 </span>
               </div>
@@ -355,34 +354,30 @@
               <button
                 @click="activeTab = 'patch'"
                 :class="tabClass('patch')"
-                class="text-sm sm:text-base whitespace-nowrap"
+                class="text-xs sm:text-base whitespace-nowrap"
               >
-                <span class="hidden sm:inline">{{ t('product.tabs.patch') }} ({{ patchAttachments.length }})</span>
-                <span class="sm:hidden">{{ t('product.tabs.patch') }}</span>
+                {{ t('product.tabs.patch') }} ({{ patchAttachments.length }})
               </button>
               <button
                 @click="activeTab = 'language_pack'"
                 :class="tabClass('language_pack')"
-                class="text-sm sm:text-base whitespace-nowrap"
+                class="text-xs sm:text-base whitespace-nowrap"
               >
-                <span class="hidden sm:inline">{{ t('product.tabs.language_pack') }} ({{ langpackAttachments.length }})</span>
-                <span class="sm:hidden">{{ t('product.tabs.language_pack') }}</span>
+                {{ t('product.tabs.language_pack') }} ({{ langpackAttachments.length }})
               </button>
               <button
                 @click="activeTab = 'manual'"
                 :class="tabClass('manual')"
-                class="text-sm sm:text-base whitespace-nowrap"
+                class="text-xs sm:text-base whitespace-nowrap"
               >
-                <span class="hidden sm:inline">{{ t('product.tabs.manual') }} ({{ manualAttachments.length }})</span>
-                <span class="sm:hidden">{{ t('product.tabs.manual') }}</span>
+                {{ t('product.tabs.manual') }} ({{ manualAttachments.length }})
               </button>
               <button
                 @click="activeTab = 'update'"
                 :class="tabClass('update')"
-                class="text-sm sm:text-base whitespace-nowrap"
+                class="text-xs sm:text-base whitespace-nowrap"
               >
-                <span class="hidden sm:inline">{{ t('product.tabs.update') }} ({{ updateAttachments.length }})</span>
-                <span class="sm:hidden">{{ t('product.tabs.update') }}</span>
+                {{ t('product.tabs.update') }} ({{ updateAttachments.length }})
               </button>
             </nav>
           </div>
