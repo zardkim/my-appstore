@@ -379,66 +379,120 @@
             <p class="text-gray-500 dark:text-gray-400 text-xs mt-0.5 truncate">📁 {{ registerItem?.folder_path }}</p>
           </div>
 
-          <!-- Product Search -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <!-- Software Selection -->
+          <div class="space-y-3">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ t('scanList.registerDialog.selectProduct') }}
             </label>
-            <div class="relative">
-              <input
-                v-model="registerProductSearch"
-                @input="onProductSearchInput"
-                @click.stop
-                type="text"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 text-sm pr-8"
-                :placeholder="t('scanList.registerDialog.searchPlaceholder')"
-              />
-              <div v-if="searchingProducts" class="absolute right-2.5 top-2.5">
-                <svg class="animate-spin w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+
+            <!-- Selected Software Display -->
+            <div v-if="selectedProduct" class="px-3 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 flex items-center gap-2">
+              <img v-if="selectedProduct.icon_url" :src="selectedProduct.icon_url" class="w-6 h-6 rounded object-cover flex-shrink-0" />
+              <div v-else class="w-6 h-6 rounded bg-orange-100 dark:bg-orange-800 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" />
                 </svg>
               </div>
-            </div>
-
-            <!-- Search Results -->
-            <div v-if="productSearchResults.length > 0" class="mt-2 max-h-48 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <button
-                v-for="product in productSearchResults"
-                :key="product.id"
-                @click.stop="selectProduct(product)"
-                class="w-full text-left px-3 py-2.5 text-sm flex items-center gap-2.5 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
-                :class="selectedProduct?.id === product.id
-                  ? 'bg-orange-50 dark:bg-orange-900/20'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
-              >
-                <img v-if="product.icon_url" :src="product.icon_url" class="w-7 h-7 rounded object-cover flex-shrink-0" />
-                <div v-else class="w-7 h-7 rounded bg-gray-100 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
-                  <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" />
-                  </svg>
-                </div>
-                <span class="flex-1 truncate font-medium">{{ product.title }}</span>
-                <svg v-if="selectedProduct?.id === product.id" class="w-4 h-4 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-              </button>
-            </div>
-
-            <!-- Selected Product Display -->
-            <div v-if="selectedProduct && !productSearchResults.length" class="mt-2 px-3 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 flex items-center gap-2">
-              <img v-if="selectedProduct.icon_url" :src="selectedProduct.icon_url" class="w-6 h-6 rounded object-cover flex-shrink-0" />
-              <span class="text-sm font-medium text-orange-700 dark:text-orange-300 flex-1 truncate">{{ selectedProduct.title }}</span>
-              <button @click.stop="clearProductSelection" class="text-orange-400 hover:text-orange-600">
+              <span class="text-sm font-semibold text-orange-700 dark:text-orange-300 flex-1 truncate">{{ selectedProduct.title }}</span>
+              <svg class="w-4 h-4 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              <button @click.stop="clearProductSelection" class="text-orange-400 hover:text-orange-600 ml-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <p v-if="registerProductSearch && !searchingProducts && productSearchResults.length === 0 && !selectedProduct" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-              {{ t('scanList.registerDialog.noResults') }}
-            </p>
+            <!-- Same Folder Software -->
+            <div>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+                {{ t('scanList.registerDialog.sameFolderSoftware') }}
+              </p>
+              <div v-if="loadingFolderProducts" class="flex items-center justify-center py-3">
+                <svg class="animate-spin w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+              </div>
+              <div v-else-if="sameFolderProducts.length > 0" class="rounded-xl border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 overflow-hidden">
+                <button
+                  v-for="product in sameFolderProducts"
+                  :key="product.id"
+                  @click.stop="selectProduct(product)"
+                  class="w-full text-left px-3 py-2.5 text-sm flex items-center gap-2.5 transition-colors border-b border-blue-100 dark:border-blue-800 last:border-0"
+                  :class="selectedProduct?.id === product.id
+                    ? 'bg-orange-50 dark:bg-orange-900/30'
+                    : 'hover:bg-blue-100 dark:hover:bg-blue-800/40'"
+                >
+                  <img v-if="product.icon_url" :src="product.icon_url" class="w-7 h-7 rounded object-cover flex-shrink-0" />
+                  <div v-else class="w-7 h-7 rounded bg-blue-200 dark:bg-blue-700 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3.5 h-3.5 text-blue-500 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" />
+                    </svg>
+                  </div>
+                  <span class="flex-1 truncate font-medium text-blue-900 dark:text-blue-100">{{ product.title }}</span>
+                  <svg v-if="selectedProduct?.id === product.id" class="w-4 h-4 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              <p v-else class="text-xs text-gray-400 dark:text-gray-500 italic">{{ t('scanList.registerDialog.noSameFolderSoftware') }}</p>
+            </div>
+
+            <!-- All Software Search -->
+            <div>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                {{ t('scanList.registerDialog.allSoftware') }}
+              </p>
+              <div class="relative mb-2">
+                <input
+                  v-model="registerProductSearch"
+                  @input="onProductSearchInput"
+                  @click.stop
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 text-sm pr-8"
+                  :placeholder="t('scanList.registerDialog.searchPlaceholder')"
+                />
+                <div v-if="searchingProducts" class="absolute right-2.5 top-2.5">
+                  <svg class="animate-spin w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                </div>
+                <svg v-else class="absolute right-2.5 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <div class="max-h-44 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <button
+                  v-for="product in productSearchResults"
+                  :key="product.id"
+                  @click.stop="selectProduct(product)"
+                  class="w-full text-left px-3 py-2.5 text-sm flex items-center gap-2.5 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
+                  :class="selectedProduct?.id === product.id
+                    ? 'bg-orange-50 dark:bg-orange-900/20'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
+                >
+                  <img v-if="product.icon_url" :src="product.icon_url" class="w-6 h-6 rounded object-cover flex-shrink-0" />
+                  <div v-else class="w-6 h-6 rounded bg-gray-100 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" />
+                    </svg>
+                  </div>
+                  <span class="flex-1 truncate">{{ product.title }}</span>
+                  <svg v-if="selectedProduct?.id === product.id" class="w-4 h-4 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <p v-if="productSearchResults.length === 0 && !searchingProducts" class="px-3 py-3 text-xs text-gray-400 dark:text-gray-500 text-center">
+                  {{ t('scanList.registerDialog.noResults') }}
+                </p>
+              </div>
+            </div>
           </div>
 
           <!-- Note -->
@@ -588,6 +642,8 @@ const registerDialogOpen = ref(false)
 const registerItem = ref(null)
 const registerProductSearch = ref('')
 const productSearchResults = ref([])
+const sameFolderProducts = ref([])
+const loadingFolderProducts = ref(false)
 const selectedProduct = ref(null)
 const registerNote = ref('')
 const registering = ref(false)
@@ -917,18 +973,40 @@ const handleAIMatchingSaved = async (data) => {
 }
 
 // ── Register Attachment (non-product types) ─────────────────────
-const openRegisterDialog = (item) => {
+const openRegisterDialog = async (item) => {
   registerItem.value = item
   registerProductSearch.value = ''
   productSearchResults.value = []
+  sameFolderProducts.value = []
   selectedProduct.value = null
   registerNote.value = ''
   registerDialogOpen.value = true
+
+  // 같은 폴더의 소프트웨어 자동 로드
+  loadingFolderProducts.value = true
+  try {
+    const res = await productsApi.getAll({ folder_path: item.folder_path, limit: 20 })
+    sameFolderProducts.value = res.data.products || []
+  } catch (e) {
+    sameFolderProducts.value = []
+  } finally {
+    loadingFolderProducts.value = false
+  }
+
+  // 전체 소프트웨어 목록 초기 로드 (검색 전 기본 목록)
+  try {
+    const res = await productsApi.getAll({ limit: 50, sort_by: 'title', sort_order: 'asc' })
+    productSearchResults.value = res.data.products || []
+  } catch (e) {
+    productSearchResults.value = []
+  }
 }
 
 const closeRegisterDialog = () => {
   registerDialogOpen.value = false
   registerItem.value = null
+  sameFolderProducts.value = []
+  productSearchResults.value = []
   clearTimeout(searchDebounce)
 }
 
@@ -937,14 +1015,22 @@ const onProductSearchInput = () => {
   clearTimeout(searchDebounce)
   const q = registerProductSearch.value.trim()
   if (!q) {
-    productSearchResults.value = []
+    // 검색어 없으면 전체 목록으로 복원
+    searchDebounce = setTimeout(async () => {
+      try {
+        const res = await productsApi.getAll({ limit: 50, sort_by: 'title', sort_order: 'asc' })
+        productSearchResults.value = res.data.products || []
+      } catch (e) {
+        productSearchResults.value = []
+      }
+    }, 200)
     return
   }
   searchDebounce = setTimeout(async () => {
     searchingProducts.value = true
     try {
-      const res = await productsApi.getAll({ search: q, limit: 20 })
-      productSearchResults.value = res.data.items || res.data
+      const res = await productsApi.getAll({ search: q, limit: 30 })
+      productSearchResults.value = res.data.products || []
     } catch (e) {
       productSearchResults.value = []
     } finally {
@@ -956,13 +1042,11 @@ const onProductSearchInput = () => {
 const selectProduct = (product) => {
   selectedProduct.value = product
   registerProductSearch.value = product.title
-  productSearchResults.value = []
 }
 
 const clearProductSelection = () => {
   selectedProduct.value = null
   registerProductSearch.value = ''
-  productSearchResults.value = []
 }
 
 const submitRegister = async () => {
