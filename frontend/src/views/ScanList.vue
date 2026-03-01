@@ -406,48 +406,87 @@
 
             <!-- Same Folder Software -->
             <div>
-              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 flex items-center gap-1">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button
+                @click.stop="sameFolderExpanded = !sameFolderExpanded"
+                class="w-full flex items-center gap-1.5 mb-1.5 group"
+              >
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                 </svg>
-                {{ t('scanList.registerDialog.sameFolderSoftware') }}
-              </p>
-              <div v-if="loadingFolderProducts" class="flex items-center justify-center py-3">
-                <svg class="animate-spin w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-              </div>
-              <div v-else-if="sameFolderProducts.length > 0" class="rounded-xl border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 overflow-hidden">
-                <button
-                  v-for="product in sameFolderProducts"
-                  :key="product.id"
-                  @click.stop="selectProduct(product)"
-                  class="w-full text-left px-3 py-2.5 text-sm flex items-center gap-2.5 transition-colors border-b border-blue-100 dark:border-blue-800 last:border-0"
-                  :class="selectedProduct?.id === product.id
-                    ? 'bg-orange-50 dark:bg-orange-900/30'
-                    : 'hover:bg-blue-100 dark:hover:bg-blue-800/40'"
+                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  {{ t('scanList.registerDialog.sameFolderSoftware') }}
+                </span>
+                <!-- 소프트웨어명 미리보기 (접혀있을 때) -->
+                <span
+                  v-if="!sameFolderExpanded && sameFolderProducts.length > 0"
+                  class="text-xs text-blue-500 dark:text-blue-400 truncate max-w-[120px] font-normal normal-case tracking-normal"
                 >
-                  <img v-if="product.icon_url" :src="product.icon_url" class="w-7 h-7 rounded object-cover flex-shrink-0" />
-                  <div v-else class="w-7 h-7 rounded bg-blue-200 dark:bg-blue-700 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-3.5 h-3.5 text-blue-500 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" />
-                    </svg>
-                  </div>
-                  <span class="flex-1 truncate font-medium text-blue-900 dark:text-blue-100">{{ product.title }}</span>
-                  <svg v-if="selectedProduct?.id === product.id" class="w-4 h-4 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  {{ sameFolderProducts.map(p => p.title).join(', ') }}
+                </span>
+                <span v-if="sameFolderProducts.length > 0" class="text-xs text-blue-500 dark:text-blue-400 ml-auto">({{ sameFolderProducts.length }})</span>
+                <svg
+                  class="w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0"
+                  :class="sameFolderExpanded ? 'rotate-180' : ''"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div v-if="sameFolderExpanded">
+                <div v-if="loadingFolderProducts" class="flex items-center justify-center py-3">
+                  <svg class="animate-spin w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                   </svg>
-                </button>
+                </div>
+                <div v-else-if="sameFolderProducts.length > 0" class="rounded-xl border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 overflow-hidden">
+                  <button
+                    v-for="product in sameFolderProducts"
+                    :key="product.id"
+                    @click.stop="selectProduct(product)"
+                    class="w-full text-left px-3 py-2.5 text-sm flex items-center gap-2.5 transition-colors border-b border-blue-100 dark:border-blue-800 last:border-0"
+                    :class="selectedProduct?.id === product.id
+                      ? 'bg-orange-50 dark:bg-orange-900/30'
+                      : 'hover:bg-blue-100 dark:hover:bg-blue-800/40'"
+                  >
+                    <img v-if="product.icon_url" :src="product.icon_url" class="w-7 h-7 rounded object-cover flex-shrink-0" />
+                    <div v-else class="w-7 h-7 rounded bg-blue-200 dark:bg-blue-700 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-3.5 h-3.5 text-blue-500 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" />
+                      </svg>
+                    </div>
+                    <span class="flex-1 truncate font-medium text-blue-900 dark:text-blue-100">{{ product.title }}</span>
+                    <svg v-if="selectedProduct?.id === product.id" class="w-4 h-4 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+                <p v-else class="text-xs text-gray-400 dark:text-gray-500 italic">{{ t('scanList.registerDialog.noSameFolderSoftware') }}</p>
               </div>
-              <p v-else class="text-xs text-gray-400 dark:text-gray-500 italic">{{ t('scanList.registerDialog.noSameFolderSoftware') }}</p>
             </div>
 
             <!-- All Software Search -->
             <div>
-              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
-                {{ t('scanList.registerDialog.allSoftware') }}
-              </p>
+              <button
+                @click.stop="allSoftwareExpanded = !allSoftwareExpanded"
+                class="w-full flex items-center gap-1.5 mb-1.5 group"
+              >
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  {{ t('scanList.registerDialog.allSoftware') }}
+                </span>
+                <span v-if="productSearchResults.length > 0" class="text-xs text-gray-400 ml-auto">({{ productSearchResults.length }})</span>
+                <svg
+                  class="w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0"
+                  :class="allSoftwareExpanded ? 'rotate-180' : ''"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div v-if="allSoftwareExpanded">
               <div class="relative mb-2">
                 <input
                   v-model="registerProductSearch"
@@ -492,6 +531,7 @@
                   {{ t('scanList.registerDialog.noResults') }}
                 </p>
               </div>
+              </div><!-- end allSoftwareExpanded -->
             </div>
           </div>
 
@@ -648,6 +688,8 @@ const selectedProduct = ref(null)
 const registerNote = ref('')
 const registering = ref(false)
 const searchingProducts = ref(false)
+const sameFolderExpanded = ref(true)
+const allSoftwareExpanded = ref(true)
 let searchDebounce = null
 
 // Scan Modal
@@ -980,6 +1022,8 @@ const openRegisterDialog = async (item) => {
   sameFolderProducts.value = []
   selectedProduct.value = null
   registerNote.value = ''
+  sameFolderExpanded.value = true
+  allSoftwareExpanded.value = true
   registerDialogOpen.value = true
 
   // 같은 폴더의 소프트웨어 자동 로드
