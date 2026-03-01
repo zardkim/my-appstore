@@ -719,12 +719,8 @@ const isSelected = (id) => selectedIds.value.includes(id)
 const loadItems = async () => {
   loading.value = true
   try {
-    const [itemsRes, statsRes] = await Promise.all([
-      filenameViolationsApi.getScanItems({ resolved: false }),
-      filenameViolationsApi.getScanStats()
-    ])
-    items.value = itemsRes.data
-    stats.value = statsRes.data
+    const itemsRes = await filenameViolationsApi.getScanItems({ resolved: false })
+    items.value = itemsRes.data || []
     selectedIds.value = []
     isAllSelected.value = false
   } catch (error) {
@@ -732,6 +728,13 @@ const loadItems = async () => {
     items.value = []
   } finally {
     loading.value = false
+  }
+  // Load stats separately (non-critical - don't block items display)
+  try {
+    const statsRes = await filenameViolationsApi.getScanStats()
+    stats.value = statsRes.data
+  } catch (e) {
+    console.warn('Failed to load stats:', e)
   }
 }
 
@@ -1022,7 +1025,13 @@ const startScan = async () => {
     const errorMessages = []
     for (const folder of foldersToScan) {
       try {
-        await scanApi.startScan(folder, useAI.value)
+        const res = await scanApi.startScan(folder, useAI.value)
+        const data = res.data || {}
+        // Show file-level errors from scan response
+        if (data.errors && data.errors.length > 0) {
+          data.errors.slice(0, 3).forEach(e => errorMessages.push(`[${folder}] ${e}`))
+          if (data.errors.length > 3) errorMessages.push(`[${folder}] ... +${data.errors.length - 3}건 오류`)
+        }
       } catch (error) {
         const errorDetail = error.response?.data?.detail || error.message
         errorMessages.push(`${folder}: ${errorDetail}`)

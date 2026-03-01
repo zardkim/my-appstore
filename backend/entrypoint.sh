@@ -61,7 +61,38 @@ END
 
 # Database tables will be created automatically by SQLAlchemy
 echo "Database tables will be created by SQLAlchemy Base.metadata.create_all()"
-echo "Note: For future migrations, Alembic configuration can be added to the Docker image"
+
+# Ensure critical schema columns exist (classification columns for scan items)
+echo "Checking schema columns..."
+python3 << 'PYEND'
+import os
+import psycopg2
+
+database_url = os.getenv('DATABASE_URL', '')
+if not database_url:
+    postgres_user = os.getenv('POSTGRES_USER', 'postgres')
+    postgres_password = os.getenv('POSTGRES_PASSWORD', 'password')
+    postgres_db = os.getenv('POSTGRES_DB', 'myappstore')
+    database_url = f"postgresql://{postgres_user}:{postgres_password}@db:5432/{postgres_db}"
+
+try:
+    conn = psycopg2.connect(database_url)
+    cur = conn.cursor()
+    # Check if filename_violations table exists
+    cur.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'filename_violations')")
+    table_exists = cur.fetchone()[0]
+    if table_exists:
+        cur.execute("ALTER TABLE filename_violations ADD COLUMN IF NOT EXISTS classification VARCHAR(20) NOT NULL DEFAULT 'product'")
+        cur.execute("ALTER TABLE filename_violations ADD COLUMN IF NOT EXISTS classification_auto BOOLEAN NOT NULL DEFAULT true")
+        conn.commit()
+        print("✓ Schema columns verified")
+    else:
+        print("Note: filename_violations table not yet created (will be created by SQLAlchemy)")
+    cur.close()
+    conn.close()
+except Exception as e:
+    print(f"Note: Schema check skipped: {e}")
+PYEND
 
 # config.json 파일이 없으면 config.sample.json에서 복사
 CONFIG_DIR="${CONFIG_DATA_DIR:-/app/data}"
