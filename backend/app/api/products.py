@@ -39,6 +39,7 @@ async def get_products(
     category: Optional[str] = None,
     vendor: Optional[str] = None,
     search: Optional[str] = None,
+    folder_path: Optional[str] = None,
     sort_by: str = Query("id", regex="^(id|title|category|vendor)$"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
     db: Session = Depends(get_db),
@@ -53,10 +54,15 @@ async def get_products(
         category: Filter by category
         vendor: Filter by vendor
         search: Search in title, description, vendor
+        folder_path: Filter by exact folder path
         sort_by: Sort field (id, title, category, vendor)
         sort_order: Sort order (asc, desc)
     """
     query = db.query(Product).options(joinedload(Product.versions))
+
+    # 폴더 경로 필터 (스캔 아이템과 같은 폴더의 소프트웨어 조회)
+    if folder_path:
+        query = query.filter(Product.folder_path == folder_path)
 
     # 카테고리 필터
     if category:
