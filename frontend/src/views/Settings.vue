@@ -679,9 +679,8 @@
           </div>
         </div>
 
-        <!-- Filing Rules -->
-        <!-- Filing Rules -->
-        <div v-show="activeSection === 'filing-rules'" class="space-y-6">
+        <!-- Filing Rules (숨김 처리) -->
+        <div v-show="false" class="space-y-6">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.filingRules.title') }}</h1>
             <p class="text-gray-500 dark:text-gray-400">{{ t('settings.filingRules.description') }}</p>
@@ -951,6 +950,75 @@
                 <span class="text-gray-700 dark:text-gray-300">{{ t('settings.filingRules.summaryPoint5') }}</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div v-show="activeSection === 'data-management'" class="space-y-6">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.dataManagement.title') }}</h1>
+            <p class="text-gray-500 dark:text-gray-400">{{ t('settings.dataManagement.description') }}</p>
+          </div>
+
+          <!-- 시스템 통계 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('settings.dataManagement.statsTitle') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('settings.dataManagement.statsDesc') }}</p>
+              </div>
+              <button
+                @click="loadDataStats"
+                :disabled="dataStatsLoading"
+                class="px-3 py-1.5 text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors disabled:opacity-50"
+              >
+                <span v-if="dataStatsLoading">{{ t('settings.dataManagement.loading') }}</span>
+                <span v-else>{{ t('settings.dataManagement.refreshStats') }}</span>
+              </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                  {{ dataStats ? dataStats.total_products : '-' }}
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ t('settings.dataManagement.totalProducts') }}</div>
+              </div>
+              <div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                  {{ dataStats ? dataStats.incomplete_count : '-' }}
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ t('settings.dataManagement.incompleteScan') }}</div>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
+                <div class="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-2">
+                  {{ dataStats ? (dataStats.last_scan === 'Never' ? t('settings.dataManagement.never') : dataStats.last_scan) : '-' }}
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ t('settings.dataManagement.lastScan') }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 삭제된 파일 정리 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ t('settings.dataManagement.cleanupTitle') }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ t('settings.dataManagement.cleanupDesc') }}</p>
+            <div v-if="cleanupResult" class="mb-4 p-3 rounded-lg text-sm" :class="cleanupResult.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'">
+              {{ cleanupResult.message }}
+            </div>
+            <button
+              @click="runCleanup"
+              :disabled="cleanupLoading"
+              class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              <svg v-if="cleanupLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              {{ t('settings.dataManagement.cleanupBtn') }}
+            </button>
           </div>
         </div>
 
@@ -1921,6 +1989,7 @@ import { scanApi } from '../api/scan'
 import { usersApi } from '../api/users'
 import { cacheApi } from '../api/cache'
 import { authApi } from '../api/auth'
+import apiClient from '../api/client'
 import { ENV } from '../utils/env'
 import { useDialog } from '../composables/useDialog'
 
@@ -1929,7 +1998,7 @@ const { t, locale } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const authStore = useAuthStore()
 const localeStore = useLocaleStore()
-const { alert, confirm } = useDialog()
+const { alert, confirm, showConfirm } = useDialog()
 
 // Use version injected by Vite from package.json
 const appVersion = __APP_VERSION__
@@ -1943,7 +2012,8 @@ const sections = computed(() => {
     { id: 'scheduler', label: t('settings.sections.scheduler'), icon: '⏰' },
     { id: 'categories', label: t('settings.sections.categories'), icon: '🏷️' },
     { id: 'board', label: t('settings.sections.board'), icon: '📋' },
-    { id: 'filing-rules', label: t('settings.sections.filingRules'), icon: '📄' },
+    // { id: 'filing-rules', label: t('settings.sections.filingRules'), icon: '📄' }, // 숨김 처리
+    { id: 'data-management', label: t('settings.sections.dataManagement'), icon: '🗄️' },
     { id: 'metadata', label: t('settings.sections.metadata'), icon: '🤖' },
     { id: 'exceptions', label: t('settings.sections.exceptions'), icon: '🚫' },
     { id: 'system', label: t('settings.sections.system'), icon: 'ℹ️' }
@@ -1961,6 +2031,51 @@ const activeSection = ref('general')
 const userInfo = computed(() => authStore.user || { username: '', role: 'user' })
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 const isLoadingConfig = ref(false) // config 로딩 중 플래그
+
+// Data Management
+const dataStats = ref(null)
+const dataStatsLoading = ref(false)
+const cleanupLoading = ref(false)
+const cleanupResult = ref(null)
+
+const loadDataStats = async () => {
+  dataStatsLoading.value = true
+  try {
+    const response = await apiClient.get('/products/stats/overview')
+    dataStats.value = response.data
+  } catch (e) {
+    console.error('Failed to load stats:', e)
+  } finally {
+    dataStatsLoading.value = false
+  }
+}
+
+const runCleanup = async () => {
+  const confirmed = await showConfirm({
+    title: t('settings.dataManagement.cleanupConfirmTitle'),
+    message: t('settings.dataManagement.cleanupConfirmMsg'),
+    type: 'warning',
+    confirmText: t('settings.dataManagement.cleanupBtn'),
+    cancelText: t('common.cancel')
+  })
+  if (!confirmed) return
+
+  cleanupLoading.value = true
+  cleanupResult.value = null
+  try {
+    const response = await apiClient.post('/products/cleanup-deleted')
+    const data = response.data
+    const msg = data.deleted_versions === 0 && data.deleted_products === 0
+      ? t('settings.dataManagement.cleanupNone')
+      : t('settings.dataManagement.cleanupSuccess', { versions: data.deleted_versions, products: data.deleted_products })
+    cleanupResult.value = { success: true, message: msg }
+    await loadDataStats()
+  } catch (e) {
+    cleanupResult.value = { success: false, message: t('settings.dataManagement.cleanupFailed') }
+  } finally {
+    cleanupLoading.value = false
+  }
+}
 
 // General
 const language = computed({
@@ -3119,10 +3234,13 @@ onMounted(async () => {
   }
 })
 
-// Watch activeSection for cache
+// Watch activeSection for cache and data-management
 watch(activeSection, (newSection) => {
   if (newSection === 'cache' && isAdmin.value) {
     loadCacheStats()
+  }
+  if (newSection === 'data-management' && isAdmin.value) {
+    loadDataStats()
   }
 })
 
