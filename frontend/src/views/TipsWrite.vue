@@ -197,11 +197,11 @@ const isEdit = computed(() => route.params.id !== undefined)
 
 // 게시판 카테고리 (설정에서 동적 로드, fallback: 기본값)
 const boardCategories = ref([
-  { value: 'tip', label: '팁', color: 'green', icon: '💡' },
-  { value: 'tech', label: '기술', color: 'blue', icon: '⚙️' },
-  { value: 'tutorial', label: '튜토리얼', color: 'purple', icon: '📚' },
-  { value: 'qna', label: 'Q&A', color: 'yellow', icon: '❓' },
-  { value: 'news', label: '뉴스', color: 'red', icon: '📰' }
+  { value: 'tip', label: '팁', color: 'green' },
+  { value: 'tech', label: '기술', color: 'blue' },
+  { value: 'tutorial', label: '튜토리얼', color: 'purple' },
+  { value: 'qna', label: 'Q&A', color: 'yellow' },
+  { value: 'news', label: '뉴스', color: 'red' }
 ])
 
 // TinyMCE 언어 매핑 (locale code -> tinymce language file)

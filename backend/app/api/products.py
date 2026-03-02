@@ -297,20 +297,19 @@ async def update_product(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    # 허용된 카테고리 목록
-    ALLOWED_CATEGORIES = [
-        "Graphics", "Office", "Development", "Utility", "Media", "OS",
-        "Security", "Network", "Mac", "Mobile", "Patch", "Driver",
-        "Source", "Backup", "Business", "Engineering",
-        "Theme", "Hardware", "Uncategorized"
-    ]
+    # 허용된 카테고리 목록 (config에서 동적으로 로드)
+    try:
+        _config = load_config()
+        ALLOWED_CATEGORIES = [cat["name"] for cat in _config.get("categories", []) if "name" in cat]
+    except Exception:
+        ALLOWED_CATEGORIES = []
 
     # 업데이트할 필드만 적용
     update_dict = update_data.model_dump(exclude_unset=True)
 
-    # 카테고리 유효성 검증
+    # 카테고리 유효성 검증 (config에 카테고리가 존재할 때만 검증)
     if "category" in update_dict and update_dict["category"] is not None:
-        if update_dict["category"] not in ALLOWED_CATEGORIES:
+        if ALLOWED_CATEGORIES and update_dict["category"] not in ALLOWED_CATEGORIES:
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid category. Allowed categories: {', '.join(ALLOWED_CATEGORIES)}"
