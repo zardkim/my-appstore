@@ -604,7 +604,7 @@
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.board.categories') }}</h3>
-              <button v-if="isAdmin" @click="showAddBoardCategoryModal = true" class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center">
+              <button v-if="isAdmin" @click="openAddBoardCategoryModal" class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -615,7 +615,7 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
               <div v-for="category in boardCategories" :key="category.value" class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-500 transition-all group">
                 <div class="flex items-center justify-between mb-3">
-                  <span :class="getBoardCategoryStyle(category.color)" class="text-sm font-medium">{{ category.label }}</span>
+                  <span :class="getBoardCategoryStyle(category.color)" class="text-sm font-medium">{{ category.icon ? category.icon + ' ' + category.label : category.label }}</span>
                   <div v-if="isAdmin" class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button @click="openEditBoardCategoryModal(category)" class="p-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
@@ -960,41 +960,117 @@
             <p class="text-gray-500 dark:text-gray-400">{{ t('settings.dataManagement.description') }}</p>
           </div>
 
-          <!-- 백업 -->
+          <!-- 백업 생성 + 목록 -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <div class="flex items-start gap-4 mb-5">
-              <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-start justify-between gap-4 mb-5">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('settings.dataManagement.backupTitle') }}</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('settings.dataManagement.backupDesc') }}</p>
+                </div>
+              </div>
+              <button
+                @click="createBackup"
+                :disabled="backupLoading"
+                class="flex-shrink-0 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <svg v-if="backupLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                 </svg>
-              </div>
-              <div>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('settings.dataManagement.backupTitle') }}</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('settings.dataManagement.backupDesc') }}</p>
-              </div>
+                {{ t('settings.dataManagement.backupBtn') }}
+              </button>
             </div>
+
+            <!-- 백업 포함/제외 항목 -->
             <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-5 text-sm text-blue-700 dark:text-blue-300 space-y-1">
               <div class="flex items-center gap-2"><span>✓</span> {{ t('settings.dataManagement.backupInclude1') }}</div>
               <div class="flex items-center gap-2"><span>✓</span> {{ t('settings.dataManagement.backupInclude2') }}</div>
+              <div class="flex items-center gap-2"><span>✓</span> {{ t('settings.dataManagement.backupInclude3') }}</div>
               <div class="flex items-center gap-2"><span>✗</span> {{ t('settings.dataManagement.backupExclude1') }}</div>
             </div>
-            <button
-              @click="downloadBackup"
-              :disabled="backupLoading"
-              class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              <svg v-if="backupLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg>
-              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              {{ t('settings.dataManagement.backupBtn') }}
-            </button>
+
+            <!-- 백업 파일 목록 -->
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('settings.dataManagement.backupListTitle') }}</h3>
+                <button @click="loadBackupList" :disabled="backupListLoading" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                  <svg :class="backupListLoading ? 'animate-spin' : ''" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  {{ t('settings.dataManagement.refresh') }}
+                </button>
+              </div>
+
+              <div v-if="backupListLoading" class="text-center py-6 text-gray-400 dark:text-gray-500 text-sm">
+                <svg class="animate-spin w-5 h-5 mx-auto mb-2" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                {{ t('settings.dataManagement.loading') }}
+              </div>
+
+              <div v-else-if="backupList.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500 text-sm border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+                <svg class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                {{ t('settings.dataManagement.backupListEmpty') }}
+              </div>
+
+              <div v-else class="space-y-2">
+                <div
+                  v-for="item in backupList"
+                  :key="item.filename"
+                  class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-600 transition-colors"
+                >
+                  <div class="min-w-0 flex-1 mr-3">
+                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{{ item.filename }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {{ formatFileSize(item.size) }} &nbsp;·&nbsp; {{ formatBackupDate(item.created_at) }}
+                    </p>
+                  </div>
+                  <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <button
+                      @click="downloadBackupFromServer(item.filename)"
+                      class="px-2.5 py-1.5 text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors flex items-center gap-1"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      {{ t('settings.dataManagement.download') }}
+                    </button>
+                    <button
+                      @click="restoreFromServer(item.filename)"
+                      class="px-2.5 py-1.5 text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/60 transition-colors flex items-center gap-1"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      {{ t('settings.dataManagement.restoreBtn') }}
+                    </button>
+                    <button
+                      @click="deleteBackupFile(item.filename)"
+                      class="px-2 py-1.5 text-xs bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- 복원 -->
+          <!-- 파일 업로드로 복원 -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-start gap-4 mb-5">
               <div class="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -1003,7 +1079,7 @@
                 </svg>
               </div>
               <div>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('settings.dataManagement.restoreTitle') }}</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('settings.dataManagement.restoreUploadTitle') }}</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('settings.dataManagement.restoreDesc') }}</p>
               </div>
             </div>
@@ -1860,6 +1936,33 @@
               </button>
             </div>
           </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.icon') }}</label>
+            <div class="flex items-center space-x-2 mb-2">
+              <div class="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-xl border-2 border-blue-500">
+                {{ newBoardCategory.icon || '🏷️' }}
+              </div>
+              <input v-model="newBoardCategory.icon" type="text" :placeholder="t('settings.board.iconPlaceholder')" maxlength="2" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-gray-700 max-h-48 overflow-y-auto">
+              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">{{ t('settings.categoriesManagement.frequentEmojis') }}</p>
+              <div class="space-y-2">
+                <div v-for="(group, groupName) in emojiGroups" :key="groupName">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('settings.categoriesManagement.emojiGroups.' + groupName) }}</p>
+                  <div class="grid grid-cols-10 gap-1">
+                    <button
+                      v-for="emoji in group"
+                      :key="emoji"
+                      type="button"
+                      @click="newBoardCategory.icon = emoji"
+                      class="w-8 h-8 text-lg rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center justify-center"
+                      :class="newBoardCategory.icon === emoji ? 'bg-blue-100 dark:bg-blue-900/50 ring-2 ring-blue-400' : ''"
+                    >{{ emoji }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="flex space-x-3">
             <button type="button" @click="closeAddBoardCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.board.cancel') }}</button>
             <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">{{ t('settings.board.add') }}</button>
@@ -1900,6 +2003,33 @@
               >
                 {{ colorOption.label }}
               </button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.icon') }}</label>
+            <div class="flex items-center space-x-2 mb-2">
+              <div class="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-xl border-2 border-blue-500">
+                {{ editingBoardCategory.icon || '🏷️' }}
+              </div>
+              <input v-model="editingBoardCategory.icon" type="text" :placeholder="t('settings.board.iconPlaceholder')" maxlength="2" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-gray-700 max-h-48 overflow-y-auto">
+              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">{{ t('settings.categoriesManagement.frequentEmojis') }}</p>
+              <div class="space-y-2">
+                <div v-for="(group, groupName) in emojiGroups" :key="groupName">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('settings.categoriesManagement.emojiGroups.' + groupName) }}</p>
+                  <div class="grid grid-cols-10 gap-1">
+                    <button
+                      v-for="emoji in group"
+                      :key="emoji"
+                      type="button"
+                      @click="editingBoardCategory.icon = emoji"
+                      class="w-8 h-8 text-lg rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center justify-center"
+                      :class="editingBoardCategory.icon === emoji ? 'bg-blue-100 dark:bg-blue-900/50 ring-2 ring-blue-400' : ''"
+                    >{{ emoji }}</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="flex space-x-3">
@@ -2077,6 +2207,8 @@ const isLoadingConfig = ref(false) // config 로딩 중 플래그
 
 // Data Management - Backup & Restore
 const backupLoading = ref(false)
+const backupList = ref([])
+const backupListLoading = ref(false)
 const restoreFile = ref(null)
 const restoreLoading = ref(false)
 const restoreResult = ref(null)
@@ -2087,18 +2219,49 @@ const formatFileSize = (bytes) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-const downloadBackup = async () => {
+const formatBackupDate = (isoStr) => {
+  if (!isoStr) return ''
+  const d = new Date(isoStr)
+  return d.toLocaleString()
+}
+
+// 백업 파일 목록 조회
+const loadBackupList = async () => {
+  backupListLoading.value = true
+  try {
+    const response = await apiClient.get('/backup/list')
+    backupList.value = response.data.files || []
+  } catch (e) {
+    console.error('Failed to load backup list:', e)
+    backupList.value = []
+  } finally {
+    backupListLoading.value = false
+  }
+}
+
+// 백업 생성 (서버에 저장)
+const createBackup = async () => {
   backupLoading.value = true
   try {
+    const response = await apiClient.post('/backup/create')
+    await alert.success(response.data.message || t('settings.dataManagement.backupSuccess'))
+    await loadBackupList()
+  } catch (e) {
+    await alert.error(t('settings.dataManagement.backupFailed'))
+  } finally {
+    backupLoading.value = false
+  }
+}
+
+// 서버 백업 파일 다운로드
+const downloadBackupFromServer = async (filename) => {
+  try {
     const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-    const response = await apiClient.get('/backup/export', {
+    const response = await apiClient.get(`/backup/download/${encodeURIComponent(filename)}`, {
       responseType: 'blob',
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
-    const disposition = response.headers['content-disposition'] || ''
-    const match = disposition.match(/filename="(.+)"/)
-    const filename = match ? match[1] : `myappstore_backup_${new Date().toISOString().slice(0, 10)}.json`
-    const url = URL.createObjectURL(new Blob([response.data], { type: 'application/json' }))
+    const url = URL.createObjectURL(new Blob([response.data], { type: 'application/zip' }))
     const a = document.createElement('a')
     a.href = url
     a.download = filename
@@ -2107,11 +2270,47 @@ const downloadBackup = async () => {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    await alert.success(t('settings.dataManagement.backupSuccess'))
   } catch (e) {
     await alert.error(t('settings.dataManagement.backupFailed'))
-  } finally {
-    backupLoading.value = false
+  }
+}
+
+// 서버 백업 파일로 복원
+const restoreFromServer = async (filename) => {
+  const confirmed = await showConfirm({
+    title: t('settings.dataManagement.restoreConfirmTitle'),
+    message: t('settings.dataManagement.restoreConfirmMsg'),
+    type: 'warning',
+    confirmText: t('settings.dataManagement.restoreBtn'),
+    cancelText: t('common.cancel')
+  })
+  if (!confirmed) return
+
+  try {
+    const response = await apiClient.post(`/backup/restore-from-server/${encodeURIComponent(filename)}`)
+    await alert.success(response.data.message || t('settings.dataManagement.restoreSuccess'))
+  } catch (e) {
+    const msg = e.response?.data?.detail || t('settings.dataManagement.restoreFailed')
+    await alert.error(msg)
+  }
+}
+
+// 서버 백업 파일 삭제
+const deleteBackupFile = async (filename) => {
+  const confirmed = await showConfirm({
+    title: t('settings.dataManagement.backupDeleteTitle'),
+    message: t('settings.dataManagement.backupDeleteMsg', { name: filename }),
+    type: 'danger',
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel')
+  })
+  if (!confirmed) return
+
+  try {
+    await apiClient.delete(`/backup/${encodeURIComponent(filename)}`)
+    await loadBackupList()
+  } catch (e) {
+    await alert.error(t('settings.dataManagement.backupFailed'))
   }
 }
 
@@ -2354,16 +2553,16 @@ const categoryIconMap = {
 
 // Board Management
 const boardCategories = ref([
-  { value: 'tip', label: '팁', color: 'green' },
-  { value: 'tech', label: '기술', color: 'blue' },
-  { value: 'tutorial', label: '튜토리얼', color: 'purple' },
-  { value: 'qna', label: 'Q&A', color: 'yellow' },
-  { value: 'news', label: '뉴스', color: 'red' }
+  { value: 'tip', label: '팁', color: 'green', icon: '💡' },
+  { value: 'tech', label: '기술', color: 'blue', icon: '⚙️' },
+  { value: 'tutorial', label: '튜토리얼', color: 'purple', icon: '📚' },
+  { value: 'qna', label: 'Q&A', color: 'yellow', icon: '❓' },
+  { value: 'news', label: '뉴스', color: 'red', icon: '📰' }
 ])
 const showAddBoardCategoryModal = ref(false)
 const showEditBoardCategoryModal = ref(false)
-const newBoardCategory = ref({ value: '', label: '', color: 'blue' })
-const editingBoardCategory = ref({ oldValue: '', value: '', label: '', color: 'blue' })
+const newBoardCategory = ref({ value: '', label: '', color: 'blue', icon: '' })
+const editingBoardCategory = ref({ oldValue: '', value: '', label: '', color: 'blue', icon: '' })
 
 // 게시판 카테고리 색상 옵션
 const categoryColorOptions = computed(() => [
@@ -3110,6 +3309,17 @@ const getBoardCategoryColor = (value) => {
   return colors[value] || 'bg-gray-500'
 }
 
+// 게시판 카테고리 추가 모달 열기 (미사용 색상 자동 선택)
+const openAddBoardCategoryModal = () => {
+  const usedColors = boardCategories.value.map(c => c.color)
+  const allColors = ['green', 'blue', 'purple', 'yellow', 'red', 'pink', 'orange', 'indigo']
+  const unusedColors = allColors.filter(c => !usedColors.includes(c))
+  const pool = unusedColors.length > 0 ? unusedColors : allColors
+  const randomColor = pool[Math.floor(Math.random() * pool.length)]
+  newBoardCategory.value = { value: '', label: '', color: randomColor, icon: '' }
+  showAddBoardCategoryModal.value = true
+}
+
 // 게시판 카테고리 추가
 const addBoardCategory = async () => {
   // 중복 체크
@@ -3124,7 +3334,7 @@ const addBoardCategory = async () => {
 
 const closeAddBoardCategoryModal = () => {
   showAddBoardCategoryModal.value = false
-  newBoardCategory.value = { value: '', label: '', color: 'blue' }
+  newBoardCategory.value = { value: '', label: '', color: 'blue', icon: '' }
 }
 
 // 게시판 카테고리 수정
@@ -3133,7 +3343,8 @@ const openEditBoardCategoryModal = (category) => {
     oldValue: category.value,
     value: category.value,
     label: category.label,
-    color: category.color || 'blue'
+    color: category.color || 'blue',
+    icon: category.icon || ''
   }
   showEditBoardCategoryModal.value = true
 }
@@ -3152,7 +3363,8 @@ const updateBoardCategory = async () => {
     boardCategories.value[index] = {
       value: editingBoardCategory.value.value,
       label: editingBoardCategory.value.label,
-      color: editingBoardCategory.value.color || 'blue'
+      color: editingBoardCategory.value.color || 'blue',
+      icon: editingBoardCategory.value.icon || ''
     }
   }
   closeEditBoardCategoryModal()
@@ -3160,7 +3372,7 @@ const updateBoardCategory = async () => {
 
 const closeEditBoardCategoryModal = () => {
   showEditBoardCategoryModal.value = false
-  editingBoardCategory.value = { oldValue: '', value: '', label: '', color: 'blue' }
+  editingBoardCategory.value = { oldValue: '', value: '', label: '', color: 'blue', icon: '' }
 }
 
 // 게시판 카테고리 삭제
@@ -3311,17 +3523,23 @@ onMounted(async () => {
   }
 })
 
-// Watch activeSection for cache
+// Watch activeSection for cache / data-management
 watch(activeSection, (newSection) => {
   if (newSection === 'cache' && isAdmin.value) {
     loadCacheStats()
   }
+  if (newSection === 'data-management' && isAdmin.value) {
+    loadBackupList()
+  }
 })
 
-// Load cache stats on mount if cache section is active
+// Load cache stats / backup list on mount if the section is active
 onMounted(() => {
   if (activeSection.value === 'cache' && isAdmin.value) {
     loadCacheStats()
+  }
+  if (activeSection.value === 'data-management' && isAdmin.value) {
+    loadBackupList()
   }
 })
 </script>

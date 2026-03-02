@@ -454,7 +454,7 @@ const filteredMetadata = computed(() => {
 })
 
 const checkDuplicates = async () => {
-  if (!softwareName.value) {
+  if (!props.violation?.id) {
     startAISearch()
     return
   }
@@ -464,20 +464,9 @@ const checkDuplicates = async () => {
   showDuplicateWarning.value = false
 
   try {
-    // 버전번호/연도/아키텍처 등을 제거한 정제된 검색어 생성
-    // 예: "Adobe Photoshop 2024 v25.1 (64-bit)" → "Adobe Photoshop"
-    const cleanName = softwareName.value
-      .replace(/\s*\([^)]*\)/g, '')               // (64-bit), (x64) 등 괄호 내용 제거
-      .replace(/\s+v\d+[\d.]*/gi, '')             // v25.1, v2024 형태 버전 제거
-      .replace(/\s+\d+\.\d+[\d.]*(?:\s|$)/g, ' ') // 1.2.3 형태 버전 제거
-      .replace(/\s+\d{4}(?:\s|$)/g, ' ')          // 4자리 연도 제거
-      .replace(/\s+/g, ' ')
-      .trim()
-
-    const searchTerm = cleanName || softwareName.value
-
-    const response = await productsApi.getAll({ search: searchTerm, limit: 20 })
-    const found = response.data.products || []
+    // 백엔드와 동일한 로직으로 중복 검사 (folder_path 정확매칭 → 유사도 매칭)
+    const response = await filenameViolationsApi.findSimilarProducts(props.violation.id)
+    const found = response.data.similar_products || []
 
     if (found.length > 0) {
       duplicates.value = found

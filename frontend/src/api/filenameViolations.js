@@ -106,5 +106,13 @@ export const filenameViolationsApi = {
     return client.post(`/filename-violations/${violationId}/add-to-product`, {
       product_id: productId
     })
+  },
+
+  /**
+   * AI 검색 전 중복 제품 검사 (백엔드 매칭 로직 동일)
+   * @param {number} violationId - Scan item ID
+   */
+  findSimilarProducts(violationId) {
+    return client.get(`/scan-items/${violationId}/find-similar`)
   }
 }

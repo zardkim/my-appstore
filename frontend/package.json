@@ -1,7 +1,7 @@
 {
   "name": "myapp-store-frontend",
   "private": true,
-  "version": "1.4.30",
+  "version": "1.4.32",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
