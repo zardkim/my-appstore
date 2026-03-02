@@ -615,7 +615,7 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
               <div v-for="category in boardCategories" :key="category.value" class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-500 transition-all group">
                 <div class="flex items-center justify-between mb-3">
-                  <span :class="getBoardCategoryStyle(category.color)" class="text-sm font-medium">{{ category.icon ? category.icon + ' ' + category.label : category.label }}</span>
+                  <span :class="getBoardCategoryStyle(category.color)" class="text-sm font-medium">{{ category.label }}</span>
                   <div v-if="isAdmin" class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button @click="openEditBoardCategoryModal(category)" class="p-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
@@ -1915,54 +1915,6 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.koreanName') }}</label>
             <input v-model="newBoardCategory.label" type="text" required :placeholder="t('settings.board.koreanNamePlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.color') }}</label>
-            <div class="grid grid-cols-4 gap-2">
-              <button
-                v-for="colorOption in categoryColorOptions"
-                :key="colorOption.value"
-                type="button"
-                @click="newBoardCategory.color = colorOption.value"
-                class="px-3 py-2 rounded-lg border-2 transition-all"
-                :class="[
-                  newBoardCategory.color === colorOption.value
-                    ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500',
-                  colorOption.bg,
-                  colorOption.text
-                ]"
-              >
-                {{ colorOption.label }}
-              </button>
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.icon') }}</label>
-            <div class="flex items-center space-x-2 mb-2">
-              <div class="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-xl border-2 border-blue-500">
-                {{ newBoardCategory.icon || '🏷️' }}
-              </div>
-              <input v-model="newBoardCategory.icon" type="text" :placeholder="t('settings.board.iconPlaceholder')" maxlength="2" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-gray-700 max-h-48 overflow-y-auto">
-              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">{{ t('settings.categoriesManagement.frequentEmojis') }}</p>
-              <div class="space-y-2">
-                <div v-for="(group, groupName) in emojiGroups" :key="groupName">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('settings.categoriesManagement.emojiGroups.' + groupName) }}</p>
-                  <div class="grid grid-cols-10 gap-1">
-                    <button
-                      v-for="emoji in group"
-                      :key="emoji"
-                      type="button"
-                      @click="newBoardCategory.icon = emoji"
-                      class="w-8 h-8 text-lg rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center justify-center"
-                      :class="newBoardCategory.icon === emoji ? 'bg-blue-100 dark:bg-blue-900/50 ring-2 ring-blue-400' : ''"
-                    >{{ emoji }}</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
           <div class="flex space-x-3">
             <button type="button" @click="closeAddBoardCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.board.cancel') }}</button>
             <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 shadow-md">{{ t('settings.board.add') }}</button>
@@ -1983,54 +1935,6 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.koreanName') }}</label>
             <input v-model="editingBoardCategory.label" type="text" required :placeholder="t('settings.board.koreanNamePlaceholder')" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.color') }}</label>
-            <div class="grid grid-cols-4 gap-2">
-              <button
-                v-for="colorOption in categoryColorOptions"
-                :key="colorOption.value"
-                type="button"
-                @click="editingBoardCategory.color = colorOption.value"
-                class="px-3 py-2 rounded-lg border-2 transition-all"
-                :class="[
-                  editingBoardCategory.color === colorOption.value
-                    ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500',
-                  colorOption.bg,
-                  colorOption.text
-                ]"
-              >
-                {{ colorOption.label }}
-              </button>
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.board.icon') }}</label>
-            <div class="flex items-center space-x-2 mb-2">
-              <div class="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-xl border-2 border-blue-500">
-                {{ editingBoardCategory.icon || '🏷️' }}
-              </div>
-              <input v-model="editingBoardCategory.icon" type="text" :placeholder="t('settings.board.iconPlaceholder')" maxlength="2" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-gray-700 max-h-48 overflow-y-auto">
-              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">{{ t('settings.categoriesManagement.frequentEmojis') }}</p>
-              <div class="space-y-2">
-                <div v-for="(group, groupName) in emojiGroups" :key="groupName">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('settings.categoriesManagement.emojiGroups.' + groupName) }}</p>
-                  <div class="grid grid-cols-10 gap-1">
-                    <button
-                      v-for="emoji in group"
-                      :key="emoji"
-                      type="button"
-                      @click="editingBoardCategory.icon = emoji"
-                      class="w-8 h-8 text-lg rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center justify-center"
-                      :class="editingBoardCategory.icon === emoji ? 'bg-blue-100 dark:bg-blue-900/50 ring-2 ring-blue-400' : ''"
-                    >{{ emoji }}</button>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
           <div class="flex space-x-3">
             <button type="button" @click="closeEditBoardCategoryModal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('settings.board.cancel') }}</button>
@@ -2553,16 +2457,16 @@ const categoryIconMap = {
 
 // Board Management
 const boardCategories = ref([
-  { value: 'tip', label: '팁', color: 'green', icon: '💡' },
-  { value: 'tech', label: '기술', color: 'blue', icon: '⚙️' },
-  { value: 'tutorial', label: '튜토리얼', color: 'purple', icon: '📚' },
-  { value: 'qna', label: 'Q&A', color: 'yellow', icon: '❓' },
-  { value: 'news', label: '뉴스', color: 'red', icon: '📰' }
+  { value: 'tip', label: '팁', color: 'green' },
+  { value: 'tech', label: '기술', color: 'blue' },
+  { value: 'tutorial', label: '튜토리얼', color: 'purple' },
+  { value: 'qna', label: 'Q&A', color: 'yellow' },
+  { value: 'news', label: '뉴스', color: 'red' }
 ])
 const showAddBoardCategoryModal = ref(false)
 const showEditBoardCategoryModal = ref(false)
-const newBoardCategory = ref({ value: '', label: '', color: 'blue', icon: '' })
-const editingBoardCategory = ref({ oldValue: '', value: '', label: '', color: 'blue', icon: '' })
+const newBoardCategory = ref({ value: '', label: '', color: 'blue' })
+const editingBoardCategory = ref({ oldValue: '', value: '', label: '', color: 'blue' })
 
 // 게시판 카테고리 색상 옵션
 const categoryColorOptions = computed(() => [
@@ -3316,7 +3220,7 @@ const openAddBoardCategoryModal = () => {
   const unusedColors = allColors.filter(c => !usedColors.includes(c))
   const pool = unusedColors.length > 0 ? unusedColors : allColors
   const randomColor = pool[Math.floor(Math.random() * pool.length)]
-  newBoardCategory.value = { value: '', label: '', color: randomColor, icon: '' }
+  newBoardCategory.value = { value: '', label: '', color: randomColor }
   showAddBoardCategoryModal.value = true
 }
 
@@ -3334,7 +3238,7 @@ const addBoardCategory = async () => {
 
 const closeAddBoardCategoryModal = () => {
   showAddBoardCategoryModal.value = false
-  newBoardCategory.value = { value: '', label: '', color: 'blue', icon: '' }
+  newBoardCategory.value = { value: '', label: '', color: 'blue' }
 }
 
 // 게시판 카테고리 수정
@@ -3343,8 +3247,7 @@ const openEditBoardCategoryModal = (category) => {
     oldValue: category.value,
     value: category.value,
     label: category.label,
-    color: category.color || 'blue',
-    icon: category.icon || ''
+    color: category.color || 'blue'
   }
   showEditBoardCategoryModal.value = true
 }
@@ -3363,8 +3266,7 @@ const updateBoardCategory = async () => {
     boardCategories.value[index] = {
       value: editingBoardCategory.value.value,
       label: editingBoardCategory.value.label,
-      color: editingBoardCategory.value.color || 'blue',
-      icon: editingBoardCategory.value.icon || ''
+      color: editingBoardCategory.value.color || 'blue'
     }
   }
   closeEditBoardCategoryModal()
@@ -3372,7 +3274,7 @@ const updateBoardCategory = async () => {
 
 const closeEditBoardCategoryModal = () => {
   showEditBoardCategoryModal.value = false
-  editingBoardCategory.value = { oldValue: '', value: '', label: '', color: 'blue', icon: '' }
+  editingBoardCategory.value = { oldValue: '', value: '', label: '', color: 'blue' }
 }
 
 // 게시판 카테고리 삭제
