@@ -49,6 +49,10 @@ export const productsApi = {
     return apiClient.post('/products/cleanup-deleted')
   },
 
+  async unregisterVersion(versionId) {
+    return apiClient.post(`/products/versions/${versionId}/unregister`)
+  },
+
   async deleteProduct(id) {
     return apiClient.delete(`/products/${id}`)
   },

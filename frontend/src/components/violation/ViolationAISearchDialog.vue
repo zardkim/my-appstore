@@ -63,10 +63,27 @@
       <!-- Body (스크롤 영역) -->
       <div class="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6">
           <!-- Violation Info -->
-          <div class="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg space-y-1.5 sm:space-y-2">
-            <p class="text-sm text-blue-900 dark:text-blue-300">
-              <strong>{{ t('violationAISearchDialog.searchTarget') }}:</strong> {{ softwareName }}
-            </p>
+          <div class="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg space-y-2 sm:space-y-2.5">
+            <div class="flex items-center gap-2">
+              <strong class="text-sm text-blue-900 dark:text-blue-300 whitespace-nowrap flex-shrink-0">{{ t('violationAISearchDialog.searchTarget') }}:</strong>
+              <input
+                v-model="softwareName"
+                type="text"
+                :disabled="loading || checkingDuplicates"
+                class="flex-1 min-w-0 text-sm px-2.5 py-1 border border-blue-300 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-60 disabled:cursor-not-allowed"
+                @keydown.enter.prevent="startAISearch"
+              />
+              <button
+                @click="startAISearch"
+                :disabled="loading || checkingDuplicates || !softwareName.trim()"
+                class="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center gap-1"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                재검색
+              </button>
+            </div>
             <p class="text-xs text-blue-700 dark:text-blue-400 truncate">
               <strong>{{ t('violationAISearchDialog.folder') }}:</strong> {{ violation?.folder_path || '' }}
             </p>
@@ -395,12 +412,14 @@ const useCustomPrompt = ref(false)
 const customPromptOpenai = ref('')
 const customPromptGemini = ref('')
 
-// 소프트웨어 이름 추출 (폴더명 사용)
-const softwareName = computed(() => {
-  if (!props.violation?.folder_path) return ''
-  const parts = props.violation.folder_path.split('/')
+// 소프트웨어 이름 (편집 가능한 ref)
+const softwareName = ref('')
+
+const extractSoftwareName = (violation) => {
+  if (!violation?.folder_path) return ''
+  const parts = violation.folder_path.split('/')
   return parts[parts.length - 1] || ''
-})
+}
 
 // 설정 로드 (API 키는 서버가 config에서 직접 읽으므로 provider/model만 로드)
 onMounted(async () => {
@@ -418,14 +437,20 @@ onMounted(async () => {
   }
 })
 
-// 다이얼로그 열릴 때 중복 검사 먼저 실행
+// 다이얼로그 열릴 때 softwareName 초기화 + 중복 검사 실행
 watch(() => props.isOpen, async (isOpen) => {
   if (isOpen) {
     await nextTick() // props.violation이 완전히 반영될 때까지 대기
+    softwareName.value = extractSoftwareName(props.violation)
     if (!metadata.value && !checkingDuplicates.value) {
       checkDuplicates()
     }
   }
+})
+
+// violation이 바뀌면 softwareName 재초기화
+watch(() => props.violation, (newViolation) => {
+  softwareName.value = extractSoftwareName(newViolation)
 })
 
 // AI 결과의 title + 주요 버전으로 이미지 검색어 구성
