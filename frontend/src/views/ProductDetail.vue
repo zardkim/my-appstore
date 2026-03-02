@@ -695,6 +695,18 @@
                       {{ t('product.versions.download') }}
                     </button>
 
+                    <!-- 등록 해제 버튼 (관리자만) -->
+                    <button
+                      v-if="authStore.user?.role === 'admin'"
+                      @click="unregisterVersion(version.id)"
+                      class="flex items-center justify-center p-2.5 sm:p-3 bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 text-orange-600 dark:text-orange-400 rounded-lg sm:rounded-xl transition-colors"
+                      :title="t('productDetail.unregisterVersion')"
+                    >
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>
+
                     <!-- 분류 변경 드롭다운 (관리자만, 파일이 있는 경우) -->
                     <div
                       v-if="authStore.user?.role === 'admin' && version.file_exists !== false"
@@ -1770,6 +1782,27 @@ const deleteVersion = async (versionId) => {
   } catch (error) {
     console.error('Failed to delete version:', error)
     await alert.error(t('productDetail.versionDeleteFailed'))
+  }
+}
+
+const unregisterVersion = async (versionId) => {
+  const confirmed = await confirm.warning(t('productDetail.unregisterVersionConfirm'))
+  if (!confirmed) return
+
+  try {
+    const response = await productsApi.unregisterVersion(versionId)
+    await alert.success(t('productDetail.unregisterVersionSuccess'))
+
+    if (response.data.product_deleted) {
+      // 제품 자체가 삭제된 경우 목록으로 이동
+      router.push('/')
+    } else {
+      // 버전만 해제된 경우 제품 새로고침
+      await loadProduct()
+    }
+  } catch (error) {
+    console.error('Failed to unregister version:', error)
+    await alert.error(t('productDetail.unregisterVersionFailed'))
   }
 }
 

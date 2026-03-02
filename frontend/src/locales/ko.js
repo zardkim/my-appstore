@@ -1494,6 +1494,10 @@ export default {
     deleteVersionConfirm: '이 버전을 DB에서 삭제하시겠습니까? (파일은 이미 삭제되었습니다)',
     deletedFilesCleanedUp: '삭제된 파일이 정리되었습니다.',
     versionDeleteFailed: '버전 삭제 중 오류가 발생했습니다.',
+    unregisterVersion: '등록 해제',
+    unregisterVersionConfirm: '이 버전의 등록을 해제하고 스캔 목록으로 되돌리시겠습니까?',
+    unregisterVersionSuccess: '버전 등록이 해제되었습니다. 스캔 목록에서 다시 확인할 수 있습니다.',
+    unregisterVersionFailed: '등록 해제 중 오류가 발생했습니다.',
     // 참조사이트 다이얼로그
     referenceSitesTitle: '참조사이트 (수동 수정 시 참고)',
     referenceSitesDescription: '메타데이터를 수동으로 수정할 때 아래 사이트들을 참고하세요:',

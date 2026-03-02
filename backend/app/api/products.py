@@ -580,6 +580,84 @@ async def merge_product_versions(
     }
 
 
+@router.post("/versions/{version_id}/unregister")
+async def unregister_version(
+    version_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_admin_user)
+):
+    """
+    버전 등록 해제 (관리자 전용)
+
+    등록된 버전을 해제하고 스캔 목록으로 되돌립니다.
+    - Version 삭제
+    - 연결된 FilenameViolation을 미등록 상태로 복원
+    - Product에 버전이 남아 있지 않으면 Product도 삭제
+    """
+    try:
+        version_obj = db.query(Version).filter(Version.id == version_id).first()
+        if not version_obj:
+            raise HTTPException(status_code=404, detail="버전을 찾을 수 없습니다")
+
+        product_id = version_obj.product_id
+
+        # 연결된 FilenameViolation 복원 (미등록 상태로)
+        db.query(FilenameViolation).filter(
+            FilenameViolation.version_id == version_id
+        ).update({
+            "is_resolved": False,
+            "product_id": None,
+            "version_id": None,
+            "violation_details": "스캔된 파일 (등록 해제됨)"
+        }, synchronize_session=False)
+
+        # Version 삭제
+        db.delete(version_obj)
+        db.flush()
+
+        # Product에 남은 Version 확인
+        remaining = db.query(Version).filter(Version.product_id == product_id).count()
+        product_deleted = False
+
+        if remaining == 0:
+            # 남은 버전 없음 → Product 관련 레코드 모두 삭제
+            db.query(FilenameViolation).filter(
+                FilenameViolation.product_id == product_id
+            ).update({
+                "is_resolved": False,
+                "product_id": None,
+                "version_id": None,
+                "violation_details": "스캔된 파일 (등록 해제됨)"
+            }, synchronize_session=False)
+            db.query(Attachment).filter(Attachment.product_id == product_id).delete(synchronize_session=False)
+            db.query(Favorite).filter(Favorite.product_id == product_id).delete(synchronize_session=False)
+            db.query(Product).filter(Product.id == product_id).delete(synchronize_session=False)
+            product_deleted = True
+
+        db.commit()
+
+        invalidate_cache([
+            "products:*",
+            "products_recent:*",
+            "products_by_category:*",
+            "stats_overview:*",
+            "stats_categories:*"
+        ])
+
+        return {
+            "success": True,
+            "product_deleted": product_deleted,
+            "product_id": product_id,
+            "message": "버전 등록이 해제되었습니다." + (" 제품도 삭제되었습니다." if product_deleted else "")
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"등록 해제 중 오류 발생: {str(e)}")
+
+
 @router.post("/cleanup-deleted")
 async def cleanup_deleted_files(
     db: Session = Depends(get_db),
