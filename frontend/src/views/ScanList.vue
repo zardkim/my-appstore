@@ -973,7 +973,7 @@ const openAIMatchingDialog = async (item) => {
     for (const searchName of searchNames) {
       if (!searchName || searchName.length < 2) continue
       const searchResponse = await productsApi.getAll({ search: searchName, limit: 20 })
-      const products = searchResponse.data.items || searchResponse.data
+      const products = searchResponse.data.products || []
       if (!products || products.length === 0) continue
 
       matchedProduct = products.find(p => p.title.toLowerCase() === searchName.toLowerCase())

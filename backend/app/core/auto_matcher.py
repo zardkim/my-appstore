@@ -334,12 +334,11 @@ async def match_violations_to_products(
                         }
 
                     # ===== 5단계: 새 Product 생성 =====
-                    # 포터블 여부 감지
+                    # 포터블 여부 감지 (parser의 포괄적 키워드 사용)
                     is_portable = False
                     if violations_list:
-                        filename_lower = violations_list[0].file_name.lower()
-                        if 'portable' in filename_lower or '무설치' in violations_list[0].file_name:
-                            is_portable = True
+                        first_filename = violations_list[0].file_name
+                        is_portable = FilenameParser._is_portable(first_filename, folder_path)
 
                     if provided_metadata:
                         # 사용자 제공 메타데이터로 생성 (상세 필드 포함)
@@ -431,6 +430,7 @@ async def match_violations_to_products(
                     # Version 생성
                     parsed = parser.parse(violation.file_name)
                     version_name = parsed.get('version', 'Unknown')
+                    version_portable = FilenameParser._is_portable(violation.file_name, file_path_str)
 
                     # 파일 크기 가져오기
                     file_size = 0
@@ -442,7 +442,8 @@ async def match_violations_to_products(
                         file_name=violation.file_name,
                         file_path=file_path_str,
                         file_size=file_size,
-                        version_name=version_name
+                        version_name=version_name,
+                        is_portable=version_portable
                     )
 
                     db.add(version)

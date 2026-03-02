@@ -11,6 +11,7 @@ from app.models.scan_history import ScanHistory
 from app.models.filename_violation import FilenameViolation
 from app.models.setting import Setting
 from app.models.favorite import Favorite
+from app.models.attachment import Attachment
 from app.schemas.product import ProductResponse, ProductListResponse, ProductUpdateRequest, VersionUpdateRequest
 from app.dependencies import get_current_user, get_current_admin_user
 from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
@@ -624,9 +625,10 @@ async def cleanup_deleted_files(
                 "version_id": None,
                 "violation_details": "스캔된 파일 (AI 매칭 대기중)"
             }, synchronize_session=False)
-            # 관련 Favorite 먼저 삭제 (외래키 제약 조건 방지)
+            # 외래키 제약 조건이 있는 관련 레코드 먼저 삭제
+            db.query(Attachment).filter(Attachment.product_id.in_(deleted_product_ids)).delete(synchronize_session=False)
             db.query(Favorite).filter(Favorite.product_id.in_(deleted_product_ids)).delete(synchronize_session=False)
-            # Product 삭제
+            # Product 삭제 (ProductVideo, ShareLink는 ondelete=CASCADE로 자동 처리)
             db.query(Product).filter(Product.id.in_(deleted_product_ids)).delete(synchronize_session=False)
 
         db.commit()

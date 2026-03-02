@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 from app.models.product import Product
 from app.models.version import Version
 from app.models.filename_violation import FilenameViolation
+from app.models.attachment import Attachment
+from app.models.favorite import Favorite
 from app.core.metadata_enricher import MetadataEnricher
 from app.core.icon_cache import IconCache
 from app.core.parser import FilenameParser
@@ -618,7 +620,7 @@ class FileScanner:
                     deleted_product_ids.append(product_id)
 
             if deleted_product_ids:
-                # FilenameViolation 리셋 (CASCADE SET NULL 전에 먼저 실행 - 재스캔 가능하도록)
+                # FilenameViolation 리셋 (재스캔 가능하도록)
                 self.db.query(FilenameViolation).filter(
                     FilenameViolation.product_id.in_(deleted_product_ids)
                 ).update({
@@ -627,6 +629,10 @@ class FileScanner:
                     "version_id": None,
                     "violation_details": "스캔된 파일 (AI 매칭 대기중)"
                 }, synchronize_session=False)
+                # 외래키 제약 조건이 있는 관련 레코드 먼저 삭제
+                self.db.query(Attachment).filter(Attachment.product_id.in_(deleted_product_ids)).delete(synchronize_session=False)
+                self.db.query(Favorite).filter(Favorite.product_id.in_(deleted_product_ids)).delete(synchronize_session=False)
+                # Product 삭제 (ProductVideo, ShareLink는 ondelete=CASCADE로 자동 처리)
                 self.db.query(Product).filter(Product.id.in_(deleted_product_ids)).delete(synchronize_session=False)
                 results["deleted_products"] = len(deleted_product_ids)
                 logger.info(f"Deleted {len(deleted_product_ids)} products with no versions")

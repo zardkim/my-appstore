@@ -27,7 +27,7 @@ from app.core.parser import FilenameParser
 from app.core.classifier import classify_file
 from app.api.config import load_config
 from app.core.redis_cache import invalidate_cache
-from app.core.auto_matcher import match_violations_to_products
+from app.core.auto_matcher import match_violations_to_products, find_similar_product
 
 # ── 하위 호환: 기존 URL (/api/filename-violations) + 신규 URL (/api/scan-items)
 router = APIRouter(tags=["Scan Items"])
@@ -173,6 +173,67 @@ async def classify_scan_item(
     db.commit()
 
     return {"success": True, "id": scan_item_id, "classification": request.classification}
+
+
+# ─────────────────────────────────────────────────────────────────
+# 중복 제품 검사 (AI 검색 전 사전 검사)
+# ─────────────────────────────────────────────────────────────────
+
+@router.get("/api/scan-items/{scan_item_id}/find-similar")
+@router.get("/api/filename-violations/{scan_item_id}/find-similar")
+async def find_similar_products_for_scan_item(
+    scan_item_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """AI 검색 전 중복 제품 검사 - 백엔드 매칭 로직과 동일한 방식으로 유사 제품 반환"""
+    import os
+    from app.core.parser import FilenameParser
+
+    item = db.query(FilenameViolation).filter(FilenameViolation.id == scan_item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="스캔 항목을 찾을 수 없습니다.")
+
+    similar_products = []
+    folder_path = item.folder_path
+
+    # 1단계: folder_path 정확한 매칭 (백엔드 1순위 검사와 동일)
+    existing = db.query(Product).filter(Product.folder_path == folder_path).first()
+    if existing:
+        similar_products.append({
+            "id": existing.id,
+            "title": existing.title,
+            "vendor": existing.vendor or "",
+            "category": existing.category or "",
+            "icon_url": existing.icon_url or "",
+            "folder_path": existing.folder_path,
+            "match_type": "exact_folder"
+        })
+    else:
+        # 2단계: 폴더명 파싱 + 유사도 기반 검사 (백엔드 2순위 검사와 동일)
+        parser = FilenameParser()
+        folder_name = os.path.basename(folder_path)
+        parsed_info = parser.parse(folder_name)
+        software_name = parsed_info.get('software_name', folder_name)
+
+        if parsed_info.get('year'):
+            year = parsed_info['year']
+            if year not in software_name:
+                software_name = f"{software_name} {year}"
+
+        similar = find_similar_product(db, software_name)
+        if similar:
+            similar_products.append({
+                "id": similar.id,
+                "title": similar.title,
+                "vendor": similar.vendor or "",
+                "category": similar.category or "",
+                "icon_url": similar.icon_url or "",
+                "folder_path": similar.folder_path,
+                "match_type": "similar"
+            })
+
+    return {"similar_products": similar_products}
 
 
 # ─────────────────────────────────────────────────────────────────

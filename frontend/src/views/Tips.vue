@@ -23,7 +23,7 @@
         <div class="flex items-stretch gap-2">
           <select v-model="selectedCategory" class="flex-1 px-3 sm:px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
             <option value="all">{{ t('tips.allCategories') }}</option>
-            <option v-for="cat in boardCategories" :key="cat.value" :value="cat.value">{{ cat.label }}</option>
+            <option v-for="cat in boardCategories" :key="cat.value" :value="cat.value">{{ cat.icon ? cat.icon + ' ' + cat.label : cat.label }}</option>
           </select>
           <select v-model="sortBy" class="flex-1 px-3 sm:px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
             <option value="latest">{{ t('tips.sortLatest') }}</option>
@@ -362,7 +362,8 @@ const pageNumbers = computed(() => {
 
 const getCategoryLabel = (category) => {
   const cat = boardCategories.value.find(c => c.value === category)
-  return cat?.label || category
+  if (!cat) return category
+  return cat.icon ? `${cat.icon} ${cat.label}` : cat.label
 }
 
 const getCategoryStyle = (category) => {

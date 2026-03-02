@@ -283,23 +283,35 @@ class FilenameParser:
         Returns:
             포터블이면 True, 아니면 False
         """
-        # 포터블 키워드 패턴
-        portable_patterns = [
+        # 포터블 키워드 패턴 (영문, 단어 경계 기준)
+        portable_patterns_en = [
             r'\bportable\b',
-            r'\bport\b',
             r'\bportableapps\b',
-            r'\bgreen\b',  # Green Edition
+            r'\bgreen\b',           # Green Edition
             r'\bnoinstall\b',
+            r'\bno[_\-]install\b',
             r'\bstandalone\b',
-            r'\b포터블\b',
-            r'\b휴대용\b'
+            r'\bstand[_\-]alone\b',
         ]
 
-        # 파일명과 폴더명을 소문자로 변환하여 검사
-        text_to_check = f"{filename} {parent_folder}".lower()
+        # 포터블 키워드 (한국어 - 원문 포함 검사)
+        portable_keywords_ko = [
+            '포터블',
+            '휴대용',
+            '무설치',
+            '단일실행',
+            '이식가능',
+        ]
 
-        for pattern in portable_patterns:
-            if re.search(pattern, text_to_check, re.IGNORECASE):
+        combined = f"{filename} {parent_folder}"
+        combined_lower = combined.lower()
+
+        for pattern in portable_patterns_en:
+            if re.search(pattern, combined_lower):
+                return True
+
+        for keyword in portable_keywords_ko:
+            if keyword in combined:
                 return True
 
         return False
