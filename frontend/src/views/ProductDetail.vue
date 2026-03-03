@@ -647,13 +647,13 @@
                       </span>
                     </div>
 
-                    <!-- 파일 경로 표시 (/library부터) -->
+                    <!-- 폴더 경로 표시 (파일명 제외, /library부터) -->
                     <div class="flex items-start gap-1.5">
                       <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                       </svg>
                       <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-mono break-all">
-                        {{ formatFilePath(version.file_path) }}
+                        {{ formatFolderPath(version.file_path) }}
                       </p>
                     </div>
                   </div>
@@ -1696,6 +1696,26 @@ const formatFilePath = (fullPath) => {
   }
 
   return path
+}
+
+// 파일 전체 경로에서 폴더 경로만 추출 (파일명 제거)
+const formatFolderPath = (fullPath) => {
+  if (!fullPath) return ''
+  // 파일명 제거 (마지막 / 이후 부분 제거)
+  const lastSlash = fullPath.lastIndexOf('/')
+  const dirPath = lastSlash > 0 ? fullPath.substring(0, lastSlash) : fullPath
+
+  // /library 이후의 경로만 표시
+  const libraryIndex = dirPath.indexOf('/library')
+  let path = libraryIndex !== -1 ? dirPath.substring(libraryIndex) : dirPath
+
+  // 경로가 3depth 이상이면 축약
+  const parts = path.split('/').filter(Boolean)
+  if (parts.length > 2) {
+    return `.../${parts.slice(-2).join('/')}`
+  }
+
+  return path || dirPath
 }
 
 const parseDetailedDescription = (description) => {
