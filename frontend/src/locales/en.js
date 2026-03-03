@@ -533,6 +533,19 @@ export default {
       every6Hours: 'Every 6 hours',
       every8Hours: 'Every 8 hours',
       every12Hours: 'Every 12 hours',
+      // Scan history
+      scanHistory: 'Scan History',
+      scanHistoryDesc: 'Last {max} scan run records',
+      clearHistory: 'Clear History',
+      clearHistoryConfirm: 'Are you sure you want to clear all scan history?',
+      noHistory: 'No scan history yet',
+      scanTypeAuto: 'Auto',
+      scanTypeManual: 'Manual',
+      scannedFiles: 'Scanned',
+      newScanItems: 'New Items',
+      deletedItems: 'Deleted',
+      duration: 'Duration',
+      errorsCount: 'Errors',
     },
     // Category management
     categoriesManagement: {

@@ -535,6 +535,19 @@ export default {
       every6Hours: '매 6시간마다',
       every8Hours: '매 8시간마다',
       every12Hours: '매 12시간마다',
+      // Scan history
+      scanHistory: '스캔 히스토리',
+      scanHistoryDesc: '최근 {max}회 스캔 실행 이력',
+      clearHistory: '히스토리 초기화',
+      clearHistoryConfirm: '스캔 히스토리를 모두 삭제하시겠습니까?',
+      noHistory: '스캔 이력이 없습니다',
+      scanTypeAuto: '자동',
+      scanTypeManual: '수동',
+      scannedFiles: '스캔 파일',
+      newScanItems: '신규 검색',
+      deletedItems: '삭제',
+      duration: '소요',
+      errorsCount: '오류',
     },
     // 카테고리 관리
     categoriesManagement: {
