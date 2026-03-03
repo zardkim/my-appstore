@@ -66,16 +66,16 @@
           <span class="mr-2">📊</span>
           {{ t('home.categoryStats') }}
         </h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-7 gap-2 sm:gap-3">
           <button
             v-for="(count, category) in stats.category_stats"
             :key="category"
-            class="flex flex-col items-center justify-center p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-2xl hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900 dark:hover:to-purple-900 transition-all cursor-pointer border border-gray-100 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-500 hover:shadow-lg transform hover:-translate-y-1 group active:scale-95"
+            class="flex flex-col items-center justify-center p-2.5 sm:p-3 lg:p-2.5 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900 dark:hover:to-purple-900 transition-all cursor-pointer border border-gray-100 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-500 hover:shadow-md transform hover:-translate-y-0.5 group active:scale-95"
             @click="goToCategory(category)"
           >
-            <span class="text-2xl sm:text-3xl mb-1 sm:mb-2 transform group-hover:scale-110 transition-transform">{{ getCategoryIcon(category) }}</span>
-            <p class="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center">{{ t(`categories.${category}`) }}</p>
-            <p class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ count }}</p>
+            <span class="text-xl sm:text-2xl lg:text-xl mb-1 transform group-hover:scale-110 transition-transform">{{ getCategoryIcon(category) }}</span>
+            <p class="text-[10px] sm:text-xs lg:text-[10px] font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center leading-tight">{{ t(`categories.${category}`) }}</p>
+            <p class="text-base sm:text-lg lg:text-base font-bold text-gray-900 dark:text-white mt-0.5">{{ count }}</p>
           </button>
         </div>
       </div>
