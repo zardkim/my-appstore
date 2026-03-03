@@ -962,7 +962,7 @@
 
           <!-- 백업 생성 + 목록 -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-            <div class="flex items-start justify-between gap-4 mb-5">
+            <div class="flex flex-col sm:flex-row items-start sm:justify-between gap-4 mb-5">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
                   <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -977,7 +977,7 @@
               <button
                 @click="createBackup"
                 :disabled="backupLoading"
-                class="flex-shrink-0 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+                class="w-full sm:w-auto flex-shrink-0 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <svg v-if="backupLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1029,9 +1029,9 @@
                 <div
                   v-for="item in backupList"
                   :key="item.filename"
-                  class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-600 transition-colors"
+                  class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-600 transition-colors gap-2"
                 >
-                  <div class="min-w-0 flex-1 mr-3">
+                  <div class="min-w-0 flex-1">
                     <p class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{{ item.filename }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                       {{ formatFileSize(item.size) }} &nbsp;·&nbsp; {{ formatBackupDate(item.created_at) }}
@@ -1115,11 +1115,11 @@
               {{ restoreResult.message }}
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <button
                 @click="runRestore"
                 :disabled="!restoreFile || restoreLoading"
-                class="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+                class="w-full sm:w-auto px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <svg v-if="restoreLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1133,7 +1133,7 @@
               <button
                 v-if="restoreFile"
                 @click="restoreFile = null; restoreResult = null"
-                class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium text-sm transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
+                class="w-full sm:w-auto px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium text-sm transition-colors hover:bg-gray-200 dark:hover:bg-gray-600 text-center"
               >
                 {{ t('common.cancel') }}
               </button>

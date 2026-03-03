@@ -45,7 +45,10 @@
 
     <!-- Last Scan Result -->
     <div v-if="status?.last_scan_result" class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-      <h3 class="font-semibold text-blue-900 dark:text-blue-400 mb-2">{{ t('settings.scheduler.lastScanResult') }}</h3>
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold text-blue-900 dark:text-blue-400">{{ t('settings.scheduler.lastScanResult') }}</h3>
+        <span v-if="status.last_scan_time" class="text-xs text-blue-600 dark:text-blue-400">{{ formatDateTime(status.last_scan_time) }}</span>
+      </div>
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
         <div>
           <p class="text-blue-700 dark:text-blue-300">{{ t('settings.scheduler.newProducts') }}</p>
@@ -228,7 +231,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { schedulerApi } from '../api/scheduler'
 import { configApi } from '../api/config'
@@ -240,6 +243,7 @@ const { alert } = useDialog()
 const status = ref(null)
 const showConfigModal = ref(false)
 const scanning = ref(false)
+let pollTimer = null
 
 const configForm = ref({
   cron_schedule: '0 5,22 * * *',
@@ -499,8 +503,14 @@ watch(intervalHours, () => {
   }
 })
 
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+})
+
 onMounted(async () => {
   await loadStatus()
+  // Poll every 60 seconds to show auto scan results
+  pollTimer = setInterval(loadStatus, 60000)
 
   try {
     // 폴더 설정에서 등록된 경로 불러오기
