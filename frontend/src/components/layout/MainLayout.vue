@@ -279,8 +279,8 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, nextTick, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
 import { useLocaleStore } from '../../store/locale'
@@ -288,6 +288,7 @@ import Sidebar from './Sidebar.vue'
 import Footer from './Footer.vue'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const localeStore = useLocaleStore()
@@ -301,6 +302,12 @@ const username = computed(() => authStore.user?.username || 'User')
 const userRole = computed(() => authStore.user?.role || 'user')
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 const userInitial = computed(() => username.value.charAt(0).toUpperCase())
+
+// 라우트 변경 시 검색바 및 더보기 메뉴 자동 닫기
+watch(() => route.path, () => {
+  showSearchOverlay.value = false
+  showMobileMenu.value = false
+})
 
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
