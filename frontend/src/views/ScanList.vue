@@ -195,7 +195,7 @@
                 <!-- View mode -->
                 <div v-if="editingId !== item.id">
                   <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-all leading-tight">{{ item.file_name }}</h3>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">📁 {{ item.folder_path }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">📁 {{ stripFileName(item.folder_path, item.file_name) }}</p>
                   <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{{ formatDate(item.created_at) }}</p>
 
                   <!-- Mobile actions -->
@@ -802,6 +802,15 @@ const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
   return date.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
+// 폴더 경로에서 파일명이 포함된 경우 제거
+const stripFileName = (folderPath, fileName) => {
+  if (!folderPath) return ''
+  if (fileName && folderPath.endsWith('/' + fileName)) {
+    return folderPath.slice(0, -(fileName.length + 1))
+  }
+  return folderPath
 }
 
 // ── Outside click handler ────────────────────────────────────────
