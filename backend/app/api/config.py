@@ -17,7 +17,7 @@ from app.models.user import User
 from app.config import settings
 
 # Sensitive field names - these are preserved (not overwritten) when incoming value is empty
-SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "googleApiKey", "bingApiKey", "smtpPassword"}
+SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "googleApiKey", "googleCseId", "smtpPassword"}
 
 router = APIRouter()
 
@@ -96,8 +96,9 @@ def get_default_config() -> Dict[str, Any]:
             "aiModel": "gpt-4o-mini",
             "openaiApiKey": "",
             "geminiApiKey": "",
-            "bingApiKey": "",
-            "bingImageSearch": False,
+            "googleApiKey": "",
+            "googleCseId": "",
+            "googleImageSearch": False,
             "autoDescription": True,
             "autoIcon": True
         },
@@ -147,16 +148,21 @@ def _migrate_config(config: Dict[str, Any]) -> tuple:
             del meta['apiKey']
             needs_save = True
 
-        # Migrate: remove obsolete Google search fields (replaced by Bing Image Search)
-        for old_key in ('googleApiKey', 'googleSearchEngineId'):
+        # Migrate: remove obsolete Bing search fields (replaced by Google CSE)
+        for old_key in ('bingApiKey', 'bingImageSearch', 'googleSearchEngineId'):
             if old_key in meta:
                 del meta[old_key]
                 logger.info(f"Removed obsolete config field: {old_key}")
                 needs_save = True
 
-        # Ensure bingImageSearch flag exists (default: False)
-        if 'bingImageSearch' not in meta:
-            meta['bingImageSearch'] = False
+        # Ensure googleImageSearch flag exists (default: False)
+        if 'googleImageSearch' not in meta:
+            meta['googleImageSearch'] = False
+            needs_save = True
+
+        # Ensure googleCseId field exists
+        if 'googleCseId' not in meta:
+            meta['googleCseId'] = ''
             needs_save = True
 
     return config, needs_save

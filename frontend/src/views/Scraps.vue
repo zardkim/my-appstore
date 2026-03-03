@@ -9,7 +9,7 @@
     </div>
 
     <!-- Content -->
-    <div class="lg:flex-1 lg:overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+    <div class="lg:flex-1 lg:overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-20 lg:pb-8">
       <div class="max-w-7xl mx-auto">
         <!-- Loading -->
         <div v-if="loading" class="flex items-center justify-center py-20">

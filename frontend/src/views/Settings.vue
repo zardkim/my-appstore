@@ -1340,80 +1340,117 @@
             </div>
           </div>
 
-          <!-- Bing Image Search API Settings -->
+          <!-- Google Image Search API Settings -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
               <div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.metadata.bingImageSearchTitle') }}</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('settings.metadata.bingImageSearchDesc') }}</p>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.metadata.googleImageSearchTitle') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('settings.metadata.googleImageSearchDesc') }}</p>
               </div>
               <!-- ON/OFF 토글 -->
               <label class="flex items-center gap-2 cursor-pointer flex-shrink-0 ml-4">
-                <span class="text-sm font-medium" :class="bingImageSearch ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'">
-                  {{ bingImageSearch ? 'ON' : 'OFF' }}
+                <span class="text-sm font-medium" :class="googleImageSearch ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'">
+                  {{ googleImageSearch ? 'ON' : 'OFF' }}
                 </span>
                 <div class="relative">
-                  <input type="checkbox" v-model="bingImageSearch" class="sr-only" />
+                  <input type="checkbox" v-model="googleImageSearch" class="sr-only" />
                   <div class="w-12 h-6 rounded-full transition-colors duration-200"
-                    :class="bingImageSearch ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'">
+                    :class="googleImageSearch ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'">
                   </div>
                   <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
-                    :class="bingImageSearch ? 'translate-x-6' : 'translate-x-0'">
+                    :class="googleImageSearch ? 'translate-x-6' : 'translate-x-0'">
                   </div>
                 </div>
               </label>
             </div>
 
-            <div v-if="bingImageSearch" class="space-y-4">
-              <!-- Bing API Key -->
+            <div v-if="googleImageSearch" class="space-y-4">
+              <!-- Google API Key -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {{ t('settings.metadata.bingApiKeyLabel') }}
-                  <span class="text-xs text-gray-500">{{ t('settings.metadata.bingApiKeySubLabel') }}</span>
+                  {{ t('settings.metadata.googleApiKeyLabel') }}
+                  <span class="text-xs text-gray-500">{{ t('settings.metadata.googleApiKeySubLabel') }}</span>
                 </label>
-                <!-- 저장됨 상태 표시 -->
-                <div v-if="hasBingKey && !editingBingKey" class="flex items-center gap-2 min-w-0">
+                <div v-if="hasGoogleApiKey && !editingGoogleApiKey" class="flex items-center gap-2 min-w-0">
                   <div class="flex-1 min-w-0 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl overflow-hidden">
                     <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span class="text-sm text-green-700 dark:text-green-400 font-mono truncate">••••••••••••••••••••••••••••••••</span>
                   </div>
-                  <button @click="editingBingKey = true; bingApiKey = ''" type="button"
+                  <button @click="editingGoogleApiKey = true; googleApiKey = ''" type="button"
                     class="flex-shrink-0 px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     수정
                   </button>
                 </div>
-                <!-- 입력 모드 -->
                 <div v-else class="flex items-center gap-2 min-w-0">
                   <input
-                    v-model="bingApiKey"
+                    v-model="googleApiKey"
                     type="password"
-                    :placeholder="t('settings.metadata.bingApiKeyPlaceholder')"
+                    :placeholder="t('settings.metadata.googleApiKeyPlaceholder')"
                     class="flex-1 min-w-0 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
-                  <button v-if="editingBingKey" @click="editingBingKey = false; bingApiKey = ''" type="button"
+                  <button v-if="editingGoogleApiKey" @click="editingGoogleApiKey = false; googleApiKey = ''" type="button"
                     class="flex-shrink-0 px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
                     취소
                   </button>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  {{ t('settings.metadata.bingApiKeyHelper') }}
-                  <a href="https://portal.azure.com/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
-                    {{ t('settings.metadata.bingApiKeyLink') }}
+                  {{ t('settings.metadata.googleApiKeyHelper') }}
+                  <a href="https://console.cloud.google.com/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
+                    {{ t('settings.metadata.googleApiKeyLink') }}
+                  </a>
+                </p>
+              </div>
+
+              <!-- Google CSE ID -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {{ t('settings.metadata.googleCseIdLabel') }}
+                  <span class="text-xs text-gray-500">{{ t('settings.metadata.googleCseIdSubLabel') }}</span>
+                </label>
+                <div v-if="hasGoogleCseId && !editingGoogleCseId" class="flex items-center gap-2 min-w-0">
+                  <div class="flex-1 min-w-0 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl overflow-hidden">
+                    <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono truncate">••••••••••••••••</span>
+                  </div>
+                  <button @click="editingGoogleCseId = true; googleCseId = ''" type="button"
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    수정
+                  </button>
+                </div>
+                <div v-else class="flex items-center gap-2 min-w-0">
+                  <input
+                    v-model="googleCseId"
+                    type="text"
+                    :placeholder="t('settings.metadata.googleCseIdPlaceholder')"
+                    class="flex-1 min-w-0 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                  />
+                  <button v-if="editingGoogleCseId" @click="editingGoogleCseId = false; googleCseId = ''" type="button"
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    취소
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  {{ t('settings.metadata.googleCseIdHelper') }}
+                  <a href="https://programmablesearchengine.google.com/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
+                    {{ t('settings.metadata.googleCseIdLink') }}
                   </a>
                 </p>
               </div>
 
               <!-- Info Box -->
               <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-                <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">{{ t('settings.metadata.bingSetupGuideTitle') }}</h4>
+                <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">{{ t('settings.metadata.googleSetupGuideTitle') }}</h4>
                 <div class="text-xs text-blue-800 dark:text-blue-400 space-y-1">
-                  <p>{{ t('settings.metadata.bingSetupStep1') }}</p>
-                  <p>{{ t('settings.metadata.bingSetupStep2') }}</p>
-                  <p>{{ t('settings.metadata.bingSetupStep3') }}</p>
+                  <p>{{ t('settings.metadata.googleSetupStep1') }}</p>
+                  <p>{{ t('settings.metadata.googleSetupStep2') }}</p>
+                  <p>{{ t('settings.metadata.googleSetupStep3') }}</p>
+                  <p>{{ t('settings.metadata.googleSetupStep4') }}</p>
                   <p class="mt-2">
-                    <strong>{{ t('settings.metadata.bingFreeQuotaLabel') }}</strong> {{ t('settings.metadata.bingFreeQuotaValue') }}
+                    <strong>{{ t('settings.metadata.googleFreeQuotaLabel') }}</strong> {{ t('settings.metadata.googleFreeQuotaValue') }}
                   </p>
                 </div>
               </div>
@@ -2505,15 +2542,18 @@ const aiProvider = ref('gemini')
 const aiModel = ref('gemini-2.5-flash')
 const geminiApiKey = ref('')
 const openaiApiKey = ref('')
-const bingApiKey = ref('')
-const bingImageSearch = ref(true)
+const googleApiKey = ref('')
+const googleCseId = ref('')
+const googleImageSearch = ref(false)
 // API 키 상태 관리: 저장 여부 + 편집 모드
 const hasGeminiKey = ref(false)
 const hasOpenaiKey = ref(false)
-const hasBingKey = ref(false)
+const hasGoogleApiKey = ref(false)
+const hasGoogleCseId = ref(false)
 const editingGeminiKey = ref(false)
 const editingOpenaiKey = ref(false)
-const editingBingKey = ref(false)
+const editingGoogleApiKey = ref(false)
+const editingGoogleCseId = ref(false)
 const useDefaultPrompt = ref(true) // 기본값 사용 체크박스 (기본적으로 체크됨)
 const customPromptOpenai = ref('')
 const customPromptGemini = ref('')
@@ -3144,8 +3184,9 @@ const saveMetadataSettings = async () => {
       // 편집 모드이거나 기존 키가 없을 때(최초 입력) 새 값 전송, 그 외 빈 문자열 (백엔드가 기존 값 보존)
       geminiApiKey: (editingGeminiKey.value || !hasGeminiKey.value) ? geminiApiKey.value : '',
       openaiApiKey: (editingOpenaiKey.value || !hasOpenaiKey.value) ? openaiApiKey.value : '',
-      bingApiKey: (editingBingKey.value || !hasBingKey.value) ? bingApiKey.value : '',
-      bingImageSearch: bingImageSearch.value,
+      googleApiKey: (editingGoogleApiKey.value || !hasGoogleApiKey.value) ? googleApiKey.value : '',
+      googleCseId: (editingGoogleCseId.value || !hasGoogleCseId.value) ? googleCseId.value : '',
+      googleImageSearch: googleImageSearch.value,
       useDefaultPrompt: useDefaultPrompt.value,
       customPromptOpenai: customPromptOpenai.value,
       customPromptGemini: customPromptGemini.value
@@ -3164,10 +3205,15 @@ const saveMetadataSettings = async () => {
       editingOpenaiKey.value = false
       openaiApiKey.value = ''
     }
-    if ((editingBingKey.value || !hasBingKey.value) && bingApiKey.value) {
-      hasBingKey.value = true
-      editingBingKey.value = false
-      bingApiKey.value = ''
+    if ((editingGoogleApiKey.value || !hasGoogleApiKey.value) && googleApiKey.value) {
+      hasGoogleApiKey.value = true
+      editingGoogleApiKey.value = false
+      googleApiKey.value = ''
+    }
+    if ((editingGoogleCseId.value || !hasGoogleCseId.value) && googleCseId.value) {
+      hasGoogleCseId.value = true
+      editingGoogleCseId.value = false
+      googleCseId.value = ''
     }
 
     await alert.success(t('settings.metadata.saved'))
@@ -3372,14 +3418,17 @@ onMounted(async () => {
       // 저장됨 표시 후 "수정" 버튼을 눌러야만 변경 가능
       hasGeminiKey.value = !!(config.metadata.geminiApiKey)
       hasOpenaiKey.value = !!(config.metadata.openaiApiKey)
-      hasBingKey.value = !!(config.metadata.bingApiKey)
-      bingImageSearch.value = config.metadata.bingImageSearch !== false  // 기본값 true
+      hasGoogleApiKey.value = !!(config.metadata.googleApiKey)
+      hasGoogleCseId.value = !!(config.metadata.googleCseId)
+      googleImageSearch.value = config.metadata.googleImageSearch === true
       geminiApiKey.value = ''
       openaiApiKey.value = ''
-      bingApiKey.value = ''
+      googleApiKey.value = ''
+      googleCseId.value = ''
       editingGeminiKey.value = false
       editingOpenaiKey.value = false
-      editingBingKey.value = false
+      editingGoogleApiKey.value = false
+      editingGoogleCseId.value = false
       // useDefaultPrompt가 설정되어 있으면 그 값을 사용, 없으면 true (기본값)
       useDefaultPrompt.value = config.metadata.useDefaultPrompt !== undefined
         ? config.metadata.useDefaultPrompt
