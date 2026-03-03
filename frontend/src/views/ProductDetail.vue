@@ -762,9 +762,9 @@
 
                 <!-- Screenshot Buttons (Admin only) -->
                 <div v-if="authStore.user?.role === 'admin'" class="flex gap-2">
-                  <!-- 스크린샷 검색 (Bing Image Search OFF이면 숨김) -->
+                  <!-- 스크린샷 검색 (Google Image Search OFF이면 숨김) -->
                   <button
-                    v-if="bingImageSearch"
+                    v-if="googleImageSearch"
                     @click="openScreenshotSearch"
                     class="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 font-medium text-xs sm:text-sm"
                   >
@@ -1519,7 +1519,7 @@ const logoSearchDialogOpen = ref(false)
 const shareDialogOpen = ref(false)
 const screenshotSearchDialogOpen = ref(false)
 const screenshotViewerOpen = ref(false)
-const bingImageSearch = ref(true)
+const googleImageSearch = ref(false)
 const currentScreenshot = ref('')
 const iconTimestamp = ref(Date.now()) // 로고 캐시 버스팅용 타임스탬프
 const isWritingGuide = ref(false) // 설치방법 가이드 작성 모드
@@ -2596,12 +2596,12 @@ onMounted(async () => {
     configCategories.value = []
   }
 
-  // Bing Image Search 설정 로드
+  // Google Image Search 설정 로드
   try {
     const metaRes = await settingsApi.getSection('metadata')
-    bingImageSearch.value = metaRes.data?.bingImageSearch !== false
+    googleImageSearch.value = metaRes.data?.googleImageSearch === true
   } catch (e) {
-    bingImageSearch.value = true // 로드 실패 시 기본값 표시
+    googleImageSearch.value = false // 로드 실패 시 기본값 비활성화
   }
 
   try {

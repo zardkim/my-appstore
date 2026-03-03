@@ -22,7 +22,7 @@ from app.schemas.image import (
     ImageUploadResponse,
     ImageDeleteResponse
 )
-from app.core.bing_image_search import BingImageSearcher
+from app.core.google_image_search import GoogleImageSearcher
 from app.core.icon_cache import IconCache
 from app.config import settings
 import json
@@ -75,19 +75,21 @@ def sanitize_filename(name: str, max_length: int = 50) -> str:
     return sanitized if sanitized else 'unnamed'
 
 
-def get_bing_searcher() -> BingImageSearcher:
-    """Bing Image Searcher 인스턴스 생성"""
+def get_google_searcher() -> GoogleImageSearcher:
+    """Google Image Searcher 인스턴스 생성"""
     from app.api.config import load_config
-    bing_api_key = ""
+    google_api_key = ""
+    google_cse_id = ""
 
     try:
         config = load_config()
         metadata_config = config.get('metadata', {})
-        bing_api_key = metadata_config.get('bingApiKey', '')
+        google_api_key = metadata_config.get('googleApiKey', '')
+        google_cse_id = metadata_config.get('googleCseId', '')
     except Exception as e:
-        logger.debug(f"Error reading Bing API config: {e}")
+        logger.debug(f"Error reading Google CSE config: {e}")
 
-    return BingImageSearcher(api_key=bing_api_key)
+    return GoogleImageSearcher(api_key=google_api_key, search_engine_id=google_cse_id)
 
 
 def get_icon_cache() -> IconCache:
@@ -161,20 +163,20 @@ async def search_logo(
     logger.debug(f"Images API] Query: '{request.query}'")
     logger.debug(f"Images API] Limit: {request.limit}, Offset: {request.offset}")
 
-    # bingImageSearch 활성화 여부 확인
+    # googleImageSearch 활성화 여부 확인
     from app.api.config import load_config as _load_cfg
     _meta = _load_cfg().get('metadata', {})
-    if not _meta.get('bingImageSearch', True):
+    if not _meta.get('googleImageSearch', True):
         return GoogleImageSearchResponse(
             success=False,
             images=[],
             error="이미지 검색이 비활성화되어 있습니다. Settings → Metadata에서 활성화해주세요."
         )
 
-    searcher = get_bing_searcher()
+    searcher = get_google_searcher()
 
     if not searcher.is_configured():
-        error_msg = "Bing Image Search API가 설정되지 않았습니다. Settings → Metadata에서 Bing API 키를 설정해주세요."
+        error_msg = "Google CSE가 설정되지 않았습니다. Settings → Metadata에서 API 키와 검색엔진 ID를 설정해주세요."
         logger.error(f"Images API] ERROR: {error_msg}")
         return GoogleImageSearchResponse(
             success=False,
@@ -217,26 +219,26 @@ async def search_screenshots(
     current_user: User = Depends(get_current_admin_user)
 ):
     """
-    Bing Image Search API로 스크린샷 검색
+    Google Custom Search API로 스크린샷 검색
     """
     logger.debug(f"\n[Images API] Screenshot search request received")
     logger.debug(f"Images API] Query: '{request.query}'")
     logger.debug(f"Images API] Limit: {request.limit}, Offset: {request.offset}")
 
-    # bingImageSearch 활성화 여부 확인
+    # googleImageSearch 활성화 여부 확인
     from app.api.config import load_config as _load_cfg
     _meta = _load_cfg().get('metadata', {})
-    if not _meta.get('bingImageSearch', True):
+    if not _meta.get('googleImageSearch', True):
         return GoogleImageSearchResponse(
             success=False,
             images=[],
             error="이미지 검색이 비활성화되어 있습니다. Settings → Metadata에서 활성화해주세요."
         )
 
-    searcher = get_bing_searcher()
+    searcher = get_google_searcher()
 
     if not searcher.is_configured():
-        error_msg = "Bing Image Search API가 설정되지 않았습니다. Settings → Metadata에서 Bing API 키를 설정해주세요."
+        error_msg = "Google CSE가 설정되지 않았습니다. Settings → Metadata에서 API 키와 검색엔진 ID를 설정해주세요."
         logger.error(f"Images API] ERROR: {error_msg}")
         return GoogleImageSearchResponse(
             success=False,
