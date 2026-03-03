@@ -50,7 +50,7 @@
             <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               <tr>
                 <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-20">{{ t('tips.number') }}</th>
-                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-32">{{ t('tips.category') }}</th>
+                <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-40">{{ t('tips.category') }}</th>
                 <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ t('tips.titleColumn') }}</th>
                 <th class="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-32">{{ t('tips.author') }}</th>
                 <th class="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-24">{{ t('tips.views') }}</th>
@@ -382,7 +382,7 @@ const formatDate = (dateStr) => {
   } else if (diffDays < 2) {
     return t('tips.yesterday')
   } else if (diffDays < 7) {
-    return t('tips.daysAgo').replace('{n}', diffDays)
+    return t('tips.daysAgo', { n: diffDays })
   } else {
     return date.toLocaleDateString()
   }
