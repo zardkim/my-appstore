@@ -20,10 +20,13 @@ class ScanScheduler:
     APScheduler를 사용하여 주기적으로 파일 스캔 실행
     """
 
-    HISTORY_FILE = "/home/nuricom/project/myappStore/data/scan_history.json"
     MAX_HISTORY = 50
 
     def __init__(self):
+        from pathlib import Path
+        from app.config import settings as app_settings
+        self.HISTORY_FILE = str(Path(app_settings.CONFIG_DATA_DIR) / "scan_history.json")
+
         jobstores = {
             'default': MemoryJobStore()
         }
