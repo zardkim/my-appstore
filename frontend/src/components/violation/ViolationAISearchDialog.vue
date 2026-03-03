@@ -416,9 +416,18 @@ const customPromptGemini = ref('')
 const softwareName = ref('')
 
 const extractSoftwareName = (violation) => {
-  if (!violation?.folder_path) return ''
-  const parts = violation.folder_path.split('/')
-  return parts[parts.length - 1] || ''
+  // 파일명을 검색어로 사용 (확장자 제거)
+  if (violation?.file_name) {
+    const name = violation.file_name
+    const lastDot = name.lastIndexOf('.')
+    return lastDot > 0 ? name.substring(0, lastDot) : name
+  }
+  // fallback: 폴더명 마지막 부분
+  if (violation?.folder_path) {
+    const parts = violation.folder_path.split('/')
+    return parts[parts.length - 1] || ''
+  }
+  return ''
 }
 
 // 설정 로드 (API 키는 서버가 config에서 직접 읽으므로 provider/model만 로드)
