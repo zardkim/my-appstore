@@ -71,7 +71,7 @@
             class="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 lg:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-700"
           >
             <span class="text-xs sm:text-sm">{{ getCategoryIcon(product.category) }}</span>
-            <span class="hidden sm:inline">{{ product.category }}</span>
+            <span class="hidden sm:inline">{{ getCategoryLabel(product.category) }}</span>
           </span>
           <span
             v-if="product.is_portable"
@@ -160,9 +160,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { favoritesApi } from '../../api/favorites'
 import { productsApi } from '../../api/products'
+import configApi from '../../api/config'
 import { getIconUrl } from '../../utils/env'
 import { useDialog } from '../../composables/useDialog'
 import { useAuthStore } from '../../store/auth'
+
+// 카테고리 라벨 모듈 레벨 캐시 (모든 카드 인스턴스가 공유)
+let _categoryLabelCache = null
 
 const { t } = useI18n({ useScope: 'global' })
 const { alert, confirm } = useDialog()
@@ -180,6 +184,7 @@ const emit = defineEmits(['ai-search', 'manual-edit', 'product-deleted'])
 const imageError = ref(false)
 const isFavorite = ref(false)
 const showMenu = ref(false)
+const categoryLabelMap = ref(_categoryLabelCache || {})
 
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 
@@ -234,6 +239,10 @@ const categoryIcons = {
 
 const getCategoryIcon = (category) => {
   return categoryIcons[category] || '📦'
+}
+
+const getCategoryLabel = (category) => {
+  return categoryLabelMap.value[category] || category
 }
 
 const handleImageError = () => {
@@ -304,8 +313,23 @@ const handleDeleteProduct = async () => {
 }
 
 // Close menu when clicking outside
-onMounted(() => {
+onMounted(async () => {
   checkFavorite()
+
+  // 카테고리 라벨 캐시가 없으면 한 번만 로드
+  if (!_categoryLabelCache) {
+    try {
+      const res = await configApi.getSection('categories')
+      const cats = res.data?.categories || res.data || []
+      _categoryLabelCache = {}
+      for (const cat of cats) {
+        if (cat.name && cat.label) _categoryLabelCache[cat.name] = cat.label
+      }
+      categoryLabelMap.value = _categoryLabelCache
+    } catch {
+      _categoryLabelCache = {}
+    }
+  }
 
   const handleClickOutside = (event) => {
     if (showMenu.value && !event.target.closest('.relative')) {
