@@ -20,6 +20,9 @@ class ScanScheduler:
     APScheduler를 사용하여 주기적으로 파일 스캔 실행
     """
 
+    HISTORY_FILE = "/home/nuricom/project/myappStore/data/scan_history.json"
+    MAX_HISTORY = 50
+
     def __init__(self):
         jobstores = {
             'default': MemoryJobStore()
@@ -31,6 +34,8 @@ class ScanScheduler:
         self.is_running: bool = False
         self.last_scan_time: Optional[datetime] = None
         self.last_scan_result: Optional[dict] = None
+        self.scan_history: List[dict] = []
+        self._load_history()
 
     def start(self, cron_expression: Optional[str] = None, scan_paths: Optional[List[str]] = None, use_ai: bool = True):
         """
@@ -77,11 +82,46 @@ class ScanScheduler:
             self.is_running = False
             logger.info("✓ Scheduler stopped")
 
-    async def _run_scheduled_scan(self):
+    def _load_history(self):
+        """파일에서 스캔 히스토리 로드"""
+        import json
+        from pathlib import Path
+        try:
+            history_file = Path(self.HISTORY_FILE)
+            if history_file.exists():
+                with open(history_file, 'r', encoding='utf-8') as f:
+                    self.scan_history = json.load(f)
+        except Exception as e:
+            logger.warning(f"Failed to load scan history: {e}")
+            self.scan_history = []
+
+    def _save_history(self):
+        """스캔 히스토리를 파일에 저장"""
+        import json
+        from pathlib import Path
+        try:
+            history_file = Path(self.HISTORY_FILE)
+            history_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(history_file, 'w', encoding='utf-8') as f:
+                json.dump(self.scan_history, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.warning(f"Failed to save scan history: {e}")
+
+    def get_history(self) -> List[dict]:
+        """스캔 히스토리 반환 (최신순)"""
+        return list(reversed(self.scan_history))
+
+    def clear_history(self):
+        """스캔 히스토리 초기화"""
+        self.scan_history = []
+        self._save_history()
+
+    async def _run_scheduled_scan(self, scan_type: str = "auto"):
         """
         스케줄된 스캔 실행
         """
-        logger.info(f"Starting scheduled scan at {datetime.now()}")
+        started_at = datetime.now()
+        logger.info(f"Starting scheduled scan at {started_at}")
 
         db = SessionLocal()
         all_results = {
@@ -90,6 +130,10 @@ class ScanScheduler:
             "updated_products": 0,
             "ai_generated": 0,
             "icons_cached": 0,
+            "scanned_files": 0,
+            "scanned_folders": 0,
+            "new_scan_items": 0,
+            "deleted_violations": 0,
             "errors": [],
             "scanned_paths": []
         }
@@ -111,6 +155,11 @@ class ScanScheduler:
                     all_results["updated_products"] += results.get("updated_products", 0)
                     all_results["ai_generated"] += results.get("ai_generated", 0)
                     all_results["icons_cached"] += results.get("icons_cached", 0)
+                    all_results["scanned_files"] += results.get("scanned_files", 0)
+                    all_results["scanned_folders"] += results.get("scanned_folders", 0)
+                    # new_products in scanner = new unresolved scan items added
+                    all_results["new_scan_items"] += results.get("new_products", 0)
+                    all_results["deleted_violations"] += results.get("deleted_violations", 0)
                     all_results["errors"].extend(results.get("errors", []))
                     all_results["scanned_paths"].append(path)
 
@@ -124,11 +173,30 @@ class ScanScheduler:
             self.last_scan_time = datetime.now()
             self.last_scan_result = all_results
 
-            logger.info(f"Scheduled scan completed at {datetime.now()}:")
-            logger.info(f"  - New products: {all_results['new_products']}")
+            # 히스토리 기록
+            elapsed = (self.last_scan_time - started_at).total_seconds()
+            history_entry = {
+                "started_at": started_at.isoformat(),
+                "finished_at": self.last_scan_time.isoformat(),
+                "duration_seconds": round(elapsed, 1),
+                "scan_type": scan_type,
+                "scanned_files": all_results["scanned_files"],
+                "new_scan_items": all_results["new_scan_items"],
+                "new_versions": all_results["new_versions"],
+                "deleted_violations": all_results["deleted_violations"],
+                "errors_count": len(all_results["errors"]),
+                "scanned_paths": all_results["scanned_paths"],
+            }
+            self.scan_history.append(history_entry)
+            if len(self.scan_history) > self.MAX_HISTORY:
+                self.scan_history = self.scan_history[-self.MAX_HISTORY:]
+            self._save_history()
+
+            logger.info(f"Scheduled scan completed at {self.last_scan_time}:")
+            logger.info(f"  - Scanned files: {all_results['scanned_files']}")
+            logger.info(f"  - New scan items: {all_results['new_scan_items']}")
             logger.info(f"  - New versions: {all_results['new_versions']}")
             logger.info(f"  - AI generated: {all_results['ai_generated']}")
-            logger.info(f"  - Icons cached: {all_results['icons_cached']}")
             if all_results['errors']:
                 logger.warning(f"  - Errors: {len(all_results['errors'])}")
 
@@ -166,7 +234,7 @@ class ScanScheduler:
             스캔 결과
         """
         logger.info("Starting manual scheduled scan...")
-        await self._run_scheduled_scan()
+        await self._run_scheduled_scan(scan_type="manual")
         return self.last_scan_result or {}
 
     def load_settings_from_db(self):

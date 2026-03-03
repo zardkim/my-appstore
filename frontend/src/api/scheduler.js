@@ -19,5 +19,13 @@ export const schedulerApi = {
 
   async getConfig() {
     return apiClient.get('/scheduler/config')
+  },
+
+  async getHistory() {
+    return apiClient.get('/scheduler/history')
+  },
+
+  async clearHistory() {
+    return apiClient.delete('/scheduler/history')
   }
 }

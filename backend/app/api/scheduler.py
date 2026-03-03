@@ -109,6 +109,27 @@ async def run_scheduler_now(
         raise HTTPException(status_code=500, detail=f"Failed to run manual scan: {str(e)}")
 
 
+@router.get("/history")
+async def get_scan_history(
+    current_user = Depends(get_current_admin_user)
+):
+    """
+    스캔 히스토리 조회 (최신순)
+    """
+    return {"history": scan_scheduler.get_history()}
+
+
+@router.delete("/history")
+async def clear_scan_history(
+    current_user = Depends(get_current_admin_user)
+):
+    """
+    스캔 히스토리 초기화
+    """
+    scan_scheduler.clear_history()
+    return {"success": True}
+
+
 @router.get("/config")
 async def get_scheduler_config(
     db: Session = Depends(get_db),

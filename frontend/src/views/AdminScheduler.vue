@@ -77,10 +77,92 @@
     <button
       @click="runManualScan"
       :disabled="scanning"
-      class="w-full bg-purple-500 dark:bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed font-medium"
+      class="w-full bg-purple-500 dark:bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed font-medium mb-6"
     >
       {{ scanning ? t('settings.scheduler.scanning') : t('settings.scheduler.runNow') }}
     </button>
+
+    <!-- Scan History -->
+    <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50">
+        <div>
+          <h3 class="font-semibold text-gray-900 dark:text-white text-sm">{{ t('settings.scheduler.scanHistory') }}</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ t('settings.scheduler.scanHistoryDesc', { max: 50 }) }}</p>
+        </div>
+        <button
+          v-if="scanHistory.length > 0"
+          @click="handleClearHistory"
+          class="text-xs text-red-500 dark:text-red-400 hover:underline"
+        >
+          {{ t('settings.scheduler.clearHistory') }}
+        </button>
+      </div>
+
+      <!-- Empty state -->
+      <div v-if="scanHistory.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500 text-sm">
+        {{ t('settings.scheduler.noHistory') }}
+      </div>
+
+      <!-- History table -->
+      <div v-else class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
+              <th class="text-left px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">시간</th>
+              <th class="text-center px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">유형</th>
+              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.scannedFiles') }}</th>
+              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.newScanItems') }}</th>
+              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.newVersions') }}</th>
+              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.deletedItems') }}</th>
+              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.duration') }}</th>
+              <th class="text-center px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('settings.scheduler.errorsCount') }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            <tr
+              v-for="(entry, idx) in scanHistory"
+              :key="idx"
+              class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+            >
+              <td class="px-3 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                {{ formatDateTime(entry.started_at) }}
+              </td>
+              <td class="px-3 py-2.5 text-center">
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                  :class="entry.scan_type === 'manual'
+                    ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                    : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'"
+                >
+                  {{ entry.scan_type === 'manual' ? t('settings.scheduler.scanTypeManual') : t('settings.scheduler.scanTypeAuto') }}
+                </span>
+              </td>
+              <td class="px-3 py-2.5 text-right text-gray-800 dark:text-gray-200 font-medium">{{ entry.scanned_files }}</td>
+              <td class="px-3 py-2.5 text-right">
+                <span :class="entry.new_scan_items > 0 ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-400 dark:text-gray-500'">
+                  {{ entry.new_scan_items > 0 ? '+' + entry.new_scan_items : '-' }}
+                </span>
+              </td>
+              <td class="px-3 py-2.5 text-right">
+                <span :class="entry.new_versions > 0 ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-400 dark:text-gray-500'">
+                  {{ entry.new_versions > 0 ? '+' + entry.new_versions : '-' }}
+                </span>
+              </td>
+              <td class="px-3 py-2.5 text-right">
+                <span :class="entry.deleted_violations > 0 ? 'text-orange-500 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'">
+                  {{ entry.deleted_violations > 0 ? entry.deleted_violations : '-' }}
+                </span>
+              </td>
+              <td class="px-3 py-2.5 text-right text-gray-500 dark:text-gray-400 text-xs">{{ entry.duration_seconds }}s</td>
+              <td class="px-3 py-2.5 text-center">
+                <span v-if="entry.errors_count > 0" class="text-red-500 dark:text-red-400 font-medium">{{ entry.errors_count }}</span>
+                <span v-else class="text-gray-300 dark:text-gray-600">-</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <!-- Config Modal -->
     <div v-if="showConfigModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showConfigModal = false">
@@ -243,6 +325,7 @@ const { alert } = useDialog()
 const status = ref(null)
 const showConfigModal = ref(false)
 const scanning = ref(false)
+const scanHistory = ref([])
 let pollTimer = null
 
 const configForm = ref({
@@ -265,6 +348,24 @@ const loadStatus = async () => {
     status.value = response.data
   } catch (error) {
     console.error('Failed to load scheduler status:', error)
+  }
+}
+
+const loadHistory = async () => {
+  try {
+    const response = await schedulerApi.getHistory()
+    scanHistory.value = response.data.history || []
+  } catch (error) {
+    console.error('Failed to load scan history:', error)
+  }
+}
+
+const handleClearHistory = async () => {
+  try {
+    await schedulerApi.clearHistory()
+    scanHistory.value = []
+  } catch (error) {
+    console.error('Failed to clear history:', error)
   }
 }
 
@@ -411,8 +512,14 @@ const runManualScan = async () => {
   scanning.value = true
   try {
     const response = await schedulerApi.runNow()
-    await alert.success(`${t('settings.scheduler.scanComplete')}\n${t('settings.scheduler.newProducts')}: ${response.data.result.new_products}개\n${t('settings.scheduler.newVersions')}: ${response.data.result.new_versions}개`)
-    await loadStatus()
+    const result = response.data.result
+    await alert.success(
+      `${t('settings.scheduler.scanComplete')}\n` +
+      `${t('settings.scheduler.scannedFiles')}: ${result.scanned_files}개\n` +
+      `${t('settings.scheduler.newScanItems')}: ${result.new_scan_items || result.new_products}개\n` +
+      `${t('settings.scheduler.newVersions')}: ${result.new_versions}개`
+    )
+    await Promise.all([loadStatus(), loadHistory()])
   } catch (error) {
     console.error('Failed to run manual scan:', error)
     await alert.error(t('settings.scheduler.scanFailed'))
@@ -508,9 +615,12 @@ onUnmounted(() => {
 })
 
 onMounted(async () => {
-  await loadStatus()
-  // Poll every 60 seconds to show auto scan results
-  pollTimer = setInterval(loadStatus, 60000)
+  await Promise.all([loadStatus(), loadHistory()])
+  // Poll every 60 seconds to show auto scan results and history
+  pollTimer = setInterval(async () => {
+    await loadStatus()
+    await loadHistory()
+  }, 60000)
 
   try {
     // 폴더 설정에서 등록된 경로 불러오기
