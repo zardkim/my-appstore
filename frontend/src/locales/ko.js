@@ -46,7 +46,7 @@ export default {
     home: '홈',
     discover: '스토어',
     search: '검색',
-    searchPlaceholder: '제품 검색...',
+    searchPlaceholder: '통합 검색...',
     detectedList: '검색된 목록',
     scan: '스캔',
     favorites: '즐겨찾기',
@@ -133,6 +133,7 @@ export default {
     sortByLatest: '최신순',
     sortByName: '이름순',
     sortByCategory: '카테고리순',
+    sortByVendor: '제조사순',
     filterByVendor: '제조사별',
     noResults: '검색 결과가 없습니다',
     noResultsDesc: '다른 검색어나 필터를 사용해보세요',
@@ -1945,6 +1946,18 @@ export default {
     locked: '비밀번호 오류가 너무 많아 링크가 잠겼습니다.',
     availableVersions: '버전 목록',
     sharedByInfo: '이 페이지는 공유 링크를 통해 제공된 제품 정보입니다.',
+  },
+
+  // 통합검색
+  unifiedSearch: {
+    title: '통합검색',
+    placeholder: '전체 검색...',
+    enterQuery: '검색어를 입력하세요',
+    enterQueryDesc: '스토어, 팁&테크, 스캔목록에서 통합 검색합니다',
+    resultsFor: '에 대한 검색 결과',
+    resultsCount: '건',
+    viewAll: '전체보기',
+    noResults: '검색 결과가 없습니다',
   },
 
   // 활동 로그

@@ -46,7 +46,7 @@ export default {
     home: 'Home',
     discover: 'Store',
     search: 'Search',
-    searchPlaceholder: 'Search products...',
+    searchPlaceholder: 'Search everything...',
     detectedList: 'Detected List',
     favorites: 'Favorites',
     scraps: 'Scraps',
@@ -132,6 +132,7 @@ export default {
     sortByLatest: 'Latest',
     sortByName: 'Name',
     sortByCategory: 'Category',
+    sortByVendor: 'Vendor',
     filterByVendor: 'By Vendor',
     noResults: 'No results found',
     noResultsDesc: 'Try a different search term or filter',
@@ -1945,6 +1946,18 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     locked: 'Too many failed attempts. This link has been locked.',
     availableVersions: 'Available Versions',
     sharedByInfo: 'This page provides product information through a shared link.',
+  },
+
+  // Unified Search
+  unifiedSearch: {
+    title: 'Search',
+    placeholder: 'Search everything...',
+    enterQuery: 'Enter a search term',
+    enterQueryDesc: 'Search across Store, Tips & Tech, and Scan List',
+    resultsFor: 'Results for',
+    resultsCount: ' found',
+    viewAll: 'View all',
+    noResults: 'No results found',
   },
 
   // Activity Log
