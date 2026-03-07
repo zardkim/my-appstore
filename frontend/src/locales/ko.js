@@ -152,6 +152,9 @@ export default {
     cleanupConfirm: '실제로 존재하지 않는 파일들을 DB에서 모두 삭제하시겠습니까?',
     cleanupSuccess: '{deleted_versions}개의 버전과 {deleted_products}개의 제품이 삭제되었습니다.',
     cleanupFailed: '삭제된 파일 정리 중 오류가 발생했습니다.',
+    tipResults: '팁&테크 게시글',
+    scanResults: '검색된 파일 목록',
+    viewAll: '전체 보기',
   },
 
   // 제품
@@ -268,6 +271,7 @@ export default {
       types: {
         patch: '패치',
         crack: '패치',
+        update: '업데이트',
         manual: '매뉴얼',
         other: '기타',
       },

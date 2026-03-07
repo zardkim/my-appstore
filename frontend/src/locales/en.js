@@ -151,6 +151,9 @@ export default {
     cleanupConfirm: 'Are you sure you want to delete all files that do not exist from the database?',
     cleanupSuccess: '{deleted_versions} versions and {deleted_products} products have been deleted.',
     cleanupFailed: 'An error occurred while cleaning up deleted files.',
+    tipResults: 'Tips & Tech Posts',
+    scanResults: 'Scanned File List',
+    viewAll: 'View All',
   },
 
   // Product
@@ -266,6 +269,7 @@ export default {
       types: {
         patch: 'Patch',
         crack: 'Patch',
+        update: 'Update',
         manual: 'Manual',
         other: 'Other',
       },

@@ -657,7 +657,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { filenameViolationsApi } from '../api/filenameViolations'
 import { productsApi } from '../api/products'
@@ -667,6 +667,7 @@ import ViolationAISearchDialog from '../components/violation/ViolationAISearchDi
 import { useDialog } from '../composables/useDialog'
 
 const router = useRouter()
+const route = useRoute()
 const { t } = useI18n({ useScope: 'global' })
 const { alert, confirm } = useDialog()
 
@@ -675,6 +676,7 @@ const loading = ref(true)
 const items = ref([])
 const stats = ref({ total: 0, by_classification: {} })
 const activeFilter = ref('all')
+const fileSearchQuery = ref('')
 const editingId = ref(null)
 const editingFilename = ref('')
 const selectedIds = ref([])
@@ -773,8 +775,12 @@ const classifications = computed(() => [
 ])
 
 const filteredItems = computed(() => {
-  if (activeFilter.value === 'all') return items.value
-  return items.value.filter(item => item.classification === activeFilter.value)
+  let result = activeFilter.value === 'all' ? items.value : items.value.filter(item => item.classification === activeFilter.value)
+  if (fileSearchQuery.value.trim()) {
+    const q = fileSearchQuery.value.trim().toLowerCase()
+    result = result.filter(item => item.file_name?.toLowerCase().includes(q) || item.folder_path?.toLowerCase().includes(q))
+  }
+  return result
 })
 
 // ── Helpers ─────────────────────────────────────────────────────
@@ -1207,6 +1213,9 @@ const startScan = async () => {
 }
 
 onMounted(() => {
+  if (route.query.search) {
+    fileSearchQuery.value = route.query.search
+  }
   loadItems()
 })
 </script>

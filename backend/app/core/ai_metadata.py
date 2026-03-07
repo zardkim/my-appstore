@@ -73,6 +73,8 @@ class AIMetadataGeneratorV2:
         """
         # 1단계: 파일명 파싱
         parsed = self.parser.parse(filename, parent_folder)
+        parsed['raw_filename'] = filename
+        parsed['raw_parent_folder'] = parent_folder
 
         # 2단계: AI 질의
         if self.api_key and self.api_key.strip():
@@ -93,6 +95,8 @@ class AIMetadataGeneratorV2:
         software_name = parsed_info['software_name']
         version = parsed_info.get('version', '')
         year = parsed_info.get('year', '')
+        raw_filename = parsed_info.get('raw_filename', '')
+        raw_parent_folder = parsed_info.get('raw_parent_folder', '')
 
         context_parts = [software_name]
         if version:
@@ -102,6 +106,13 @@ class AIMetadataGeneratorV2:
 
         software_context = ' '.join(context_parts)
 
+        # 원본 파일명 컨텍스트 구성
+        filename_context = ""
+        if raw_filename:
+            filename_context += f"\nOriginal filename: {raw_filename}"
+        if raw_parent_folder:
+            filename_context += f"\nParent folder: {raw_parent_folder}"
+
         # 커스텀 프롬프트가 있으면 사용, 없으면 기본 프롬프트 사용
         if custom_prompt:
             # 커스텀 프롬프트의 변수 치환 (소문자/대문자/괄더형 모두 지원)
@@ -110,7 +121,7 @@ class AIMetadataGeneratorV2:
             prompt = prompt.replace('[SOFTWARE_NAME]', software_context)
         else:
             # 상세 메타데이터 프롬프트 (영어 - 더 나은 성능)
-            prompt = f"""Provide detailed metadata for the software: {software_context}
+            prompt = f"""Provide detailed metadata for the software: {software_context}{filename_context}
 
 Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
@@ -209,6 +220,14 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 3. Use empty strings "" or empty arrays [] for unknown information
 4. Be specific and detailed - provide comprehensive information
 5. For well-known software, fill in as much detail as possible
+
+**CRITICAL VERSION RULES:**
+1. Carefully examine the original filename for version information (e.g., "visual_studio_6", "photoshop_7", "office_2003")
+2. Single numbers in filenames ARE version numbers (e.g., "studio 6" → version "6", "photoshop 7" → version "7")
+3. Use the EXACT version from the filename - do NOT substitute with the latest release version
+4. If filename says "Visual Studio 6", the version is "6" (1998), NOT "2022"
+5. If filename says "Photoshop 7", the version is "7" (2002), NOT "2024"
+6. Provide metadata accurate to that specific version, not the current/latest version
 
 **LANGUAGE REQUIREMENT:**
 - Provide ALL text content (descriptions, features, notes, etc.) in KOREAN language
@@ -275,6 +294,8 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
         software_name = parsed_info['software_name']
         version = parsed_info.get('version', '')
         year = parsed_info.get('year', '')
+        raw_filename = parsed_info.get('raw_filename', '')
+        raw_parent_folder = parsed_info.get('raw_parent_folder', '')
 
         context_parts = [software_name]
         if version:
@@ -284,6 +305,13 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 
         software_context = ' '.join(context_parts)
 
+        # 원본 파일명 컨텍스트 구성
+        filename_context = ""
+        if raw_filename:
+            filename_context += f"\nOriginal filename: {raw_filename}"
+        if raw_parent_folder:
+            filename_context += f"\nParent folder: {raw_parent_folder}"
+
         # 커스텀 프롬프트가 있으면 사용, 없으면 기본 프롬프트 사용
         if custom_prompt:
             # 커스텀 프롬프트의 변수 치환 (소문자/대문자/괄더형 모두 지원)
@@ -292,7 +320,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
             prompt = prompt.replace('[SOFTWARE_NAME]', software_context)
         else:
             # Gemini용 영어 프롬프트 (더 나은 성능)
-            prompt = f"""Provide detailed metadata for the software: {software_context}
+            prompt = f"""Provide detailed metadata for the software: {software_context}{filename_context}
 
 Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
@@ -391,6 +419,14 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 3. Use empty strings "" or empty arrays [] for unknown information
 4. Be specific and detailed - provide comprehensive information
 5. For well-known software, fill in as much detail as possible
+
+**CRITICAL VERSION RULES:**
+1. Carefully examine the original filename for version information (e.g., "visual_studio_6", "photoshop_7", "office_2003")
+2. Single numbers in filenames ARE version numbers (e.g., "studio 6" → version "6", "photoshop 7" → version "7")
+3. Use the EXACT version from the filename - do NOT substitute with the latest release version
+4. If filename says "Visual Studio 6", the version is "6" (1998), NOT "2022"
+5. If filename says "Photoshop 7", the version is "7" (2002), NOT "2024"
+6. Provide metadata accurate to that specific version, not the current/latest version
 
 **LANGUAGE REQUIREMENT:**
 - Provide ALL text content (descriptions, features, notes, etc.) in KOREAN language

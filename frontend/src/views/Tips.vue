@@ -208,44 +208,14 @@
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div v-if="totalPages > 1" class="flex items-center justify-center mt-4 sm:mt-6 gap-1 sm:gap-2">
-          <!-- Previous Button -->
-          <button
-            @click="previousPage"
-            :disabled="currentPage === 1"
-            class="px-2 sm:px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300 transition-colors"
-          >
-            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <!-- Page Numbers -->
-          <button
-            v-for="page in pageNumbers"
-            :key="page"
-            @click="goToPage(page)"
-            :class="[
-              'px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base',
-              page === currentPage
-                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-            ]"
-          >
-            {{ page }}
-          </button>
-
-          <!-- Next Button -->
-          <button
-            @click="nextPage"
-            :disabled="currentPage === totalPages"
-            class="px-2 sm:px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300 transition-colors"
-          >
-            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+        <!-- Infinite Scroll Sentinel -->
+        <div ref="infiniteScrollSentinel" class="h-4"></div>
+        <!-- Loading indicator -->
+        <div v-if="loadingMore" class="flex justify-center py-4">
+          <svg class="animate-spin w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
         </div>
       </div>
     </div>
@@ -253,8 +223,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../store/auth'
 import { scrapsApi } from '../api/scraps'
@@ -264,6 +234,7 @@ import { useDialog } from '../composables/useDialog'
 
 const { t } = useI18n({ useScope: 'global' })
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const { alert } = useDialog()
 const isAdmin = computed(() => authStore.user?.role === 'admin')
@@ -294,9 +265,12 @@ const CATEGORY_COLOR_MAP = {
   indigo: 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-300',
 }
 
-// Pagination
-const currentPage = ref(1)
+// Infinite Scroll
 const itemsPerPage = ref(20)
+const displayedCount = ref(20)
+const loadingMore = ref(false)
+const infiniteScrollSentinel = ref(null)
+let scrollObserver = null
 
 // Posts data (loaded from API)
 const posts = ref([])
@@ -332,32 +306,13 @@ const filteredPosts = computed(() => {
   return result
 })
 
-// Pagination computed properties
-const totalPages = computed(() => {
-  return Math.ceil(filteredPosts.value.length / itemsPerPage.value) || 1
-})
-
+// Infinite scroll computed
 const paginatedPosts = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredPosts.value.slice(start, end)
+  return filteredPosts.value.slice(0, displayedCount.value)
 })
 
-const pageNumbers = computed(() => {
-  const pages = []
-  const maxVisible = 5
-  let startPage = Math.max(1, currentPage.value - Math.floor(maxVisible / 2))
-  let endPage = Math.min(totalPages.value, startPage + maxVisible - 1)
-
-  if (endPage - startPage < maxVisible - 1) {
-    startPage = Math.max(1, endPage - maxVisible + 1)
-  }
-
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(i)
-  }
-
-  return pages
+const hasMore = computed(() => {
+  return displayedCount.value < filteredPosts.value.length
 })
 
 const getCategoryLabel = (category) => {
@@ -404,23 +359,28 @@ const goToWrite = () => {
   router.push('/tips/write')
 }
 
-// Pagination functions
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+// Infinite scroll functions
+const loadMore = () => {
+  if (!hasMore.value || loadingMore.value) return
+  loadingMore.value = true
+  setTimeout(() => {
+    displayedCount.value += itemsPerPage.value
+    loadingMore.value = false
+  }, 200)
 }
 
-const previousPage = () => {
-  if (currentPage.value > 1) {
-    goToPage(currentPage.value - 1)
-  }
-}
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    goToPage(currentPage.value + 1)
+const setupInfiniteScroll = () => {
+  if (scrollObserver) scrollObserver.disconnect()
+  scrollObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasMore.value) {
+        loadMore()
+      }
+    },
+    { threshold: 0.1 }
+  )
+  if (infiniteScrollSentinel.value) {
+    scrollObserver.observe(infiniteScrollSentinel.value)
   }
 }
 
@@ -473,9 +433,9 @@ const toggleScrap = async (post) => {
   }
 }
 
-// Reset to first page when filters change
+// Reset displayed count when filters change
 watch([selectedCategory, searchQuery, sortBy], () => {
-  currentPage.value = 1
+  displayedCount.value = itemsPerPage.value
 })
 
 const loadBoardCategories = async () => {
@@ -484,17 +444,31 @@ const loadBoardCategories = async () => {
     if (response.data?.categories?.length > 0) {
       boardCategories.value = response.data.categories
     }
+    if (response.data?.postsPerPage) {
+      const perPage = parseInt(response.data.postsPerPage, 10)
+      if (!isNaN(perPage) && perPage > 0) {
+        itemsPerPage.value = perPage
+        displayedCount.value = perPage
+      }
+    }
   } catch (error) {
     console.error('Failed to load board categories:', error)
   }
 }
 
-onMounted(() => {
-  loadBoardCategories()
+onMounted(async () => {
+  if (route.query.search) {
+    searchQuery.value = route.query.search
+  }
+  await loadBoardCategories()
   loadPosts()
-  // Only load scraps if user is authenticated
   if (authStore.isAuthenticated) {
     loadScraps()
   }
+  setupInfiniteScroll()
+})
+
+onUnmounted(() => {
+  if (scrollObserver) scrollObserver.disconnect()
 })
 </script>
