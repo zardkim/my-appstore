@@ -237,10 +237,24 @@ def cache_response(prefix: str = "api", ttl: int = 300):
             # 캐시 키 생성
             cache_key = redis_cache.generate_key(prefix, **cache_params)
 
-            # TODO: SQLAlchemy 모델 → Pydantic 직렬화 후 캐시 복원 로직 필요
-            # 현재는 캐시 비활성화 (SQLAlchemy 객체 직렬화 문제)
-            logger.debug(f"Cache DISABLED for {prefix}")
+            # 캐시 히트 확인
+            cached = redis_cache.get(cache_key)
+            if cached is not None:
+                logger.debug(f"Cache HIT: {cache_key}")
+                return cached
+
+            # 캐시 미스: 원본 함수 실행
             result = await func(*args, **kwargs)
+
+            # jsonable_encoder로 SQLAlchemy 객체 → JSON 직렬화 후 캐시 저장
+            try:
+                from fastapi.encoders import jsonable_encoder
+                serializable = jsonable_encoder(result)
+                redis_cache.set(cache_key, serializable, ttl)
+                logger.debug(f"Cache SET: {cache_key} (TTL: {ttl}s)")
+            except Exception as e:
+                logger.warning(f"Cache set failed for {cache_key}: {e}")
+
             return result
 
         return wrapper
