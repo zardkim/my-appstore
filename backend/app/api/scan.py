@@ -12,6 +12,7 @@ from app.dependencies import get_current_admin_user
 from app.config import settings
 from app.models.setting import Setting
 from app.core.redis_cache import invalidate_cache
+from app.core.activity_logger import log_activity
 from app.models.filename_violation import FilenameViolation
 from app.models.product import Product
 from app.models.version import Version
@@ -154,6 +155,10 @@ async def start_scan(
             db.add(last_scan_setting)
 
         db.commit()
+
+        log_activity(db, action="scan", resource_type="scan", resource_name=request.path,
+                     user_id=current_user.id, username=current_user.username,
+                     details={"path": request.path, "use_ai": request.use_ai})
 
         # 스캔 완료 후 자동 매칭 수행
         match_results = await auto_match_scanned_files(db)

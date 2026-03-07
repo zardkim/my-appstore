@@ -105,6 +105,12 @@ const routes = [
         meta: { requiresAdmin: true }
       },
       {
+        path: 'activity-log',
+        name: 'ActivityLog',
+        component: () => import('../views/ActivityLog.vue'),
+        meta: { requiresAdmin: true }
+      },
+      {
         path: 'my/share-links',
         name: 'ShareManage',
         component: () => import('../views/ShareManage.vue')

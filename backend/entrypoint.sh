@@ -109,6 +109,41 @@ try:
     conn.commit()
     print("✓ product_videos table ready")
 
+    # activity_logs 테이블 생성 (없으면)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS activity_logs (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER,
+            username VARCHAR(100),
+            action VARCHAR(50) NOT NULL,
+            resource_type VARCHAR(50),
+            resource_id INTEGER,
+            resource_name VARCHAR(500),
+            ip_address VARCHAR(50),
+            details TEXT,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+    """)
+    cur.execute("CREATE INDEX IF NOT EXISTS ix_activity_logs_action ON activity_logs(action)")
+    cur.execute("CREATE INDEX IF NOT EXISTS ix_activity_logs_created_at ON activity_logs(created_at)")
+    conn.commit()
+    print("✓ activity_logs table ready")
+
+    # pg_trgm 확장 및 GIN 인덱스 생성 (검색 성능 최적화)
+    try:
+        cur.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+        conn.commit()
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_products_title_trgm ON products USING GIN (title gin_trgm_ops)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_products_subtitle_trgm ON products USING GIN (subtitle gin_trgm_ops)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_products_vendor_trgm ON products USING GIN (vendor gin_trgm_ops)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_posts_title_trgm ON posts USING GIN (title gin_trgm_ops)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_filename_violations_file_name_trgm ON filename_violations USING GIN (file_name gin_trgm_ops)")
+        conn.commit()
+        print("✓ pg_trgm indexes created")
+    except Exception as idx_e:
+        print(f"Note: pg_trgm index creation skipped: {idx_e}")
+        conn.rollback()
+
     cur.close()
     conn.close()
 except Exception as e:

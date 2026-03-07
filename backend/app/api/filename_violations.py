@@ -28,6 +28,7 @@ from app.core.classifier import classify_file
 from app.api.config import load_config
 from app.core.redis_cache import invalidate_cache
 from app.core.auto_matcher import match_violations_to_products, find_similar_product
+from app.core.activity_logger import log_activity
 
 # ── 하위 호환: 기존 URL (/api/filename-violations) + 신규 URL (/api/scan-items)
 router = APIRouter(tags=["Scan Items"])
@@ -259,7 +260,13 @@ async def register_scan_item(
 
     # 제품 분류: AI 매칭으로 Product 생성
     if item.classification == "product":
-        return await _register_as_product(item, db)
+        result = await _register_as_product(item, db)
+        if result.get("success") and result.get("product_id"):
+            log_activity(db, action="product_create", resource_type="product",
+                         resource_id=result["product_id"],
+                         resource_name=result.get("product", {}).get("title") or item.file_name,
+                         user_id=current_user.id, username=current_user.username)
+        return result
 
     # 설치영상 분류: ProductVideo 생성
     if item.classification == "installation_video":

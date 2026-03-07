@@ -13,6 +13,7 @@ from app.models.comment import Comment
 from app.models.user import User, UserRole
 from app.schemas.post import PostCreate, PostUpdate, PostResponse
 from app.config import settings
+from app.core.activity_logger import log_activity
 import logging
 logger = logging.getLogger(__name__)
 
@@ -138,6 +139,9 @@ def create_post(
     db.commit()
     db.refresh(new_post)
 
+    log_activity(db, action="post_create", resource_type="post", resource_id=new_post.id,
+                 resource_name=new_post.title, user_id=current_user.id, username=current_user.username)
+
     post_dict = {
         "id": new_post.id,
         "category": new_post.category,
@@ -182,6 +186,9 @@ def update_post(
 
     db.commit()
     db.refresh(post)
+
+    log_activity(db, action="post_update", resource_type="post", resource_id=post.id,
+                 resource_name=post.title, user_id=current_user.id, username=current_user.username)
 
     post_dict = {
         "id": post.id,
@@ -234,8 +241,12 @@ def delete_post(
                 logger.debug(f"Delete Post] Failed to delete image {image_path}: {e}")
                 # 이미지 삭제 실패해도 게시글 삭제는 계속 진행
 
+    post_title = post.title
     db.delete(post)
     db.commit()
+
+    log_activity(db, action="post_delete", resource_type="post", resource_id=post_id,
+                 resource_name=post_title, user_id=current_user.id, username=current_user.username)
 
     return {"message": "게시글이 삭제되었습니다."}
 

@@ -33,6 +33,10 @@ export const productsApi = {
     return apiClient.get('/products/stats/categories')
   },
 
+  async getVendorStats() {
+    return apiClient.get('/products/stats/vendors')
+  },
+
   async updateProduct(id, data) {
     return apiClient.put(`/products/${id}`, data)
   },
