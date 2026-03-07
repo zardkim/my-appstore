@@ -125,6 +125,7 @@
               <option value="id">{{ t('discover.sortByLatest') }}</option>
               <option value="title">{{ t('discover.sortByName') }}</option>
               <option value="category">{{ t('discover.sortByCategory') }}</option>
+              <option value="vendor">{{ t('discover.sortByVendor') }}</option>
             </select>
 
             <button
@@ -150,6 +151,7 @@
               <option value="id">{{ t('discover.sortByLatest') }}</option>
               <option value="title">{{ t('discover.sortByName') }}</option>
               <option value="category">{{ t('discover.sortByCategory') }}</option>
+              <option value="vendor">{{ t('discover.sortByVendor') }}</option>
             </select>
 
             <button
@@ -457,6 +459,7 @@ const handleSearch = () => {
 const resetAndLoad = () => {
   currentPage.value = 1
   products.value = []
+  totalProducts.value = 0
   loadProducts()
   if (searchQuery.value.trim()) {
     searchTips()
@@ -496,7 +499,7 @@ const loadProducts = async (append = false) => {
       skip: (currentPage.value - 1) * pageSize,
       limit: pageSize,
       sort_by: sortBy.value,
-      sort_order: 'desc'
+      sort_order: sortBy.value === 'id' ? 'desc' : 'asc'
     }
 
     if (selectedCategory.value) {
@@ -608,7 +611,7 @@ const selectCategoryMobile = (category) => {
 }
 
 const selectVendor = (vendor) => {
-  selectedVendor.value = vendor
+  selectedVendor.value = selectedVendor.value === vendor ? null : vendor
   selectedCategory.value = null
   resetAndLoad()
 }

@@ -324,7 +324,7 @@ const toggleSearchOverlay = async () => {
 const handleMobileSearch = () => {
   const q = mobileSearchQuery.value.trim()
   if (q) {
-    router.push(`/discover?search=${encodeURIComponent(q)}`)
+    router.push({ path: '/search', query: { q } })
     mobileSearchQuery.value = ''
     showSearchOverlay.value = false
   }

@@ -45,7 +45,10 @@
       <button
         v-else
         @click="handleSearchIconClick"
-        class="menu-item group justify-center w-full mb-1"
+        :class="[
+          'menu-item group justify-center w-full mb-1',
+          route.path === '/search' ? 'bg-gradient-to-r from-blue-500 to-purple-600 !text-white shadow-md' : ''
+        ]"
         :title="$t('nav.search')"
       >
         <div class="menu-icon">
@@ -419,7 +422,7 @@ const goToHome = () => {
 const handleSearch = () => {
   const q = sidebarSearch.value.trim()
   if (q) {
-    router.push({ path: '/discover', query: { search: q } })
+    router.push({ path: '/search', query: { q } })
     sidebarSearch.value = ''
   }
 }
@@ -430,7 +433,7 @@ const handleSearchInput = () => {
   searchInputTimer = setTimeout(() => {
     const q = sidebarSearch.value.trim()
     if (q.length >= 2) {
-      router.push({ path: '/discover', query: { search: q } })
+      router.push({ path: '/search', query: { q } })
     }
   }, 600)
 }
