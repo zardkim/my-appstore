@@ -549,6 +549,8 @@ export default {
       noHistory: '스캔 이력이 없습니다',
       scanTypeAuto: '자동',
       scanTypeManual: '수동',
+      startTime: '시간',
+      scanType: '유형',
       scannedFiles: '스캔 파일',
       newScanItems: '신규 검색',
       deletedItems: '삭제',

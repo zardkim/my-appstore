@@ -467,9 +467,11 @@ class FileScanner:
             violation.version_id = existing_version.id
             violation.is_resolved = True
             violation.violation_details = "이미 스토어에 등록된 파일"
-
-        self.db.add(violation)
-        results["new_products"] += 1  # Count scanned files as new products
+            self.db.add(violation)
+            results["new_versions"] += 1  # Already registered version file
+        else:
+            self.db.add(violation)
+            results["new_products"] += 1  # New unresolved scan item
 
     def _detect_renamed_files(self, base_path: str, scanned_files: set, results: Dict):
         """
