@@ -107,7 +107,7 @@ const routes = [
       {
         path: 'activity-log',
         name: 'ActivityLog',
-        component: () => import('../views/ActivityLog.vue'),
+        redirect: '/settings?section=activity-log',
         meta: { requiresAdmin: true }
       },
       {
