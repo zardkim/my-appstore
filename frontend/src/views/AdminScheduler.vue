@@ -103,64 +103,120 @@
         {{ t('settings.scheduler.noHistory') }}
       </div>
 
-      <!-- History table -->
-      <div v-else class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
-              <th class="text-left px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">시간</th>
-              <th class="text-center px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">유형</th>
-              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.scannedFiles') }}</th>
-              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.newScanItems') }}</th>
-              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.newVersions') }}</th>
-              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.deletedItems') }}</th>
-              <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.duration') }}</th>
-              <th class="text-center px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('settings.scheduler.errorsCount') }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-            <tr
-              v-for="(entry, idx) in scanHistory"
-              :key="idx"
-              class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-            >
-              <td class="px-3 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                {{ formatDateTime(entry.started_at) }}
-              </td>
-              <td class="px-3 py-2.5 text-center">
-                <span
-                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                  :class="entry.scan_type === 'manual'
-                    ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                    : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'"
-                >
-                  {{ entry.scan_type === 'manual' ? t('settings.scheduler.scanTypeManual') : t('settings.scheduler.scanTypeAuto') }}
-                </span>
-              </td>
-              <td class="px-3 py-2.5 text-right text-gray-800 dark:text-gray-200 font-medium">{{ entry.scanned_files }}</td>
-              <td class="px-3 py-2.5 text-right">
-                <span :class="entry.new_scan_items > 0 ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-400 dark:text-gray-500'">
+      <div v-else>
+        <!-- 모바일: 카드 뷰 -->
+        <div class="sm:hidden divide-y divide-gray-100 dark:divide-gray-700">
+          <div
+            v-for="(entry, idx) in scanHistory"
+            :key="idx"
+            class="px-4 py-3 space-y-2"
+          >
+            <!-- 시간 + 유형 -->
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDateTime(entry.started_at) }}</span>
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                :class="entry.scan_type === 'manual'
+                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                  : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'"
+              >
+                {{ entry.scan_type === 'manual' ? t('settings.scheduler.scanTypeManual') : t('settings.scheduler.scanTypeAuto') }}
+              </span>
+            </div>
+            <!-- 스캔 결과 -->
+            <div class="grid grid-cols-4 gap-2 text-center">
+              <div class="bg-gray-50 dark:bg-gray-700/40 rounded-lg py-1.5">
+                <p class="text-xs text-gray-400 dark:text-gray-500">{{ t('settings.scheduler.scannedFiles') }}</p>
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ entry.scanned_files }}</p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/40 rounded-lg py-1.5">
+                <p class="text-xs text-gray-400 dark:text-gray-500">{{ t('settings.scheduler.newScanItems') }}</p>
+                <p class="text-sm font-bold" :class="entry.new_scan_items > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'">
                   {{ entry.new_scan_items > 0 ? '+' + entry.new_scan_items : '-' }}
-                </span>
-              </td>
-              <td class="px-3 py-2.5 text-right">
-                <span :class="entry.new_versions > 0 ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-400 dark:text-gray-500'">
+                </p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/40 rounded-lg py-1.5">
+                <p class="text-xs text-gray-400 dark:text-gray-500">{{ t('settings.scheduler.newVersions') }}</p>
+                <p class="text-sm font-bold" :class="entry.new_versions > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'">
                   {{ entry.new_versions > 0 ? '+' + entry.new_versions : '-' }}
-                </span>
-              </td>
-              <td class="px-3 py-2.5 text-right">
-                <span :class="entry.deleted_violations > 0 ? 'text-orange-500 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'">
+                </p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/40 rounded-lg py-1.5">
+                <p class="text-xs text-gray-400 dark:text-gray-500">{{ t('settings.scheduler.deletedItems') }}</p>
+                <p class="text-sm font-bold" :class="entry.deleted_violations > 0 ? 'text-orange-500 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'">
                   {{ entry.deleted_violations > 0 ? entry.deleted_violations : '-' }}
-                </span>
-              </td>
-              <td class="px-3 py-2.5 text-right text-gray-500 dark:text-gray-400 text-xs">{{ entry.duration_seconds }}s</td>
-              <td class="px-3 py-2.5 text-center">
-                <span v-if="entry.errors_count > 0" class="text-red-500 dark:text-red-400 font-medium">{{ entry.errors_count }}</span>
-                <span v-else class="text-gray-300 dark:text-gray-600">-</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </p>
+              </div>
+            </div>
+            <!-- 소요시간 + 오류 -->
+            <div class="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+              <span>{{ t('settings.scheduler.duration') }}: {{ entry.duration_seconds }}s</span>
+              <span v-if="entry.errors_count > 0" class="text-red-500 dark:text-red-400 font-medium">
+                {{ t('settings.scheduler.errorsCount') }}: {{ entry.errors_count }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 데스크톱: 테이블 뷰 -->
+        <div class="hidden sm:block overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
+                <th class="text-left px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.startTime') }}</th>
+                <th class="text-center px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('settings.scheduler.scanType') }}</th>
+                <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.scannedFiles') }}</th>
+                <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.newScanItems') }}</th>
+                <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.newVersions') }}</th>
+                <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.deletedItems') }}</th>
+                <th class="text-right px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ t('settings.scheduler.duration') }}</th>
+                <th class="text-center px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('settings.scheduler.errorsCount') }}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              <tr
+                v-for="(entry, idx) in scanHistory"
+                :key="idx"
+                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+              >
+                <td class="px-3 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                  {{ formatDateTime(entry.started_at) }}
+                </td>
+                <td class="px-3 py-2.5 text-center">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                    :class="entry.scan_type === 'manual'
+                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                      : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'"
+                  >
+                    {{ entry.scan_type === 'manual' ? t('settings.scheduler.scanTypeManual') : t('settings.scheduler.scanTypeAuto') }}
+                  </span>
+                </td>
+                <td class="px-3 py-2.5 text-right text-gray-800 dark:text-gray-200 font-medium">{{ entry.scanned_files }}</td>
+                <td class="px-3 py-2.5 text-right">
+                  <span :class="entry.new_scan_items > 0 ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-400 dark:text-gray-500'">
+                    {{ entry.new_scan_items > 0 ? '+' + entry.new_scan_items : '-' }}
+                  </span>
+                </td>
+                <td class="px-3 py-2.5 text-right">
+                  <span :class="entry.new_versions > 0 ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-400 dark:text-gray-500'">
+                    {{ entry.new_versions > 0 ? '+' + entry.new_versions : '-' }}
+                  </span>
+                </td>
+                <td class="px-3 py-2.5 text-right">
+                  <span :class="entry.deleted_violations > 0 ? 'text-orange-500 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'">
+                    {{ entry.deleted_violations > 0 ? entry.deleted_violations : '-' }}
+                  </span>
+                </td>
+                <td class="px-3 py-2.5 text-right text-gray-500 dark:text-gray-400 text-xs">{{ entry.duration_seconds }}s</td>
+                <td class="px-3 py-2.5 text-center">
+                  <span v-if="entry.errors_count > 0" class="text-red-500 dark:text-red-400 font-medium">{{ entry.errors_count }}</span>
+                  <span v-else class="text-gray-300 dark:text-gray-600">-</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 

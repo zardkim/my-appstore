@@ -547,6 +547,8 @@ export default {
       noHistory: 'No scan history yet',
       scanTypeAuto: 'Auto',
       scanTypeManual: 'Manual',
+      startTime: 'Time',
+      scanType: 'Type',
       scannedFiles: 'Scanned',
       newScanItems: 'New Items',
       deletedItems: 'Deleted',

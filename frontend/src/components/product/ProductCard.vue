@@ -1,23 +1,13 @@
 <template>
   <div class="relative">
-    <!-- NEW 배지 (코너 리본) -->
+    <!-- NEW 배지 (작은 pill) -->
     <div
       v-if="isNew"
-      class="absolute top-0 left-0 z-20 pointer-events-none w-16 h-16 overflow-hidden rounded-tl-2xl"
+      class="absolute top-2 left-2 z-20 pointer-events-none"
     >
-      <div class="absolute bg-gradient-to-r from-red-500 to-pink-600 text-white text-[8px] font-black shadow-md text-center py-1 tracking-widest" style="width: 80px; top: 13px; left: -18px; transform: rotate(-45deg);">
-        ✨ NEW
-      </div>
-    </div>
-
-    <!-- UPDATED 배지 (코너 리본) -->
-    <div
-      v-else-if="isUpdated"
-      class="absolute top-0 left-0 z-20 pointer-events-none w-16 h-16 overflow-hidden rounded-tl-2xl"
-    >
-      <div class="absolute bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-[8px] font-black shadow-md text-center py-1 tracking-widest" style="width: 80px; top: 13px; left: -18px; transform: rotate(-45deg);">
-        🆙 UPD
-      </div>
+      <span class="inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-500 text-white text-[9px] font-bold leading-none shadow-sm tracking-wide">
+        NEW
+      </span>
     </div>
 
     <router-link
@@ -192,17 +182,7 @@ const isNew = computed(() => {
   if (!props.product.created_at) return false
   const date = new Date(props.product.created_at)
   const diffDays = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24))
-  return diffDays <= 30
-})
-
-const isUpdated = computed(() => {
-  if (isNew.value) return false
-  if (!props.product.versions || props.product.versions.length === 0) return false
-  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
-  return props.product.versions.some(v => {
-    const d = v.release_date ? new Date(v.release_date).getTime() : 0
-    return d > thirtyDaysAgo
-  })
+  return diffDays <= 7
 })
 
 const iconUrl = computed(() => {
