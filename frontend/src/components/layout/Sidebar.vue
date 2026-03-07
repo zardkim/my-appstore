@@ -34,6 +34,7 @@
           <input
             v-model="sidebarSearch"
             @keyup.enter="handleSearch"
+            @input="handleSearchInput"
             type="text"
             :placeholder="$t('nav.searchPlaceholder')"
             class="w-full pl-8 pr-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-xl border border-transparent focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:bg-white dark:focus:bg-gray-600 transition-all"
@@ -101,22 +102,6 @@
           </svg>
         </div>
         <span v-if="!isCollapsed" class="menu-text">{{ $t('nav.detectedList') }}</span>
-      </router-link>
-
-      <!-- Activity Log (Admin Only) -->
-      <router-link
-        v-if="isAdmin"
-        to="/activity-log"
-        class="menu-item group"
-        :class="isCollapsed ? 'justify-center' : ''"
-      >
-        <div class="menu-icon">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
-        <span v-if="!isCollapsed" class="menu-text">{{ $t('activityLog.title') }}</span>
       </router-link>
 
       <!-- Tips & Tech -->
@@ -434,9 +419,20 @@ const goToHome = () => {
 const handleSearch = () => {
   const q = sidebarSearch.value.trim()
   if (q) {
-    router.push(`/discover?search=${encodeURIComponent(q)}`)
+    router.push({ path: '/discover', query: { search: q } })
     sidebarSearch.value = ''
   }
+}
+
+let searchInputTimer = null
+const handleSearchInput = () => {
+  if (searchInputTimer) clearTimeout(searchInputTimer)
+  searchInputTimer = setTimeout(() => {
+    const q = sidebarSearch.value.trim()
+    if (q.length >= 2) {
+      router.push({ path: '/discover', query: { search: q } })
+    }
+  }, 600)
 }
 
 const handleSearchIconClick = () => {

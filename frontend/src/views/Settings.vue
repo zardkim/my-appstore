@@ -1754,6 +1754,107 @@
         </div>
 
         <!-- System -->
+        <!-- 활동 로그 섹션 -->
+        <div v-show="activeSection === 'activity-log'" class="space-y-6">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('activityLog.title') }}</h1>
+            <p class="text-gray-500 dark:text-gray-400">{{ t('activityLog.description') }}</p>
+          </div>
+
+          <!-- 필터 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 border border-gray-100 dark:border-gray-700">
+            <div class="flex flex-wrap gap-3 items-center">
+              <select v-model="actLogAction" @change="loadActivityLogs(true)"
+                class="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <option value="">{{ t('activityLog.allActions') }}</option>
+                <option v-for="(label, key) in actLogActionLabels" :key="key" :value="key">{{ label }}</option>
+              </select>
+              <input v-model="actLogUsername" @input="debouncedLoadLogs" type="text"
+                :placeholder="t('activityLog.filterByUser')"
+                class="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white w-40" />
+              <button @click="resetActivityLogs"
+                class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                {{ t('activityLog.reset') }}
+              </button>
+              <span class="text-sm text-gray-500 dark:text-gray-400 ml-auto">{{ t('activityLog.total', { n: actLogTotal }) }}</span>
+              <button @click="showClearLogDialog = true"
+                class="px-3 py-2 text-sm bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40">
+                {{ t('activityLog.clearOld') }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 로그 목록 -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div v-if="actLogs.length === 0" class="p-12 text-center text-gray-400 dark:text-gray-500">
+              <p class="text-lg font-medium">{{ t('activityLog.noLogs') }}</p>
+            </div>
+            <div v-else>
+              <!-- 데스크톱 테이블 -->
+              <div class="hidden sm:block overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead class="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-40">{{ t('activityLog.time') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-32">{{ t('activityLog.user') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-36">{{ t('activityLog.action') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ t('activityLog.resource') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-32">{{ t('activityLog.ip') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <tr v-for="log in actLogs" :key="log.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                      <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatLogTime(log.created_at) }}</td>
+                      <td class="px-4 py-3 font-medium text-gray-900 dark:text-white text-xs">{{ log.username }}</td>
+                      <td class="px-4 py-3">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-medium" :class="getActionBadgeClass(log.action)">{{ log.action_label }}</span>
+                      </td>
+                      <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 truncate max-w-xs">{{ log.resource_name || '-' }}</td>
+                      <td class="px-4 py-3 text-xs text-gray-400 dark:text-gray-500 font-mono">{{ log.ip_address || '-' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- 모바일 카드 -->
+              <div class="sm:hidden divide-y divide-gray-100 dark:divide-gray-700">
+                <div v-for="log in actLogs" :key="log.id" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-medium" :class="getActionBadgeClass(log.action)">{{ log.action_label }}</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ formatLogTime(log.created_at) }}</span>
+                  </div>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ log.username }}</p>
+                  <p v-if="log.resource_name" class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ log.resource_name }}</p>
+                </div>
+              </div>
+            </div>
+            <!-- 더 보기 -->
+            <div v-if="actLogHasMore" class="p-4 text-center border-t border-gray-100 dark:border-gray-700">
+              <button @click="loadActivityLogs(false)"
+                class="px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg">
+                {{ t('activityLog.loadMore') }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 오래된 로그 삭제 다이얼로그 -->
+          <div v-if="showClearLogDialog" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-sm">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('activityLog.clearOldTitle') }}</h3>
+              <label class="block text-sm text-gray-600 dark:text-gray-400 mb-2">{{ t('activityLog.clearDays') }}</label>
+              <select v-model="clearLogDays" class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4">
+                <option :value="7">7일</option>
+                <option :value="30">30일</option>
+                <option :value="90">90일</option>
+                <option :value="180">180일</option>
+              </select>
+              <div class="flex gap-2 justify-end">
+                <button @click="clearOldLogs" class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600">{{ t('activityLog.delete') }}</button>
+                <button @click="showClearLogDialog = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('common.cancel') }}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div v-show="activeSection === 'system'" class="space-y-6">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ t('settings.system.title') }}</h1>
@@ -2128,6 +2229,7 @@ import { usersApi } from '../api/users'
 import { cacheApi } from '../api/cache'
 import { authApi } from '../api/auth'
 import apiClient from '../api/client'
+import { activityLogApi } from '../api/activityLog'
 import { ENV } from '../utils/env'
 import { useDialog } from '../composables/useDialog'
 
@@ -2154,6 +2256,7 @@ const sections = computed(() => {
     { id: 'data-management', label: t('settings.sections.dataManagement'), icon: '🗄️' },
     { id: 'metadata', label: t('settings.sections.metadata'), icon: '🤖' },
     { id: 'exceptions', label: t('settings.sections.exceptions'), icon: '🚫' },
+    { id: 'activity-log', label: t('activityLog.title'), icon: '🗒️' },
     { id: 'system', label: t('settings.sections.system'), icon: 'ℹ️' }
   ]
 
@@ -2169,6 +2272,75 @@ const activeSection = ref('general')
 const userInfo = computed(() => authStore.user || { username: '', role: 'user' })
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 const isLoadingConfig = ref(false) // config 로딩 중 플래그
+
+// Activity Log
+const actLogs = ref([])
+const actLogTotal = ref(0)
+const actLogSkip = ref(0)
+const actLogLimit = 50
+const actLogAction = ref('')
+const actLogUsername = ref('')
+const actLogActionLabels = ref({})
+const actLogHasMore = computed(() => actLogs.value.length < actLogTotal.value)
+const showClearLogDialog = ref(false)
+const clearLogDays = ref(30)
+
+const loadActivityLogs = async (reset = true) => {
+  if (reset) { actLogs.value = []; actLogSkip.value = 0 }
+  try {
+    const params = { skip: actLogSkip.value, limit: actLogLimit }
+    if (actLogAction.value) params.action = actLogAction.value
+    if (actLogUsername.value) params.username = actLogUsername.value
+    const res = await activityLogApi.getLogs(params)
+    actLogs.value = reset ? res.data.logs : [...actLogs.value, ...res.data.logs]
+    actLogTotal.value = res.data.total
+    actLogActionLabels.value = res.data.action_labels || {}
+    actLogSkip.value += res.data.logs.length
+  } catch (e) {
+    console.error('Failed to load activity logs:', e)
+  }
+}
+
+const resetActivityLogs = () => {
+  actLogAction.value = ''
+  actLogUsername.value = ''
+  loadActivityLogs(true)
+}
+
+let actLogDebounceTimer = null
+const debouncedLoadLogs = () => {
+  clearTimeout(actLogDebounceTimer)
+  actLogDebounceTimer = setTimeout(() => loadActivityLogs(true), 500)
+}
+
+const clearOldLogs = async () => {
+  try {
+    await activityLogApi.clearOldLogs(clearLogDays.value)
+    showClearLogDialog.value = false
+    loadActivityLogs(true)
+  } catch (e) {
+    console.error('Failed to clear logs:', e)
+  }
+}
+
+const formatLogTime = (isoStr) => {
+  if (!isoStr) return '-'
+  const d = new Date(isoStr)
+  return d.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
+const getActionBadgeClass = (action) => {
+  const map = {
+    download: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+    scan: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
+    user_login: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+    product_create: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+    product_update: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
+    product_delete: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+    post_create: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400',
+  }
+  return map[action] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+}
 
 // Data Management - Backup & Restore
 const backupLoading = ref(false)
@@ -3509,6 +3681,9 @@ watch(activeSection, (newSection) => {
   }
   if (newSection === 'data-management' && isAdmin.value) {
     loadBackupList()
+  }
+  if (newSection === 'activity-log' && isAdmin.value) {
+    loadActivityLogs(true)
   }
 })
 
