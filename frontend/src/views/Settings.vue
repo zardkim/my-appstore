@@ -1900,29 +1900,41 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.iconEmoji') }}</label>
-            <div class="flex items-center space-x-2 mb-2">
-              <div class="flex-shrink-0 w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-2xl border-2 border-blue-500">
+            <!-- 선택된 이모지 미리보기 + 직접 입력 -->
+            <div class="flex items-center gap-3 mb-3">
+              <div class="flex-shrink-0 w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-4xl border-2 border-blue-500 shadow-inner">
                 {{ newCategory.icon || '❓' }}
               </div>
-              <input v-model="newCategory.icon" type="text" required :placeholder="t('settings.categoriesManagement.iconEmojiPlaceholder')" maxlength="2" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+              <div class="flex-1">
+                <input v-model="newCategory.icon" type="text" required :placeholder="t('settings.categoriesManagement.iconEmojiPlaceholder')" maxlength="2" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">직접 이모지를 입력하거나 아래 목록에서 선택하세요</p>
+              </div>
             </div>
 
-            <!-- Emoji Picker -->
-            <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-3">{{ t('settings.categoriesManagement.frequentEmojis') }}</p>
-
-              <!-- Emoji Categories -->
-              <div class="space-y-3">
+            <!-- Emoji Picker 접기/펼치기 -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+              <button
+                type="button"
+                @click="showEmojiPickerAdd = !showEmojiPickerAdd"
+                class="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <span>{{ t('settings.categoriesManagement.frequentEmojis') }}</span>
+                <svg class="w-4 h-4 transition-transform duration-200" :class="showEmojiPickerAdd ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div v-if="showEmojiPickerAdd" class="p-4 bg-gray-50 dark:bg-gray-900 space-y-4">
                 <div v-for="(group, groupName) in emojiGroups" :key="groupName">
                   <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ t('settings.categoriesManagement.emojiGroups.' + groupName) }}</p>
-                  <div class="grid grid-cols-10 gap-2">
+                  <div class="grid grid-cols-8 sm:grid-cols-10 gap-1.5">
                     <button
                       v-for="emoji in group"
                       :key="emoji"
                       type="button"
                       @click="selectEmoji('add', emoji)"
-                      class="w-8 h-8 flex items-center justify-center text-xl hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                      :class="newCategory.icon === emoji ? 'bg-blue-500 dark:bg-blue-600' : ''"
+                      :title="emoji"
+                      class="w-9 h-9 flex items-center justify-center text-2xl hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-all hover:scale-125"
+                      :class="newCategory.icon === emoji ? 'bg-blue-500 dark:bg-blue-600 scale-110' : ''"
                     >
                       {{ emoji }}
                     </button>
@@ -1996,29 +2008,41 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.categoriesManagement.iconEmoji') }}</label>
-            <div class="flex items-center space-x-2 mb-2">
-              <div class="flex-shrink-0 w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-2xl border-2 border-blue-500">
+            <!-- 선택된 이모지 미리보기 + 직접 입력 -->
+            <div class="flex items-center gap-3 mb-3">
+              <div class="flex-shrink-0 w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-4xl border-2 border-blue-500 shadow-inner">
                 {{ editingCategory.icon || '❓' }}
               </div>
-              <input v-model="editingCategory.icon" type="text" required placeholder="🎨" maxlength="2" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+              <div class="flex-1">
+                <input v-model="editingCategory.icon" type="text" required placeholder="🎨" maxlength="2" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">직접 이모지를 입력하거나 아래 목록에서 선택하세요</p>
+              </div>
             </div>
 
-            <!-- Emoji Picker -->
-            <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-3">{{ t('settings.categoriesManagement.frequentEmojis') }}</p>
-
-              <!-- Emoji Categories -->
-              <div class="space-y-3">
+            <!-- Emoji Picker 접기/펼치기 -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+              <button
+                type="button"
+                @click="showEmojiPickerEdit = !showEmojiPickerEdit"
+                class="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <span>{{ t('settings.categoriesManagement.frequentEmojis') }}</span>
+                <svg class="w-4 h-4 transition-transform duration-200" :class="showEmojiPickerEdit ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div v-if="showEmojiPickerEdit" class="p-4 bg-gray-50 dark:bg-gray-900 space-y-4">
                 <div v-for="(group, groupName) in emojiGroups" :key="groupName">
                   <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ t('settings.categoriesManagement.emojiGroups.' + groupName) }}</p>
-                  <div class="grid grid-cols-10 gap-2">
+                  <div class="grid grid-cols-8 sm:grid-cols-10 gap-1.5">
                     <button
                       v-for="emoji in group"
                       :key="emoji"
                       type="button"
                       @click="selectEmoji('edit', emoji)"
-                      class="w-8 h-8 flex items-center justify-center text-xl hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                      :class="editingCategory.icon === emoji ? 'bg-blue-500 dark:bg-blue-600' : ''"
+                      :title="emoji"
+                      class="w-9 h-9 flex items-center justify-center text-2xl hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-all hover:scale-125"
+                      :class="editingCategory.icon === emoji ? 'bg-blue-500 dark:bg-blue-600 scale-110' : ''"
                     >
                       {{ emoji }}
                     </button>
@@ -3037,6 +3061,10 @@ const saveFolders = async () => {
     await alert.error(t('settings.folders.saveFailed') + ': ' + errorMessage)
   }
 }
+
+// 이모지 피커 접기/펼치기 상태
+const showEmojiPickerAdd = ref(false)
+const showEmojiPickerEdit = ref(false)
 
 // 이모지 선택 함수
 const selectEmoji = (mode, emoji) => {

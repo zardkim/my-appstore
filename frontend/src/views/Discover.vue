@@ -144,6 +144,53 @@
           </div>
         </div>
 
+        <!-- Unified Search: Tips Results -->
+        <div v-if="isSearchMode && tipResults.length > 0" class="mb-4 sm:mb-6">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <span>📝</span> {{ t('discover.tipResults') }}
+            </h2>
+            <button @click="$router.push(`/tips?search=${encodeURIComponent(searchQuery)}`)" class="text-sm text-blue-500 hover:underline">
+              {{ t('discover.viewAll') }}
+            </button>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden">
+            <router-link
+              v-for="post in tipResults"
+              :key="post.id"
+              :to="`/tips/${post.id}`"
+              class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <span class="text-gray-400 dark:text-gray-500 text-sm flex-shrink-0">#{{ post.id }}</span>
+              <span class="flex-1 font-medium text-gray-900 dark:text-white text-sm truncate">{{ post.title }}</span>
+              <span class="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">{{ post.author_username }}</span>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- Unified Search: Scan Items (Admin only) -->
+        <div v-if="isSearchMode && authStore.user?.role === 'admin' && scanResults.length > 0" class="mb-4 sm:mb-6">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <span>🔍</span> {{ t('discover.scanResults') }}
+            </h2>
+            <button @click="$router.push(`/scan-list?search=${encodeURIComponent(searchQuery)}`)" class="text-sm text-blue-500 hover:underline">
+              {{ t('discover.viewAll') }}
+            </button>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden">
+            <div
+              v-for="item in scanResults"
+              :key="item.id"
+              class="flex items-center gap-3 px-4 py-3"
+            >
+              <span class="text-lg flex-shrink-0">{{ item.classification === 'installation_video' ? '🎬' : item.classification === 'patch' ? '🔧' : '📦' }}</span>
+              <span class="flex-1 text-sm text-gray-900 dark:text-white truncate">{{ item.file_name }}</span>
+              <span class="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">{{ item.classification }}</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Products Grid -->
         <div>
           <!-- Loading State -->
@@ -284,6 +331,8 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { productsApi } from '../api/products'
+import { postsApi } from '../api/posts'
+import { filenameViolationsApi } from '../api/filenameViolations'
 import ProductCard from '../components/product/ProductCard.vue'
 import ProductAISearchDialog from '../components/product/ProductAISearchDialog.vue'
 import ProductManualEditDialog from '../components/product/ProductManualEditDialog.vue'
@@ -332,6 +381,11 @@ const loadingMore = ref(false)
 const currentPage = ref(1)
 const pageSize = 20
 
+// Unified search results
+const tipResults = ref([])
+const scanResults = ref([])
+const isSearchMode = computed(() => !!searchQuery.value.trim())
+
 // Infinite scroll
 const scrollObserverTarget = ref(null)
 let scrollObserver = null
@@ -360,6 +414,31 @@ const resetAndLoad = () => {
   currentPage.value = 1
   products.value = []
   loadProducts()
+  if (searchQuery.value.trim()) {
+    searchTips()
+    if (authStore.user?.role === 'admin') searchScanItems()
+  } else {
+    tipResults.value = []
+    scanResults.value = []
+  }
+}
+
+const searchTips = async () => {
+  try {
+    const response = await postsApi.getPosts({ search: searchQuery.value.trim(), limit: 5 })
+    tipResults.value = Array.isArray(response.data) ? response.data.filter(p => !p.is_notice) : []
+  } catch (e) {
+    tipResults.value = []
+  }
+}
+
+const searchScanItems = async () => {
+  try {
+    const response = await filenameViolationsApi.getScanItems({ search: searchQuery.value.trim(), limit: 5, resolved: false })
+    scanResults.value = response.data?.items || []
+  } catch (e) {
+    scanResults.value = []
+  }
 }
 
 const loadProducts = async (append = false) => {
