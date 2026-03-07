@@ -11,6 +11,7 @@ from app.models.user import User
 from app.dependencies import get_current_user
 from app.core.security import decode_access_token
 from app.config import settings
+from app.core.activity_logger import log_activity
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -108,6 +109,14 @@ async def download_file(
 
         # RFC 5987: filename*=UTF-8''encoded_name 형식 사용
         content_disposition = f"attachment; filename*=UTF-8''{encoded_filename}"
+
+        # 다운로드 로그 기록
+        log_activity(
+            db, action="download",
+            resource_type="version", resource_id=version.id,
+            resource_name=version.file_name,
+            user_id=current_user.id, username=current_user.username,
+        )
 
         return Response(
             status_code=200,

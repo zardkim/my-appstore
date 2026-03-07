@@ -17,6 +17,7 @@ from app.schemas.user import UserCreate, UserResponse, UserRegister
 from app.core.security import verify_password, create_access_token, get_password_hash
 from app.dependencies import get_current_user
 from app.config import settings
+from app.core.activity_logger import log_activity
 
 router = APIRouter()
 
@@ -81,6 +82,10 @@ async def login(
         data={"sub": user.username, "role": user.role.value},
         expires_delta=access_token_expires
     )
+
+    log_activity(db, action="user_login", resource_type="user",
+                 resource_id=user.id, resource_name=user.username,
+                 user_id=user.id, username=user.username)
 
     return {"access_token": access_token, "token_type": "bearer"}
 

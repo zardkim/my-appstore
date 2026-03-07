@@ -34,6 +34,28 @@
             <span class="text-xs opacity-75">{{ getCategoryCount(category.name) }}</span>
           </button>
         </nav>
+
+        <!-- Vendor Filter -->
+        <div v-if="vendorStats.length > 0" class="mt-6">
+          <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ t('discover.vendors') }}</h2>
+          <nav class="space-y-0.5">
+            <button
+              v-for="vendor in vendorStats"
+              :key="vendor.vendor"
+              @click="selectVendor(vendor.vendor)"
+              :class="[
+                'w-full text-left px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center',
+                selectedVendor === vendor.vendor
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+              ]"
+            >
+              <span class="text-lg mr-3">🏢</span>
+              <span class="flex-1 truncate">{{ vendor.vendor }}</span>
+              <span class="text-xs opacity-75 flex-shrink-0">{{ vendor.count }}</span>
+            </button>
+          </nav>
+        </div>
       </div>
     </div>
 
@@ -271,7 +293,7 @@
               @click="selectCategoryMobile(null)"
               :class="[
                 'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-between',
-                selectedCategory === null
+                selectedCategory === null && selectedVendor === null
                   ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
               ]"
@@ -295,6 +317,26 @@
               <span class="flex-1">{{ t(`categories.${category.name}`) }}</span>
               <span class="text-xs opacity-75">{{ getCategoryCount(category.name) }}</span>
             </button>
+
+            <!-- Vendor section in mobile modal -->
+            <div v-if="vendorStats.length > 0" class="pt-4">
+              <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-1 mb-2">{{ t('discover.vendors') }}</p>
+              <button
+                v-for="vendor in vendorStats"
+                :key="vendor.vendor"
+                @click="selectVendor(vendor.vendor); showCategoryModal = false"
+                :class="[
+                  'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center',
+                  selectedVendor === vendor.vendor
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                ]"
+              >
+                <span class="text-lg mr-3">🏢</span>
+                <span class="flex-1 truncate">{{ vendor.vendor }}</span>
+                <span class="text-xs opacity-75">{{ vendor.count }}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -372,10 +414,12 @@ const categories = [
 
 const searchQuery = ref('')
 const selectedCategory = ref(null)
+const selectedVendor = ref(null)
 const sortBy = ref('id')
 const products = ref([])
 const totalProducts = ref(0)
 const categoryStats = ref({})
+const vendorStats = ref([])
 const loading = ref(true)
 const loadingMore = ref(false)
 const currentPage = ref(1)
@@ -459,6 +503,10 @@ const loadProducts = async (append = false) => {
       params.category = selectedCategory.value
     }
 
+    if (selectedVendor.value) {
+      params.vendor = selectedVendor.value
+    }
+
     if (searchQuery.value.trim()) {
       params.search = searchQuery.value.trim()
     }
@@ -516,6 +564,7 @@ const handleProductDeleted = async (productId) => {
   products.value = products.value.filter(p => p.id !== productId)
   totalProducts.value = Math.max(0, totalProducts.value - 1)
   await loadCategoryStats()
+  loadVendorStats()
 }
 
 const loadCategoryStats = async () => {
@@ -531,18 +580,36 @@ const loadCategoryStats = async () => {
   }
 }
 
+const loadVendorStats = async () => {
+  try {
+    const response = await productsApi.getVendorStats()
+    vendorStats.value = response.data || []
+  } catch (error) {
+    console.error('Failed to load vendor stats:', error)
+    vendorStats.value = []
+  }
+}
+
 const getCategoryCount = (category) => {
   return categoryStats.value[category] || 0
 }
 
 const selectCategory = (category) => {
   selectedCategory.value = category
+  selectedVendor.value = null
   resetAndLoad()
 }
 
 const selectCategoryMobile = (category) => {
   selectedCategory.value = category
+  selectedVendor.value = null
   showCategoryModal.value = false
+  resetAndLoad()
+}
+
+const selectVendor = (vendor) => {
+  selectedVendor.value = vendor
+  selectedCategory.value = null
   resetAndLoad()
 }
 
@@ -623,6 +690,7 @@ onMounted(async () => {
   }
   await loadProducts()
   loadCategoryStats()
+  loadVendorStats()
   await nextTick()
   setupScrollObserver()
 })

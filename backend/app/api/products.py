@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, case
 from typing import List, Optional
 import os
 
@@ -18,6 +18,7 @@ from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
 from app.core.parser import FilenameParser
 from app.api.config import load_config
 from app.core.redis_cache import cache_response, invalidate_cache
+from app.core.activity_logger import log_activity
 from app.config import settings
 
 router = APIRouter()
@@ -73,22 +74,34 @@ async def get_products(
     if vendor:
         query = query.filter(Product.vendor.ilike(f"%{vendor}%"))
 
-    # 검색
+    # 검색 (pg_trgm GIN 인덱스 활용: title, subtitle, vendor)
     if search:
         search_filter = or_(
             Product.title.ilike(f"%{search}%"),
             Product.subtitle.ilike(f"%{search}%"),
-            Product.description.ilike(f"%{search}%"),
             Product.vendor.ilike(f"%{search}%")
         )
         query = query.filter(search_filter)
 
-    # 정렬
-    sort_column = getattr(Product, sort_by)
-    if sort_order == "asc":
-        query = query.order_by(sort_column.asc())
+    # 정렬 (검색 시 title 일치 우선, 그 외 기본 정렬)
+    if search:
+        relevance = case(
+            (Product.title.ilike(f"{search}%"), 0),
+            (Product.title.ilike(f"%{search}%"), 1),
+            (Product.subtitle.ilike(f"%{search}%"), 2),
+            else_=3
+        )
+        sort_column = getattr(Product, sort_by)
+        if sort_order == "asc":
+            query = query.order_by(relevance, sort_column.asc())
+        else:
+            query = query.order_by(relevance, sort_column.desc())
     else:
-        query = query.order_by(sort_column.desc())
+        sort_column = getattr(Product, sort_by)
+        if sort_order == "asc":
+            query = query.order_by(sort_column.asc())
+        else:
+            query = query.order_by(sort_column.desc())
 
     total = query.count()
     products = query.offset(skip).limit(limit).all()
@@ -277,6 +290,27 @@ async def get_category_stats(
     ]
 
 
+@router.get("/stats/vendors")
+@cache_response(prefix="stats_vendors", ttl=300)
+async def get_vendor_stats(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Get available vendors with product counts (excludes empty vendors)"""
+    stats = db.query(
+        Product.vendor,
+        func.count(Product.id).label('count')
+    ).filter(
+        Product.vendor.isnot(None),
+        Product.vendor != ''
+    ).group_by(Product.vendor).order_by(func.count(Product.id).desc()).all()
+
+    return [
+        {"vendor": stat.vendor, "count": stat.count}
+        for stat in stats
+    ]
+
+
 @router.put("/{product_id}", response_model=ProductResponse)
 async def update_product(
     product_id: int,
@@ -339,6 +373,9 @@ async def update_product(
     db.commit()
     db.refresh(product)
 
+    log_activity(db, action="product_update", resource_type="product", resource_id=product.id,
+                 resource_name=product.title, user_id=current_user.id, username=current_user.username)
+
     # 캐시 무효화
     invalidate_cache([
         "products_list:*",
@@ -347,7 +384,8 @@ async def update_product(
         "product_detail:*",
         "search_suggestions:*",
         "stats_overview:*",
-        "stats_categories:*"
+        "stats_categories:*",
+            "stats_vendors:*"
     ])
 
     return product
@@ -500,7 +538,8 @@ async def regenerate_product_metadata(
             "product_detail:*",
             "search_suggestions:*",
             "stats_overview:*",
-            "stats_categories:*"
+            "stats_categories:*",
+            "stats_vendors:*"
         ])
 
         return {
@@ -567,7 +606,8 @@ async def merge_product_versions(
         "product_detail:*",
         "search_suggestions:*",
         "stats_overview:*",
-        "stats_categories:*"
+        "stats_categories:*",
+            "stats_vendors:*"
     ])
 
     return {
@@ -641,7 +681,8 @@ async def unregister_version(
             "products_recent:*",
             "products_by_category:*",
             "stats_overview:*",
-            "stats_categories:*"
+            "stats_categories:*",
+            "stats_vendors:*"
         ])
 
         return {
@@ -716,7 +757,8 @@ async def cleanup_deleted_files(
             "products_recent:*",
             "products_by_category:*",
             "stats_overview:*",
-            "stats_categories:*"
+            "stats_categories:*",
+            "stats_vendors:*"
         ])
 
         return {
@@ -767,9 +809,13 @@ async def delete_product(
         # 제품에 연결된 모든 버전 삭제 (cascade로 자동 삭제되지만 명시적으로 처리)
         db.query(Version).filter(Version.product_id == product_id).delete(synchronize_session=False)
 
+        product_title = product.title
         # 제품 삭제
         db.delete(product)
         db.commit()
+
+        log_activity(db, action="product_delete", resource_type="product", resource_id=product_id,
+                     resource_name=product_title, user_id=current_user.id, username=current_user.username)
 
         # 캐시 무효화
         invalidate_cache([
@@ -777,7 +823,8 @@ async def delete_product(
             "products_recent:*",
             "products_by_category:*",
             "stats_overview:*",
-            "stats_categories:*"
+            "stats_categories:*",
+            "stats_vendors:*"
         ])
 
         return {

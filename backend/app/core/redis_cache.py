@@ -237,10 +237,19 @@ def cache_response(prefix: str = "api", ttl: int = 300):
             # 캐시 키 생성
             cache_key = redis_cache.generate_key(prefix, **cache_params)
 
-            # 캐시 비활성화 - 직접 원본 함수 실행
-            # TODO: Pydantic 모델 복원 로직 추가 필요
-            logger.debug(f"Cache DISABLED for {prefix}")
+            # 캐시 히트 확인
+            cached = redis_cache.get(cache_key)
+            if cached is not None:
+                logger.debug(f"Cache HIT: {cache_key}")
+                return cached  # dict/list 반환 → FastAPI가 response_model 적용
+
+            # 캐시 미스: 원본 함수 실행 후 결과 캐싱
             result = await func(*args, **kwargs)
+            try:
+                redis_cache.set(cache_key, result, ttl)
+                logger.debug(f"Cache SET: {cache_key} (TTL: {ttl}s)")
+            except Exception as e:
+                logger.warning(f"Cache set failed for {cache_key}: {e}")
             return result
 
         return wrapper
