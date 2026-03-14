@@ -105,6 +105,17 @@
           </div>
         </div>
 
+        <div v-else-if="loadError" class="text-center py-12 sm:py-16">
+          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-red-100 to-red-50 dark:from-red-900 dark:to-red-800 rounded-3xl flex items-center justify-center">
+            <svg class="w-10 h-10 text-red-400 dark:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-base sm:text-lg font-semibold text-red-600 dark:text-red-400 mb-2">{{ t('common.error') || '서버 오류' }}</h3>
+          <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-4">제품 목록을 불러오지 못했습니다. 서버 연결을 확인하거나 새로고침해 주세요.</p>
+          <button @click="reload" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">새로고침</button>
+        </div>
+
         <div v-else-if="recentProducts.length === 0" class="text-center py-12 sm:py-16">
           <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 rounded-3xl flex items-center justify-center">
             <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,6 +183,7 @@ const authStore = useAuthStore()
 const { t, locale } = useI18n({ useScope: 'global' })
 
 const loading = ref(true)
+const loadError = ref(false)
 const stats = ref({
   total_products: 0,
   incomplete_count: 0,
@@ -248,10 +260,19 @@ const fetchRecentProducts = async () => {
   try {
     const response = await productsApi.getRecent(12)
     recentProducts.value = response.data
+    loadError.value = false
   } catch (error) {
     console.error('Failed to fetch recent products:', error)
     recentProducts.value = []
+    loadError.value = true
   }
+}
+
+const reload = async () => {
+  loading.value = true
+  loadError.value = false
+  await Promise.all([fetchStats(), fetchRecentProducts()])
+  loading.value = false
 }
 
 const goToCategory = (category) => {
