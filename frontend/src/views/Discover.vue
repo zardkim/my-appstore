@@ -15,7 +15,7 @@
             ]"
           >
             <span>{{ t('discover.allCategories') }}</span>
-            <span class="text-xs opacity-75">{{ totalProducts }}</span>
+            <span class="text-xs opacity-75">{{ allTotal }}</span>
           </button>
 
           <button
@@ -231,7 +231,7 @@
               ]"
             >
               <span>{{ t('discover.allCategories') }}</span>
-              <span class="text-xs opacity-75">{{ totalProducts }}</span>
+              <span class="text-xs opacity-75">{{ allTotal }}</span>
             </button>
 
             <button
@@ -334,12 +334,19 @@ const loadingMore = ref(false)
 const currentPage = ref(1)
 const pageSize = 20
 let loadVersion = 0  // race condition 방지용
+let initialized = false  // 초기 로드 완료 전 watch 차단용
 
 // Infinite scroll
 const scrollObserverTarget = ref(null)
 let scrollObserver = null
 
 const hasMore = computed(() => products.value.length < totalProducts.value)
+
+// "전체" 버튼용: categoryStats 합계 (개별 카테고리 필터와 무관하게 항상 전체 수량 표시)
+const allTotal = computed(() => {
+  const sum = Object.values(categoryStats.value).reduce((a, b) => a + b, 0)
+  return sum > 0 ? sum : totalProducts.value
+})
 
 // Dialog state
 const aiSearchDialogOpen = ref(false)
@@ -360,10 +367,10 @@ const handleSearch = () => {
 }
 
 const resetAndLoad = () => {
-  loading.value = true  // 제품 초기화 전에 loading 먼저 설정
+  loading.value = true
   currentPage.value = 1
   products.value = []
-  totalProducts.value = 0
+  // totalProducts는 유지 (0으로 리셋하지 않음 — 새 결과 수신 시 갱신)
   loadProducts()
 }
 
@@ -561,6 +568,7 @@ onMounted(async () => {
   loadCategoryStats()
   await nextTick()
   setupScrollObserver()
+  initialized = true  // 초기 로드 완료
 })
 
 onUnmounted(() => {
@@ -572,6 +580,8 @@ onUnmounted(() => {
 watch(
   () => route.query,
   (newQuery) => {
+    // 초기 로드 완료 전에는 watch 무시 (onMounted의 loadProducts와 race condition 방지)
+    if (!initialized) return
     let changed = false
     if ((newQuery.category || null) !== selectedCategory.value) {
       selectedCategory.value = newQuery.category || null
