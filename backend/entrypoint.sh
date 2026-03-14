@@ -129,14 +129,40 @@ try:
     conn.commit()
     print("✓ activity_logs table ready")
 
-    # users.email 컬럼 추가 (없으면)
-    cur.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')")
-    users_exists = cur.fetchone()[0]
-    if users_exists:
-        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR UNIQUE")
-        cur.execute("CREATE INDEX IF NOT EXISTS ix_users_email ON users (email)")
-        conn.commit()
-        print("✓ users.email column verified")
+    # users.email 컬럼 추가 (없으면) - 독립 try-except으로 보장
+    try:
+        cur.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')")
+        users_exists = cur.fetchone()[0]
+        if users_exists:
+            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR")
+            conn.commit()
+            # UNIQUE 제약조건 별도 추가 (이미 있으면 무시)
+            try:
+                cur.execute("""
+                    DO $$
+                    BEGIN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM pg_constraint
+                            WHERE conname = 'users_email_key'
+                        ) THEN
+                            ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);
+                        END IF;
+                    END $$;
+                """)
+                conn.commit()
+            except Exception:
+                conn.rollback()
+            try:
+                cur.execute("CREATE INDEX IF NOT EXISTS ix_users_email ON users (email)")
+                conn.commit()
+            except Exception:
+                conn.rollback()
+            print("✓ users.email column verified")
+        else:
+            print("Note: users table not yet created (will be created by SQLAlchemy)")
+    except Exception as email_e:
+        conn.rollback()
+        print(f"Note: users.email fix skipped: {email_e}")
 
     # pg_trgm 확장 및 GIN 인덱스 생성 (검색 성능 최적화)
     try:
