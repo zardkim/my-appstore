@@ -17,6 +17,12 @@ export const usersApi = {
     return response.data
   },
 
+  // Update user info (admin only)
+  update: async (userId, username) => {
+    const response = await client.patch(`/users/${userId}`, { username })
+    return response.data
+  },
+
   // Change user password (admin only)
   changePassword: async (userId, newPassword) => {
     const response = await client.patch(`/users/${userId}/password`, {

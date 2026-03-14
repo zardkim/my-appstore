@@ -3058,6 +3058,23 @@ const toggleRegistration = async () => {
   }
 }
 
+const openEditUserModal = (user) => {
+  editingUser.value = { id: user.id, username: user.username }
+  showEditUserModal.value = true
+}
+
+const updateUser = async () => {
+  try {
+    await usersApi.update(editingUser.value.id, editingUser.value.username)
+    showEditUserModal.value = false
+    await loadUsers()
+    await alert.success(t('settings.users.userUpdated') || '사용자 정보가 수정되었습니다.')
+  } catch (error) {
+    console.error('Failed to update user:', error)
+    await alert.error(error.response?.data?.detail || t('settings.users.userUpdateFailed') || '사용자 수정에 실패했습니다.')
+  }
+}
+
 const openPasswordModal = (user) => {
   editingUser.value = { id: user.id, username: user.username }
   newPassword.value = ''
