@@ -39,6 +39,29 @@ try:
 except Exception:
     pass  # 테이블이 아직 없거나 이미 컬럼이 있으면 무시
 
+# ── users.email 컬럼 보장 ─────────────────────────────────────────────
+try:
+    from sqlalchemy import text as _text2
+    with engine.connect() as _conn2:
+        _conn2.execute(_text2(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR"
+        ))
+        # UNIQUE 제약조건이 없으면 추가
+        _conn2.execute(_text2("""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_constraint
+                    WHERE conname = 'users_email_key' AND conrelid = 'users'::regclass
+                ) THEN
+                    ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);
+                END IF;
+            END $$;
+        """))
+        _conn2.commit()
+except Exception:
+    pass
+
 # Ensure required directories exist before app initialization
 required_directories = [
     settings.ICON_CACHE_DIR,

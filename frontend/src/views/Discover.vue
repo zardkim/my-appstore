@@ -411,14 +411,15 @@ const loadProducts = async (append = false) => {
     totalProducts.value = response.data.total
   } catch (error) {
     console.error('Failed to load products:', error)
-    if (myVersion !== loadVersion) return
-    if (!append) {
+    if (myVersion === loadVersion && !append) {
       products.value = []
       totalProducts.value = 0
     }
   } finally {
-    if (myVersion === loadVersion) {
+    // 항상 로딩 상태 초기화 (버전 체크 없음 — stuck spinner 방지)
+    if (!append) {
       loading.value = false
+    } else if (myVersion === loadVersion) {
       loadingMore.value = false
     }
   }
