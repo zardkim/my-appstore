@@ -20,6 +20,10 @@ class UserStatusToggle(BaseModel):
     is_active: bool
 
 
+class UserUpdate(BaseModel):
+    username: str
+
+
 @router.get("/", response_model=List[UserResponse])
 async def get_users(
     db: Session = Depends(get_db),
@@ -56,6 +60,31 @@ async def create_user(
     db.refresh(new_user)
 
     return new_user
+
+
+@router.patch("/{user_id}", response_model=UserResponse)
+async def update_user(
+    user_id: int,
+    user_data: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Update user info (admin only)"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.role == "admin":
+        raise HTTPException(status_code=403, detail="Cannot edit admin user")
+
+    existing = db.query(User).filter(User.username == user_data.username, User.id != user_id).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Username already exists")
+
+    user.username = user_data.username
+    db.commit()
+    db.refresh(user)
+    return user
 
 
 @router.patch("/{user_id}/password")
