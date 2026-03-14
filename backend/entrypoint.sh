@@ -129,6 +129,15 @@ try:
     conn.commit()
     print("✓ activity_logs table ready")
 
+    # users.email 컬럼 추가 (없으면)
+    cur.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')")
+    users_exists = cur.fetchone()[0]
+    if users_exists:
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR UNIQUE")
+        cur.execute("CREATE INDEX IF NOT EXISTS ix_users_email ON users (email)")
+        conn.commit()
+        print("✓ users.email column verified")
+
     # pg_trgm 확장 및 GIN 인덱스 생성 (검색 성능 최적화)
     try:
         cur.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
