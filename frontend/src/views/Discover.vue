@@ -234,7 +234,7 @@
           </div>
 
           <!-- Category List -->
-          <div class="p-4 space-y-1 pb-8">
+          <div class="p-4 space-y-1 pb-24">
             <button
               @click="selectCategoryMobile(null)"
               :class="[
