@@ -39,15 +39,23 @@ try:
 except Exception:
     pass  # 테이블이 아직 없거나 이미 컬럼이 있으면 무시
 
-# ── users.email 컬럼 보장 ─────────────────────────────────────────────
+# ── users.email 컬럼 보장 (ALTER TABLE은 별도 트랜잭션으로 커밋) ────────
 try:
     from sqlalchemy import text as _text2
     with engine.connect() as _conn2:
         _conn2.execute(_text2(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR"
         ))
-        # UNIQUE 제약조건이 없으면 추가
-        _conn2.execute(_text2("""
+        _conn2.commit()
+    logger.info("✓ users.email column verified")
+except Exception as _e2:
+    logger.info(f"users.email column: {_e2}")
+
+# UNIQUE 제약조건은 별도 트랜잭션 (실패해도 위 컬럼 추가는 유지)
+try:
+    from sqlalchemy import text as _text3
+    with engine.connect() as _conn3:
+        _conn3.execute(_text3("""
             DO $$
             BEGIN
                 IF NOT EXISTS (
@@ -58,7 +66,7 @@ try:
                 END IF;
             END $$;
         """))
-        _conn2.commit()
+        _conn3.commit()
 except Exception:
     pass
 

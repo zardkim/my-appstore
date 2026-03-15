@@ -5,11 +5,11 @@
  * Do not edit manually.
  */
 
-export const version = "1.3.23"
+export const version = "1.4.48"
 export const versionInfo = {
   major: 1,
-  minor: 3,
-  patch: 23
+  minor: 4,
+  patch: 48
 }
 
 export const buildInfo = {
