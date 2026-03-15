@@ -70,11 +70,16 @@ class ProductResponse(ProductBase):
         if v is None:
             return None
         if isinstance(v, list):
-            # 이미 문자열 배열이면 그대로 반환
-            if all(isinstance(item, str) for item in v):
-                return v
-            # 객체 배열이면 URL만 추출
-            return [item.get('url') if isinstance(item, dict) else item for item in v]
+            result = []
+            for item in v:
+                if isinstance(item, str):
+                    result.append(item)
+                elif isinstance(item, dict):
+                    url = item.get('url')
+                    if url is not None:
+                        result.append(url)
+                # None이나 기타 타입은 무시
+            return result if result else None
         return v
 
     @field_validator('patch_links', mode='before')
