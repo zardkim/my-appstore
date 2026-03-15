@@ -164,7 +164,8 @@
               </svg>
             </div>
             <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">{{ t('common.error') || '서버 오류' }}</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">제품 목록을 불러오지 못했습니다. 서버 연결을 확인하거나 새로고침해 주세요.</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-2">제품 목록을 불러오지 못했습니다. 서버 연결을 확인하거나 새로고침해 주세요.</p>
+            <p v-if="loadErrorDetail" class="text-xs text-red-400 dark:text-red-500 mb-4 font-mono break-all">{{ loadErrorDetail }}</p>
             <button @click="resetAndLoad" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">새로고침</button>
           </div>
 
@@ -345,6 +346,7 @@ const categoryStats = ref({})
 const loading = ref(true)
 const loadingMore = ref(false)
 const loadError = ref(false)
+const loadErrorDetail = ref('')
 const currentPage = ref(1)
 const pageSize = 20
 let loadVersion = 0  // race condition 방지용
@@ -430,6 +432,9 @@ const loadProducts = async (append = false) => {
       products.value = []
       totalProducts.value = 0
       loadError.value = true
+      const status = error.response?.status
+      const detail = error.response?.data?.detail || error.message || '알 수 없는 오류'
+      loadErrorDetail.value = status ? `[HTTP ${status}] ${detail}` : detail
     }
   } finally {
     // 항상 로딩 상태 초기화 (버전 체크 없음 — stuck spinner 방지)

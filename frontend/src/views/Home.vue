@@ -112,7 +112,8 @@
             </svg>
           </div>
           <h3 class="text-base sm:text-lg font-semibold text-red-600 dark:text-red-400 mb-2">{{ t('common.error') || '서버 오류' }}</h3>
-          <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-4">제품 목록을 불러오지 못했습니다. 서버 연결을 확인하거나 새로고침해 주세요.</p>
+          <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-2">제품 목록을 불러오지 못했습니다. 서버 연결을 확인하거나 새로고침해 주세요.</p>
+          <p v-if="loadErrorDetail" class="text-xs text-red-400 dark:text-red-500 mb-4 font-mono break-all">{{ loadErrorDetail }}</p>
           <button @click="reload" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">새로고침</button>
         </div>
 
@@ -184,6 +185,7 @@ const { t, locale } = useI18n({ useScope: 'global' })
 
 const loading = ref(true)
 const loadError = ref(false)
+const loadErrorDetail = ref('')
 const stats = ref({
   total_products: 0,
   incomplete_count: 0,
@@ -261,10 +263,14 @@ const fetchRecentProducts = async () => {
     const response = await productsApi.getRecent(12)
     recentProducts.value = response.data
     loadError.value = false
+    loadErrorDetail.value = ''
   } catch (error) {
     console.error('Failed to fetch recent products:', error)
     recentProducts.value = []
     loadError.value = true
+    const status = error.response?.status
+    const detail = error.response?.data?.detail || error.message || '알 수 없는 오류'
+    loadErrorDetail.value = status ? `[HTTP ${status}] ${detail}` : detail
   }
 }
 
