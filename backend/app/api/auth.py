@@ -232,7 +232,8 @@ async def register(user_data: UserRegister, db: Session = Depends(get_db)):
         username=user_data.username,
         email=user_data.email,
         password_hash=get_password_hash(user_data.password),
-        role=UserRole.user
+        role=UserRole.user,
+        is_active=True
     )
     db.add(new_user)
     db.commit()

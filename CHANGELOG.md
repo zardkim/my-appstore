@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.56] - 2026-03-16
+
+### Changed
+- **사용자 관리**: 수정 버튼 제거, 비밀번호 버튼 → 비밀번호 초기화(랜덤 생성)로 변경
+- **사용자 관리**: 신규 사용자 생성 시 활성 상태(is_active=True) 명시적 설정
+- **푸터**: Discord 아이콘+텍스트 한 줄로 표시 (`inline-flex` 적용)
+- **README**: 스크린샷 경로를 raw.githubusercontent.com 절대 URL로 변경
+- **버전**: 1.4.56
+
 ## [1.4.54] - 2026-03-16
 
 ### Added
