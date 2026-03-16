@@ -23,13 +23,13 @@
     <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/03_product_detail.jpg" alt="Product Detail"/><br/><sub>Product Detail</sub></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/04_product_detail2.jpg" alt="Product Detail (Features)"/><br/><sub>Product Detail (Features)</sub></td>
-    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/05_scan_list.jpg" alt="Detected List"/><br/><sub>Detected List</sub></td>
-    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/06_tips_list.jpg" alt="Tips &amp; Tech"/><br/><sub>Tips &amp; Tech</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/04_product_detail2.jpg" alt="Product Detail (Features)"/><br/><sub>Detected List</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/05_scan_list.jpg" alt="Detected List"/><br/><sub>Tips &amp; Tech</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/06_tips_list.jpg" alt="Tips &amp; Tech"/><br/><sub>Tips &amp; Tech Detail</sub></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/07_settings_general.jpg" alt="Settings - General"/><br/><sub>Settings - General</sub></td>
-    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/08_settings_folder.jpg" alt="Settings - Folder"/><br/><sub>Settings - Folder</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/07_settings_general.jpg" alt="Settings - General"/><br/><sub>Settings - Category</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/08_settings_folder.jpg" alt="Settings - Folder"/><br/><sub>Settings - Data manager</sub></td>
     <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/eng/09_settings_metadata.jpg" alt="Settings - Metadata"/><br/><sub>Settings - Metadata (AI)</sub></td>
   </tr>
 </table>
