@@ -96,7 +96,7 @@ export function getBackendUrl(path) {
  * @returns {string} Download URL
  */
 export function getDownloadUrl(versionId, token) {
-  return `${ENV.BACKEND_URL}/api/download/${versionId}?token=${token}`
+  return `/api/download/direct/${versionId}?token=${token}`
 }
 
 /**
