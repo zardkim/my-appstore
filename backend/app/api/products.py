@@ -63,6 +63,20 @@ async def diagnose_products(db: Session = Depends(get_db)):
         result["products_joinedload"] = f"ok (got {len(products)} rows)"
     except Exception as e:
         result["products_joinedload"] = f"FAIL: {e}"
+    try:
+        # Pydantic 직렬화 테스트
+        from sqlalchemy.orm import joinedload as jl2
+        from app.schemas.product import ProductResponse as PR
+        import traceback
+        products2 = db.query(Product).options(jl2(Product.versions)).limit(5).all()
+        for p in products2:
+            _validate_icon_url(p)
+            for v in p.versions:
+                v.file_exists = os.path.exists(v.file_path) if v.file_path else False
+        serialized = [PR.model_validate(p) for p in products2]
+        result["pydantic_serialization"] = f"ok ({len(serialized)} products)"
+    except Exception as e:
+        result["pydantic_serialization"] = f"FAIL: {traceback.format_exc()}"
     return result
 
 

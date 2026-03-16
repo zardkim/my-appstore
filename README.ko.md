@@ -4,13 +4,40 @@
 
 **NAS 기반 개인 소프트웨어 라이브러리 관리 시스템**
 
-[![Version](https://img.shields.io/badge/version-1.3.15-blue.svg)](https://github.com/zardkim/my-appstore/releases)
+[![Version](https://img.shields.io/badge/version-1.4.54-blue.svg)](https://github.com/zardkim/my-appstore/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](https://hub.docker.com/u/zardkim)
 
 [🇺🇸 English](README.md) | [🇰🇷 한국어](README.ko.md)
 
 </div>
+
+---
+
+## 📸 스크린샷
+
+<table>
+  <tr>
+    <td><img src="screenshot/kor/01_login.jpg" alt="로그인"/><br/><sub>로그인</sub></td>
+    <td><img src="screenshot/kor/02_home.jpg" alt="홈 대시보드"/><br/><sub>홈 대시보드</sub></td>
+    <td><img src="screenshot/kor/03_store.jpg" alt="앱 스토어"/><br/><sub>앱 스토어</sub></td>
+  </tr>
+  <tr>
+    <td><img src="screenshot/kor/04_product_detail.jpg" alt="제품 상세"/><br/><sub>제품 상세</sub></td>
+    <td><img src="screenshot/kor/05_product_detail2.jpg" alt="제품 상세 (기능/사양)"/><br/><sub>제품 상세 (기능/사양)</sub></td>
+    <td><img src="screenshot/kor/06_scan_list.jpg" alt="검색된 목록"/><br/><sub>검색된 목록</sub></td>
+  </tr>
+  <tr>
+    <td><img src="screenshot/kor/07_tips_list.jpg" alt="팁&테크 게시판"/><br/><sub>팁&amp;테크 게시판</sub></td>
+    <td><img src="screenshot/kor/08_tips_post.jpg" alt="팁&테크 게시글"/><br/><sub>팁&amp;테크 게시글</sub></td>
+    <td><img src="screenshot/kor/09_settings_general.jpg" alt="설정 - 일반"/><br/><sub>설정 - 일반</sub></td>
+  </tr>
+  <tr>
+    <td><img src="screenshot/kor/10_settings_folder.jpg" alt="설정 - 폴더"/><br/><sub>설정 - 폴더</sub></td>
+    <td><img src="screenshot/kor/11_settings_metadata.jpg" alt="설정 - 메타데이터 (AI)"/><br/><sub>설정 - 메타데이터 (AI)</sub></td>
+    <td></td>
+  </tr>
+</table>
 
 ---
 
@@ -111,7 +138,7 @@ OpenAI 또는 Gemini 중 **하나만** 설정해도 됩니다.
 # OpenAI (GPT-4o-mini)
 OPENAI_API_KEY=sk-...
 
-# Google Gemini
+# Google Gemini (무료 티어 제공)
 GEMINI_API_KEY=AI...
 ```
 
@@ -121,7 +148,9 @@ GEMINI_API_KEY=AI...
 |--------|---------|
 | OpenAI | https://platform.openai.com/api-keys |
 | Google Gemini | https://aistudio.google.com/app/apikey |
-| Bing Image Search | https://portal.azure.com (Cognitive Services) |
+| Google 커스텀 검색 (이미지) | https://console.cloud.google.com (Custom Search API) |
+
+> **Google 이미지 검색**: Google Cloud Console에서 Custom Search JSON API를 활성화하고, https://programmablesearchengine.google.com 에서 검색 엔진을 생성한 후 `GOOGLE_API_KEY` + `GOOGLE_CSE_ID` 를 Settings → Metadata에서 설정하세요.
 
 > API 키는 `.env` 파일에 저장하거나, 앱 접속 후 **Settings → Metadata** 메뉴에서 직접 입력할 수 있습니다.
 
@@ -144,6 +173,6 @@ docker-compose pull && docker-compose up -d
 
 <div align="center">
 
-Made by [zardkim](https://github.com/zardkim) (.feat Claude)
+Made by [zardkim](https://discord.gg/8amwMw2X) (.feat Claude)
 
 </div>

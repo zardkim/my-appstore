@@ -1767,7 +1767,7 @@
               <select v-model="actLogAction" @change="loadActivityLogs(true)"
                 class="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <option value="">{{ t('activityLog.allActions') }}</option>
-                <option v-for="(label, key) in actLogActionLabels" :key="key" :value="key">{{ label }}</option>
+                <option v-for="(label, key) in actLogActionLabels" :key="key" :value="key">{{ te('activityLog.actions.' + key) ? t('activityLog.actions.' + key) : label }}</option>
               </select>
               <input v-model="actLogUsername" @input="debouncedLoadLogs" type="text"
                 :placeholder="t('activityLog.filterByUser')"
@@ -1807,7 +1807,7 @@
                       <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatLogTime(log.created_at) }}</td>
                       <td class="px-4 py-3 font-medium text-gray-900 dark:text-white text-xs">{{ log.username }}</td>
                       <td class="px-4 py-3">
-                        <span class="px-2 py-0.5 rounded-full text-xs font-medium" :class="getActionBadgeClass(log.action)">{{ log.action_label }}</span>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-medium" :class="getActionBadgeClass(log.action)">{{ te('activityLog.actions.' + log.action) ? t('activityLog.actions.' + log.action) : log.action_label }}</span>
                       </td>
                       <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 truncate max-w-xs">{{ log.resource_name || '-' }}</td>
                       <td class="px-4 py-3 text-xs text-gray-400 dark:text-gray-500 font-mono">{{ log.ip_address || '-' }}</td>
@@ -1819,7 +1819,7 @@
               <div class="sm:hidden divide-y divide-gray-100 dark:divide-gray-700">
                 <div v-for="log in actLogs" :key="log.id" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                   <div class="flex items-center justify-between mb-1">
-                    <span class="px-2 py-0.5 rounded-full text-xs font-medium" :class="getActionBadgeClass(log.action)">{{ log.action_label }}</span>
+                    <span class="px-2 py-0.5 rounded-full text-xs font-medium" :class="getActionBadgeClass(log.action)">{{ te('activityLog.actions.' + log.action) ? t('activityLog.actions.' + log.action) : log.action_label }}</span>
                     <span class="text-xs text-gray-400 dark:text-gray-500">{{ formatLogTime(log.created_at) }}</span>
                   </div>
                   <p class="text-sm font-medium text-gray-900 dark:text-white">{{ log.username }}</p>
@@ -2233,7 +2233,7 @@ import { activityLogApi } from '../api/activityLog'
 import { ENV } from '../utils/env'
 import { useDialog } from '../composables/useDialog'
 
-const { t, locale } = useI18n({ useScope: 'global' })
+const { t, te, locale } = useI18n({ useScope: 'global' })
 
 const route = useRoute()
 const authStore = useAuthStore()
