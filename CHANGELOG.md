@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.54] - 2026-03-16
+
+### Added
+- **스크린샷**: README에 한국어/영어 스크린샷 섹션 추가 (screenshot/kor, screenshot/eng)
+- **활동 로그 번역키**: `activityLog.actions.*` 14개 action 번역키 추가 (ko.js / en.js)
+
+### Changed
+- **검색된 목록**: 분류명 "제품" → "소프트웨어"로 변경
+- **푸터**: Discord 링크 업데이트 (https://discord.gg/8amwMw2X)
+- **README**: Bing Image Search → Google Custom Search(Image) 설명으로 변경
+- **README**: 버전 뱃지 1.4.54로 업데이트
+
+### Fixed
+- **ProductDetail.vue**: `@/api/attachments.js` 동적 import 오류 → 상대 경로로 수정
+
 ## [1.4.13] - 2026-02-28
 
 ### Fixed

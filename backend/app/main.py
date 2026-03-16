@@ -177,6 +177,10 @@ tags_metadata = [
     },
 ]
 
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import traceback
+
 app = FastAPI(
     title="MyApp Store API",
     description="""
@@ -230,6 +234,15 @@ NAS 기반 개인 소프트웨어 라이브러리 관리 시스템
         "name": "MIT License",
     },
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    tb = traceback.format_exc()
+    logger.error(f"Unhandled exception on {request.url}: {tb}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc), "traceback": tb, "type": type(exc).__name__}
+    )
 
 # CORS configuration - 환경변수에서 동적 로드
 app.add_middleware(
