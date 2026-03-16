@@ -4,7 +4,7 @@
 
 **NAS 기반 개인 소프트웨어 라이브러리 관리 시스템**
 
-[![Version](https://img.shields.io/badge/version-1.4.54-blue.svg)](https://github.com/zardkim/my-appstore/releases)
+[![Version](https://img.shields.io/badge/version-1.4.55-blue.svg)](https://github.com/zardkim/my-appstore/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](https://hub.docker.com/u/zardkim)
 
@@ -18,23 +18,23 @@
 
 <table>
   <tr>
-    <td><img src="screenshot/kor/01_login.jpg" alt="로그인"/><br/><sub>로그인</sub></td>
-    <td><img src="screenshot/kor/02_home.jpg" alt="홈 대시보드"/><br/><sub>홈 대시보드</sub></td>
-    <td><img src="screenshot/kor/03_store.jpg" alt="앱 스토어"/><br/><sub>앱 스토어</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/01_login.jpg" alt="로그인"/><br/><sub>로그인</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/02_home.jpg" alt="홈 대시보드"/><br/><sub>홈 대시보드</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/03_store.jpg" alt="앱 스토어"/><br/><sub>앱 스토어</sub></td>
   </tr>
   <tr>
-    <td><img src="screenshot/kor/04_product_detail.jpg" alt="제품 상세"/><br/><sub>제품 상세</sub></td>
-    <td><img src="screenshot/kor/05_product_detail2.jpg" alt="제품 상세 (기능/사양)"/><br/><sub>제품 상세 (기능/사양)</sub></td>
-    <td><img src="screenshot/kor/06_scan_list.jpg" alt="검색된 목록"/><br/><sub>검색된 목록</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/04_product_detail.jpg" alt="제품 상세"/><br/><sub>제품 상세</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/05_product_detail2.jpg" alt="제품 상세 (기능/사양)"/><br/><sub>제품 상세 (기능/사양)</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/06_scan_list.jpg" alt="검색된 목록"/><br/><sub>검색된 목록</sub></td>
   </tr>
   <tr>
-    <td><img src="screenshot/kor/07_tips_list.jpg" alt="팁&테크 게시판"/><br/><sub>팁&amp;테크 게시판</sub></td>
-    <td><img src="screenshot/kor/08_tips_post.jpg" alt="팁&테크 게시글"/><br/><sub>팁&amp;테크 게시글</sub></td>
-    <td><img src="screenshot/kor/09_settings_general.jpg" alt="설정 - 일반"/><br/><sub>설정 - 일반</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/07_tips_list.jpg" alt="팁&amp;테크 게시판"/><br/><sub>팁&amp;테크 게시판</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/08_tips_post.jpg" alt="팁&amp;테크 게시글"/><br/><sub>팁&amp;테크 게시글</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/09_settings_general.jpg" alt="설정 - 일반"/><br/><sub>설정 - 일반</sub></td>
   </tr>
   <tr>
-    <td><img src="screenshot/kor/10_settings_folder.jpg" alt="설정 - 폴더"/><br/><sub>설정 - 폴더</sub></td>
-    <td><img src="screenshot/kor/11_settings_metadata.jpg" alt="설정 - 메타데이터 (AI)"/><br/><sub>설정 - 메타데이터 (AI)</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/10_settings_folder.jpg" alt="설정 - 폴더"/><br/><sub>설정 - 폴더</sub></td>
+    <td><img src="https://raw.githubusercontent.com/zardkim/my-appstore/main/screenshot/kor/11_settings_metadata.jpg" alt="설정 - 메타데이터 (AI)"/><br/><sub>설정 - 메타데이터 (AI)</sub></td>
     <td></td>
   </tr>
 </table>
