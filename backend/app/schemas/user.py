@@ -24,6 +24,7 @@ class UserResponse(UserBase):
     id: int
     email: Optional[str] = None
     role: str
+    is_active: bool
     created_at: datetime
 
     class Config:
