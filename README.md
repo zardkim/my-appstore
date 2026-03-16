@@ -4,7 +4,7 @@
 
 **Personal Software Library Manager for NAS**
 
-[![Version](https://img.shields.io/badge/version-1.4.55-blue.svg)](https://github.com/zardkim/my-appstore/releases)
+[![Version](https://img.shields.io/badge/version-1.4.56-blue.svg)](https://github.com/zardkim/my-appstore/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](https://hub.docker.com/u/zardkim)
 
