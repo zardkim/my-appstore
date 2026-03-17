@@ -736,6 +736,7 @@ async def unregister_version(
             "products:*",
             "products_recent:*",
             "products_by_category:*",
+            "product_detail:*",
             "stats_overview:*",
             "stats_categories:*",
             "stats_vendors:*"
