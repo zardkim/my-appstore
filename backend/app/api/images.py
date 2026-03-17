@@ -523,8 +523,12 @@ async def download_screenshot_by_slot(
             old_file.unlink()
 
         # URL에서 다운로드
+        _headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+        }
         async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
-            response = await client.get(url)
+            response = await client.get(url, headers=_headers)
             if response.status_code != 200:
                 return ImageUploadResponse(
                     success=False,
