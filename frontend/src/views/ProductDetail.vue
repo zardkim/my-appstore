@@ -2237,11 +2237,13 @@ const handleLogoSaved = async (data) => {
     console.log('Logo updated:', data.icon_url)
   }
 
-  // 제품 정보 새로고침 (다른 필드도 업데이트되었을 수 있음)
+  // 제품 정보 새로고침 (캐시 무효화 후 최신 데이터)
   try {
+    const savedIconUrl = data?.icon_url || product.value.icon_url
     const response = await productsApi.getById(product.value.id)
     product.value = response.data
-    // 제품 정보 로드 후에도 타임스탬프 업데이트
+    // 캐시된 데이터가 icon_url을 덮어쓸 수 있으므로 직접 설정
+    if (savedIconUrl) product.value.icon_url = savedIconUrl
     iconTimestamp.value = Date.now()
   } catch (error) {
     console.error('Failed to reload product:', error)
@@ -2347,9 +2349,11 @@ const uploadScreenshot = async (event, index) => {
     const response = await imagesApi.uploadScreenshotFile(product.value.id, file, index)
 
     if (response.data.success) {
-      // Product 다시 로드 (백엔드가 DB를 이미 업데이트함)
-      const updatedProduct = await productsApi.getById(product.value.id)
-      product.value = updatedProduct.data
+      // 직접 업데이트 (getById 대신 - Redis 캐시 stale 데이터 방지)
+      const newScreenshots = [...(product.value.screenshots || [])]
+      while (newScreenshots.length <= index) newScreenshots.push(null)
+      newScreenshots[index] = response.data.url
+      product.value.screenshots = newScreenshots
     } else {
       await alert.error(response.data.error || t('productDetail.screenshotUploadFailed'))
     }
@@ -2375,8 +2379,11 @@ const addScreenshotBySlotUrl = async (slotIndex) => {
   try {
     const response = await imagesApi.downloadScreenshotBySlot(product.value.id, url, slotIndex)
     if (response.data.success) {
-      const updatedProduct = await productsApi.getById(product.value.id)
-      product.value = updatedProduct.data
+      // 직접 업데이트 (getById 대신 - Redis 캐시 stale 데이터 방지)
+      const newScreenshots = [...(product.value.screenshots || [])]
+      while (newScreenshots.length <= slotIndex) newScreenshots.push(null)
+      newScreenshots[slotIndex] = response.data.url
+      product.value.screenshots = newScreenshots
       screenshotSlotUrl.value = ''
       activeUrlSlot.value = null
     } else {

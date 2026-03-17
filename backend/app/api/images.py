@@ -24,6 +24,7 @@ from app.schemas.image import (
 )
 from app.core.google_image_search import GoogleImageSearcher
 from app.core.icon_cache import IconCache
+from app.core.redis_cache import invalidate_cache
 from app.config import settings
 import json
 
@@ -488,6 +489,8 @@ async def upload_screenshot_file(
         # None 값 제거하지 않음 (슬롯 인덱스 유지)
         product.screenshots = current_screenshots
         db.commit()
+        # 캐시 무효화
+        invalidate_cache([f"product_detail:{product_id}:*", "products_list:*", "products_recent:*"])
 
         return ImageUploadResponse(success=True, url=local_path)
 
@@ -564,6 +567,8 @@ async def download_screenshot_by_slot(
         current_screenshots[slot] = {"type": "local", "url": local_path}
         product.screenshots = current_screenshots
         db.commit()
+        # 캐시 무효화
+        invalidate_cache([f"product_detail:{product_id}:*", "products_list:*", "products_recent:*"])
 
         return ImageUploadResponse(success=True, url=local_path)
 
@@ -616,6 +621,8 @@ async def download_logo_from_url(
                 product.icon_url = local_path
                 db.commit()
                 logger.debug(f"Download Logo] DB updated for product {product_id}")
+                # 캐시 무효화 (product_detail 캐시가 stale 데이터 반환하는 문제 방지)
+                invalidate_cache([f"product_detail:{product_id}:*", "products_list:*", "products_recent:*"])
             else:
                 logger.debug(f"Download Logo] Product {product_id} not found in DB (test mode), skipping DB update")
 
