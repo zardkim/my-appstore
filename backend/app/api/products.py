@@ -483,7 +483,7 @@ async def update_version(
 
     # 캐시 무효화 (제품 상세 정보 변경)
     invalidate_cache([
-        f"product_detail:*{product_id}*",
+        "product_detail:*",
         "products_list:*",
         "products_recent:*"
     ])

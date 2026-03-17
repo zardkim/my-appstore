@@ -490,7 +490,7 @@ async def upload_screenshot_file(
         product.screenshots = current_screenshots
         db.commit()
         # 캐시 무효화
-        invalidate_cache([f"product_detail:{product_id}:*", "products_list:*", "products_recent:*"])
+        invalidate_cache(["product_detail:*", "products_list:*", "products_recent:*"])
 
         return ImageUploadResponse(success=True, url=local_path)
 
@@ -568,7 +568,7 @@ async def download_screenshot_by_slot(
         product.screenshots = current_screenshots
         db.commit()
         # 캐시 무효화
-        invalidate_cache([f"product_detail:{product_id}:*", "products_list:*", "products_recent:*"])
+        invalidate_cache(["product_detail:*", "products_list:*", "products_recent:*"])
 
         return ImageUploadResponse(success=True, url=local_path)
 
@@ -622,7 +622,7 @@ async def download_logo_from_url(
                 db.commit()
                 logger.debug(f"Download Logo] DB updated for product {product_id}")
                 # 캐시 무효화 (product_detail 캐시가 stale 데이터 반환하는 문제 방지)
-                invalidate_cache([f"product_detail:{product_id}:*", "products_list:*", "products_recent:*"])
+                invalidate_cache(["product_detail:*", "products_list:*", "products_recent:*"])
             else:
                 logger.debug(f"Download Logo] Product {product_id} not found in DB (test mode), skipping DB update")
 
