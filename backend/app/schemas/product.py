@@ -59,14 +59,14 @@ class ProductResponse(ProductBase):
     release_date: Optional[str] = None
     crawled_from: Optional[Dict[str, Any]] = None
     last_crawled_at: Optional[datetime] = None
-    screenshots: Optional[List[str]] = None  # 문자열 배열로 변경 (URL 직접 저장)
+    screenshots: Optional[List[Optional[str]]] = None  # None 허용 (슬롯 위치 유지)
     installation_guide: Optional[str] = None
     patch_links: Optional[List[PatchLink]] = None  # 패치/크랙 관련 링크 (최대 5개)
 
     @field_validator('screenshots', mode='before')
     @classmethod
     def convert_screenshots(cls, v):
-        """DB에서 읽을 때 객체 배열을 문자열 배열로 변환"""
+        """DB에서 읽을 때 객체 배열을 문자열 배열로 변환 (None은 슬롯 위치 보존을 위해 유지)"""
         if v is None:
             return None
         if isinstance(v, list):
@@ -76,10 +76,10 @@ class ProductResponse(ProductBase):
                     result.append(item)
                 elif isinstance(item, dict):
                     url = item.get('url')
-                    if url is not None:
-                        result.append(url)
-                # None이나 기타 타입은 무시
-            return result if result else None
+                    result.append(url)  # None이어도 슬롯 위치 보존
+                elif item is None:
+                    result.append(None)  # None 유지 (슬롯 위치 보존)
+            return result if any(x is not None for x in result) else None
         return v
 
     @field_validator('patch_links', mode='before')
