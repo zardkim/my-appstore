@@ -1682,6 +1682,9 @@ export default {
     confidenceLevelMedium: '보통',
     confidenceLevelLow: '낮음',
     confidenceNote: '제조사/출시연도 등 파이프라인이 직접 확인 가능한 신호로 계산된 값입니다 (AI 자체 답변 아님).',
+    // 폴더 내 설명 파일 재활용
+    descriptionFilesFound: '이 폴더에서 설명 파일 {count}개를 찾았습니다. 파일 내용만 근거로 메타데이터를 생성할 수 있습니다.',
+    useDescriptionFile: '{name}(으)로 생성',
   },
 
   // 푸터

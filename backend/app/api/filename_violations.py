@@ -30,6 +30,7 @@ from app.core.redis_cache import invalidate_cache
 from app.core.auto_matcher import match_violations_to_products, find_similar_product
 from app.core.activity_logger import log_activity
 from app.core.source_extractor import fetch_url_text, extract_text_from_file, SourceFetchError
+from app.api.filesystem import _ensure_within_scan_base
 
 # ── 하위 호환: 기존 URL (/api/filename-violations) + 신규 URL (/api/scan-items)
 router = APIRouter(tags=["Scan Items"])
@@ -777,19 +778,75 @@ async def create_product_from_scan_item_with_metadata(
         raise HTTPException(status_code=500, detail=f"제품 등록 중 오류 발생: {str(e)}")
 
 
+_DESCRIPTION_FILE_PATTERNS = ('*.txt', '*.nfo', '*.md')
+
+
+def _find_description_files(folder_path: str) -> List[Dict]:
+    """스캔 시 등록 대상에서는 제외되지만(scanner.py 기본 예외 패턴) 메타데이터
+    생성 소스로는 재활용할 수 있는 설명 파일(readme.txt, *.nfo, *.md 등)을
+    폴더에서 찾는다. _ensure_within_scan_base와 동일하게 허용된 스캔 루트
+    하위만 접근하도록 제한한다."""
+    import fnmatch
+
+    try:
+        folder = _ensure_within_scan_base(Path(folder_path))
+    except HTTPException:
+        return []
+
+    if not folder.is_dir():
+        return []
+
+    results = []
+    for entry in sorted(folder.iterdir()):
+        if not entry.is_file():
+            continue
+        name_lower = entry.name.lower()
+        if any(fnmatch.fnmatch(name_lower, p) for p in _DESCRIPTION_FILE_PATTERNS):
+            try:
+                size = entry.stat().st_size
+            except OSError:
+                size = None
+            results.append({"name": entry.name, "path": str(entry), "size": size})
+    return results
+
+
+@router.get("/api/scan-items/{scan_item_id}/description-files")
+@router.get("/api/filename-violations/{scan_item_id}/description-files")
+async def get_description_files(
+    scan_item_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    스캔 항목이 있는 폴더에서 메타데이터 생성 소스로 재활용할 수 있는 설명
+    파일(readme.txt, *.nfo, *.md 등)을 찾아 반환 (관리자 전용).
+
+    이 파일들은 스캔 시 등록 대상에서는 제외되지만, 원클릭으로
+    generate-metadata-from-source의 description_file_path로 넘겨
+    파일을 새로 업로드하지 않고도 메타데이터를 생성할 수 있다.
+    """
+    item = db.query(FilenameViolation).filter(FilenameViolation.id == scan_item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="스캔 항목을 찾을 수 없습니다.")
+
+    return {"files": _find_description_files(item.folder_path)}
+
+
 @router.post("/api/scan-items/{scan_item_id}/generate-metadata-from-source")
 @router.post("/api/filename-violations/{scan_item_id}/generate-metadata-from-source")
 async def generate_metadata_from_source(
     scan_item_id: int,
     url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
+    description_file_path: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user)
 ):
     """
-    사용자가 제공한 URL 또는 파일(txt/md/pdf)의 원문만 근거로 메타데이터 생성
-    (관리자 전용). 웹 검색만으로는 AI가 답을 낼 수 없는 개인 개발자 소프트웨어를
-    위한 경로 - url과 file 중 정확히 하나만 제공해야 한다.
+    사용자가 제공한 URL, 업로드 파일(txt/md/pdf), 또는 스캔 폴더에 이미 있는
+    설명 파일의 원문만 근거로 메타데이터 생성 (관리자 전용). 웹 검색만으로는
+    AI가 답을 낼 수 없는 개인 개발자 소프트웨어를 위한 경로 - url, file,
+    description_file_path 중 정확히 하나만 제공해야 한다.
 
     응답은 generate_detailed_metadata와 동일한 JSON 스키마이므로 기존
     create-product-with-metadata 플로우에 그대로 재사용할 수 있다.
@@ -798,19 +855,29 @@ async def generate_metadata_from_source(
     if not item:
         raise HTTPException(status_code=404, detail="스캔 항목을 찾을 수 없습니다.")
 
-    if not url and not file:
-        raise HTTPException(status_code=400, detail="url 또는 file 중 하나를 제공해야 합니다.")
-    if url and file:
-        raise HTTPException(status_code=400, detail="url과 file을 동시에 제공할 수 없습니다.")
+    provided = [v for v in (url, file, description_file_path) if v]
+    if len(provided) == 0:
+        raise HTTPException(status_code=400, detail="url, file, description_file_path 중 하나를 제공해야 합니다.")
+    if len(provided) > 1:
+        raise HTTPException(status_code=400, detail="url, file, description_file_path 중 하나만 제공할 수 있습니다.")
 
     try:
         if url:
             source_text = await fetch_url_text(url)
             filename_hint = item.file_name
-        else:
+        elif file:
             content = await file.read()
             source_text = extract_text_from_file(file.filename or "", content)
             filename_hint = file.filename or item.file_name
+        else:
+            # description_file_path: 스캔 폴더에서 감지된 기존 파일을 직접 읽음
+            # (허용된 스캔 루트 하위인지 반드시 재검증 - 프론트가 보낸 값을 신뢰하지 않음)
+            candidate = _ensure_within_scan_base(Path(description_file_path))
+            if not candidate.is_file():
+                raise HTTPException(status_code=404, detail="파일을 찾을 수 없습니다.")
+            content = candidate.read_bytes()
+            source_text = extract_text_from_file(candidate.name, content)
+            filename_hint = candidate.name
     except SourceFetchError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
