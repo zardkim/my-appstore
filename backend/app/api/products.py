@@ -24,62 +24,6 @@ from app.config import settings
 router = APIRouter()
 
 
-@router.get("/diag")
-async def diagnose_products(db: Session = Depends(get_db)):
-    """진단 엔드포인트 - 인증 없이 DB/쿼리 상태 확인 (임시)"""
-    result = {}
-    try:
-        from sqlalchemy import text
-        # DB 연결 테스트
-        db.execute(text("SELECT 1"))
-        result["db_connection"] = "ok"
-    except Exception as e:
-        result["db_connection"] = f"FAIL: {e}"
-        return result
-    try:
-        # users 테이블 컬럼 확인
-        from sqlalchemy import text
-        cols = db.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='users' ORDER BY column_name")).fetchall()
-        result["users_columns"] = [c[0] for c in cols]
-    except Exception as e:
-        result["users_columns"] = f"FAIL: {e}"
-    try:
-        # User 쿼리 테스트
-        from app.models.user import User
-        count = db.query(User).count()
-        result["users_count"] = count
-    except Exception as e:
-        result["users_query"] = f"FAIL: {e}"
-    try:
-        # Product 쿼리 테스트
-        count = db.query(Product).count()
-        result["products_count"] = count
-    except Exception as e:
-        result["products_query"] = f"FAIL: {e}"
-    try:
-        # Product joinedload 테스트
-        from sqlalchemy.orm import joinedload as jl
-        products = db.query(Product).options(jl(Product.versions)).limit(1).all()
-        result["products_joinedload"] = f"ok (got {len(products)} rows)"
-    except Exception as e:
-        result["products_joinedload"] = f"FAIL: {e}"
-    try:
-        # Pydantic 직렬화 테스트
-        from sqlalchemy.orm import joinedload as jl2
-        from app.schemas.product import ProductResponse as PR
-        import traceback
-        products2 = db.query(Product).options(jl2(Product.versions)).limit(5).all()
-        for p in products2:
-            _validate_icon_url(p)
-            for v in p.versions:
-                v.file_exists = os.path.exists(v.file_path) if v.file_path else False
-        serialized = [PR.model_validate(p) for p in products2]
-        result["pydantic_serialization"] = f"ok ({len(serialized)} products)"
-    except Exception as e:
-        result["pydantic_serialization"] = f"FAIL: {traceback.format_exc()}"
-    return result
-
-
 def _validate_icon_url(product):
     """icon_url이 로컬 파일을 가리키는데 실제 파일이 없으면 None으로 설정"""
     if product.icon_url and product.icon_url.startswith('/static/icons/'):
@@ -201,7 +145,16 @@ async def get_products_by_category(
             ...
         }
     """
-    categories = ["Graphics", "Office", "Development", "Utility", "Media", "OS", "Security", "Game", "Network"]
+    # config.json에 정의된 카테고리 목록 사용 (하드코딩 시 config에서 추가한
+    # 카테고리가 홈 화면에 노출되지 않는 문제가 있었음)
+    try:
+        _config = load_config()
+        categories = [cat["name"] for cat in _config.get("categories", []) if "name" in cat]
+    except Exception:
+        categories = []
+
+    if not categories:
+        categories = ["Graphics", "Office", "Development", "Utility", "Media", "OS", "Security", "Network"]
 
     result = {}
     for category in categories:
@@ -733,10 +686,11 @@ async def unregister_version(
         db.commit()
 
         invalidate_cache([
-            "products:*",
+            "products_list:*",
             "products_recent:*",
             "products_by_category:*",
             "product_detail:*",
+            "search_suggestions:*",
             "stats_overview:*",
             "stats_categories:*",
             "stats_vendors:*"
@@ -810,9 +764,11 @@ async def cleanup_deleted_files(
 
         # 캐시 무효화
         invalidate_cache([
-            "products:*",
+            "products_list:*",
             "products_recent:*",
             "products_by_category:*",
+            "product_detail:*",
+            "search_suggestions:*",
             "stats_overview:*",
             "stats_categories:*",
             "stats_vendors:*"
@@ -876,9 +832,11 @@ async def delete_product(
 
         # 캐시 무효화
         invalidate_cache([
-            "products:*",
+            "products_list:*",
             "products_recent:*",
             "products_by_category:*",
+            "product_detail:*",
+            "search_suggestions:*",
             "stats_overview:*",
             "stats_categories:*",
             "stats_vendors:*"

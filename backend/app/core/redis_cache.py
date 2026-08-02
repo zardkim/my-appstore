@@ -151,9 +151,10 @@ class RedisCache:
     def delete_pattern(self, pattern: str) -> int:
         """
         패턴과 매칭되는 모든 키 삭제
+        KEYS 대신 SCAN 커서를 사용해 Redis를 블로킹하지 않음
 
         Args:
-            pattern: 키 패턴 (예: "products:*")
+            pattern: 키 패턴 (예: "products_list:*")
 
         Returns:
             삭제된 키 개수
@@ -162,10 +163,10 @@ class RedisCache:
             return 0
 
         try:
-            keys = self.client.keys(pattern)
-            if keys:
-                return self.client.delete(*keys)
-            return 0
+            deleted = 0
+            for key in self.client.scan_iter(match=pattern, count=500):
+                deleted += self.client.delete(key)
+            return deleted
         except Exception as e:
             logger.error(f"Delete pattern error for '{pattern}': {e}", exc_info=True)
             return 0
