@@ -54,6 +54,28 @@ def extract_version_from_title(title: str) -> Optional[str]:
     return None
 
 
+def get_product_version_signature(product: Product) -> Optional[str]:
+    """
+    제품의 버전/연도 시그니처를 추출 (title 우선, 실패 시 folder_path로 폴백)
+
+    AI가 title을 생성할 때 "공식 제품명"만 요구받으므로 연도를 생략하는 경우가
+    있음 (예: "AutoCAD 2026" 폴더 → title "AutoCAD"). 이 경우 title만으로는
+    버전을 구분할 수 없으므로, AI가 손대지 않은 원본 폴더명에서 다시 추출을
+    시도해 "AutoCAD 2026"과 "AutoCAD 2027"이 같은 제품으로 오인되지 않도록 함
+    """
+    version = extract_version_from_title(product.title)
+    if version:
+        return version
+
+    if product.folder_path:
+        folder_name = os.path.basename(product.folder_path.rstrip('/\\'))
+        version = extract_version_from_title(folder_name)
+        if version:
+            return version
+
+    return None
+
+
 def normalize_title(title: str) -> str:
     """
     제품 타이틀을 정규화하여 비교 가능하도록 만듦
@@ -125,7 +147,8 @@ def find_similar_product(
 
     for product in all_products:
         # 버전/연도 비교: 둘 다 버전이 있는데 다르면 다른 제품으로 판단
-        product_version = extract_version_from_title(product.title)
+        # (title에서 연도가 생략되어도 folder_path로 폴백해 추출)
+        product_version = get_product_version_signature(product)
         if title_version and product_version and title_version != product_version:
             continue
 

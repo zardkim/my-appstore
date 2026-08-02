@@ -126,7 +126,7 @@ class AIMetadataGeneratorV2:
 Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
 **Basic Information:**
-- title: Official software name (in English or original language)
+- title: Official software name (in English or original language). If the software is released as distinct yearly/edition versions (e.g., "AutoCAD 2026", "Adobe Photoshop 2024", "Microsoft Office 2021"), you MUST include that year/edition in the title so different releases are not confused with each other. Do not include it for software that isn't versioned this way.
 - subtitle: Korean product name if commonly used (e.g., "어도비 포토샵" for "Adobe Photoshop"), otherwise empty ""
 - version: Version number (if known)
 - platform: Windows, macOS, Linux, or Cross-platform
@@ -325,7 +325,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
 **Basic Information:**
-- title: Official software name (in English or original language)
+- title: Official software name (in English or original language). If the software is released as distinct yearly/edition versions (e.g., "AutoCAD 2026", "Adobe Photoshop 2024", "Microsoft Office 2021"), you MUST include that year/edition in the title so different releases are not confused with each other. Do not include it for software that isn't versioned this way.
 - subtitle: Korean product name if commonly used (e.g., "어도비 포토샵" for "Adobe Photoshop"), otherwise empty ""
 - version: Version number (if known)
 - platform: Windows, macOS, Linux, or Cross-platform
