@@ -126,8 +126,8 @@ async def test_metadata_generation(
             'score': round(confidence_score, 3),  # 0.0 ~ 1.0
             'percentage': round(confidence_score * 100, 1),  # 0% ~ 100%
             'level': confidence_level,  # "high", "medium", "low"
-            'auto_register': auto_register,  # True if score >= 0.9
-            'threshold': 0.9
+            'auto_register': auto_register,  # True if score >= threshold
+            'threshold': 0.85
         }
 
         return MetadataTestResponse(
