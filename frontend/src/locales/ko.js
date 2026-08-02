@@ -1469,70 +1469,6 @@ export default {
     logout: '로그아웃하시겠습니까?',
   },
 
-  // 불일치 항목 상세 다이얼로그
-  unmatchedDialog: {
-    title: '불일치 항목 상세',
-    // File Info
-    fileInfo: '파일 정보',
-    fileName: '파일명',
-    filePath: '경로',
-    parsedName: '파싱된 이름',
-    parsedVersion: '파싱된 버전',
-    // Confidence Score
-    confidenceScore: '정확도 점수',
-    confidenceLevelHigh: '높음',
-    confidenceLevelMedium: '보통',
-    confidenceLevelLow: '낮음',
-    confidenceNote: '90% 미만은 수동 검토가 필요합니다.',
-    // AI Suggestion
-    aiSuggestion: 'AI 제안 메타데이터',
-    productName: '제품명',
-    manufacturer: '제조사',
-    categoryLabel: '카테고리',
-    license: '라이선스',
-    descriptionLabel: '설명',
-    // Action Tabs
-    approve: '승인',
-    search: '재검색',
-    manual: '수동입력',
-    ignore: '무시',
-    // Approve Action
-    approveDescription: 'AI가 제안한 메타데이터를 승인하고 제품으로 등록합니다.',
-    approveButton: 'AI 제안 승인 및 등록',
-    processing: '처리 중...',
-    // Search Action
-    searchDescription: '다른 소프트웨어 이름으로 AI에게 다시 검색합니다.',
-    searchPlaceholder: '예: Adobe Photoshop 2024',
-    searchButton: 'AI 재검색',
-    searching: '검색 중...',
-    // Manual Action
-    manualDescription: '메타데이터를 직접 입력합니다.',
-    productNameLabel: '제품명',
-    manufacturerLabel: '제조사',
-    categorySelectLabel: '카테고리',
-    selectPlaceholder: '선택하세요',
-    descriptionLabelManual: '설명',
-    officialWebsite: '공식 웹사이트',
-    iconUrl: '아이콘 URL',
-    manualSaveButton: '수동 메타데이터 저장 및 등록',
-    saving: '저장 중...',
-    required: '*',
-    // Ignore Action
-    ignoreDescription: '이 항목을 무시합니다. 나중에 다시 검토할 수 있습니다.',
-    ignoreButton: '항목 무시',
-    // Messages
-    approveSuccess: '승인되었습니다. 제품으로 등록되었습니다.',
-    approveError: '승인 중 오류가 발생했습니다.',
-    searchSuccess: '재검색 완료! 정확도: {percentage}%',
-    searchError: '검색 중 오류가 발생했습니다.',
-    manualSaveSuccess: '수동 메타데이터가 저장되었습니다.',
-    manualSaveError: '저장 중 오류가 발생했습니다.',
-    ignoreSuccess: '항목이 무시되었습니다.',
-    ignoreError: '무시 처리 중 오류가 발생했습니다.',
-    // Footer
-    close: '닫기',
-  },
-
   // 제품 상세페이지
   productDetail: {
     back: '뒤로 가기',
@@ -1740,6 +1676,12 @@ export default {
     invalidApiKey: 'API 키가 유효하지 않습니다.',
     apiKeyHint: '설정에서 API 키를 확인하고 다시 입력해주세요.',
     quotaHint: 'API 사용량이 초과되었습니다. OpenAI/Google Cloud 대시보드에서 결제 정보를 확인하세요.',
+    // 신뢰도 배지
+    confidenceLabel: '신뢰도',
+    confidenceLevelHigh: '높음',
+    confidenceLevelMedium: '보통',
+    confidenceLevelLow: '낮음',
+    confidenceNote: '제조사/출시연도 등 파이프라인이 직접 확인 가능한 신호로 계산된 값입니다 (AI 자체 답변 아님).',
   },
 
   // 푸터

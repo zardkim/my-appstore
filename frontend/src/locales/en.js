@@ -1515,70 +1515,6 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     logout: 'Are you sure you want to logout?',
   },
 
-  // Unmatched Item Detail Dialog
-  unmatchedDialog: {
-    title: 'Unmatched Item Details',
-    // File Info
-    fileInfo: 'File Information',
-    fileName: 'File Name',
-    filePath: 'Path',
-    parsedName: 'Parsed Name',
-    parsedVersion: 'Parsed Version',
-    // Confidence Score
-    confidenceScore: 'Confidence Score',
-    confidenceLevelHigh: 'High',
-    confidenceLevelMedium: 'Medium',
-    confidenceLevelLow: 'Low',
-    confidenceNote: 'Scores below 90% require manual review.',
-    // AI Suggestion
-    aiSuggestion: 'AI Suggested Metadata',
-    productName: 'Product Name',
-    manufacturer: 'Manufacturer',
-    categoryLabel: 'Category',
-    license: 'License',
-    descriptionLabel: 'Description',
-    // Action Tabs
-    approve: 'Approve',
-    search: 'Search',
-    manual: 'Manual',
-    ignore: 'Ignore',
-    // Approve Action
-    approveDescription: 'Approve AI suggested metadata and register as product.',
-    approveButton: 'Approve AI Suggestion & Register',
-    processing: 'Processing...',
-    // Search Action
-    searchDescription: 'Search again with a different software name.',
-    searchPlaceholder: 'e.g., Adobe Photoshop 2024',
-    searchButton: 'Search Again with AI',
-    searching: 'Searching...',
-    // Manual Action
-    manualDescription: 'Enter metadata manually.',
-    productNameLabel: 'Product Name',
-    manufacturerLabel: 'Manufacturer',
-    categorySelectLabel: 'Category',
-    selectPlaceholder: 'Please select',
-    descriptionLabelManual: 'Description',
-    officialWebsite: 'Official Website',
-    iconUrl: 'Icon URL',
-    manualSaveButton: 'Save Manual Metadata & Register',
-    saving: 'Saving...',
-    required: '*',
-    // Ignore Action
-    ignoreDescription: 'Ignore this item. You can review it later.',
-    ignoreButton: 'Ignore Item',
-    // Messages
-    approveSuccess: 'Approved. Product registered successfully.',
-    approveError: 'An error occurred during approval.',
-    searchSuccess: 'Search complete! Confidence: {percentage}%',
-    searchError: 'An error occurred during search.',
-    manualSaveSuccess: 'Manual metadata saved successfully.',
-    manualSaveError: 'An error occurred while saving.',
-    ignoreSuccess: 'Item ignored successfully.',
-    ignoreError: 'An error occurred while ignoring.',
-    // Footer
-    close: 'Close',
-  },
-
   // Product Detail Page
   productDetail: {
     back: 'Back',
@@ -1786,6 +1722,12 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     invalidApiKey: 'Invalid API key.',
     apiKeyHint: 'Please check and re-enter the API key in settings.',
     quotaHint: 'API quota exceeded. Please check your billing information on the OpenAI/Google Cloud dashboard.',
+    // Confidence badge
+    confidenceLabel: 'Confidence',
+    confidenceLevelHigh: 'High',
+    confidenceLevelMedium: 'Medium',
+    confidenceLevelLow: 'Low',
+    confidenceNote: 'Calculated from signals the pipeline can verify directly (vendor, release year, etc.) - not the AI\'s own self-assessment.',
   },
 
   // Footer

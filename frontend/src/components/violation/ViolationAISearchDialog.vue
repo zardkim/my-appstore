@@ -238,6 +238,26 @@
               ✓ {{ t('violationAISearchDialog.generationComplete') }}
             </div>
 
+            <!-- 신뢰도 배지 (규칙 기반 - AI 자체보고 아님) -->
+            <div
+              v-if="metadata.confidence?.level"
+              class="flex items-center gap-2 p-3 rounded-lg border text-sm"
+              :class="{
+                'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 text-green-700 dark:text-green-400': metadata.confidence.level === 'high',
+                'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700 text-yellow-700 dark:text-yellow-400': metadata.confidence.level === 'medium',
+                'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 text-red-700 dark:text-red-400': metadata.confidence.level === 'low',
+              }"
+              :title="t('violationAISearchDialog.confidenceNote')"
+            >
+              <span class="font-medium">{{ t('violationAISearchDialog.confidenceLabel') }}:</span>
+              <span>{{
+                metadata.confidence.level === 'high' ? t('violationAISearchDialog.confidenceLevelHigh')
+                  : metadata.confidence.level === 'medium' ? t('violationAISearchDialog.confidenceLevelMedium')
+                  : t('violationAISearchDialog.confidenceLevelLow')
+              }}</span>
+              <span class="opacity-75">({{ metadata.confidence.percentage }}%)</span>
+            </div>
+
             <!-- Metadata: 모바일 카드 / 데스크톱 테이블 -->
             <!-- 모바일 카드 레이아웃 -->
             <div class="sm:hidden space-y-2">
@@ -702,6 +722,7 @@ const saveMetadata = async () => {
     if (hasValue(metadata.value.supported_formats)) mappedMetadata.supported_formats = metadata.value.supported_formats
     if (hasValue(metadata.value.release_notes)) mappedMetadata.release_notes = metadata.value.release_notes
     if (hasValue(metadata.value.release_date)) mappedMetadata.release_date = metadata.value.release_date
+    if (hasValue(metadata.value.release_year)) mappedMetadata.release_year = metadata.value.release_year
     if (hasValue(metadata.value.installation_info)) mappedMetadata.installation_info = metadata.value.installation_info
     if (hasValue(metadata.value.screenshots)) mappedMetadata.screenshots = metadata.value.screenshots
 

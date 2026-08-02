@@ -1,139 +1,85 @@
 """
-메타데이터 정확도 계산 모듈
+메타데이터 신뢰도 계산 모듈 (규칙 기반)
 
-AI가 생성한 메타데이터의 신뢰도를 측정하여 자동 등록 여부 결정
+AI 자체 신뢰도 자기보고는 신호로 쓰지 않는다 - 근거 없이 메타데이터를
+지어낸 바로 그 호출에게 "이거 확실해?"라고 물어봐도 똑같이 그럴듯하게
+답할 위험이 크기 때문. 대신 파이프라인이 AI 호출과 독립적으로 관찰할 수
+있는 신호만 사용한다:
+  - developer(vendor)가 KNOWN_VENDORS와 매칭되는가
+  - release_year 추출에 성공했는가 (AI 응답 또는 파일명 파싱)
+  - 제품명이 너무 짧거나 일반명사에 가깝지 않은가
 """
 from typing import Dict, Any
-from difflib import SequenceMatcher
+
+from app.core.parser import FilenameParser
+
+# 제품명이 지나치게 일반적이어서 신뢰도를 낮춰야 하는 단어들
+_GENERIC_NAME_WORDS = {
+    'setup', 'install', 'installer', 'app', 'application', 'program',
+    'software', 'system', 'tool', 'utility', 'update', 'patch', 'new',
+}
 
 
 def calculate_confidence_score(metadata: Dict[str, Any], parsed_info: Dict[str, Any]) -> float:
     """
-    메타데이터 정확도 점수 계산
+    메타데이터 신뢰도 점수 계산 (규칙 기반, AI 자기보고 미사용)
 
     Args:
         metadata: AI가 생성한 메타데이터
         parsed_info: 파일명에서 파싱한 정보
 
     Returns:
-        정확도 점수 (0.0 ~ 1.0)
+        신뢰도 점수 (0.0 ~ 1.0)
 
-    점수 기준:
-        - 제목 유사도 (30%)
-        - Vendor 존재 (15%)
-        - Description 적정성 (15%)
-        - Category 유효성 (15%)
-        - Icon URL 존재 (10%)
-        - Official website 존재 (15%)
+    신호별 가중치:
+        - vendor가 KNOWN_VENDORS와 매칭 (50%)
+        - release_year 추출 성공 (35%)
+        - 제품명이 충분히 구체적 (15%) - 3자 이하이거나 일반명사면 미부여
     """
     score = 0.0
 
-    # 1. 제목 유사도 (0.3)
-    title_score = calculate_title_similarity(
-        metadata.get('title', ''),
-        parsed_info.get('software_name', '')
-    )
-    score += title_score * 0.3
+    if _has_known_vendor(metadata, parsed_info):
+        score += 0.50
 
-    # 2. Vendor 존재 여부 (0.15)
-    vendor = metadata.get('vendor', '')
-    if vendor and vendor.lower() not in ['unknown', 'n/a', '']:
+    if _has_release_year(metadata, parsed_info):
+        score += 0.35
+
+    if _is_specific_name(metadata, parsed_info):
         score += 0.15
 
-    # 3. Description 적정성 (0.15)
-    description = metadata.get('description', '')
-    desc_len = len(description)
-    if 100 <= desc_len <= 500:
-        # 적정 길이
-        score += 0.15
-    elif 50 <= desc_len < 100 or 500 < desc_len <= 1000:
-        # 짧거나 긴 경우 부분 점수
-        score += 0.08
-
-    # 4. Category 유효성 (0.15)
-    category = metadata.get('category', '')
-    valid_categories = [
-        'Graphics', 'Office', 'Development', 'Utility', 'Media',
-        'OS', 'Security', 'Network', 'Mac', 'Mobile', 'Patch',
-        'Driver', 'Source', 'Backup', 'Business',
-        'Engineering', 'Theme', 'Hardware', 'Font'
-    ]
-    if category in valid_categories:
-        score += 0.15
-
-    # 5. Icon URL 존재 (0.10)
-    icon_url = metadata.get('icon_url', '')
-    if icon_url and icon_url.startswith('http'):
-        score += 0.10
-
-    # 6. Official website 존재 (0.15)
-    official_website = metadata.get('official_website', '')
-    if official_website and official_website.startswith('http'):
-        score += 0.15
-
-    # 점수 범위 제한 (0.0 ~ 1.0)
     return min(max(score, 0.0), 1.0)
 
 
-def calculate_title_similarity(title: str, parsed_name: str) -> float:
-    """
-    제목 유사도 계산
-
-    Args:
-        title: AI가 생성한 제목
-        parsed_name: 파싱된 소프트웨어 이름
-
-    Returns:
-        유사도 점수 (0.0 ~ 1.0)
-    """
-    if not title or not parsed_name:
-        return 0.0
-
-    # 대소문자 무시, 공백 정규화
-    title_normalized = ' '.join(title.lower().split())
-    parsed_normalized = ' '.join(parsed_name.lower().split())
-
-    # SequenceMatcher로 유사도 계산
-    similarity = SequenceMatcher(None, title_normalized, parsed_normalized).ratio()
-
-    # 핵심 단어 포함 여부 추가 점수
-    parsed_words = set(parsed_normalized.split())
-    title_words = set(title_normalized.split())
-
-    # 파싱된 이름의 단어가 제목에 포함되어 있으면 보너스
-    if parsed_words and title_words:
-        word_overlap = len(parsed_words & title_words) / len(parsed_words)
-        # 유사도와 단어 중복률의 가중 평균
-        similarity = (similarity * 0.7) + (word_overlap * 0.3)
-
-    return similarity
+def _has_known_vendor(metadata: Dict[str, Any], parsed_info: Dict[str, Any]) -> bool:
+    """AI가 응답한 developer(구 vendor 필드) 또는 파일명 파싱 vendor가
+    KNOWN_VENDORS에 포함되는 문자열인지 확인. 부분 문자열 매칭을 쓰는 이유는
+    developer 필드가 "Autodesk, Inc." 같은 자유 텍스트로 오기 때문."""
+    developer = (
+        metadata.get('developer') or metadata.get('vendor')
+        or parsed_info.get('vendor') or ''
+    )
+    developer_lower = developer.lower()
+    return any(vendor in developer_lower for vendor in FilenameParser.KNOWN_VENDORS)
 
 
-def normalize_software_name(name: str) -> str:
-    """
-    소프트웨어 이름 정규화 (캐시 키로 사용)
+def _has_release_year(metadata: Dict[str, Any], parsed_info: Dict[str, Any]) -> bool:
+    """AI가 응답한 release_year(검증됨) 또는 파일명 파싱 단계에서 이미
+    추출된 year가 있으면 성공으로 간주."""
+    ai_year = FilenameParser.parse_ai_release_year(metadata.get('release_year'))
+    return bool(ai_year or parsed_info.get('year'))
 
-    Args:
-        name: 원본 소프트웨어 이름
 
-    Returns:
-        정규화된 이름 (소문자, 공백 제거, 특수문자 제거)
-    """
-    import re
-
-    # 소문자 변환
-    normalized = name.lower()
-
-    # 버전 정보 제거 (예: "2024", "v1.0", "24.5")
-    normalized = re.sub(r'\b(v?\d+\.?\d*\.?\d*)\b', '', normalized)
-
-    # 특수문자 제거 (알파벳, 숫자, 공백만 유지)
-    normalized = re.sub(r'[^a-z0-9\s]', ' ', normalized)
-
-    # 연속된 공백을 하나로
-    normalized = ' '.join(normalized.split())
-
-    return normalized.strip()
+def _is_specific_name(metadata: Dict[str, Any], parsed_info: Dict[str, Any]) -> bool:
+    """제품명이 3자 이하로 너무 짧거나, "setup"/"installer" 같은 일반명사로만
+    구성되어 있으면 신뢰할 수 있을 만큼 구체적이지 않다고 판단."""
+    name = metadata.get('title') or parsed_info.get('software_name') or ''
+    normalized = ' '.join(name.lower().split())
+    if len(normalized.replace(' ', '')) <= 3:
+        return False
+    words = set(normalized.split())
+    if words and words.issubset(_GENERIC_NAME_WORDS):
+        return False
+    return bool(normalized)
 
 
 def get_confidence_level(score: float) -> str:
@@ -141,26 +87,26 @@ def get_confidence_level(score: float) -> str:
     점수에 따른 신뢰도 레벨 반환
 
     Args:
-        score: 정확도 점수 (0.0 ~ 1.0)
+        score: 신뢰도 점수 (0.0 ~ 1.0)
 
     Returns:
         신뢰도 레벨: "high", "medium", "low"
     """
-    if score >= 0.9:
+    if score >= 0.8:
         return "high"
-    elif score >= 0.7:
+    elif score >= 0.5:
         return "medium"
     else:
         return "low"
 
 
-def should_auto_register(score: float, threshold: float = 0.9) -> bool:
+def should_auto_register(score: float, threshold: float = 0.85) -> bool:
     """
     자동 등록 여부 판단
 
     Args:
-        score: 정확도 점수
-        threshold: 임계값 (기본값: 0.9)
+        score: 신뢰도 점수
+        threshold: 임계값 (기본값: 0.85 - vendor 매칭 + release_year 추출 성공 시 도달)
 
     Returns:
         자동 등록 가능 여부
