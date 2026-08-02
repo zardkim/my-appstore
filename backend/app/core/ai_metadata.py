@@ -23,7 +23,7 @@ class AIMetadataGeneratorV2:
     def __init__(self, provider: str = "openai", api_key: str = None, model: str = None):
         """
         Args:
-            provider: AI 제공자 ('openai', 'gemini')
+            provider: AI 제공자 ('openai', 'gemini', 'claude')
             api_key: API 키
             model: 모델명 (지정하지 않으면 최신 모델 사용)
         """
@@ -34,6 +34,8 @@ class AIMetadataGeneratorV2:
             self.api_key = api_key
         elif self.provider == 'gemini':
             self.api_key = settings.GEMINI_API_KEY
+        elif self.provider == 'claude':
+            self.api_key = settings.CLAUDE_API_KEY
         else:
             self.api_key = settings.OPENAI_API_KEY
 
@@ -43,6 +45,9 @@ class AIMetadataGeneratorV2:
         elif self.provider == 'gemini':
             # Gemini 2.5 이상
             self.model = "gemini-2.5-flash"  # 또는 gemini-2.5-pro
+        elif self.provider == 'claude':
+            # Claude 5 세대 최고 성능 모델 (기본값)
+            self.model = "claude-opus-5"
         else:
             # OpenAI GPT-4.5 이상
             self.model = "gpt-4o"  # gpt-4o는 GPT-4 Turbo 최신 버전
@@ -82,6 +87,8 @@ class AIMetadataGeneratorV2:
                 metadata = await self._query_openai_detailed(parsed, custom_prompt)
             elif self.provider == 'gemini':
                 metadata = await self._query_gemini_detailed(parsed, custom_prompt)
+            elif self.provider == 'claude':
+                metadata = await self._query_claude_detailed(parsed, custom_prompt)
             else:
                 logger.debug(f"Unknown provider: {self.provider}, falling back")
                 metadata = self._fallback_metadata(parsed)
@@ -502,6 +509,206 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
             traceback.print_exc()
             return self._fallback_metadata(parsed_info)
 
+    async def _query_claude_detailed(self, parsed_info: Dict, custom_prompt: str = None) -> Dict:
+        """Anthropic Claude API로 상세 메타데이터 생성"""
+        software_name = parsed_info['software_name']
+        version = parsed_info.get('version', '')
+        year = parsed_info.get('year', '')
+        raw_filename = parsed_info.get('raw_filename', '')
+        raw_parent_folder = parsed_info.get('raw_parent_folder', '')
+
+        context_parts = [software_name]
+        if version:
+            context_parts.append(f"버전 {version}")
+        if year:
+            context_parts.append(f"({year})")
+
+        software_context = ' '.join(context_parts)
+
+        # 원본 파일명 컨텍스트 구성
+        filename_context = ""
+        if raw_filename:
+            filename_context += f"\nOriginal filename: {raw_filename}"
+        if raw_parent_folder:
+            filename_context += f"\nParent folder: {raw_parent_folder}"
+
+        # 커스텀 프롬프트가 있으면 사용, 없으면 기본 프롬프트 사용
+        if custom_prompt:
+            # 커스텀 프롬프트의 변수 치환 (소문자/대문자/괄더형 모두 지원)
+            prompt = custom_prompt.replace('{software_name}', software_context)
+            prompt = prompt.replace('{SOFTWARE_NAME}', software_context)
+            prompt = prompt.replace('[SOFTWARE_NAME]', software_context)
+        else:
+            # Claude용 영어 프롬프트 (더 나은 성능)
+            prompt = f"""Provide detailed metadata for the software: {software_context}{filename_context}
+
+Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
+
+**Basic Information:**
+- title: Official software name (in English or original language). If the software is released as distinct yearly/edition versions (e.g., "AutoCAD 2026", "Adobe Photoshop 2024", "Microsoft Office 2021"), you MUST include that year/edition in the title so different releases are not confused with each other. Do not include it for software that isn't versioned this way.
+- subtitle: Korean product name if commonly used (e.g., "어도비 포토샵" for "Adobe Photoshop"), otherwise empty ""
+- version: Version number (if known)
+- platform: Windows, macOS, Linux, or Cross-platform
+- developer: Official developer/vendor name
+- category: Choose the BEST match based on PRIMARY function:
+  * Graphics: Image editing, graphic design, 3D modeling
+  * Media: Video/audio editing, media playback, screen recording
+  * Office: Documents, spreadsheets, presentations
+  * Business: Accounting, ERP, CRM, business management
+  * Development: Programming, IDE, development tools
+  * Utility: System utilities, optimization tools
+  * Security, Network, OS, Engineering, Hardware, or Uncategorized for others
+- official_website: Official website URL (full URL with https://)
+- icon_url: Official logo/icon image URL (leave "" if unknown)
+- license_type: Free, Freemium, Trial, Commercial, or Open Source
+- language: Supported languages (e.g., "English, Korean, Japanese" or "Multilingual")
+
+**Descriptions:**
+- description_short: 50-100 character brief description (one sentence)
+- description_detailed: 200-300 character detailed description (main features and purpose)
+
+**Features (5-10 items):**
+- features: Array of key features (e.g., ["Virtual machine management", "Snapshot support"])
+
+**File Formats:**
+- supported_formats: Array of supported file formats (e.g., [".vmdk", ".iso", ".ova"])
+
+**System Requirements (object):**
+- system_requirements: {{
+    "os": "Operating system requirements (specific)",
+    "cpu": "CPU requirements",
+    "ram": "RAM requirements (minimum/recommended)",
+    "disk_space": "Disk space needed",
+    "gpu": "GPU requirements (if any)",
+    "additional": "Additional requirements (if any)"
+  }}
+
+**Installation Info (object):**
+- installation_info: {{
+    "installer_type": "Installation method (e.g., EXE installer, DMG mount, Archive extraction)",
+    "file_size": "Approximate file size (e.g., about 500MB)",
+    "internet_required": "Internet requirement (e.g., Required for activation, Not required)"
+  }}
+
+**Release Notes:**
+- release_notes: Major release notes or version history (2-3 lines if known)
+
+**Example Output:**
+{{
+  "title": "VMware Workstation Pro",
+  "subtitle": "VMware 워크스테이션 프로",
+  "version": "12.0.1",
+  "platform": "Windows",
+  "developer": "VMware, Inc.",
+  "category": "Utility",
+  "official_website": "https://www.vmware.com/products/workstation-pro.html",
+  "icon_url": "",
+  "license_type": "Commercial",
+  "language": "다국어 지원 (영어, 한국어, 일본어, 중국어 등)",
+  "description_short": "단일 PC에서 여러 운영체제를 가상 머신으로 실행할 수 있는 전문 가상화 소프트웨어",
+  "description_detailed": "VMware Workstation Pro는 IT 전문가와 개발자가 Windows 또는 Linux PC 한 대에서 여러 운영체제를 실행, 테스트, 배포할 수 있도록 하는 업계 표준 하이퍼바이저 솔루션입니다. 고급 3D 그래픽 지원, 고해상도 디스플레이, 강력한 가상 네트워킹 기능을 제공합니다.",
+  "features": [
+    "하나의 PC에서 여러 운영체제 동시 실행",
+    "DirectX 10 및 OpenGL 3.3 지원으로 3D 그래픽 구현",
+    "4K UHD 디스플레이 지원",
+    "가상 네트워크 구성 기능",
+    "스냅샷 및 복제 기능",
+    "vSphere/ESXi 원격 연결",
+    "USB 3.0 장치 지원"
+  ],
+  "supported_formats": [".vmx", ".vmdk", ".ovf", ".ova", ".iso"],
+  "system_requirements": {{
+    "os": "Windows 7 이상 (64비트)",
+    "cpu": "1.3GHz 이상의 64비트 Intel 또는 AMD 멀티코어 프로세서",
+    "ram": "최소 2GB (4GB 이상 권장)",
+    "disk_space": "설치용 1.2GB (가상 머신용 추가 공간 필요)",
+    "gpu": "DirectX 10 호환 그래픽 카드",
+    "additional": "BIOS에서 하드웨어 가상화(Intel VT-x 또는 AMD-V) 활성화 필요"
+  }},
+  "installation_info": {{
+    "installer_type": "EXE 실행 파일",
+    "file_size": "약 300-600MB",
+    "internet_required": "라이선스 인증 및 업데이트 시 필요"
+  }},
+  "release_notes": "버전 12.0.1: Windows 10 안정성 개선, Intel Skylake 호환성 향상, USB 3.0 수정 및 보안 패치 포함"
+}}
+
+**CRITICAL RULES:**
+1. Return ONLY valid JSON - no markdown, no comments, no explanations
+2. Include ALL fields listed above - this is MANDATORY
+3. Use empty strings "" or empty arrays [] for unknown information
+4. Be specific and detailed - provide comprehensive information
+5. For well-known software, fill in as much detail as possible
+
+**CRITICAL VERSION RULES:**
+1. Carefully examine the original filename for version information (e.g., "visual_studio_6", "photoshop_7", "office_2003")
+2. Single numbers in filenames ARE version numbers (e.g., "studio 6" → version "6", "photoshop 7" → version "7")
+3. Use the EXACT version from the filename - do NOT substitute with the latest release version
+4. If filename says "Visual Studio 6", the version is "6" (1998), NOT "2022"
+5. If filename says "Photoshop 7", the version is "7" (2002), NOT "2024"
+6. Provide metadata accurate to that specific version, not the current/latest version
+
+**LANGUAGE REQUIREMENT:**
+- Provide ALL text content (descriptions, features, notes, etc.) in KOREAN language
+- Keep technical terms and proper nouns in their original form
+- Examples: "가상 머신 관리", "스냅샷 및 복제 기능", "Windows 10 안정성 개선"
+- Field names remain in English, but all VALUES must be in Korean"""
+
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": self.api_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json"
+                    },
+                    json={
+                        "model": self.model,
+                        "max_tokens": 8192,
+                        "system": "You are an expert software analyst. You provide comprehensive, accurate metadata about software applications in JSON format. Always include ALL required fields in your response, even if you need to use empty strings or arrays for unknown information. Your responses are detailed, well-structured, and factually correct.",
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ]
+                    }
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    # thinking이 켜져 있으면 첫 블록이 text가 아닐 수 있으므로 타입으로 선택
+                    content = next(
+                        (b['text'] for b in result.get('content', []) if b.get('type') == 'text'),
+                        ''
+                    ).strip()
+
+                    # JSON 추출 및 파싱
+                    extracted_json = self._extract_json(content)
+                    metadata = json.loads(extracted_json)
+
+                    # AI 원본 응답 저장 (디버깅용)
+                    metadata['ai_raw_response'] = content
+                    metadata['ai_provider'] = 'claude'
+
+                    logger.debug(f"✅ Claude 상세 메타데이터 생성 완료: {metadata.get('title')}")
+                    return metadata
+                else:
+                    error_text = response.text
+                    error_info = self._parse_api_error(response.status_code, error_text, 'claude')
+                    logger.error(f"Claude API error: {error_info}")
+                    fallback = self._fallback_metadata(parsed_info)
+                    fallback['ai_error'] = error_info
+                    return fallback
+
+        except json.JSONDecodeError as e:
+            logger.debug(f"JSON parsing error (Claude): {e}")
+            return self._fallback_metadata(parsed_info)
+        except Exception as e:
+            logger.debug(f"Claude API Error: {e}")
+            return self._fallback_metadata(parsed_info)
+
     def _extract_json(self, text: str) -> str:
         """텍스트에서 JSON 추출 (마크다운 코드 블록 제거)"""
         text = text.strip()
@@ -514,6 +721,19 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
             text = '\n'.join(lines)
 
         return text.strip()
+
+    def _claude_thinking_disabled_param(self) -> dict:
+        """짧은 판정/테스트용 Claude 호출에 thinking을 끄기 위한 파라미터.
+
+        claude-opus-5/claude-sonnet-5는 thinking이 기본 활성화되어 있어
+        작은 max_tokens 예산이 thinking에 소비되고 텍스트 답변이 비어버릴 수
+        있으므로 명시적으로 꺼야 한다. 반면 opus-4-8/sonnet-4-6/haiku-4-5
+        같은 구세대 모델은 thinking이 기본 비활성화이고, "disabled" 타입
+        자체를 인식하지 못해 400 에러가 날 수 있으므로 아예 필드를 넣지 않는다.
+        """
+        if self.model in ("claude-opus-5", "claude-sonnet-5"):
+            return {"thinking": {"type": "disabled"}}
+        return {}
 
     def _parse_api_error(self, status_code: int, error_text: str, provider: str) -> dict:
         """API 에러 코드 파싱 및 사용자 친화적 메시지 생성"""
@@ -557,6 +777,16 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
             elif provider == 'gemini':
                 if 'error' in error_data:
                     error_info['detail'] = error_data['error'].get('message', '')
+            elif provider == 'claude':
+                if 'error' in error_data:
+                    error_info['detail'] = error_data['error'].get('message', '')
+                    error_type = error_data['error'].get('type', '')
+                    if error_type == 'rate_limit_error':
+                        error_info['type'] = 'rate_limit'
+                        error_info['message'] = 'API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.'
+                    elif error_type == 'authentication_error':
+                        error_info['type'] = 'invalid_api_key'
+                        error_info['message'] = 'API 키가 유효하지 않습니다. 설정에서 API 키를 확인해주세요.'
         except:
             pass
 
@@ -589,6 +819,8 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
                 return await self._test_openai_connection()
             elif self.provider == 'gemini':
                 return await self._test_gemini_connection()
+            elif self.provider == 'claude':
+                return await self._test_claude_connection()
             else:
                 return {
                     'success': False,
@@ -699,6 +931,60 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
                 'error': {'type': 'timeout', 'code': 0}
             }
 
+    async def _test_claude_connection(self) -> dict:
+        """Claude API 연결 테스트"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": self.api_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json"
+                    },
+                    json={
+                        "model": self.model,
+                        "max_tokens": 10,
+                        **self._claude_thinking_disabled_param(),
+                        "messages": [{"role": "user", "content": "Hi"}]
+                    }
+                )
+
+                # Rate limit 헤더 확인
+                rate_limit_info = {
+                    'limit_requests': response.headers.get('anthropic-ratelimit-requests-limit'),
+                    'remaining_requests': response.headers.get('anthropic-ratelimit-requests-remaining'),
+                    'limit_tokens': response.headers.get('anthropic-ratelimit-tokens-limit'),
+                    'remaining_tokens': response.headers.get('anthropic-ratelimit-tokens-remaining'),
+                }
+
+                if response.status_code == 200:
+                    return {
+                        'success': True,
+                        'provider': 'claude',
+                        'model': self.model,
+                        'message': 'API 연결 성공',
+                        'rate_limit': rate_limit_info
+                    }
+                else:
+                    error_info = self._parse_api_error(response.status_code, response.text, 'claude')
+                    return {
+                        'success': False,
+                        'provider': 'claude',
+                        'model': self.model,
+                        'message': error_info['message'],
+                        'error': error_info,
+                        'rate_limit': rate_limit_info
+                    }
+        except httpx.TimeoutException:
+            return {
+                'success': False,
+                'provider': 'claude',
+                'model': self.model,
+                'message': 'API 연결 시간 초과',
+                'error': {'type': 'timeout', 'code': 0}
+            }
+
     async def is_filename_clear_for_matching(
         self,
         filename: str,
@@ -759,6 +1045,8 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
                 return await self._judge_clarity_openai(prompt)
             elif self.provider == 'gemini':
                 return await self._judge_clarity_gemini(prompt)
+            elif self.provider == 'claude':
+                return await self._judge_clarity_claude(prompt)
             else:
                 # 알 수 없는 제공자는 기본값 True
                 return True
@@ -842,6 +1130,42 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
                     return True
         except Exception as e:
             logger.debug(f"Gemini clarity check error: {e}")
+            return True
+
+    async def _judge_clarity_claude(self, prompt: str) -> bool:
+        """Claude로 파일명 명확성 판단"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": self.api_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json"
+                    },
+                    json={
+                        "model": self.model,
+                        "max_tokens": 20,
+                        **self._claude_thinking_disabled_param(),
+                        "system": "You are a software filename analyzer. Answer only with CLEAR or UNCLEAR.",
+                        "messages": [{"role": "user", "content": prompt}]
+                    }
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    answer = next(
+                        (b['text'] for b in result.get('content', []) if b.get('type') == 'text'),
+                        ''
+                    ).strip().upper()
+                    is_clear = 'CLEAR' in answer
+                    logger.debug(f"파일명 명확성 판단 (Claude): {answer} → {is_clear}")
+                    return is_clear
+                else:
+                    logger.debug(f"Claude clarity check failed: {response.status_code}")
+                    return True
+        except Exception as e:
+            logger.debug(f"Claude clarity check error: {e}")
             return True
 
     def _fallback_metadata(self, parsed_info: Dict) -> Dict:

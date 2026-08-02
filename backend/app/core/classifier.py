@@ -20,14 +20,11 @@
 import re
 from pathlib import Path
 
+from app.core.keywords import PATCH_KEYWORDS as _PATCH_KEYWORDS
+
 # ------------------------------------------------------------------
 # 키워드 정의
 # ------------------------------------------------------------------
-
-_PATCH_KEYWORDS = {
-    "patch", "hotfix", "fix", "crack", "keygen", "keygenerator",
-    "serial", "key", "reg", "loader", "activator", "unlocker", "bypass",
-}
 
 _LANGPACK_KEYWORDS = {
     "lang", "language", "locale", "translation", "multilingual", "multi_lang",
@@ -49,6 +46,16 @@ _MANUAL_EXTENSIONS = {".pdf", ".doc", ".docx", ".chm", ".txt"}
 
 # sp1, sp2, sp3 ... 패턴
 _SP_PATTERN = re.compile(r"\bsp\d+\b")
+
+# "+ Fix", "with Keygen", "Incl.Patch"처럼 연결어 뒤에 패치 키워드가 오는 패턴.
+# 이 경우 파일 자체가 패치가 아니라 패치/크랙/키젠이 "동봉됨"을 의미하므로
+# 패치로 분류하지 않는다. 구분자는 공백/언더스코어/마침표가 없는 경우
+# (예: "IncludesPatch")까지 커버하도록 0개 이상으로 허용한다.
+_CONNECTOR_PATCH_PATTERN = re.compile(
+    r"(?:\+|with|incl\.?|include[sd]?|bundled)[\s_.]*"
+    r"(?:fix|crack|keygen|patch|serial)",
+    re.IGNORECASE,
+)
 
 
 # ------------------------------------------------------------------
@@ -77,13 +84,16 @@ def classify_file(file_name: str, folder_name: str = "") -> str:
     # ── 규칙 1: 메뉴얼 전용 확장자 ──────────────────────────────────
     # .pdf/.doc/.docx/.chm/.txt 이면서 patch/update 키워드가 없으면 메뉴얼
     if ext in _MANUAL_EXTENSIONS:
-        has_patch = _contains_any(combined, _PATCH_KEYWORDS)
+        has_patch = _has_core_patch_signal(combined, name_lower)
         has_update = _contains_any(combined, _UPDATE_KEYWORDS) or bool(_SP_PATTERN.search(combined))
         if not has_patch and not has_update:
             return "manual"
 
     # ── 규칙 2: 패치 키워드 ─────────────────────────────────────────
-    if _contains_any(combined, _PATCH_KEYWORDS):
+    # "+ Fix", "with Keygen"처럼 연결어를 통해 패치/크랙이 동봉되었다는
+    # 표현인 경우에는 이 규칙을 건너뛰고 아래 규칙들을 계속 평가한다
+    # (예: "Autodesk Maya v2026 + Fix (macOS).zip"은 patch가 아니라 product).
+    if _has_core_patch_signal(combined, name_lower):
         return "patch"
 
     # ── 규칙 3: 언어팩 키워드 ───────────────────────────────────────
@@ -110,3 +120,19 @@ def _contains_any(text: str, keywords: set) -> bool:
         if kw in text:
             return True
     return False
+
+
+def _is_bundled_patch_mention(name_lower: str) -> bool:
+    """파일명이 '+Fix', 'with Keygen'처럼 연결어를 통한 패치 동봉 표현을
+    포함하는지 확인. 폴더명이 아니라 파일명만 검사한다 — 그렇지 않으면
+    폴더명에 이런 문구가 있을 때 같은 폴더의 실제 Keygen.exe 같은 파일까지
+    product로 잘못 분류될 수 있다."""
+    return bool(_CONNECTOR_PATCH_PATTERN.search(name_lower))
+
+
+def _has_core_patch_signal(combined: str, name_lower: str) -> bool:
+    """패치 키워드가 존재하고, 그것이 연결어를 통한 동봉 표현이 아닌
+    핵심 키워드인 경우에만 True."""
+    if not _contains_any(combined, _PATCH_KEYWORDS):
+        return False
+    return not _is_bundled_patch_mention(name_lower)

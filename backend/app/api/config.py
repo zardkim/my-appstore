@@ -17,7 +17,7 @@ from app.models.user import User
 from app.config import settings
 
 # Sensitive field names - these are preserved (not overwritten) when incoming value is empty
-SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "googleApiKey", "googleCseId", "smtpPassword"}
+SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "claudeApiKey", "googleApiKey", "googleCseId", "smtpPassword"}
 
 router = APIRouter()
 
@@ -96,6 +96,7 @@ def get_default_config() -> Dict[str, Any]:
             "aiModel": "gpt-4o-mini",
             "openaiApiKey": "",
             "geminiApiKey": "",
+            "claudeApiKey": "",
             "googleApiKey": "",
             "googleCseId": "",
             "googleImageSearch": False,
@@ -163,6 +164,11 @@ def _migrate_config(config: Dict[str, Any]) -> tuple:
         # Ensure googleCseId field exists
         if 'googleCseId' not in meta:
             meta['googleCseId'] = ''
+            needs_save = True
+
+        # Ensure claudeApiKey field exists
+        if 'claudeApiKey' not in meta:
+            meta['claudeApiKey'] = ''
             needs_save = True
 
     return config, needs_save

@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     # AI
     OPENAI_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
+    CLAUDE_API_KEY: str = ""
 
     # Google Custom Search
     GOOGLE_CUSTOM_SEARCH_API_KEY: str = ""

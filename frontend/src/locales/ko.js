@@ -836,6 +836,16 @@ export default {
       gemini20FlashLite: 'Gemini 2.0 Flash Lite (경량)',
       geminiModelTip: '💡 Gemini 2.5 Flash가 안정적이며 할당량이 넉넉합니다. (추천)',
       geminiQuotaWarning: '⚠️ 무료 할당량 초과 시 429 에러가 발생할 수 있습니다.',
+      // Claude 모델 옵션
+      claudeModel: 'Claude 모델',
+      claudeGroup5: 'Claude 5 세대 ⭐ 추천',
+      claudeGroup4: 'Claude 4 세대',
+      claudeOpus5: 'Claude Opus 5 (최고 성능, 기본값)',
+      claudeSonnet5: 'Claude Sonnet 5 (빠르고 저렴)',
+      claudeOpus48: 'Claude Opus 4.8 (고성능)',
+      claudeSonnet46: 'Claude Sonnet 4.6 (균형)',
+      claudeHaiku45: 'Claude Haiku 4.5 (빠름, 저렴)',
+      claudeModelTip: '💡 Claude Opus 5가 가장 정확한 메타데이터를 생성합니다. 속도/비용이 중요하면 Sonnet 5를 선택하세요.',
       model: '모델',
       apiKey: 'API 키',
       useCustomPrompt: '사용자 정의 프롬프트 사용',
@@ -850,6 +860,9 @@ export default {
       // Gemini 프롬프트
       geminiPromptLabel: 'Gemini 프롬프트',
       geminiPromptPlaceholder: 'Gemini에게 질문할 프롬프트를 입력하세요...',
+      // Claude 프롬프트
+      claudePromptLabel: 'Claude 프롬프트',
+      claudePromptPlaceholder: 'Claude에게 질문할 프롬프트를 입력하세요...',
       // 공통 프롬프트 UI
       restoreDefault: '기본값으로 복원',
       currentCharCount: '현재 문자 수:',
@@ -864,6 +877,7 @@ export default {
       gemini30FlashExp: 'Gemini 3.0 Flash: 무료 (실험적)',
       gemini25FlashExp: 'Gemini 2.5 Flash: 무료 (실험적)',
       gemini25ProExp: 'Gemini 2.5 Pro: 무료 (실험적)',
+      claudePricingTitle: 'Claude (모두 유료):',
       // Google Custom Search API
       googleImageSearchTitle: '🔍 Google 이미지 검색 설정',
       googleImageSearchDesc: '이미지 검색 기능을 사용하려면 Google Custom Search API 키와 검색엔진 ID가 필요합니다.',
@@ -928,6 +942,26 @@ export default {
 - description_short: 간단한 설명 (50-100자)
 - description_detailed: 상세 설명 (200-300자)
 - features: 주요 기능 (배열, 6개 이상)
+- supported_formats: 지원 파일 형식 (배열)
+- system_requirements: 시스템 요구사항 (os, cpu, ram, disk_space, gpu, additional)
+- installation_info: 설치 정보 (installer_type, file_size, internet_required)
+- release_notes: 릴리즈 노트
+
+알 수 없는 필드는 빈 값을 사용하세요. JSON 형식으로만 응답해주세요.`,
+      defaultPromptClaude: `소프트웨어 '[SOFTWARE_NAME]'에 대한 메타데이터를 JSON 형식으로 제공해주세요.
+
+필수 필드:
+- title: 정식 명칭
+- version: 버전 번호
+- platform: 플랫폼 (Windows, macOS, Linux 등)
+- developer: 개발사/제조사
+- category: 카테고리 (Graphics, Office, Development 등)
+- official_website: 공식 웹사이트 URL
+- license_type: 라이선스 유형
+- language: 지원 언어
+- description_short: 간단한 설명 (50-100자)
+- description_detailed: 상세 설명 (200-300자)
+- features: 주요 기능 (배열, 5개 이상)
 - supported_formats: 지원 파일 형식 (배열)
 - system_requirements: 시스템 요구사항 (os, cpu, ram, disk_space, gpu, additional)
 - installation_info: 설치 정보 (installer_type, file_size, internet_required)

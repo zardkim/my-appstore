@@ -1177,6 +1177,7 @@
                 <select v-model="aiProvider" @change="onProviderChange" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                   <option value="gemini">Google Gemini</option>
                   <option value="openai">OpenAI</option>
+                  <option value="claude">Anthropic Claude</option>
                 </select>
               </div>
 
@@ -1235,6 +1236,25 @@
                 </p>
                 <p class="text-xs text-orange-600 dark:text-orange-400 mt-1">
                   {{ t('settings.metadata.geminiQuotaWarning') }}
+                </p>
+              </div>
+
+              <!-- Claude Models -->
+              <div v-if="aiProvider === 'claude'">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.metadata.claudeModel') }}</label>
+                <select v-model="aiModel" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                  <optgroup :label="t('settings.metadata.claudeGroup5')">
+                    <option value="claude-opus-5">{{ t('settings.metadata.claudeOpus5') }}</option>
+                    <option value="claude-sonnet-5">{{ t('settings.metadata.claudeSonnet5') }}</option>
+                  </optgroup>
+                  <optgroup :label="t('settings.metadata.claudeGroup4')">
+                    <option value="claude-opus-4-8">{{ t('settings.metadata.claudeOpus48') }}</option>
+                    <option value="claude-sonnet-4-6">{{ t('settings.metadata.claudeSonnet46') }}</option>
+                    <option value="claude-haiku-4-5">{{ t('settings.metadata.claudeHaiku45') }}</option>
+                  </optgroup>
+                </select>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  {{ t('settings.metadata.claudeModelTip') }}
                 </p>
               </div>
 
@@ -1314,6 +1334,44 @@
                 </p>
               </div>
 
+              <!-- Claude API Key -->
+              <div v-if="aiProvider === 'claude'">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Claude API 키
+                  <span class="text-xs text-gray-500">(Anthropic API Key)</span>
+                </label>
+                <!-- 저장됨 상태 표시 -->
+                <div v-if="hasClaudeKey && !editingClaudeKey" class="flex items-center gap-2 min-w-0">
+                  <div class="flex-1 min-w-0 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl overflow-hidden">
+                    <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono truncate">sk-ant-••••••••••••••••••••••••</span>
+                  </div>
+                  <button @click="editingClaudeKey = true; claudeApiKey = ''" type="button"
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    수정
+                  </button>
+                </div>
+                <!-- 입력 모드 -->
+                <div v-else class="flex items-center gap-2 min-w-0">
+                  <input
+                    v-model="claudeApiKey"
+                    type="password"
+                    placeholder="sk-ant-..."
+                    class="flex-1 min-w-0 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                  />
+                  <button v-if="editingClaudeKey" @click="editingClaudeKey = false; claudeApiKey = ''" type="button"
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    취소
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Claude API 키는 https://console.anthropic.com/settings/keys 에서 발급받을 수 있습니다.
+                  <span v-if="hasClaudeKey && !editingClaudeKey" class="text-green-600 dark:text-green-400">• 저장됨</span>
+                </p>
+              </div>
+
               <!-- Pricing Info -->
               <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
                 <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">{{ t('settings.metadata.pricingInfo') }}</h4>
@@ -1332,6 +1390,12 @@
                     • {{ t('settings.metadata.gemini30FlashExp') }}<br>
                     • {{ t('settings.metadata.gemini25FlashExp') }}<br>
                     • {{ t('settings.metadata.gemini25ProExp') }}
+                  </p>
+                  <p v-if="aiProvider === 'claude'">
+                    <strong>{{ t('settings.metadata.claudePricingTitle') }}</strong><br>
+                    • {{ t('settings.metadata.claudeOpus5') }}<br>
+                    • {{ t('settings.metadata.claudeSonnet5') }}<br>
+                    • {{ t('settings.metadata.claudeHaiku45') }}
                   </p>
                 </div>
               </div>
@@ -1476,6 +1540,7 @@
                 </p>
                 <div v-if="aiProvider === 'openai'" class="bg-white dark:bg-gray-800 rounded-lg p-4 font-mono text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ defaultPromptOpenai }}</div>
                 <div v-if="aiProvider === 'gemini'" class="bg-white dark:bg-gray-800 rounded-lg p-4 font-mono text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ defaultPromptGemini }}</div>
+                <div v-if="aiProvider === 'claude'" class="bg-white dark:bg-gray-800 rounded-lg p-4 font-mono text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ defaultPromptClaude }}</div>
               </div>
             </div>
 
@@ -1534,6 +1599,29 @@
                 ></textarea>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   {{ t('settings.metadata.currentCharCount') }} {{ customPromptGemini.length }}
+                </p>
+              </div>
+
+              <!-- Claude Prompt -->
+              <div v-if="aiProvider === 'claude'">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {{ t('settings.metadata.claudePromptLabel') }}
+                  <button
+                    @click="customPromptClaude = defaultPromptClaude"
+                    type="button"
+                    class="ml-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {{ t('settings.metadata.restoreDefault') }}
+                  </button>
+                </label>
+                <textarea
+                  v-model="customPromptClaude"
+                  rows="15"
+                  class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+                  :placeholder="t('settings.metadata.claudePromptPlaceholder')"
+                ></textarea>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  {{ t('settings.metadata.currentCharCount') }} {{ customPromptClaude.length }}
                 </p>
               </div>
             </div>
@@ -2686,25 +2774,30 @@ const aiProvider = ref('gemini')
 const aiModel = ref('gemini-2.5-flash')
 const geminiApiKey = ref('')
 const openaiApiKey = ref('')
+const claudeApiKey = ref('')
 const googleApiKey = ref('')
 const googleCseId = ref('')
 const googleImageSearch = ref(false)
 // API 키 상태 관리: 저장 여부 + 편집 모드
 const hasGeminiKey = ref(false)
 const hasOpenaiKey = ref(false)
+const hasClaudeKey = ref(false)
 const hasGoogleApiKey = ref(false)
 const hasGoogleCseId = ref(false)
 const editingGeminiKey = ref(false)
 const editingOpenaiKey = ref(false)
+const editingClaudeKey = ref(false)
 const editingGoogleApiKey = ref(false)
 const editingGoogleCseId = ref(false)
 const useDefaultPrompt = ref(true) // 기본값 사용 체크박스 (기본적으로 체크됨)
 const customPromptOpenai = ref('')
 const customPromptGemini = ref('')
+const customPromptClaude = ref('')
 
 // 기본 프롬프트 템플릿 (i18n으로부터 가져오기)
 const defaultPromptOpenai = computed(() => t('settings.metadata.defaultPromptOpenai'))
 const defaultPromptGemini = computed(() => t('settings.metadata.defaultPromptGemini'))
+const defaultPromptClaude = computed(() => t('settings.metadata.defaultPromptClaude'))
 const showMetadataDialog = ref(false)
 
 // 기본값 사용 체크박스 해제 시 커스텀 프롬프트를 기본값으로 초기화
@@ -2717,12 +2810,16 @@ watch(useDefaultPrompt, (newValue) => {
     if (!customPromptGemini.value || customPromptGemini.value.trim() === '') {
       customPromptGemini.value = defaultPromptGemini.value
     }
+    if (!customPromptClaude.value || customPromptClaude.value.trim() === '') {
+      customPromptClaude.value = defaultPromptClaude.value
+    }
   }
 })
 
 // 이전 언어의 기본 프롬프트 저장 (언어 변경 감지용)
 let prevDefaultPromptOpenai = ''
 let prevDefaultPromptGemini = ''
+let prevDefaultPromptClaude = ''
 
 // 언어 변경 시 기본 프롬프트 자동 업데이트
 watch(locale, () => {
@@ -2737,9 +2834,15 @@ watch(locale, () => {
       customPromptGemini.value === prevDefaultPromptGemini) {
     customPromptGemini.value = defaultPromptGemini.value
   }
+  if (!customPromptClaude.value ||
+      customPromptClaude.value.trim() === '' ||
+      customPromptClaude.value === prevDefaultPromptClaude) {
+    customPromptClaude.value = defaultPromptClaude.value
+  }
   // 현재 기본 프롬프트를 저장
   prevDefaultPromptOpenai = defaultPromptOpenai.value
   prevDefaultPromptGemini = defaultPromptGemini.value
+  prevDefaultPromptClaude = defaultPromptClaude.value
 })
 
 // AI 제공자 변경 시 기본 모델 설정
@@ -2748,6 +2851,8 @@ const onProviderChange = () => {
     aiModel.value = 'gpt-4o-mini'
   } else if (aiProvider.value === 'gemini') {
     aiModel.value = 'gemini-2.5-flash'
+  } else if (aiProvider.value === 'claude') {
+    aiModel.value = 'claude-opus-5'
   }
 }
 
@@ -3320,12 +3425,14 @@ const saveMetadataSettings = async () => {
       // 편집 모드이거나 기존 키가 없을 때(최초 입력) 새 값 전송, 그 외 빈 문자열 (백엔드가 기존 값 보존)
       geminiApiKey: (editingGeminiKey.value || !hasGeminiKey.value) ? geminiApiKey.value : '',
       openaiApiKey: (editingOpenaiKey.value || !hasOpenaiKey.value) ? openaiApiKey.value : '',
+      claudeApiKey: (editingClaudeKey.value || !hasClaudeKey.value) ? claudeApiKey.value : '',
       googleApiKey: (editingGoogleApiKey.value || !hasGoogleApiKey.value) ? googleApiKey.value : '',
       googleCseId: (editingGoogleCseId.value || !hasGoogleCseId.value) ? googleCseId.value : '',
       googleImageSearch: googleImageSearch.value,
       useDefaultPrompt: useDefaultPrompt.value,
       customPromptOpenai: customPromptOpenai.value,
-      customPromptGemini: customPromptGemini.value
+      customPromptGemini: customPromptGemini.value,
+      customPromptClaude: customPromptClaude.value
     }
 
     await configApi.updateSection('metadata', data)
@@ -3340,6 +3447,11 @@ const saveMetadataSettings = async () => {
       hasOpenaiKey.value = true
       editingOpenaiKey.value = false
       openaiApiKey.value = ''
+    }
+    if ((editingClaudeKey.value || !hasClaudeKey.value) && claudeApiKey.value) {
+      hasClaudeKey.value = true
+      editingClaudeKey.value = false
+      claudeApiKey.value = ''
     }
     if ((editingGoogleApiKey.value || !hasGoogleApiKey.value) && googleApiKey.value) {
       hasGoogleApiKey.value = true
@@ -3554,15 +3666,18 @@ onMounted(async () => {
       // 저장됨 표시 후 "수정" 버튼을 눌러야만 변경 가능
       hasGeminiKey.value = !!(config.metadata.geminiApiKey)
       hasOpenaiKey.value = !!(config.metadata.openaiApiKey)
+      hasClaudeKey.value = !!(config.metadata.claudeApiKey)
       hasGoogleApiKey.value = !!(config.metadata.googleApiKey)
       hasGoogleCseId.value = !!(config.metadata.googleCseId)
       googleImageSearch.value = config.metadata.googleImageSearch === true
       geminiApiKey.value = ''
       openaiApiKey.value = ''
+      claudeApiKey.value = ''
       googleApiKey.value = ''
       googleCseId.value = ''
       editingGeminiKey.value = false
       editingOpenaiKey.value = false
+      editingClaudeKey.value = false
       editingGoogleApiKey.value = false
       editingGoogleCseId.value = false
       // useDefaultPrompt가 설정되어 있으면 그 값을 사용, 없으면 true (기본값)
@@ -3571,9 +3686,11 @@ onMounted(async () => {
         : (config.metadata.useCustomPrompt !== undefined ? !config.metadata.useCustomPrompt : true)
       customPromptOpenai.value = config.metadata.customPromptOpenai || defaultPromptOpenai.value
       customPromptGemini.value = config.metadata.customPromptGemini || defaultPromptGemini.value
+      customPromptClaude.value = config.metadata.customPromptClaude || defaultPromptClaude.value
       // 이전 기본 프롬프트 초기화 (언어 변경 감지용)
       prevDefaultPromptOpenai = defaultPromptOpenai.value
       prevDefaultPromptGemini = defaultPromptGemini.value
+      prevDefaultPromptClaude = defaultPromptClaude.value
     }
 
     // 게시판 설정
@@ -3593,6 +3710,9 @@ onMounted(async () => {
     }
     if (!prevDefaultPromptGemini) {
       prevDefaultPromptGemini = defaultPromptGemini.value
+    }
+    if (!prevDefaultPromptClaude) {
+      prevDefaultPromptClaude = defaultPromptClaude.value
     }
   } catch (error) {
     console.error('설정 로드 실패:', error)

@@ -303,6 +303,8 @@ async def _register_as_product(item: FilenameViolation, db: Session):
 
     if ai_provider == 'gemini':
         api_key = metadata_config.get('geminiApiKey', '')
+    elif ai_provider == 'claude':
+        api_key = metadata_config.get('claudeApiKey', '')
     else:
         api_key = metadata_config.get('openaiApiKey', '') or metadata_config.get('apiKey', '')
 

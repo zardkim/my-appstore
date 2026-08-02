@@ -834,6 +834,16 @@ export default {
       gemini20FlashLite: 'Gemini 2.0 Flash Lite (Lightweight)',
       geminiModelTip: '💡 Gemini 2.5 Flash is stable with generous quota. (Recommended)',
       geminiQuotaWarning: '⚠️ Free quota exceeded may result in 429 errors.',
+      // Claude model options
+      claudeModel: 'Claude Model',
+      claudeGroup5: 'Claude 5 Series ⭐ Recommended',
+      claudeGroup4: 'Claude 4 Series',
+      claudeOpus5: 'Claude Opus 5 (Highest Quality, Default)',
+      claudeSonnet5: 'Claude Sonnet 5 (Fast & Affordable)',
+      claudeOpus48: 'Claude Opus 4.8 (High Performance)',
+      claudeSonnet46: 'Claude Sonnet 4.6 (Balanced)',
+      claudeHaiku45: 'Claude Haiku 4.5 (Fast, Affordable)',
+      claudeModelTip: '💡 Claude Opus 5 produces the most accurate metadata. Choose Sonnet 5 if speed/cost matters more.',
       model: 'Model',
       apiKey: 'API Key',
       useCustomPrompt: 'Use Custom Prompt',
@@ -848,6 +858,9 @@ export default {
       // Gemini prompt
       geminiPromptLabel: 'Gemini Prompt',
       geminiPromptPlaceholder: 'Enter the prompt to ask Gemini...',
+      // Claude prompt
+      claudePromptLabel: 'Claude Prompt',
+      claudePromptPlaceholder: 'Enter the prompt to ask Claude...',
       // Common prompt UI
       restoreDefault: 'Restore Default',
       currentCharCount: 'Current character count:',
@@ -862,6 +875,7 @@ export default {
       gemini30FlashExp: 'Gemini 3.0 Flash: Free (Experimental)',
       gemini25FlashExp: 'Gemini 2.5 Flash: Free (Experimental)',
       gemini25ProExp: 'Gemini 2.5 Pro: Free (Experimental)',
+      claudePricingTitle: 'Claude (All Paid):',
       // Google Custom Search API
       googleImageSearchTitle: '🔍 Google Image Search Settings',
       googleImageSearchDesc: 'A Google Custom Search API key and Search Engine ID are required to use the image search feature.',
@@ -926,6 +940,26 @@ Required fields:
 - description_short: Brief description (50-100 chars)
 - description_detailed: Detailed description (200-300 chars)
 - features: Key features (array, 6+ items)
+- supported_formats: Supported file formats (array)
+- system_requirements: System requirements (os, cpu, ram, disk_space, gpu, additional)
+- installation_info: Installation information (installer_type, file_size, internet_required)
+- release_notes: Release notes
+
+Use empty values for unknown fields. Respond in JSON format only.`,
+      defaultPromptClaude: `Provide metadata for the software '[SOFTWARE_NAME]' in JSON format.
+
+Required fields:
+- title: Official name
+- version: Version number
+- platform: Platform (Windows, macOS, Linux, etc.)
+- developer: Developer/Manufacturer
+- category: Category (Graphics, Office, Development, etc.)
+- official_website: Official website URL
+- license_type: License type
+- language: Supported languages
+- description_short: Brief description (50-100 chars)
+- description_detailed: Detailed description (200-300 chars)
+- features: Key features (array, 5+ items)
 - supported_formats: Supported file formats (array)
 - system_requirements: System requirements (os, cpu, ram, disk_space, gpu, additional)
 - installation_info: Installation information (installer_type, file_size, internet_required)
