@@ -17,6 +17,7 @@ from app.models.comment import Comment
 from app.models.user import User
 from app.dependencies import get_current_admin_user
 from app.config import settings
+from app.api.config import SENSITIVE_FIELDS
 
 router = APIRouter()
 
@@ -40,6 +41,18 @@ def get_backup_dir() -> Path:
 def _safe_filename(name: str) -> str:
     """경로 탐색 공격 방지: 파일명만 허용"""
     return Path(name).name
+
+
+def _strip_sensitive_config(data):
+    """백업 ZIP에 포함되는 config.json에서 API 키 등 민감 필드를 제거 (평문 유출 방지)"""
+    if isinstance(data, dict):
+        return {
+            key: ("" if key in SENSITIVE_FIELDS and isinstance(value, str) else _strip_sensitive_config(value))
+            for key, value in data.items()
+        }
+    if isinstance(data, list):
+        return [_strip_sensitive_config(item) for item in data]
+    return data
 
 
 def _dt_to_str(val):
@@ -173,8 +186,17 @@ def _build_zip_buffer(db_snapshot: dict) -> io.BytesIO:
 
         for fname in BACKUP_DATA_FILES:
             fpath = data_root / fname
-            if fpath.exists():
-                zf.write(fpath, f"data/{fname}")
+            if not fpath.exists():
+                continue
+            if fname == "config.json":
+                try:
+                    with open(fpath, 'r', encoding='utf-8') as f:
+                        stripped = _strip_sensitive_config(json.load(f))
+                    zf.writestr(f"data/{fname}", json.dumps(stripped, ensure_ascii=False, indent=2))
+                    continue
+                except (json.JSONDecodeError, OSError):
+                    pass  # 파싱 실패 시 원본 그대로 포함 (기존 동작 유지)
+            zf.write(fpath, f"data/{fname}")
 
         for subdir in BACKUP_DATA_SUBDIRS:
             subdir_path = data_root / subdir

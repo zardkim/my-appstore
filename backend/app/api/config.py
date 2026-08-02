@@ -213,11 +213,14 @@ def save_config(config: Dict[str, Any]):
 
 @router.get("/")
 async def get_config(current_user: User = Depends(get_current_user)):
-    """Get all configuration. Requires authentication."""
+    """Get all configuration. Requires authentication.
+
+    Sensitive fields (API keys 등) are always masked in the response, even for
+    admins — the frontend only needs a truthy/falsy signal to render "설정됨".
+    The real value never leaves the server after it's saved.
+    """
     config = load_config()
-    if current_user.role.value != "admin":
-        config = mask_sensitive_fields(config)
-    return config
+    return mask_sensitive_fields(config)
 
 
 @router.get("/{section}")
@@ -231,11 +234,7 @@ async def get_config_section(
     if section not in config:
         raise HTTPException(status_code=404, detail=f"Section '{section}' not found")
 
-    data = config[section]
-    if current_user.role.value != "admin":
-        data = mask_sensitive_fields(data)
-
-    return data
+    return mask_sensitive_fields(config[section])
 
 
 @router.put("/{section}")
