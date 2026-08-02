@@ -7,7 +7,7 @@
 분류값: product | patch | language_pack | manual | update | installation_video
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Form, File, UploadFile
 from sqlalchemy.orm import Session
 from typing import List, Dict, Optional
 from pydantic import BaseModel
@@ -29,6 +29,7 @@ from app.api.config import load_config
 from app.core.redis_cache import invalidate_cache
 from app.core.auto_matcher import match_violations_to_products, find_similar_product
 from app.core.activity_logger import log_activity
+from app.core.source_extractor import fetch_url_text, extract_text_from_file, SourceFetchError
 
 # ── 하위 호환: 기존 URL (/api/filename-violations) + 신규 URL (/api/scan-items)
 router = APIRouter(tags=["Scan Items"])
@@ -774,3 +775,73 @@ async def create_product_from_scan_item_with_metadata(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"제품 등록 중 오류 발생: {str(e)}")
+
+
+@router.post("/api/scan-items/{scan_item_id}/generate-metadata-from-source")
+@router.post("/api/filename-violations/{scan_item_id}/generate-metadata-from-source")
+async def generate_metadata_from_source(
+    scan_item_id: int,
+    url: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    사용자가 제공한 URL 또는 파일(txt/md/pdf)의 원문만 근거로 메타데이터 생성
+    (관리자 전용). 웹 검색만으로는 AI가 답을 낼 수 없는 개인 개발자 소프트웨어를
+    위한 경로 - url과 file 중 정확히 하나만 제공해야 한다.
+
+    응답은 generate_detailed_metadata와 동일한 JSON 스키마이므로 기존
+    create-product-with-metadata 플로우에 그대로 재사용할 수 있다.
+    """
+    item = db.query(FilenameViolation).filter(FilenameViolation.id == scan_item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="스캔 항목을 찾을 수 없습니다.")
+
+    if not url and not file:
+        raise HTTPException(status_code=400, detail="url 또는 file 중 하나를 제공해야 합니다.")
+    if url and file:
+        raise HTTPException(status_code=400, detail="url과 file을 동시에 제공할 수 없습니다.")
+
+    try:
+        if url:
+            source_text = await fetch_url_text(url)
+            filename_hint = item.file_name
+        else:
+            content = await file.read()
+            source_text = extract_text_from_file(file.filename or "", content)
+            filename_hint = file.filename or item.file_name
+    except SourceFetchError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if not source_text.strip():
+        raise HTTPException(status_code=400, detail="소스에서 텍스트를 추출하지 못했습니다.")
+
+    config = load_config()
+    metadata_config = config.get('metadata', {})
+    ai_provider = metadata_config.get('aiProvider', 'gemini')
+    ai_model = metadata_config.get('aiModel', 'gemini-2.5-flash')
+
+    if ai_provider == 'gemini':
+        api_key = metadata_config.get('geminiApiKey', '')
+    elif ai_provider == 'claude':
+        api_key = metadata_config.get('claudeApiKey', '')
+    else:
+        api_key = metadata_config.get('openaiApiKey', '') or metadata_config.get('apiKey', '')
+
+    if not api_key or not api_key.strip():
+        raise HTTPException(
+            status_code=400,
+            detail=f"{ai_provider.upper()} API 키가 설정되지 않았습니다. 설정 > 메타데이터 설정에서 API 키를 입력하세요."
+        )
+
+    generator = AIMetadataGenerator(provider=ai_provider, api_key=api_key, model=ai_model)
+    metadata = await generator.generate_metadata_from_source(source_text, filename_hint)
+
+    if metadata.get('ai_error'):
+        error_info = metadata['ai_error']
+        status_code = 429 if error_info.get('type') == 'rate_limit' else \
+                      402 if error_info.get('type') == 'insufficient_quota' else 500
+        raise HTTPException(status_code=status_code, detail=error_info.get('message', 'AI 오류가 발생했습니다.'))
+
+    return {"success": True, "metadata": metadata}
