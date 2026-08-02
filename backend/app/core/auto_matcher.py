@@ -392,10 +392,13 @@ async def match_violations_to_products(
                         first_filename = violations_list[0].file_name
                         is_portable = FilenameParser._is_portable(first_filename, folder_path)
 
-                    # release_year: 최종 title에서 우선 추출, 실패 시 원본 folder_path로 폴백
-                    # (AI가 title에서 연도를 생략해도 신뢰도 높은 값을 확보하기 위함)
+                    # release_year: AI가 응답한 release_year 필드를 최우선으로 쓰고,
+                    # 없거나 형식이 잘못됐으면 title → folder_path 정규식 추출로 폴백
                     final_title = metadata.get('title', software_name)
-                    release_year = FilenameParser.extract_release_year(final_title, folder_path)
+                    release_year = (
+                        FilenameParser.parse_ai_release_year(metadata.get('release_year'))
+                        or FilenameParser.extract_release_year(final_title, folder_path)
+                    )
 
                     if provided_metadata:
                         # 사용자 제공 메타데이터로 생성 (상세 필드 포함)
@@ -444,8 +447,9 @@ async def match_violations_to_products(
                 if metadata.get('title'):
                     product.title = metadata['title']
                     if not product.release_year:
-                        product.release_year = FilenameParser.extract_release_year(
-                            product.title, product.folder_path
+                        product.release_year = (
+                            FilenameParser.parse_ai_release_year(metadata.get('release_year'))
+                            or FilenameParser.extract_release_year(product.title, product.folder_path)
                         )
                 if metadata.get('subtitle'):
                     product.subtitle = metadata['subtitle']

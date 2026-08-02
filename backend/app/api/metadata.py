@@ -416,7 +416,10 @@ async def register_metadata(
             vendor=metadata.get('vendor', ''),
             icon_url=metadata.get('icon_url', ''),
             category=metadata.get('category', 'Uncategorized'),
-            release_year=FilenameParser.extract_release_year(title),
+            release_year=(
+                FilenameParser.parse_ai_release_year(metadata.get('release_year'))
+                or FilenameParser.extract_release_year(title)
+            ),
             folder_path=folder_path
         )
 

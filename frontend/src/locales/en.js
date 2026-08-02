@@ -909,10 +909,11 @@ export default {
       defaultPromptOpenai: `Provide metadata for the software '[SOFTWARE_NAME]' in JSON format.
 
 Required fields:
-- title: Official name
+- title: Product name ONLY (do not include developer/vendor or platform/OS - e.g. "AutoCAD", not "Autodesk AutoCAD" or "AutoCAD macOS". Include the year only if the software is released as distinct yearly/edition versions)
 - version: Version number
-- platform: Platform (Windows, macOS, Linux, etc.)
-- developer: Developer/Manufacturer
+- release_year: Four-digit release year (e.g. "2024"). Leave empty if not released in yearly/edition versions
+- platform: Platform (one of: Windows, macOS, Linux, Cross-platform)
+- developer: Developer/Manufacturer (put it here, not in title)
 - category: Category (Graphics, Office, Development, etc.)
 - official_website: Official website URL
 - license_type: License type
@@ -929,10 +930,11 @@ Use empty values for unknown fields. Respond in JSON format only.`,
       defaultPromptGemini: `Provide metadata for the software '[SOFTWARE_NAME]' in JSON format.
 
 Required fields:
-- title: Official name
+- title: Product name ONLY (do not include developer/vendor or platform/OS - e.g. "AutoCAD", not "Autodesk AutoCAD" or "AutoCAD macOS". Include the year only if the software is released as distinct yearly/edition versions)
 - version: Version number
-- platform: Platform (Windows, macOS, Linux, etc.)
-- developer: Developer/Manufacturer
+- release_year: Four-digit release year (e.g. "2024"). Leave empty if not released in yearly/edition versions
+- platform: Platform (one of: Windows, macOS, Linux, Cross-platform)
+- developer: Developer/Manufacturer (put it here, not in title)
 - category: Category (Graphics, Office, Development, etc.)
 - official_website: Official website URL
 - license_type: License type
@@ -949,10 +951,11 @@ Use empty values for unknown fields. Respond in JSON format only.`,
       defaultPromptClaude: `Provide metadata for the software '[SOFTWARE_NAME]' in JSON format.
 
 Required fields:
-- title: Official name
+- title: Product name ONLY (do not include developer/vendor or platform/OS - e.g. "AutoCAD", not "Autodesk AutoCAD" or "AutoCAD macOS". Include the year only if the software is released as distinct yearly/edition versions)
 - version: Version number
-- platform: Platform (Windows, macOS, Linux, etc.)
-- developer: Developer/Manufacturer
+- release_year: Four-digit release year (e.g. "2024"). Leave empty if not released in yearly/edition versions
+- platform: Platform (one of: Windows, macOS, Linux, Cross-platform)
+- developer: Developer/Manufacturer (put it here, not in title)
 - category: Category (Graphics, Office, Development, etc.)
 - official_website: Official website URL
 - license_type: License type

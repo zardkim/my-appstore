@@ -911,10 +911,11 @@ export default {
       defaultPromptOpenai: `소프트웨어 '[SOFTWARE_NAME]'에 대한 메타데이터를 JSON 형식으로 제공해주세요.
 
 필수 필드:
-- title: 정식 명칭
+- title: 제품명만 (개발사/제조사, 플랫폼/OS는 포함하지 마세요 - 예: "AutoCAD"이지 "Autodesk AutoCAD"나 "AutoCAD macOS"가 아님. 연도별로 출시되는 소프트웨어라면 연도만 포함)
 - version: 버전 번호
-- platform: 플랫폼 (Windows, macOS, Linux 등)
-- developer: 개발사/제조사
+- release_year: 출시 연도 4자리 (예: "2024"). 연도별 출시가 아니면 빈 값
+- platform: 플랫폼 (Windows, macOS, Linux, Cross-platform 중 하나)
+- developer: 개발사/제조사 (title에 넣지 말고 이 필드에만)
 - category: 카테고리 (Graphics, Office, Development 등)
 - official_website: 공식 웹사이트 URL
 - license_type: 라이선스 유형
@@ -931,10 +932,11 @@ export default {
       defaultPromptGemini: `소프트웨어 '[SOFTWARE_NAME]'에 대한 메타데이터를 JSON 형식으로 제공해주세요.
 
 필수 필드:
-- title: 정식 명칭
+- title: 제품명만 (개발사/제조사, 플랫폼/OS는 포함하지 마세요 - 예: "AutoCAD"이지 "Autodesk AutoCAD"나 "AutoCAD macOS"가 아님. 연도별로 출시되는 소프트웨어라면 연도만 포함)
 - version: 버전 번호
-- platform: 플랫폼 (Windows, macOS, Linux 등)
-- developer: 개발사/제조사
+- release_year: 출시 연도 4자리 (예: "2024"). 연도별 출시가 아니면 빈 값
+- platform: 플랫폼 (Windows, macOS, Linux, Cross-platform 중 하나)
+- developer: 개발사/제조사 (title에 넣지 말고 이 필드에만)
 - category: 카테고리 (Graphics, Office, Development 등)
 - official_website: 공식 웹사이트 URL
 - license_type: 라이선스 유형
@@ -951,10 +953,11 @@ export default {
       defaultPromptClaude: `소프트웨어 '[SOFTWARE_NAME]'에 대한 메타데이터를 JSON 형식으로 제공해주세요.
 
 필수 필드:
-- title: 정식 명칭
+- title: 제품명만 (개발사/제조사, 플랫폼/OS는 포함하지 마세요 - 예: "AutoCAD"이지 "Autodesk AutoCAD"나 "AutoCAD macOS"가 아님. 연도별로 출시되는 소프트웨어라면 연도만 포함)
 - version: 버전 번호
-- platform: 플랫폼 (Windows, macOS, Linux 등)
-- developer: 개발사/제조사
+- release_year: 출시 연도 4자리 (예: "2024"). 연도별 출시가 아니면 빈 값
+- platform: 플랫폼 (Windows, macOS, Linux, Cross-platform 중 하나)
+- developer: 개발사/제조사 (title에 넣지 말고 이 필드에만)
 - category: 카테고리 (Graphics, Office, Development 등)
 - official_website: 공식 웹사이트 URL
 - license_type: 라이선스 유형
