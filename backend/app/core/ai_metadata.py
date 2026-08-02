@@ -97,6 +97,240 @@ class AIMetadataGeneratorV2:
 
         return metadata
 
+    async def generate_metadata_from_source(self, source_text: str, filename_hint: str = "") -> Dict:
+        """
+        사용자가 제공한 원문(URL 크롤링 또는 업로드 파일에서 추출한 텍스트)만
+        근거로 메타데이터 생성.
+
+        generate_detailed_metadata와 달리 AI의 사전 지식으로 빈 칸을 채우는
+        것을 금지하고, 원문에 명시되지 않은 정보는 빈 값으로 남기도록 지시한다.
+        블로그/커뮤니티에만 공유된, 웹 검색만으로는 AI가 알 수 없는 개인
+        개발자 소프트웨어를 위한 경로.
+
+        Args:
+            source_text: URL/파일에서 추출된 원문 텍스트
+            filename_hint: 원본 파일명 또는 검색 컨텍스트 (선택)
+        """
+        prompt = self._build_source_prompt(source_text, filename_hint)
+        parsed_info = {'software_name': filename_hint or ''}
+
+        if not (self.api_key and self.api_key.strip()):
+            return self._fallback_metadata(parsed_info)
+
+        if self.provider == 'openai':
+            return await self._query_openai_from_source(prompt, parsed_info)
+        elif self.provider == 'gemini':
+            return await self._query_gemini_from_source(prompt, parsed_info)
+        elif self.provider == 'claude':
+            return await self._query_claude_from_source(prompt, parsed_info)
+        else:
+            logger.debug(f"Unknown provider: {self.provider}, falling back")
+            return self._fallback_metadata(parsed_info)
+
+    def _build_source_prompt(self, source_text: str, filename_hint: str) -> str:
+        """소스 기반 생성용 공통 프롬프트 (3개 프로바이더가 동일하게 사용).
+
+        핵심 제약: 원문에 없는 정보는 절대 추측하지 말고 빈 값으로 남길 것.
+        generate_detailed_metadata의 프롬프트와 달리 "ALL fields are REQUIRED"
+        문구를 의도적으로 넣지 않는다 - 그게 있으면 AI가 근거 없이 답을
+        지어내는 원인이 되기 때문 (계획 3-3 항목).
+        """
+        hint_line = f"\nOriginal filename or search context: {filename_hint}" if filename_hint else ""
+
+        return f"""Below is text extracted from a source the user provided (a webpage or an uploaded document) about a piece of software.{hint_line}
+
+--- SOURCE TEXT START ---
+{source_text}
+--- SOURCE TEXT END ---
+
+Extract metadata about this software using ONLY information explicitly stated in the source text above. Do NOT use your own prior knowledge about this software to fill in gaps, and do NOT guess. If a field is not mentioned in the source text, leave it as an empty string "" or empty array [] - an empty field is far better than a fabricated one.
+
+Return a JSON object with the following fields:
+
+**Basic Information:**
+- title: Product name ONLY, exactly as stated in the source. Do NOT include the developer/vendor name or platform/OS - those go in separate fields below.
+- subtitle: Korean product name, only if mentioned in the source, otherwise ""
+- version: Version number, only if explicitly stated in the source
+- release_year: Four-digit release year, only if explicitly stated in the source
+- platform: One of "Windows", "macOS", "Linux", "Cross-platform" - only if stated or clearly implied in the source, otherwise ""
+- developer: Developer/vendor name, only if stated in the source
+- category: Best match from Graphics/Media/Office/Business/Development/Utility/Security/Network/OS/Engineering/Hardware/Uncategorized based on what the source describes - use "Uncategorized" if unclear
+- official_website: Official website URL, only if stated in the source
+- icon_url: ""
+- license_type: Free/Freemium/Trial/Commercial/Open Source, only if stated in the source
+- language: Supported languages, only if stated in the source
+
+**Descriptions (based only on what the source actually says):**
+- description_short: Brief description (50-100 characters)
+- description_detailed: Detailed description (up to 300 characters)
+
+**Features:**
+- features: Array of features actually mentioned in the source (empty array if none mentioned)
+
+**File Formats:**
+- supported_formats: Array of file formats mentioned in the source (empty array if none mentioned)
+
+**System Requirements (object, only fill fields explicitly mentioned in the source):**
+- system_requirements: {{"os": "", "cpu": "", "ram": "", "disk_space": "", "gpu": "", "additional": ""}}
+
+**Installation Info (object, only fill fields explicitly mentioned in the source):**
+- installation_info: {{"installer_type": "", "file_size": "", "internet_required": ""}}
+
+**Release Notes:**
+- release_notes: Only if the source mentions release notes or a changelog
+
+**CRITICAL RULES:**
+1. Return ONLY valid JSON - no markdown, no comments, no explanations
+2. Use ONLY the source text above - NEVER use prior/general knowledge about this software to fill in a field the source doesn't mention
+3. Leave unknown fields as empty string/array rather than guessing or fabricating
+4. Field names remain in English, but description/feature VALUES must be written in Korean"""
+
+    async def _query_openai_from_source(self, prompt: str, parsed_info: Dict) -> Dict:
+        """OpenAI로 소스 기반 메타데이터 생성"""
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": self.model,
+                        "messages": [
+                            {
+                                "role": "system",
+                                "content": "You are an expert software analyst. You extract metadata strictly from the source text the user provides - you never fabricate information the source doesn't contain."
+                            },
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ],
+                        "temperature": 0.0,
+                        "max_tokens": 4096
+                    }
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    content = result['choices'][0]['message']['content'].strip()
+
+                    extracted_json = self._extract_json(content)
+                    metadata = json.loads(extracted_json)
+                    metadata['ai_raw_response'] = content
+                    metadata['ai_provider'] = 'openai'
+                    return metadata
+                else:
+                    error_info = self._parse_api_error(response.status_code, response.text, 'openai')
+                    fallback = self._fallback_metadata(parsed_info)
+                    fallback['ai_error'] = error_info
+                    return fallback
+        except json.JSONDecodeError as e:
+            logger.debug(f"JSON parsing error (OpenAI source): {e}")
+            return self._fallback_metadata(parsed_info)
+        except Exception as e:
+            logger.debug(f"OpenAI source API Error: {e}")
+            return self._fallback_metadata(parsed_info)
+
+    async def _query_gemini_from_source(self, prompt: str, parsed_info: Dict) -> Dict:
+        """Gemini로 소스 기반 메타데이터 생성"""
+        try:
+            api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+            system_instruction = "You are an expert software analyst. You extract metadata strictly from the source text the user provides - you never fabricate information the source doesn't contain."
+
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    api_url,
+                    headers={"Content-Type": "application/json"},
+                    json={
+                        "system_instruction": {
+                            "parts": [{"text": system_instruction}]
+                        },
+                        "contents": [{
+                            "parts": [{"text": prompt}]
+                        }],
+                        "generationConfig": {
+                            "temperature": 0.0,
+                            "maxOutputTokens": 8192,
+                            "topP": 0.95,
+                            "topK": 40
+                        }
+                    }
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    if 'candidates' in result and len(result['candidates']) > 0:
+                        content = result['candidates'][0]['content']['parts'][0]['text'].strip()
+                        extracted_json = self._extract_json(content)
+                        metadata = json.loads(extracted_json)
+                        metadata['ai_raw_response'] = content
+                        metadata['ai_provider'] = 'gemini'
+                        return metadata
+                    else:
+                        fallback = self._fallback_metadata(parsed_info)
+                        fallback['ai_error'] = {'code': 'unexpected_response', 'message': 'Unexpected API response format'}
+                        return fallback
+                else:
+                    error_info = self._parse_api_error(response.status_code, response.text, 'gemini')
+                    fallback = self._fallback_metadata(parsed_info)
+                    fallback['ai_error'] = error_info
+                    return fallback
+        except json.JSONDecodeError as e:
+            logger.debug(f"JSON parsing error (Gemini source): {e}")
+            return self._fallback_metadata(parsed_info)
+        except Exception as e:
+            logger.debug(f"Gemini source API Error: {e}")
+            return self._fallback_metadata(parsed_info)
+
+    async def _query_claude_from_source(self, prompt: str, parsed_info: Dict) -> Dict:
+        """Claude로 소스 기반 메타데이터 생성"""
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": self.api_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json"
+                    },
+                    json={
+                        "model": self.model,
+                        "max_tokens": 8192,
+                        "system": "You are an expert software analyst. You extract metadata strictly from the source text the user provides - you never fabricate information the source doesn't contain.",
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ]
+                    }
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    content = next(
+                        (b['text'] for b in result.get('content', []) if b.get('type') == 'text'),
+                        ''
+                    ).strip()
+                    extracted_json = self._extract_json(content)
+                    metadata = json.loads(extracted_json)
+                    metadata['ai_raw_response'] = content
+                    metadata['ai_provider'] = 'claude'
+                    return metadata
+                else:
+                    error_info = self._parse_api_error(response.status_code, response.text, 'claude')
+                    fallback = self._fallback_metadata(parsed_info)
+                    fallback['ai_error'] = error_info
+                    return fallback
+        except json.JSONDecodeError as e:
+            logger.debug(f"JSON parsing error (Claude source): {e}")
+            return self._fallback_metadata(parsed_info)
+        except Exception as e:
+            logger.debug(f"Claude source API Error: {e}")
+            return self._fallback_metadata(parsed_info)
+
     async def _query_openai_detailed(self, parsed_info: Dict, custom_prompt: str = None) -> Dict:
         """OpenAI GPT-4.5+ API로 상세 메타데이터 생성"""
         software_name = parsed_info['software_name']
