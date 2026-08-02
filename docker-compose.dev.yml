@@ -68,6 +68,7 @@ services:
       # AI (선택사항 - 웹 UI에서도 설정 가능)
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY:-}
 
       # Paths (컨테이너 내부 경로)
       - SCAN_BASE_PATH=/app/data/library
