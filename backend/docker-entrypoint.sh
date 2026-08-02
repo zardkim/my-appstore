@@ -106,6 +106,8 @@ if [ -n "$DB_HOST" ] && [ -n "$POSTGRES_USER" ] && [ -n "$POSTGRES_DB" ]; then
   PGPASSWORD=$POSTGRES_PASSWORD psql -h "$DB_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" << 'ENDSQL' 2>/dev/null || true
 ALTER TABLE filename_violations ADD COLUMN IF NOT EXISTS classification VARCHAR(20) NOT NULL DEFAULT 'product';
 ALTER TABLE filename_violations ADD COLUMN IF NOT EXISTS classification_auto BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS release_year INTEGER;
+CREATE INDEX IF NOT EXISTS ix_products_release_year ON products (release_year);
 ENDSQL
   echo "✓ Schema safety check complete"
 fi
