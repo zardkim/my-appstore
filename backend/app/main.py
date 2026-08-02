@@ -140,10 +140,6 @@ tags_metadata = [
         "description": "AI 메타데이터 생성 및 관리",
     },
     {
-        "name": "Unmatched",
-        "description": "매칭되지 않은 파일 관리",
-    },
-    {
         "name": "Posts",
         "description": "게시판(팁&테크) 게시글 관리",
     },
