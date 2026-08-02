@@ -67,6 +67,8 @@ async def test_metadata_generation(
             api_key = metadata_config.get('geminiApiKey', '').strip()
         elif ai_provider == 'openai':
             api_key = (metadata_config.get('openaiApiKey', '') or metadata_config.get('apiKey', '')).strip()
+        elif ai_provider == 'claude':
+            api_key = metadata_config.get('claudeApiKey', '').strip()
         else:
             api_key = ''
 

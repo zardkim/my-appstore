@@ -89,6 +89,8 @@ async def auto_match_scanned_files(db: Session) -> dict:
         api_key = metadata_config.get('geminiApiKey', '')
     elif ai_provider == 'openai':
         api_key = metadata_config.get('openaiApiKey', '')
+    elif ai_provider == 'claude':
+        api_key = metadata_config.get('claudeApiKey', '')
     else:
         return {"matched": 0, "failed": 0, "errors": [f"Unsupported AI provider: {ai_provider}"]}
 
@@ -217,6 +219,8 @@ async def regenerate_metadata(
     ai_model = metadata_config.get('aiModel', 'gpt-4o-mini')
     if ai_provider == 'gemini':
         api_key = metadata_config.get('geminiApiKey', '')
+    elif ai_provider == 'claude':
+        api_key = metadata_config.get('claudeApiKey', '')
     else:
         api_key = metadata_config.get('openaiApiKey', '') or metadata_config.get('apiKey', '')
 
@@ -486,6 +490,8 @@ async def test_ai_api(
     # API 키 가져오기
     if ai_provider == 'gemini':
         api_key = metadata_config.get('geminiApiKey', '')
+    elif ai_provider == 'claude':
+        api_key = metadata_config.get('claudeApiKey', '')
     else:
         api_key = metadata_config.get('openaiApiKey', '')
 

@@ -374,6 +374,7 @@ const openaiApiKey = ref('')
 const useCustomPrompt = ref(false)
 const customPromptOpenai = ref('')
 const customPromptGemini = ref('')
+const customPromptClaude = ref('')
 
 // 설정 로드
 onMounted(async () => {
@@ -387,6 +388,7 @@ onMounted(async () => {
       useCustomPrompt.value = response.data.useCustomPrompt || false
       customPromptOpenai.value = response.data.customPromptOpenai || ''
       customPromptGemini.value = response.data.customPromptGemini || ''
+      customPromptClaude.value = response.data.customPromptClaude || ''
     }
   } catch (error) {
     console.error('설정 로드 오류:', error)
@@ -503,10 +505,15 @@ const startAISearch = async (term = null) => {
       useCustomPrompt.value = configResponse.data.useCustomPrompt || false
       customPromptOpenai.value = configResponse.data.customPromptOpenai || ''
       customPromptGemini.value = configResponse.data.customPromptGemini || ''
+      customPromptClaude.value = configResponse.data.customPromptClaude || ''
     }
 
     // 현재 provider에 맞는 커스텀 프롬프트 선택
-    const customPrompt = aiProvider.value === 'openai' ? customPromptOpenai.value : customPromptGemini.value
+    const customPrompt = aiProvider.value === 'openai'
+      ? customPromptOpenai.value
+      : aiProvider.value === 'claude'
+        ? customPromptClaude.value
+        : customPromptGemini.value
 
     // 메타데이터 생성 요청 (Settings와 동일한 API 사용)
     const response = await metadataApi.testGeneration(

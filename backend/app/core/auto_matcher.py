@@ -37,7 +37,9 @@ def extract_version_from_title(title: str) -> Optional[str]:
         return None
 
     # 연도 패턴 (2003, 2007, 2010, 2019, 2024 등)
-    year_match = re.search(r'\b((?:19|20)\d{2})\b', title)
+    # \b는 '_'를 단어 문자로 취급하므로 'v2026', '_2024_'처럼 연도가 영문자/
+    # 언더스코어에 바로 붙어있으면 매치되지 않는다. 숫자가 아닌 경계를 직접 확인.
+    year_match = re.search(r'(?<!\d)((?:19|20)\d{2})(?!\d)', title)
     if year_match:
         return year_match.group(1)
 

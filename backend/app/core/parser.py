@@ -1,6 +1,8 @@
 import re
 from typing import Dict, Optional
 
+from app.core.keywords import PATCH_KEYWORDS
+
 
 class FilenameParser:
     """
@@ -8,6 +10,9 @@ class FilenameParser:
     """
 
     # 제거할 일반적인 키워드 (노이즈)
+    # 패치/크랙 관련 키워드는 classifier.py와 공유하는 app.core.keywords.PATCH_KEYWORDS를
+    # 그대로 합쳐서, 두 모듈이 서로 다른 키워드 세트를 관리하다 생기는 불일치
+    # (예: "fix"가 classifier에는 있지만 parser에는 없던 문제)를 방지한다.
     NOISE_WORDS = {
         # 설치 관련
         'setup', 'installer', 'install', 'portable', 'full', 'final', 'with',
@@ -15,7 +20,7 @@ class FilenameParser:
         'crack', 'keygen', 'patch', 'serial', 'key', 'keys', 'cracked',
         'activation', 'activator', 'activated', 'registered', 'licensed',
         # 아키텍처
-        'x64', 'x86', 'ia64', 'x32', 'win', 'mac', 'linux', 'bits', 'bit',
+        'x64', 'x86', 'ia64', 'x32', 'win', 'mac', 'macos', 'linux', 'bits', 'bit',
         # 에디션 타입
         'multilingual', 'retail', 'oem', 'vlsc', 'vol', 'trial',
         # 패키징
@@ -31,8 +36,8 @@ class FilenameParser:
         # 한글 노이즈
         '한국어판', '설치법', '인증방법', '스크린샷', '포터블', '휴대용',
         # 기타
-        'readme', 'instructions', 'screenshot', 'preview', 'info'
-    }
+        'readme', 'instructions', 'screenshot', 'preview', 'info', 'dlm'
+    } | PATCH_KEYWORDS
 
     # 에디션 키워드 (제품명에 포함)
     EDITION_WORDS = {
@@ -109,6 +114,11 @@ class FilenameParser:
         # 제조사 추정
         vendor = FilenameParser._extract_vendor(software_name)
 
+        # 제조사명이 소프트웨어 이름에 중복으로 남아있으면 제거
+        # (예: "Autodesk AutoCAD" + vendor "Autodesk" → "AutoCAD")
+        if vendor:
+            software_name = FilenameParser._remove_vendor_from_name(software_name, vendor)
+
         # 포터블 여부 감지
         is_portable = FilenameParser._is_portable(filename, parent_folder)
 
@@ -132,11 +142,15 @@ class FilenameParser:
             r'(\d+\.\d+\.\d+\.\d+)',         # 1.2.3.4
             r'(\d+\.\d+\.\d+)',              # 1.2.3
             r'[\s_](\d+\.\d+)[\s_]',         # 공백/언더스코어로 둘러싸인 1.2
-            r'\b(365|360|2024|2023|2022|2021|2020|2019|2018|2017|2016)\b',  # Office 365, 2021 등 특수 버전
-            r'\b(20\d{2})\b',                # 2022 (연도 형식 버전)
-            r'\bSP(\d+)\b',                  # SP1, SP2 (Service Pack)
-            r'\bR(\d+)\b',                   # R1, R2 (Release)
-            r'\bv(\d+)\b',                   # v1 (단독)
+            # 아래 패턴들은 원래 \b를 썼으나, '_'가 단어 문자로 취급되어
+            # 'v2026'/'_2024_'처럼 문자·언더스코어에 바로 붙은 경우 매치되지
+            # 않는 문제가 있었음. 숫자 경계는 (?<!\d)/(?!\d)로, 'v'/'SP'/'R'
+            # 앞 경계는 영숫자만 배제하는 방식으로 교체.
+            r'(?<!\d)(365|360|2024|2023|2022|2021|2020|2019|2018|2017|2016)(?!\d)',  # Office 365, 2021 등 특수 버전
+            r'(?<!\d)(20\d{2})(?!\d)',       # 2022 (연도 형식 버전)
+            r'(?<![A-Za-z0-9])SP(\d+)(?!\d)',  # SP1, SP2 (Service Pack)
+            r'(?<![A-Za-z0-9])R(\d+)(?!\d)',   # R1, R2 (Release)
+            r'(?<![A-Za-z0-9])v(\d+)(?!\d)',   # v1 (단독)
         ]
 
         versions = []
@@ -158,8 +172,13 @@ class FilenameParser:
 
     @staticmethod
     def _extract_year(text: str) -> Optional[str]:
-        """연도 추출 (2000-2099)"""
-        match = re.search(r'\b(20\d{2})\b', text)
+        r"""연도 추출 (1900-2099)
+
+        \b는 '_'를 단어 문자로 취급하므로 'v2026', '_2024_'처럼 연도가
+        영문자/언더스코어에 바로 붙어있으면 \b(20\d{2})\b가 매치되지 않는다.
+        숫자가 아닌 문자 경계를 직접 확인해 이 문제를 회피한다.
+        """
+        match = re.search(r'(?<!\d)((?:19|20)\d{2})(?!\d)', text)
         return match.group(1) if match else None
 
     @staticmethod
@@ -234,11 +253,21 @@ class FilenameParser:
                 return 'Dassault Systemes'
             return words[0].capitalize()
 
-        # 첫 단어가 대문자로 시작하고 2글자 이상인 경우
-        if len(words[0]) >= 2 and words[0][0].isupper():
-            return words[0]
-
+        # KNOWN_VENDORS에 없으면 확인되지 않은 추정이므로 반환하지 않음
+        # (예전에는 대문자로 시작하는 첫 단어를 제조사로 추정했으나,
+        #  이는 검증되지 않은 추측이라 오탐이 많아 제거함)
         return None
+
+    @staticmethod
+    def _remove_vendor_from_name(software_name: str, vendor: str) -> str:
+        """
+        소프트웨어 이름에서 제조사명을 제거 (중복 방지)
+        예: "Autodesk AutoCAD" + vendor "Autodesk" → "AutoCAD"
+        """
+        cleaned = re.sub(rf'\b{re.escape(vendor)}\b', '', software_name, flags=re.IGNORECASE)
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        # 제조사명이 이름 전체였던 경우(제거 시 빈 문자열)에는 원본 유지
+        return cleaned if cleaned else software_name
 
     @staticmethod
     def clean_metadata(metadata: Dict) -> Dict:
