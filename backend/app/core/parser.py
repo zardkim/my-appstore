@@ -197,6 +197,20 @@ class FilenameParser:
         return int(year) if year else None
 
     @staticmethod
+    def parse_ai_release_year(value) -> Optional[int]:
+        """AI 응답의 release_year 필드 값을 검증된 int로 변환.
+
+        AI가 "", "N/A", 잘못된 자릿수 등을 반환할 수 있으므로 1900-2099
+        범위의 4자리 숫자 문자열만 허용하고, 그 외에는 None을 반환해
+        호출측이 title/folder_path 정규식 폴백을 타도록 한다.
+        """
+        if value in (None, ''):
+            return None
+        text = str(value).strip()
+        match = re.fullmatch(r'(?:19|20)\d{2}', text)
+        return int(match.group(0)) if match else None
+
+    @staticmethod
     def _extract_software_name(text: str, version: str, year: str) -> str:
         """
         소프트웨어 이름 추출 (노이즈 제거)

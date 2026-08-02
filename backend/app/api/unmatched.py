@@ -114,7 +114,10 @@ async def approve_suggestion(
             vendor=metadata.get('vendor'),
             category=metadata.get('category'),
             icon_url=metadata.get('icon_url', ''),
-            release_year=FilenameParser.extract_release_year(metadata.get('title'), item.folder_path),
+            release_year=(
+                FilenameParser.parse_ai_release_year(metadata.get('release_year'))
+                or FilenameParser.extract_release_year(metadata.get('title'), item.folder_path)
+            ),
             folder_path=item.folder_path
         )
 

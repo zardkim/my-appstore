@@ -133,11 +133,12 @@ class AIMetadataGeneratorV2:
 Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
 **Basic Information:**
-- title: Official software name (in English or original language). If the software is released as distinct yearly/edition versions (e.g., "AutoCAD 2026", "Adobe Photoshop 2024", "Microsoft Office 2021"), you MUST include that year/edition in the title so different releases are not confused with each other. Do not include it for software that isn't versioned this way.
+- title: Product name ONLY (in English or original language). Do NOT include the developer/vendor name (e.g., write "AutoCAD", not "Autodesk AutoCAD") and do NOT include the platform/OS (e.g., write "Photoshop", not "Photoshop macOS") - those belong in the separate "developer" and "platform" fields below. If the software is released as distinct yearly/edition versions (e.g., "AutoCAD 2026", "Adobe Photoshop 2024", "Microsoft Office 2021"), you MUST include that year/edition in the title so different releases are not confused with each other. Do not include a year for software that isn't versioned this way.
 - subtitle: Korean product name if commonly used (e.g., "어도비 포토샵" for "Adobe Photoshop"), otherwise empty ""
 - version: Version number (if known)
-- platform: Windows, macOS, Linux, or Cross-platform
-- developer: Official developer/vendor name
+- release_year: Four-digit release year of THIS specific version as a string (e.g., "2024"). This must match the year in the title, if any. Leave "" if the software isn't released in yearly/edition versions or the year is unknown.
+- platform: MUST be exactly one of: "Windows", "macOS", "Linux", "Cross-platform". Do not use any other value or free text.
+- developer: Official developer/vendor name (this is where the vendor belongs - NOT in the title)
 - category: Choose the BEST match based on PRIMARY function:
   * Graphics: Image editing, graphic design, 3D modeling
   * Media: Video/audio editing, media playback, screen recording
@@ -186,6 +187,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
   "title": "VMware Workstation Pro",
   "subtitle": "VMware 워크스테이션 프로",
   "version": "12.0.1",
+  "release_year": "",
   "platform": "Windows",
   "developer": "VMware, Inc.",
   "category": "Utility",
@@ -227,6 +229,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 3. Use empty strings "" or empty arrays [] for unknown information
 4. Be specific and detailed - provide comprehensive information
 5. For well-known software, fill in as much detail as possible
+6. Keep "title" to product name (+ year if applicable) ONLY - vendor goes in "developer", OS goes in "platform", never duplicate them into "title"
 
 **CRITICAL VERSION RULES:**
 1. Carefully examine the original filename for version information (e.g., "visual_studio_6", "photoshop_7", "office_2003")
@@ -332,11 +335,12 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
 **Basic Information:**
-- title: Official software name (in English or original language). If the software is released as distinct yearly/edition versions (e.g., "AutoCAD 2026", "Adobe Photoshop 2024", "Microsoft Office 2021"), you MUST include that year/edition in the title so different releases are not confused with each other. Do not include it for software that isn't versioned this way.
+- title: Product name ONLY (in English or original language). Do NOT include the developer/vendor name (e.g., write "AutoCAD", not "Autodesk AutoCAD") and do NOT include the platform/OS (e.g., write "Photoshop", not "Photoshop macOS") - those belong in the separate "developer" and "platform" fields below. If the software is released as distinct yearly/edition versions (e.g., "AutoCAD 2026", "Adobe Photoshop 2024", "Microsoft Office 2021"), you MUST include that year/edition in the title so different releases are not confused with each other. Do not include a year for software that isn't versioned this way.
 - subtitle: Korean product name if commonly used (e.g., "어도비 포토샵" for "Adobe Photoshop"), otherwise empty ""
 - version: Version number (if known)
-- platform: Windows, macOS, Linux, or Cross-platform
-- developer: Official developer/vendor name
+- release_year: Four-digit release year of THIS specific version as a string (e.g., "2024"). This must match the year in the title, if any. Leave "" if the software isn't released in yearly/edition versions or the year is unknown.
+- platform: MUST be exactly one of: "Windows", "macOS", "Linux", "Cross-platform". Do not use any other value or free text.
+- developer: Official developer/vendor name (this is where the vendor belongs - NOT in the title)
 - category: Choose the BEST match based on PRIMARY function:
   * Graphics: Image editing, graphic design, 3D modeling
   * Media: Video/audio editing, media playback, screen recording
@@ -385,6 +389,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
   "title": "VMware Workstation Pro",
   "subtitle": "VMware 워크스테이션 프로",
   "version": "12.0.1",
+  "release_year": "",
   "platform": "Windows",
   "developer": "VMware, Inc.",
   "category": "Utility",
@@ -426,6 +431,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 3. Use empty strings "" or empty arrays [] for unknown information
 4. Be specific and detailed - provide comprehensive information
 5. For well-known software, fill in as much detail as possible
+6. Keep "title" to product name (+ year if applicable) ONLY - vendor goes in "developer", OS goes in "platform", never duplicate them into "title"
 
 **CRITICAL VERSION RULES:**
 1. Carefully examine the original filename for version information (e.g., "visual_studio_6", "photoshop_7", "office_2003")
@@ -545,11 +551,12 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 Return a JSON object with the following fields. ALL fields are REQUIRED - use empty strings "" or empty arrays [] if information is unknown.
 
 **Basic Information:**
-- title: Official software name (in English or original language). If the software is released as distinct yearly/edition versions (e.g., "AutoCAD 2026", "Adobe Photoshop 2024", "Microsoft Office 2021"), you MUST include that year/edition in the title so different releases are not confused with each other. Do not include it for software that isn't versioned this way.
+- title: Product name ONLY (in English or original language). Do NOT include the developer/vendor name (e.g., write "AutoCAD", not "Autodesk AutoCAD") and do NOT include the platform/OS (e.g., write "Photoshop", not "Photoshop macOS") - those belong in the separate "developer" and "platform" fields below. If the software is released as distinct yearly/edition versions (e.g., "AutoCAD 2026", "Adobe Photoshop 2024", "Microsoft Office 2021"), you MUST include that year/edition in the title so different releases are not confused with each other. Do not include a year for software that isn't versioned this way.
 - subtitle: Korean product name if commonly used (e.g., "어도비 포토샵" for "Adobe Photoshop"), otherwise empty ""
 - version: Version number (if known)
-- platform: Windows, macOS, Linux, or Cross-platform
-- developer: Official developer/vendor name
+- release_year: Four-digit release year of THIS specific version as a string (e.g., "2024"). This must match the year in the title, if any. Leave "" if the software isn't released in yearly/edition versions or the year is unknown.
+- platform: MUST be exactly one of: "Windows", "macOS", "Linux", "Cross-platform". Do not use any other value or free text.
+- developer: Official developer/vendor name (this is where the vendor belongs - NOT in the title)
 - category: Choose the BEST match based on PRIMARY function:
   * Graphics: Image editing, graphic design, 3D modeling
   * Media: Video/audio editing, media playback, screen recording
@@ -598,6 +605,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
   "title": "VMware Workstation Pro",
   "subtitle": "VMware 워크스테이션 프로",
   "version": "12.0.1",
+  "release_year": "",
   "platform": "Windows",
   "developer": "VMware, Inc.",
   "category": "Utility",
@@ -639,6 +647,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
 3. Use empty strings "" or empty arrays [] for unknown information
 4. Be specific and detailed - provide comprehensive information
 5. For well-known software, fill in as much detail as possible
+6. Keep "title" to product name (+ year if applicable) ONLY - vendor goes in "developer", OS goes in "platform", never duplicate them into "title"
 
 **CRITICAL VERSION RULES:**
 1. Carefully examine the original filename for version information (e.g., "visual_studio_6", "photoshop_7", "office_2003")
@@ -1176,6 +1185,7 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
             'title': software_name,
             'subtitle': '',
             'version': parsed_info.get('version', ''),
+            'release_year': parsed_info.get('year', ''),
             'platform': 'Windows',
             'developer': parsed_info.get('vendor', ''),
             'category': 'Utility',
