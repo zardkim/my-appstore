@@ -33,6 +33,7 @@ class Product(Base):
     # 릴리즈 정보
     release_notes = Column(Text)  # 릴리즈 노트
     release_date = Column(String)  # 릴리즈 날짜
+    release_year = Column(Integer, index=True)  # 출시 연도 (버전 구분/필터링용, title 문자열 파싱 대체)
 
     # 크롤링 메타데이터
     crawled_from = Column(JSON)  # 크롤링 소스 {"softpedia": true, "github": true, ...}

@@ -21,6 +21,7 @@ from app.schemas.unmatched import (
 from app.core.redis_cache import invalidate_cache
 from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
 from app.core.confidence import calculate_confidence_score, normalize_software_name
+from app.core.parser import FilenameParser
 from app.api.config import load_config
 
 router = APIRouter()
@@ -113,6 +114,7 @@ async def approve_suggestion(
             vendor=metadata.get('vendor'),
             category=metadata.get('category'),
             icon_url=metadata.get('icon_url', ''),
+            release_year=FilenameParser.extract_release_year(metadata.get('title'), item.folder_path),
             folder_path=item.folder_path
         )
 
@@ -189,6 +191,7 @@ async def save_manual_metadata(
             vendor=request.vendor,
             category=request.category,
             icon_url=request.icon_url or "",
+            release_year=FilenameParser.extract_release_year(request.title, item.folder_path),
             folder_path=item.folder_path
         )
 

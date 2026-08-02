@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.dependencies import get_current_user, get_current_admin_user, get_db
 from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
 from app.core.confidence import calculate_confidence_score, get_confidence_level, should_auto_register
+from app.core.parser import FilenameParser
 from app.api.config import load_config
 from app.models.product import Product
 import logging
@@ -415,6 +416,7 @@ async def register_metadata(
             vendor=metadata.get('vendor', ''),
             icon_url=metadata.get('icon_url', ''),
             category=metadata.get('category', 'Uncategorized'),
+            release_year=FilenameParser.extract_release_year(title),
             folder_path=folder_path
         )
 
