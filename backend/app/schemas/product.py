@@ -57,6 +57,7 @@ class ProductResponse(ProductBase):
     supported_formats: Optional[List[str]] = None  # 지원 포맷 목록
     release_notes: Optional[str] = None
     release_date: Optional[str] = None
+    release_year: Optional[int] = None
     crawled_from: Optional[Dict[str, Any]] = None
     last_crawled_at: Optional[datetime] = None
     screenshots: Optional[List[Optional[str]]] = None  # None 허용 (슬롯 위치 유지)
@@ -128,6 +129,7 @@ class ProductUpdateRequest(BaseModel):
     supported_formats: Optional[List[str]] = None  # 지원 포맷 목록
     release_notes: Optional[str] = None
     release_date: Optional[str] = None
+    release_year: Optional[int] = None
     screenshots: Optional[List[str]] = None  # 문자열 배열로 변경
     patch_links: Optional[List[PatchLink]] = None  # 패치/크랙 관련 링크 (최대 5개)
 

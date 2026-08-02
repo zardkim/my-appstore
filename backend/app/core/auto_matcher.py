@@ -56,6 +56,20 @@ def extract_version_from_title(title: str) -> Optional[str]:
     return None
 
 
+_YEAR_ONLY_PATTERN = re.compile(r'^(?:19|20)\d{2}$')
+
+
+def _is_year_signature(value: Optional[str]) -> bool:
+    """시그니처 문자열이 순수 연도(예: "2026")인지 확인.
+
+    release_year 컬럼은 항상 연도만 저장하지만, extract_version_from_title은
+    제목에 따라 연도("2026") 또는 점버전("25.0")을 반환할 수 있다. 둘의 "종류"가
+    다르면 값이 달라도 서로 다른 제품이라는 증거가 아니므로 구분해서 취급해야 한다
+    (예: 후보 제목 "Photoshop v25.0" vs 기존 제품 release_year=2024인 "Photoshop 2024").
+    """
+    return bool(value) and bool(_YEAR_ONLY_PATTERN.match(value))
+
+
 def get_product_version_signature(product: Product) -> Optional[str]:
     """
     제품의 버전/연도 시그니처를 추출 (title 우선, 실패 시 folder_path로 폴백)
@@ -64,7 +78,14 @@ def get_product_version_signature(product: Product) -> Optional[str]:
     있음 (예: "AutoCAD 2026" 폴더 → title "AutoCAD"). 이 경우 title만으로는
     버전을 구분할 수 없으므로, AI가 손대지 않은 원본 폴더명에서 다시 추출을
     시도해 "AutoCAD 2026"과 "AutoCAD 2027"이 같은 제품으로 오인되지 않도록 함
+
+    release_year 컬럼이 채워져 있으면(파서가 생성 시점에 직접 계산한 값이라
+    title/folder_path 문자열 재파싱보다 신뢰도가 높음) 이를 최우선으로 사용하고,
+    NULL인 레거시 행에 대해서만 기존 title→folder_path 정규식 폴백을 유지한다.
     """
+    if product.release_year:
+        return str(product.release_year)
+
     version = extract_version_from_title(product.title)
     if version:
         return version
@@ -148,10 +169,16 @@ def find_similar_product(
     best_similarity = 0.0
 
     for product in all_products:
-        # 버전/연도 비교: 둘 다 버전이 있는데 다르면 다른 제품으로 판단
-        # (title에서 연도가 생략되어도 folder_path로 폴백해 추출)
+        # 버전/연도 비교: 둘 다 버전이 있고, 같은 종류(연도 vs 연도, 점버전 vs
+        # 점버전)인데 값이 다르면 다른 제품으로 판단. release_year 컬럼은 항상
+        # 연도만 담고 있어 후보 쪽이 점버전("25.0")을 반환하면 종류가 달라지므로
+        # 이 경우는 상충 증거로 보지 않고 비교를 건너뛴다.
         product_version = get_product_version_signature(product)
-        if title_version and product_version and title_version != product_version:
+        if (
+            title_version and product_version
+            and _is_year_signature(title_version) == _is_year_signature(product_version)
+            and title_version != product_version
+        ):
             continue
 
         # 제품 타이틀 정규화
@@ -365,6 +392,11 @@ async def match_violations_to_products(
                         first_filename = violations_list[0].file_name
                         is_portable = FilenameParser._is_portable(first_filename, folder_path)
 
+                    # release_year: 최종 title에서 우선 추출, 실패 시 원본 folder_path로 폴백
+                    # (AI가 title에서 연도를 생략해도 신뢰도 높은 값을 확보하기 위함)
+                    final_title = metadata.get('title', software_name)
+                    release_year = FilenameParser.extract_release_year(final_title, folder_path)
+
                     if provided_metadata:
                         # 사용자 제공 메타데이터로 생성 (상세 필드 포함)
                         product = Product(
@@ -383,6 +415,7 @@ async def match_violations_to_products(
                             installation_info=metadata.get('installation_info'),
                             release_notes=metadata.get('release_notes'),
                             release_date=metadata.get('release_date'),
+                            release_year=release_year,
                             icon_url=metadata.get('icon_url', ''),
                             screenshots=metadata.get('screenshots'),
                             folder_path=folder_path,
@@ -394,6 +427,7 @@ async def match_violations_to_products(
                             title=metadata.get('title', software_name),
                             description=metadata.get('description', f"{software_name} 소프트웨어"),
                             vendor=metadata.get('vendor', ''),
+                            release_year=release_year,
                             category=metadata.get('category', 'Utility'),
                             icon_url=metadata.get('icon_url', ''),
                             folder_path=folder_path,
@@ -409,6 +443,10 @@ async def match_violations_to_products(
                     metadata = provided_metadata
                 if metadata.get('title'):
                     product.title = metadata['title']
+                    if not product.release_year:
+                        product.release_year = FilenameParser.extract_release_year(
+                            product.title, product.folder_path
+                        )
                 if metadata.get('subtitle'):
                     product.subtitle = metadata['subtitle']
                 if metadata.get('description'):

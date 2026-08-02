@@ -1,3 +1,4 @@
+import os
 import re
 from typing import Dict, Optional
 
@@ -180,6 +181,20 @@ class FilenameParser:
         """
         match = re.search(r'(?<!\d)((?:19|20)\d{2})(?!\d)', text)
         return match.group(1) if match else None
+
+    @staticmethod
+    def extract_release_year(title: str, folder_path: str = None) -> Optional[int]:
+        """title에서 연도를 추출하고, 없으면 folder_path의 폴더명에서 재시도.
+
+        AI가 title을 생성할 때 연도를 생략하는 경우가 있어(예: "AutoCAD 2026"
+        폴더 → title "AutoCAD"), 원본 폴더명으로 폴백해 Product.release_year를
+        계산한다. auto_matcher.py의 버전 분리 가드와 동일한 폴백 순서를 따른다.
+        """
+        year = FilenameParser._extract_year(title or "")
+        if not year and folder_path:
+            folder_name = os.path.basename(folder_path.rstrip('/\\'))
+            year = FilenameParser._extract_year(folder_name)
+        return int(year) if year else None
 
     @staticmethod
     def _extract_software_name(text: str, version: str, year: str) -> str:
