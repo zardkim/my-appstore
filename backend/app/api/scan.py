@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from pathlib import Path
 from datetime import datetime
+import asyncio
 import os
 
 from app.database import get_db
@@ -131,12 +132,9 @@ async def start_scan(
     scanner = FileScanner(db, use_ai=request.use_ai)
 
     try:
-        if request.use_ai:
-            # Use async version with AI
-            results = await scanner.scan_directory_async(request.path)
-        else:
-            # Use sync version without AI
-            results = scanner.scan_directory(request.path)
+        # 스캔은 동기 파일시스템 I/O이므로 스레드로 실행해 이벤트 루프를
+        # 블로킹하지 않도록 함 (NAS 스캔 중에도 다른 API 요청이 응답 가능)
+        results = await asyncio.to_thread(scanner.scan_directory, request.path)
 
         # 스캔 완료 후 마지막 스캔 시간을 Settings에 저장
         last_scan_time = datetime.now().isoformat()
