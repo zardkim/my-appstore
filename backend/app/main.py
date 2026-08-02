@@ -70,6 +70,21 @@ try:
 except Exception:
     pass
 
+# ── products.release_year 컬럼 보장 (Alembic 마이그레이션이 적용되지 않는 배포 환경 대비) ──
+try:
+    from sqlalchemy import text as _text4
+    with engine.connect() as _conn4:
+        _conn4.execute(_text4(
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS release_year INTEGER"
+        ))
+        _conn4.execute(_text4(
+            "CREATE INDEX IF NOT EXISTS ix_products_release_year ON products (release_year)"
+        ))
+        _conn4.commit()
+    logger.info("✓ products.release_year column verified")
+except Exception as _e4:
+    logger.info(f"products.release_year column: {_e4}")
+
 # Ensure required directories exist before app initialization
 required_directories = [
     settings.ICON_CACHE_DIR,
