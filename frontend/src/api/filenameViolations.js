@@ -114,5 +114,28 @@ export const filenameViolationsApi = {
    */
   findSimilarProducts(violationId) {
     return client.get(`/scan-items/${violationId}/find-similar`)
+  },
+
+  /**
+   * 스캔 항목 폴더에서 재활용 가능한 설명 파일(readme.txt, *.nfo, *.md 등) 조회
+   * @param {number} violationId - Scan item ID
+   */
+  getDescriptionFiles(violationId) {
+    return client.get(`/scan-items/${violationId}/description-files`)
+  },
+
+  /**
+   * URL/업로드 파일/스캔 폴더 내 설명 파일의 원문만 근거로 메타데이터 생성
+   * @param {number} violationId - Scan item ID
+   * @param {object} source - { url?: string, file?: File, descriptionFilePath?: string } 중 하나만
+   */
+  generateMetadataFromSource(violationId, source) {
+    const formData = new FormData()
+    if (source.url) formData.append('url', source.url)
+    if (source.file) formData.append('file', source.file)
+    if (source.descriptionFilePath) formData.append('description_file_path', source.descriptionFilePath)
+    return client.post(`/scan-items/${violationId}/generate-metadata-from-source`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
   }
 }

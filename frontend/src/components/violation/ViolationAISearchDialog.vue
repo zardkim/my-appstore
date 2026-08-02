@@ -92,6 +92,27 @@
             </p>
           </div>
 
+          <!-- 폴더 내 설명 파일 발견 (readme.txt, *.nfo, *.md 등) -->
+          <div
+            v-if="descriptionFiles.length > 0"
+            class="mb-4 sm:mb-6 p-3 sm:p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg space-y-2"
+          >
+            <p class="text-sm font-medium text-purple-800 dark:text-purple-300">
+              {{ t('violationAISearchDialog.descriptionFilesFound', { count: descriptionFiles.length }) }}
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="file in descriptionFiles"
+                :key="file.path"
+                @click="generateFromDescriptionFile(file)"
+                :disabled="generatingFromDescriptionFile"
+                class="px-3 py-1.5 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {{ generatingFromDescriptionFile ? t('violationAISearchDialog.generating') : t('violationAISearchDialog.useDescriptionFile', { name: file.name }) }}
+              </button>
+            </div>
+          </div>
+
           <!-- 중복 검사 중 -->
           <div v-if="checkingDuplicates" class="flex flex-col items-center justify-center py-8 sm:py-12">
             <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-yellow-500 dark:border-yellow-400 mb-4"></div>
@@ -419,6 +440,10 @@ const testingApi = ref(false)
 const apiTestResult = ref(null)
 const metadata = ref(null)
 
+// 폴더 내 설명 파일 재활용 (readme.txt, *.nfo, *.md 등)
+const descriptionFiles = ref([])
+const generatingFromDescriptionFile = ref(false)
+
 // 중복 검사
 const checkingDuplicates = ref(false)
 const duplicates = ref([])
@@ -471,15 +496,75 @@ watch(() => props.isOpen, async (isOpen) => {
   if (isOpen) {
     await nextTick() // props.violation이 완전히 반영될 때까지 대기
     softwareName.value = extractSoftwareName(props.violation)
+    descriptionFiles.value = []
+    loadDescriptionFiles()
     if (!metadata.value && !checkingDuplicates.value) {
       checkDuplicates()
     }
   }
 })
 
-// violation이 바뀌면 softwareName 재초기화
+// 폴더 내 재활용 가능한 설명 파일 조회 (readme.txt, *.nfo, *.md 등)
+const loadDescriptionFiles = async () => {
+  if (!props.violation?.id) return
+  try {
+    const response = await filenameViolationsApi.getDescriptionFiles(props.violation.id)
+    descriptionFiles.value = response.data.files || []
+  } catch (error) {
+    console.error('설명 파일 조회 오류:', error)
+  }
+}
+
+// startAISearch(다이얼로그 오픈 시 자동 실행)와 generateFromDescriptionFile을
+// 사용자가 겹쳐서 실행할 수 있으므로(예: 자동 AI 검색이 진행 중일 때 설명
+// 파일 버튼을 클릭), 나중에 끝난 요청이 먼저 끝난 요청의 결과를 덮어쓰지
+// 않도록 순번 토큰으로 "가장 최근에 시작된 요청"만 상태를 쓰도록 가드한다.
+let resultToken = 0
+
+// 감지된 설명 파일의 원문만 근거로 메타데이터 생성 (일반 AI 검색을 덮어씀)
+// showDuplicateWarning은 그대로 두어, 중복 경고가 떠 있으면 사용자가 그 경고를
+// 먼저 처리하도록 함 (여기서 지우면 "기존 제품에 버전 추가" 선택지를 잃음)
+const generateFromDescriptionFile = async (file) => {
+  if (!props.violation?.id || generatingFromDescriptionFile.value) return
+
+  const myToken = ++resultToken
+  generatingFromDescriptionFile.value = true
+  errorMessage.value = ''
+  isApiError.value = false
+
+  try {
+    const response = await filenameViolationsApi.generateMetadataFromSource(props.violation.id, {
+      descriptionFilePath: file.path
+    })
+    if (myToken !== resultToken) return // 이후에 시작된 다른 요청이 이미 결과를 표시함
+
+    if (response.data.success && response.data.metadata) {
+      loading.value = false
+      metadata.value = response.data.metadata
+    } else {
+      loading.value = false
+      errorMessage.value = response.data.error || t('violationAISearchDialog.generateFailed')
+    }
+  } catch (error) {
+    if (myToken !== resultToken) return
+    console.error('설명 파일 기반 생성 오류:', error)
+    loading.value = false
+    errorMessage.value = error.response?.data?.detail || t('violationAISearchDialog.generateFailed')
+    isApiError.value = true
+  } finally {
+    generatingFromDescriptionFile.value = false
+  }
+}
+
+// violation이 바뀌면 softwareName + 설명 파일 목록 재초기화
+// (다이얼로그 인스턴스가 재사용되며 violation prop만 바뀌는 경우, 이전
+// 폴더의 설명 파일 목록이 남아있으면 엉뚱한 폴더의 파일로 생성될 수 있음)
 watch(() => props.violation, (newViolation) => {
   softwareName.value = extractSoftwareName(newViolation)
+  descriptionFiles.value = []
+  if (props.isOpen) {
+    loadDescriptionFiles()
+  }
 })
 
 // AI 결과의 title + 주요 버전으로 이미지 검색어 구성
@@ -596,6 +681,7 @@ const startAISearch = async () => {
     return
   }
 
+  const myToken = ++resultToken
   loading.value = true
   errorMessage.value = ''
   apiErrorDetail.value = ''
@@ -627,6 +713,8 @@ const startAISearch = async () => {
         customPrompt: useCustomPrompt.value ? customPrompt : null
       }
     )
+
+    if (myToken !== resultToken) return // 이후에 시작된 다른 요청(설명 파일 등)이 이미 결과를 표시함
 
     if (response.data.success) {
       if (response.data.metadata) {

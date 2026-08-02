@@ -1728,6 +1728,9 @@ Use empty values for unknown fields. Respond in JSON format only.`,
     confidenceLevelMedium: 'Medium',
     confidenceLevelLow: 'Low',
     confidenceNote: 'Calculated from signals the pipeline can verify directly (vendor, release year, etc.) - not the AI\'s own self-assessment.',
+    // Reusing description files found in the scan folder
+    descriptionFilesFound: 'Found {count} description file(s) in this folder. You can generate metadata based only on their contents.',
+    useDescriptionFile: 'Generate from {name}',
   },
 
   // Footer
