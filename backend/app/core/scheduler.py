@@ -147,10 +147,9 @@ class ScanScheduler:
                 try:
                     scanner = FileScanner(db, use_ai=self.use_ai)
 
-                    if self.use_ai:
-                        results = await scanner.scan_directory_async(path)
-                    else:
-                        results = scanner.scan_directory(path)
+                    # 스캔은 동기 파일시스템 I/O이므로 스레드로 실행해 이벤트
+                    # 루프를 블로킹하지 않도록 함 (자동 스캔 중에도 API 응답 가능)
+                    results = await asyncio.to_thread(scanner.scan_directory, path)
 
                     # 결과 집계
                     all_results["new_products"] += results.get("new_products", 0)

@@ -138,110 +138,12 @@ class FileScanner:
 
         return False
 
-    async def scan_directory_async(self, base_path: str) -> Dict:
-        """
-        Scan a directory for software files recursively (async version with AI)
-
-        Args:
-            base_path: Root path to scan
-
-        Returns:
-            Dictionary with scan results
-        """
-        base_path = Path(base_path)
-
-        if not base_path.exists():
-            raise ValueError(f"Path does not exist: {base_path}")
-
-        results = {
-            "new_products": 0,
-            "new_versions": 0,
-            "updated_products": 0,
-            "deleted_versions": 0,
-            "deleted_products": 0,
-            "deleted_violations": 0,
-            "renamed_files": 0,
-            "ai_generated": 0,
-            "icons_cached": 0,
-            "scanned_folders": 0,
-            "scanned_files": 0,
-            "errors": []
-        }
-
-        # 스캔 경로 내의 기존 파일들 추적
-        scanned_files = set()
-
-        # 재귀적으로 모든 하위 폴더 스캔
-        await self._scan_folder_recursive_async(base_path, results, scanned_files)
-
-        # 파일명 변경 감지 및 업데이트 (삭제 전에 먼저 실행)
-        try:
-            self._detect_renamed_files(str(base_path.absolute()), scanned_files, results)
-        except Exception as e:
-            logger.error(f"Error detecting renamed files: {e}")
-            results["errors"].append(f"Rename detection error: {str(e)}")
-            try:
-                self.db.rollback()
-            except Exception:
-                pass
-
-        # 삭제된 파일 정리
-        try:
-            self._cleanup_deleted_files(str(base_path.absolute()), scanned_files, results)
-        except Exception as e:
-            logger.error(f"Error cleaning up deleted files: {e}")
-            results["errors"].append(f"Cleanup error: {str(e)}")
-            try:
-                self.db.rollback()
-            except Exception:
-                pass
-
-        try:
-            self.db.commit()
-        except Exception as e:
-            logger.error(f"Error committing scan results: {e}")
-            self.db.rollback()
-            results["errors"].append(f"Commit error: {str(e)}")
-        return results
-
-    async def _scan_folder_recursive_async(self, folder: Path, results: Dict, scanned_files: set):
-        """
-        재귀적으로 폴더를 스캔 (하위 폴더 포함)
-
-        Args:
-            folder: 스캔할 폴더
-            results: 결과 딕셔너리
-            scanned_files: 스캔된 파일 경로 추적용 Set
-        """
-        # 스캔 예외 목록에 있는 폴더는 건너뛰기
-        if self._is_excluded(folder.name):
-            logger.debug(f"Skipping excluded folder: {folder.name}")
-            return
-
-        try:
-            logger.info(f"Scanning folder: {folder}")
-            results["scanned_folders"] += 1
-
-            # 현재 폴더의 파일들 처리
-            await self._process_folder_async(folder, results, scanned_files)
-
-            # 하위 폴더 재귀 스캔
-            for subfolder in folder.iterdir():
-                if subfolder.is_dir():
-                    await self._scan_folder_recursive_async(subfolder, results, scanned_files)
-
-        except PermissionError as e:
-            error_msg = f"Permission denied: {folder} - {str(e)}"
-            logger.warning(error_msg)
-            results["errors"].append(error_msg)
-        except Exception as e:
-            error_msg = f"Error processing {folder}: {str(e)}"
-            logger.error(error_msg)
-            results["errors"].append(error_msg)
-
     def scan_directory(self, base_path: str) -> Dict:
         """
-        Scan a directory for software files recursively (sync version without AI)
+        Scan a directory for software files recursively
+
+        이벤트 루프를 블로킹하지 않도록 호출부(scan.py, scheduler.py)에서
+        asyncio.to_thread()로 감싸서 실행해야 함
 
         Args:
             base_path: Root path to scan
@@ -337,43 +239,6 @@ class FileScanner:
             error_msg = f"Error processing {folder}: {str(e)}"
             logger.error(error_msg)
             results["errors"].append(error_msg)
-
-    async def _process_folder_async(self, folder: Path, results: Dict, scanned_files: set):
-        """
-        Process a single folder - add all files to FilenameViolation as "scanned"
-        (Product will be created later when user clicks AI matching)
-
-        Args:
-            folder: Path to the product folder
-            results: Results dictionary to update
-            scanned_files: Set to track scanned file paths
-        """
-        folder_path_str = str(folder.absolute())
-
-        # 유효한 파일만 수집 (제외 대상 건너뛰기)
-        valid_files = []
-        for file_path in folder.iterdir():
-            if file_path.is_file():
-                if self._is_excluded_file(file_path.name):
-                    logger.debug(f"Skipping excluded file: {file_path.name}")
-                    continue
-                valid_files.append(file_path)
-
-        # 유효한 파일이 없으면 폴더 건너뛰기
-        if not valid_files:
-            logger.debug(f"Skipping empty folder (no valid files): {folder}")
-            return
-
-        for file_path in valid_files:
-            logger.debug(f"Processing file: {file_path.name}")
-            results["scanned_files"] += 1
-            try:
-                with self.db.begin_nested():
-                    self._add_scanned_file(file_path, folder_path_str, results)
-                scanned_files.add(str(file_path.absolute()))
-            except Exception as e:
-                logger.warning(f"Failed to scan file {file_path.name}: {e}")
-                results["errors"].append(f"File error {file_path.name}: {str(e)}")
 
     def _process_folder(self, folder: Path, results: Dict, scanned_files: set):
         """
