@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.63] - 2026-08-02
+
+### Fixed
+- **보안**: 프로덕션 환경에서 전역 예외 핸들러가 응답에 Python traceback을 포함하던 문제 수정
+- **보안**: 인증 없이 DB 스키마/row count/traceback을 노출하던 `/api/products/diag` 진단 엔드포인트 제거
+- **보안**: 폴더 브라우저(`/api/filesystem/browse`, `/create-directory`)가 SCAN_BASE_PATH·등록된 스캔 폴더 밖의 임의 경로에 접근 가능하던 문제 수정 (경로 탐색 방지)
+- **캐시**: 제품 삭제/버전 등록해제/삭제파일 정리 시 존재하지 않는 `"products:*"` 패턴으로 캐시를 무효화해 삭제된 제품이 최대 5분간 목록에 계속 노출되던 버그 수정 (`product_detail`, `search_suggestions` 캐시 누락분도 함께 보강)
+- **매칭**: 연도/에디션이 다른 소프트웨어(예: AutoCAD 2026 vs 2027)가 AI 메타데이터의 title에서 연도가 생략될 경우 같은 제품으로 오인 매칭되던 버그 수정 (폴더명 기반 폴백 추출 + AI 프롬프트 보강)
+
+### Changed
+- **홈 화면 카테고리**: `/api/products/by-category`가 하드코딩된 9개 카테고리 대신 config.json 기반 카테고리 목록을 사용하도록 변경
+- **캐시 무효화**: Redis `KEYS` 대신 `SCAN` 커서 사용 (대규모 캐시에서 Redis 블로킹 방지)
+
+### Performance
+- **검색**: products.title/subtitle/vendor에 pg_trgm GIN 인덱스 추가 (기존에는 실제로 존재하지 않아 ILIKE 검색이 매번 시퀀셜 스캔이었음)
+- **DB**: `versions.product_id`에 인덱스 추가 (FK였지만 Postgres가 자동 인덱싱하지 않아 대부분의 조회 쿼리가 풀스캔이었음)
+- **스캔**: 수동/자동 스캔 중 FastAPI 이벤트 루프가 블로킹되어 다른 API 요청이 응답하지 못하던 문제 수정 (동기 파일시스템 I/O를 스레드로 분리)
+
+### Deployment
+- **docker-compose**: 누락되어 있던 `VIDEOS_DIR`, `ATTACHMENTS_DIR` 환경변수 추가
+- **DB 마이그레이션**: `a1b2c3d4e5f7` 리비전 추가 (pg_trgm GIN 인덱스, versions.product_id 인덱스) — 배포 시 `alembic upgrade head` 필요
+
 ## [1.4.56] - 2026-03-16
 
 ### Changed
