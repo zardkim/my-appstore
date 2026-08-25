@@ -96,7 +96,14 @@ export function getBackendUrl(path) {
  * @returns {string} Download URL
  */
 export function getDownloadUrl(versionId, token) {
-  return `/api/download/direct/${versionId}?token=${token}`
+  // 프로덕션 빌드(Docker/Nginx 환경)에서는 X-Accel-Redirect 경로를 사용 -
+  // Nginx가 파일을 직접 서빙하므로 다운로드 이어받기(HTTP Range)가 지원됨.
+  // `vite dev` 로컬 개발 서버는 Nginx 없이 백엔드로 직접 프록시하므로
+  // X-Accel-Redirect 헤더를 해석할 주체가 없어 /direct 스트리밍 경로를 사용.
+  if (import.meta.env.DEV) {
+    return `/api/download/direct/${versionId}?token=${token}`
+  }
+  return `/api/download/${versionId}?token=${token}`
 }
 
 /**

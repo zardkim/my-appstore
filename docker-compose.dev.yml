@@ -108,6 +108,10 @@ services:
     image: myappstore-frontend:latest
     container_name: myapp-frontend
     restart: unless-stopped
+    volumes:
+      - ./data:/app/data:ro
+      # 다운로드 이어받기(Range 요청)를 위해 Nginx가 파일을 직접 읽습니다.
+      # backend에 추가 폴더를 마운트했다면 여기에도 동일한 경로를 :ro로 추가해야 합니다.
     ports:
       - "${FRONTEND_PORT:-5900}:5900"
     environment:
