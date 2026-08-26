@@ -79,7 +79,7 @@
 
       <!-- Stats Cards -->
       <div class="px-4 sm:px-6 lg:px-8 pb-3">
-        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+        <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
           <div
             v-for="cls in classifications"
             :key="cls.key"
@@ -771,6 +771,16 @@ const classifications = computed(() => [
     activeBgClass: 'bg-rose-500 text-white',
     ringColor: 'rose-400',
     headerClass: 'bg-gradient-to-r from-rose-500 to-pink-600',
+  },
+  {
+    key: 'plugin_skin',
+    label: t('scanList.classification.plugin_skin'),
+    icon: '🎨',
+    textColor: 'text-pink-600 dark:text-pink-400',
+    bgClass: 'bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300',
+    activeBgClass: 'bg-pink-500 text-white',
+    ringColor: 'pink-400',
+    headerClass: 'bg-gradient-to-r from-pink-500 to-fuchsia-600',
   },
 ])
 

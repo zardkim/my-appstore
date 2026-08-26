@@ -1,10 +1,12 @@
 """
 스캔 목록 (Scan Items) 관리 API
 
-파일 스캔 후 생성된 항목을 관리한다. 각 항목은 6가지 분류 중 하나로 자동 분류되며,
-분류에 따라 제품 등록(AI 매칭) 또는 첨부파일(패치/언어팩/메뉴얼/업데이트) 또는 설치영상 등록 처리를 한다.
+파일 스캔 후 생성된 항목을 관리한다. 각 항목은 스캔 시 5가지 분류 중 하나로 자동 분류되며
+(product/patch/language_pack/manual/update), installation_video/plugin_skin은 수동 재분류로만
+지정된다. 분류에 따라 제품 등록(AI 매칭) 또는 첨부파일(패치/언어팩/메뉴얼/업데이트/플러그인·스킨)
+또는 설치영상 등록 처리를 한다.
 
-분류값: product | patch | language_pack | manual | update | installation_video
+분류값: product | patch | language_pack | manual | update | installation_video | plugin_skin
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Form, File, UploadFile
@@ -35,7 +37,7 @@ from app.api.filesystem import _ensure_within_scan_base
 # ── 하위 호환: 기존 URL (/api/filename-violations) + 신규 URL (/api/scan-items)
 router = APIRouter(tags=["Scan Items"])
 
-VALID_CLASSIFICATIONS = {"product", "patch", "language_pack", "manual", "update", "installation_video"}
+VALID_CLASSIFICATIONS = {"product", "patch", "language_pack", "manual", "update", "installation_video", "plugin_skin"}
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -283,7 +285,7 @@ async def register_scan_item(
     if not request.product_id:
         raise HTTPException(
             status_code=400,
-            detail="패치/언어팩/메뉴얼/업데이트 등록 시 product_id가 필요합니다."
+            detail="패치/언어팩/메뉴얼/업데이트/플러그인·스킨 등록 시 product_id가 필요합니다."
         )
 
     return await _register_as_attachment(item, request.product_id, request.note, db)
@@ -452,7 +454,7 @@ async def _register_as_attachment(
     note: Optional[str],
     db: Session,
 ):
-    """patch/language_pack/manual/update 분류 항목을 Attachment로 등록"""
+    """patch/language_pack/manual/update/plugin_skin 분류 항목을 Attachment로 등록"""
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="제품을 찾을 수 없습니다.")
@@ -483,7 +485,7 @@ async def _register_as_attachment(
         file_name=item.file_name,
         file_size=file_size,
         note=note or "",
-        type=item.classification,  # patch | language_pack | manual | update
+        type=item.classification,  # patch | language_pack | manual | update | plugin_skin
     )
     db.add(attachment)
 

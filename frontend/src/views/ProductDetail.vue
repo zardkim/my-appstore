@@ -380,6 +380,13 @@
               >
                 {{ t('product.tabs.update') }} ({{ updateAttachments.length }})
               </button>
+              <button
+                @click="activeTab = 'plugin_skin'"
+                :class="tabClass('plugin_skin')"
+                class="text-xs sm:text-base whitespace-nowrap"
+              >
+                {{ t('product.tabs.plugin_skin') }} ({{ pluginSkinAttachments.length }})
+              </button>
             </nav>
           </div>
 
@@ -735,6 +742,7 @@
                               { key: 'language_pack', icon: '🌐', label: t('product.tabs.language_pack') },
                               { key: 'manual', icon: '📄', label: t('product.tabs.manual') },
                               { key: 'update', icon: '⬆️', label: t('product.tabs.update') },
+                              { key: 'plugin_skin', icon: '🎨', label: t('product.tabs.plugin_skin') },
                               { key: 'installation_video', icon: '🎬', label: t('scanList.classification.installation_video') },
                             ]"
                             :key="cls.key"
@@ -993,8 +1001,8 @@
               </div>
             </div>
 
-            <!-- Patch / LanguagePack / Manual / Update Tabs (공통 구조) -->
-            <div v-if="['patch','language_pack','manual','update'].includes(activeTab)">
+            <!-- Patch / LanguagePack / Manual / Update / PluginSkin Tabs (공통 구조) -->
+            <div v-if="['patch','language_pack','manual','update','plugin_skin'].includes(activeTab)">
               <div class="flex items-center justify-between gap-3 mb-4 sm:mb-6">
                 <h3 class="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white flex items-center">
                   <span class="mr-1.5 sm:mr-2 text-base sm:text-xl">{{ tabTypeIcon(activeTab) }}</span>
@@ -1067,6 +1075,7 @@
                         <option value="language_pack">{{ t('product.tabs.language_pack') }}</option>
                         <option value="manual">{{ t('product.tabs.manual') }}</option>
                         <option value="update">{{ t('product.tabs.update') }}</option>
+                        <option value="plugin_skin">{{ t('product.tabs.plugin_skin') }}</option>
                       </select>
                     </div>
                     <div>
@@ -1755,6 +1764,7 @@ const reclassifyVersion = async (versionId, classification) => {
     language_pack: t('product.tabs.language_pack'),
     manual: t('product.tabs.manual'),
     update: t('product.tabs.update'),
+    plugin_skin: t('product.tabs.plugin_skin'),
     installation_video: t('scanList.classification.installation_video'),
   }
   const label = labelMap[classification] || classification
@@ -2419,6 +2429,7 @@ const patchAttachments = computed(() => attachments.value.filter(a => a.type ===
 const langpackAttachments = computed(() => attachments.value.filter(a => a.type === 'language_pack'))
 const manualAttachments = computed(() => attachments.value.filter(a => a.type === 'manual'))
 const updateAttachments = computed(() => attachments.value.filter(a => a.type === 'update'))
+const pluginSkinAttachments = computed(() => attachments.value.filter(a => a.type === 'plugin_skin'))
 
 // 현재 활성 탭의 첨부파일 목록
 const currentTabAttachments = computed(() => {
@@ -2427,13 +2438,14 @@ const currentTabAttachments = computed(() => {
     case 'language_pack': return langpackAttachments.value
     case 'manual': return manualAttachments.value
     case 'update': return updateAttachments.value
+    case 'plugin_skin': return pluginSkinAttachments.value
     default: return []
   }
 })
 
 // 탭 타입별 아이콘
 const tabTypeIcon = (type) => {
-  const icons = { patch: '🔧', language_pack: '🌐', manual: '📄', update: '⬆️' }
+  const icons = { patch: '🔧', language_pack: '🌐', manual: '📄', update: '⬆️', plugin_skin: '🎨' }
   return icons[type] || '📦'
 }
 

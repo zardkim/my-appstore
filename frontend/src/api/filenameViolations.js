@@ -18,7 +18,7 @@ export const filenameViolationsApi = {
   /**
    * 분류 수동 변경 (신규 API)
    * @param {number} id - Scan item ID
-   * @param {string} classification - product|patch|language_pack|manual|update
+   * @param {string} classification - product|patch|language_pack|manual|update|installation_video|plugin_skin
    */
   classifyItem(id, classification) {
     return client.patch(`/scan-items/${id}/classify`, { classification })
@@ -36,7 +36,7 @@ export const filenameViolationsApi = {
   },
 
   /**
-   * 첨부파일로 등록 (patch/language_pack/manual/update)
+   * 첨부파일로 등록 (patch/language_pack/manual/update/plugin_skin)
    * @param {number} id - Scan item ID
    * @param {number} productId - 연결할 제품 ID
    * @param {string} classification - 분류 (현재 item.classification 값 사용)

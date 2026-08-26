@@ -5,7 +5,7 @@ from datetime import datetime
 
 class AttachmentBase(BaseModel):
     note: Optional[str] = None
-    type: str = "patch"  # manual, crack, patch, etc.
+    type: str = "patch"  # manual, crack, patch, language_pack, update, plugin_skin, etc.
 
 
 class AttachmentCreate(AttachmentBase):

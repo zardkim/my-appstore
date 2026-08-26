@@ -16,11 +16,11 @@ from app.schemas.attachment import Attachment as AttachmentSchema, AttachmentUpd
 from app.dependencies import get_current_user, get_current_admin_user
 from app.config import settings
 
-VALID_CLASSIFICATIONS = {"patch", "language_pack", "manual", "update"}
+VALID_CLASSIFICATIONS = {"patch", "language_pack", "manual", "update", "plugin_skin"}
 
 
 class ReclassifyVersionRequest(BaseModel):
-    classification: str  # patch | language_pack | manual | update
+    classification: str  # patch | language_pack | manual | update | plugin_skin
     note: Optional[str] = None
 
 
@@ -189,7 +189,7 @@ def reclassify_version_as_attachment(
     """
     버전(Version)을 첨부파일(Attachment)로 분류 변환
 
-    버전 탭의 파일을 패치/언어팩/메뉴얼/업데이트로 재분류할 때 사용한다.
+    버전 탭의 파일을 패치/언어팩/메뉴얼/업데이트/플러그인·스킨으로 재분류할 때 사용한다.
     - Version 레코드를 Attachment 레코드로 변환 (물리 파일은 그대로 유지)
     - 관련 스캔 항목(FilenameViolation)이 있으면 등록 완료로 표시
     """

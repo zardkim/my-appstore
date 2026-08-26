@@ -170,6 +170,7 @@ export default {
       language_pack: 'Language Pack',
       manual: 'Manual',
       update: 'Update',
+      plugin_skin: 'Plugins/Skins',
     },
     info: {
       title: 'Program Description',
@@ -273,6 +274,8 @@ export default {
         crack: 'Patch',
         update: 'Update',
         manual: 'Manual',
+        language_pack: 'Language Pack',
+        plugin_skin: 'Plugins/Skins',
         other: 'Other',
       },
       // Links
@@ -1432,6 +1435,7 @@ Use empty values for unknown fields. Respond in JSON format only.`,
       manual: 'Manual',
       update: 'Update',
       installation_video: 'Install Video',
+      plugin_skin: 'Plugins/Skins',
     },
 
     // Filter tabs

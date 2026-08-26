@@ -171,6 +171,7 @@ export default {
       language_pack: '언어팩',
       manual: '메뉴얼',
       update: '업데이트',
+      plugin_skin: '플러그인/스킨',
     },
     info: {
       title: '프로그램 설명',
@@ -275,6 +276,8 @@ export default {
         crack: '패치',
         update: '업데이트',
         manual: '매뉴얼',
+        language_pack: '언어팩',
+        plugin_skin: '플러그인/스킨',
         other: '기타',
       },
       // 링크 관련
@@ -1386,6 +1389,7 @@ export default {
       manual: '메뉴얼',
       update: '업데이트',
       installation_video: '설치영상',
+      plugin_skin: '플러그인/스킨',
     },
 
     // Filter tabs
