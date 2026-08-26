@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.68] - 2026-08-26
+
+### Added
+- **AI 제공자**: Claude(Anthropic) 메타데이터 생성 지원 추가 (설정 > 메타데이터 설정 > AI 모델 설정에서 선택 가능)
+- **메타데이터 생성**: URL 또는 파일(txt/nfo/md/pdf) 원문을 소스로 사용하는 메타데이터 생성 엔드포인트 추가 - AI가 임의로 지어내지 않고 주어진 텍스트 안에서만 추출
+- **스캔**: 스캔 폴더 내 설명 파일(.txt/.nfo/.md) 자동 감지 + 원클릭 메타데이터 생성 UI
+- **신뢰도 배지**: 제조사/출시연도/구체적인 이름 여부 기반 규칙형 신뢰도 스코어링을 AI 검색 결과에 배지로 표시
+- **제품 상세**: `release_year`(출시 연도) 필드 추가 - 같은 이름이지만 연도가 다른 소프트웨어(예: AutoCAD 2026 vs 2027)가 같은 제품으로 오매칭되는 문제의 구조적 개선
+- **다운로드**: 브라우저 다운로드 중단 후 이어받기(HTTP Range / 206 Partial Content) 지원 - 문서화만 되어 있고 실제로는 연결되지 않았던 Nginx X-Accel-Redirect 구성을 정상화하여 Nginx가 파일을 직접 서빙
+- **제품 상세**: "플러그인/스킨" 탭 추가 (패치 탭과 동일한 업로드/다운로드/설명 구조), 검색된 목록 페이지의 분류 옵션에도 추가
+
+### Fixed
+- **보안**: 관리자 API 응답(`GET /api/config/`)에 AI API 키가 평문으로 그대로 노출되던 문제 수정 - 항상 마스킹 처리
+- **보안**: 백업 ZIP에 포함되는 config.json에서 API 키 등 민감 정보 제거
+- **AI 매칭**: 파일명의 버전(예: v25.0)과 제품의 release_year(연도)처럼 서로 다른 종류의 값을 비교해 정상적인 후보까지 오탐 차단하던 버그 수정
+- **DB**: `release_year` 컬럼 마이그레이션이 실제 배포 진입점(entrypoint.sh는 Alembic을 호출하지 않음)에는 적용되지 않아 목록 조회가 500 에러로 실패하던 문제 수정 - main.py의 스키마 안전망에 추가
+- **정리**: 사용되지 않던 unmatched.py/UnmatchedItem 서브시스템(어디서도 라우팅되지 않던 죽은 코드) 제거
+
+### Deployment
+- **docker-compose**: `CLAUDE_API_KEY` 환경변수 추가 (선택사항 - Settings UI에서도 설정 가능)
+- **docker-compose**: 다운로드 이어받기를 위해 frontend 컨테이너에 library 볼륨 읽기 전용 마운트(`./data:/app/data:ro`) 추가 필요
+- **Nginx**: `frontend/nginx.conf`에 `/protected` internal location 추가 (X-Accel-Redirect 대상)
+
 ## [1.4.63] - 2026-08-02
 
 ### Fixed
