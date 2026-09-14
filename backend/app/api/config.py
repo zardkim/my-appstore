@@ -17,7 +17,7 @@ from app.models.user import User
 from app.config import settings
 
 # Sensitive field names - these are preserved (not overwritten) when incoming value is empty
-SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "claudeApiKey", "googleApiKey", "googleCseId", "smtpPassword"}
+SENSITIVE_FIELDS = {"apiKey", "geminiApiKey", "openaiApiKey", "claudeApiKey", "googleApiKey", "googleCseId", "smtpPassword", "discordWebhookUrl"}
 
 router = APIRouter()
 
@@ -62,7 +62,13 @@ def get_default_config() -> Dict[str, Any]:
         "general": {
             "language": "ko",
             "frontendUrl": default_frontend_url,
-            "backendUrl": default_backend_url
+            "backendUrl": default_backend_url,
+            # 디스코드 알림 (기존 설치의 config.json에는 없을 수 있으므로
+            # 읽는 쪽에서는 반드시 .get(key, default)로 접근할 것)
+            "discordEnabled": False,
+            "discordWebhookUrl": "",
+            "discordNotifyNewProduct": True,
+            "discordNotifyNewVersion": True
         },
         "folders": {
             "scanFolders": [default_scan_folder]

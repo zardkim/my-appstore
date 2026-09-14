@@ -16,6 +16,7 @@ from app.models.version import Version
 from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
 from app.core.parser import FilenameParser
 from app.core.redis_cache import invalidate_cache
+from app.core import discord_notifier
 
 logger = logging.getLogger(__name__)
 
@@ -276,6 +277,10 @@ async def match_violations_to_products(
     api_error_occurred = False  # API 오류 발생 시 나머지 폴더 건너뛰기
     api_error_info = None
 
+    # 디스코드 알림 대상 수집 (커밋 성공한 항목만 담고, 함수 끝에서 한 번에 전송)
+    # 루프 안에서 보내면 웹훅 rate limit에 걸리고, 롤백된 항목까지 공지될 수 있다
+    notify_items = []
+
     for folder_path, violations_list in folder_groups.items():
         # API 오류(rate_limit, quota 등)가 발생했으면 나머지 폴더 건너뛰기
         if api_error_occurred:
@@ -296,6 +301,10 @@ async def match_violations_to_products(
             is_duplicate = False
             duplicate_reason = None
             metadata = None
+
+            # 디스코드 알림용 - 이번 폴더에서 실제로 새로 만들어진 것만 기록
+            is_new_product = False
+            new_version_names = []
 
             if existing_product:
                 # 이미 등록된 폴더 → AI 호출 없이 Version만 추가
@@ -439,6 +448,7 @@ async def match_violations_to_products(
 
                     db.add(product)
                     db.flush()  # Get product ID
+                    is_new_product = True
 
             # 수동 매칭: 기존 제품(folder_path 일치, 비중복)의 메타데이터 업데이트
             if existing_product and provided_metadata and not is_duplicate:
@@ -515,6 +525,7 @@ async def match_violations_to_products(
 
                     db.add(version)
                     db.flush()  # Get version ID
+                    new_version_names.append(version_name or violation.file_name)
 
                     # Violation에 매칭 정보 저장
                     violation.product_id = product.id
@@ -544,6 +555,14 @@ async def match_violations_to_products(
 
             results["products"].append(product_info)
 
+            # 커밋이 끝난 뒤에만 알림 대상에 추가 (신규 제품 또는 새 버전이 있을 때만)
+            if is_new_product or new_version_names:
+                notify_items.append({
+                    **product_info,
+                    "is_new_product": is_new_product,
+                    "versions": new_version_names,
+                })
+
             # 중복 제품인 경우 duplicates에도 추가
             if is_duplicate:
                 results["duplicates"].append({
@@ -571,5 +590,12 @@ async def match_violations_to_products(
             "stats_overview:*",
             "stats_categories:*"
         ])
+
+    # 디스코드 알림 전송 (모든 커밋 완료 후 백그라운드로 일괄 전송)
+    # 커밋은 이미 끝났으므로 전송을 기다리지 않는다 - 기다리면 디스코드 응답
+    # 지연이 그대로 스캔/매칭 API 응답 시간에 더해진다.
+    # 내부에서 예외를 모두 처리하므로 매칭 결과에 영향을 주지 않는다
+    if notify_items:
+        discord_notifier.send_new_items_background(notify_items)
 
     return results

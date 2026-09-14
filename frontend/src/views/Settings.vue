@@ -90,6 +90,97 @@
             </div>
           </div>
 
+          <!-- Discord Notification (admin only) -->
+          <div v-if="isAdmin" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div class="min-w-0">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.general.discordTitle') }}</h3>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('settings.general.discordDesc') }}</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                <input type="checkbox" v-model="discordEnabled" class="sr-only peer" />
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            <div v-if="discordEnabled" class="space-y-4">
+              <!-- Webhook URL -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.general.discordWebhookUrl') }}</label>
+                <!-- 저장됨 상태 표시 (실제 URL은 서버 밖으로 나오지 않음) -->
+                <div v-if="hasDiscordWebhook && !editingDiscordWebhook" class="flex items-center gap-2 min-w-0">
+                  <div class="flex-1 min-w-0 flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl overflow-hidden">
+                    <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm text-green-700 dark:text-green-400 font-mono truncate">https://discord.com/api/webhooks/••••••••</span>
+                  </div>
+                  <button @click="editingDiscordWebhook = true; discordWebhookUrl = ''" type="button"
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    {{ t('settings.general.discordEdit') }}
+                  </button>
+                </div>
+                <!-- 입력 모드 -->
+                <div v-else class="flex items-center gap-2 min-w-0">
+                  <input
+                    v-model="discordWebhookUrl"
+                    type="password"
+                    placeholder="https://discord.com/api/webhooks/..."
+                    class="flex-1 min-w-0 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                  />
+                  <button v-if="editingDiscordWebhook" @click="editingDiscordWebhook = false; discordWebhookUrl = ''" type="button"
+                    class="flex-shrink-0 px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-colors whitespace-nowrap">
+                    {{ t('settings.general.discordCancel') }}
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  {{ t('settings.general.discordWebhookUrlDesc') }}
+                  <span v-if="hasDiscordWebhook && !editingDiscordWebhook" class="text-green-600 dark:text-green-400">• {{ t('settings.general.discordSaved') }}</span>
+                </p>
+              </div>
+
+              <!-- 알림 종류 -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.general.discordEvents') }}</label>
+                <div class="space-y-2">
+                  <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="discordNotifyNewProduct" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ t('settings.general.discordNotifyNewProduct') }}</span>
+                  </label>
+                  <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="discordNotifyNewVersion" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ t('settings.general.discordNotifyNewVersion') }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 테스트 전송 -->
+              <div class="flex items-center gap-3">
+                <button @click="testDiscordWebhook" :disabled="discordTesting" type="button"
+                  class="px-4 py-2 text-sm bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-medium">
+                  {{ discordTesting ? t('settings.general.discordTesting') : t('settings.general.discordTest') }}
+                </button>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('settings.general.discordTestDesc') }}</p>
+              </div>
+
+              <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+                <div class="flex items-start">
+                  <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div class="text-sm text-blue-800 dark:text-blue-300">
+                    <p class="font-semibold mb-1">{{ t('settings.general.discordGuideTitle') }}</p>
+                    <ul class="list-disc list-inside space-y-1 text-xs">
+                      <li>{{ t('settings.general.discordGuideCreate') }}</li>
+                      <li>{{ t('settings.general.discordGuideTrigger') }}</li>
+                      <li>{{ t('settings.general.discordGuideIcon') }}</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Apply Button -->
           <div class="flex justify-end">
             <button @click="saveGeneralSettings" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-md font-medium flex items-center">
@@ -2271,6 +2362,7 @@ import { cacheApi } from '../api/cache'
 import { authApi } from '../api/auth'
 import apiClient from '../api/client'
 import { activityLogApi } from '../api/activityLog'
+import { notificationsApi } from '../api/notifications'
 import { ENV } from '../utils/env'
 import { useDialog } from '../composables/useDialog'
 
@@ -2554,6 +2646,16 @@ const language = computed({
   }
 })
 const accessUrl = ref(ENV.APP_URL)
+// 디스코드 알림 설정
+// 주의: 웹훅 URL은 서버에서 마스킹("***")되어 내려오므로 절대 응답값을 바인딩하지 않는다.
+//       입력칸은 항상 비워두고, 사용자가 입력했을 때만 서버로 전송한다.
+const discordEnabled = ref(false)
+const discordWebhookUrl = ref('')
+const hasDiscordWebhook = ref(false)
+const editingDiscordWebhook = ref(false)
+const discordNotifyNewProduct = ref(true)
+const discordNotifyNewVersion = ref(true)
+const discordTesting = ref(false)
 const apiUrl = ref(ENV.BACKEND_URL)
 const passwordForm = ref({ currentPassword: '', newPassword: '', confirmPassword: '' })
 const passwordLoading = ref(false)
@@ -3387,16 +3489,56 @@ const deleteCategory = async (category) => {
   }
 }
 
+// 디스코드 웹훅 테스트 전송
+// 브라우저에는 마스킹된 값만 있으므로 서버에 저장된 웹훅으로 전송한다
+const testDiscordWebhook = async () => {
+  if (discordWebhookUrl.value || !hasDiscordWebhook.value) {
+    await alert.warning(t('settings.general.discordTestSaveFirst'))
+    return
+  }
+
+  discordTesting.value = true
+  try {
+    const response = await notificationsApi.testDiscord()
+    if (response.data.success) {
+      await alert.success(response.data.message)
+    } else {
+      await alert.error(response.data.message)
+    }
+  } catch (error) {
+    console.error('Discord test failed:', error)
+    await alert.error(t('settings.general.discordTestFailed'))
+  } finally {
+    discordTesting.value = false
+  }
+}
+
 // 일반 설정 저장
 const saveGeneralSettings = async () => {
   try {
     const data = {
       language: language.value,
       frontendUrl: accessUrl.value,
-      backendUrl: apiUrl.value
+      backendUrl: apiUrl.value,
+      discordEnabled: discordEnabled.value,
+      discordNotifyNewProduct: discordNotifyNewProduct.value,
+      discordNotifyNewVersion: discordNotifyNewVersion.value
+    }
+
+    // 웹훅 URL은 새로 입력했을 때만 전송 (빈 값 = 서버의 기존 값 유지)
+    if ((editingDiscordWebhook.value || !hasDiscordWebhook.value) && discordWebhookUrl.value) {
+      data.discordWebhookUrl = discordWebhookUrl.value
     }
 
     await configApi.updateSection('general', data)
+
+    // 저장 성공 후 입력 상태 정리
+    if (data.discordWebhookUrl) {
+      hasDiscordWebhook.value = true
+      editingDiscordWebhook.value = false
+      discordWebhookUrl.value = ''
+    }
+
     await alert.success(t('settings.general.saved'))
   } catch (error) {
     console.error('General settings save failed:', error)
@@ -3638,6 +3780,15 @@ onMounted(async () => {
 
       // 회원가입 설정
       registrationOpen.value = config.general.registrationOpen || false
+
+      // 디스코드 알림 설정 (기존 설치에는 키가 없을 수 있으므로 기본값 사용)
+      discordEnabled.value = config.general.discordEnabled || false
+      discordNotifyNewProduct.value = config.general.discordNotifyNewProduct !== false
+      discordNotifyNewVersion.value = config.general.discordNotifyNewVersion !== false
+      // 마스킹된 값은 바인딩하지 않고 "설정됨" 여부만 판단
+      hasDiscordWebhook.value = !!config.general.discordWebhookUrl
+      discordWebhookUrl.value = ''
+      editingDiscordWebhook.value = false
     }
     isLoadingConfig.value = false
 
