@@ -117,8 +117,8 @@ def _resolve_icon_url(icon_url: Optional[str], backend_url: str) -> Optional[str
     return None
 
 
-def _build_embed(item: Dict, frontend_url: str, backend_url: str) -> Dict:
-    """알림 항목 하나를 디스코드 embed로 변환"""
+def _build_embed(item: Dict, backend_url: str) -> Dict:
+    """알림 항목 하나를 디스코드 embed로 변환 (제품 링크는 넣지 않는다)"""
     is_new_product = item.get("is_new_product", False)
     versions = item.get("versions") or []
 
@@ -133,9 +133,6 @@ def _build_embed(item: Dict, frontend_url: str, backend_url: str) -> Dict:
     description = _truncate(item.get("description"), MAX_DESC_LEN)
     if description:
         embed["description"] = description
-
-    if frontend_url and item.get("id"):
-        embed["url"] = f"{frontend_url.strip().rstrip('/')}/product/{item['id']}"
 
     fields = []
     if item.get("vendor"):
@@ -228,10 +225,7 @@ async def send_new_items(items: List[Dict]) -> bool:
         if not filtered:
             return False
 
-        embeds = [
-            _build_embed(item, config["frontend_url"], config["backend_url"])
-            for item in filtered
-        ]
+        embeds = [_build_embed(item, config["backend_url"]) for item in filtered]
 
         sent_any = False
         # 디스코드는 메시지당 embed 10개 제한 → 청크로 나눠 전송
