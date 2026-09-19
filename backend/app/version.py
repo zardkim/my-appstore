@@ -5,7 +5,7 @@ This file is automatically updated by the release process.
 Do not edit manually.
 """
 
-__version__ = "1.4.70"
+__version__ = "1.4.71"
 __version_info__ = (1, 4, 70)
 
 # Build information (optional, can be set during build process)
