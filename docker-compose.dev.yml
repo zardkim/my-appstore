@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15-alpine
+    image: postgres:15.19-alpine
     container_name: myapp-db
     restart: unless-stopped
     environment:
