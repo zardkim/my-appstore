@@ -341,15 +341,20 @@ class FilenameParser:
         Returns:
             포터블이면 True, 아니면 False
         """
-        # 포터블 키워드 패턴 (영문, 단어 경계 기준)
+        # 포터블 키워드 패턴 (영문)
+        #
+        # \b 를 쓰면 안 된다. `_` 는 단어 문자라서 `_Portable` 앞에 경계가 생기지
+        # 않는다. 이 라이브러리는 언더스코어 파일명이 대부분이라
+        # HeidiSQL_12.21_64_Portable.zip 같은 것이 전부 미검출됐다.
+        # 그래서 "영숫자가 아닌 것"을 경계로 직접 지정한다.
         portable_patterns_en = [
-            r'\bportable\b',
-            r'\bportableapps\b',
-            r'\bgreen\b',           # Green Edition
-            r'\bnoinstall\b',
-            r'\bno[_\-]install\b',
-            r'\bstandalone\b',
-            r'\bstand[_\-]alone\b',
+            r'(?<![a-z0-9])portable(?![a-z0-9])',
+            r'(?<![a-z0-9])portableapps(?![a-z0-9])',
+            r'(?<![a-z0-9])green(?![a-z0-9])',           # Green Edition
+            r'(?<![a-z0-9])noinstall(?![a-z0-9])',
+            r'(?<![a-z0-9])no[_\- ]install(?![a-z0-9])',
+            r'(?<![a-z0-9])standalone(?![a-z0-9])',
+            r'(?<![a-z0-9])stand[_\- ]alone(?![a-z0-9])',
         ]
 
         # 포터블 키워드 (한국어 - 원문 포함 검사)

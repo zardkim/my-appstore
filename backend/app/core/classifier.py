@@ -45,7 +45,9 @@ _UPDATE_KEYWORDS = {
 _MANUAL_EXTENSIONS = {".pdf", ".doc", ".docx", ".chm", ".txt"}
 
 # sp1, sp2, sp3 ... 패턴
-_SP_PATTERN = re.compile(r"\bsp\d+\b")
+# \b 대신 영숫자 경계를 직접 지정한다. `_` 는 단어 문자라서 `app_sp2` 가
+# \bsp\d+\b 로는 걸리지 않는다 (parser._is_portable 과 같은 이유).
+_SP_PATTERN = re.compile(r"(?<![a-z0-9])sp\d+(?![a-z0-9])")
 
 # "+ Fix", "with Keygen", "Incl.Patch"처럼 연결어 뒤에 패치 키워드가 오는 패턴.
 # 이 경우 파일 자체가 패치가 아니라 패치/크랙/키젠이 "동봉됨"을 의미하므로
