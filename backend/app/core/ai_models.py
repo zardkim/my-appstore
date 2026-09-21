@@ -27,11 +27,17 @@ REQUEST_TIMEOUT = 15.0
 
 # 조회 실패 시에만 쓰는 목록. 최신 상태를 보장하지 않는다.
 FALLBACK_MODELS: Dict[str, List[str]] = {
+    # OpenAI 는 키가 없으면 이 목록이 보인다. 키를 넣으면 실제 사용 가능한
+    # 전체 목록(gpt-4.x 포함)이 API 에서 내려온다.
     "openai": [
         "gpt-6-astra",
         "gpt-5.6-sol",
+        "gpt-4.1",
+        "gpt-4.1-mini",
         "gpt-4o",
         "gpt-4o-mini",
+        "gpt-4-turbo",
+        "gpt-4",
     ],
     "gemini": [
         "gemini-3-pro-preview",
@@ -59,17 +65,37 @@ _OPENAI_EXCLUDE = (
 )
 
 
-def _sort_models(ids: List[str]) -> List[str]:
-    """대략 최신순. 버전 숫자를 뽑아 내림차순으로 둔다.
+# 텍스트 생성용이 아닌 모델. 이름에 이 조각이 들어가면 목록에서 뺀다.
+# 제공자는 generateContent 를 지원한다고 표시하지만, 음성/이미지/음악 전용
+# 모델이라 메타데이터 생성에는 쓸 수 없다.
+_NON_TEXT_TOKENS = (
+    "-tts", "tts-", "transcribe", "-image", "image-", "-audio", "audio-",
+    "computer-use", "robotics", "lyria", "nano-banana", "veo-", "imagen",
+    "embedding", "-live", "deep-research", "antigravity",
+)
 
-    제공자가 정렬 순서를 보장하지 않으므로 여기서 정리한다. 완벽한 정렬은
-    불가능하고(이름 규칙이 제공자마다 다르다) "최신이 위로 오는 편" 정도를
-    노린다.
+
+def _is_text_model(model_id: str) -> bool:
+    mid = model_id.lower()
+    return not any(token in mid for token in _NON_TEXT_TOKENS)
+
+
+def _sort_models(ids: List[str], prefer_prefix: str = "") -> List[str]:
+    """제공자의 주력 계열을 먼저, 그 안에서 버전이 높은 것을 먼저.
+
+    제공자가 정렬 순서를 보장하지 않는다. 그냥 버전 숫자만으로 정렬하면
+    날짜가 들어간 이름(deep-research-pro-preview-12-2025)이 위로 올라와
+    정작 쓸 모델이 아래로 밀린다. 그래서 두 단계로 정렬한다.
+
+      1) prefer_prefix 로 시작하는 것(gemini- / gpt-)을 먼저
+      2) 그 안에서 버전 숫자 내림차순 (4자리 숫자는 연도로 보고 제외)
     """
     def key(model_id: str):
-        nums = [int(n) for n in re.findall(r"\d+", model_id)[:3]]
+        family = 0 if (prefer_prefix and model_id.startswith(prefer_prefix)) else 1
+        # 4자리 이상은 연도·날짜로 보고 버전에서 제외한다 (2025, 20251001 …)
+        nums = [int(n) for n in re.findall(r"\d+", model_id) if len(n) < 4][:3]
         nums += [0] * (3 - len(nums))
-        return (-nums[0], -nums[1], -nums[2], model_id)
+        return (family, -nums[0], -nums[1], -nums[2], model_id)
 
     return sorted(ids, key=key)
 
@@ -90,8 +116,10 @@ async def _list_openai(api_key: str) -> List[str]:
             continue
         if any(token in mid for token in _OPENAI_EXCLUDE):
             continue
+        if not _is_text_model(mid):
+            continue
         ids.append(mid)
-    return _sort_models(ids)
+    return _sort_models(ids, prefer_prefix="gpt-")
 
 
 async def _list_gemini(api_key: str) -> List[str]:
@@ -109,8 +137,13 @@ async def _list_gemini(api_key: str) -> List[str]:
         if "generateContent" not in (item.get("supportedGenerationMethods") or []):
             continue
         name = item.get("name", "")
-        ids.append(name.split("/", 1)[-1] if "/" in name else name)
-    return _sort_models(ids)
+        mid = name.split("/", 1)[-1] if "/" in name else name
+        # generateContent 를 지원한다고 표시돼도 음성/이미지/음악 전용 모델이
+        # 섞여 온다. 메타데이터 생성에 쓸 수 없으므로 뺀다.
+        if not _is_text_model(mid):
+            continue
+        ids.append(mid)
+    return _sort_models(ids, prefer_prefix="gemini-")
 
 
 async def _list_claude(api_key: str) -> List[str]:
@@ -124,7 +157,7 @@ async def _list_claude(api_key: str) -> List[str]:
         data = r.json().get("data", [])
 
     # Anthropic 은 최신순으로 내려주므로 순서를 유지한다.
-    return [item["id"] for item in data if item.get("id")]
+    return [item["id"] for item in data if item.get("id") and _is_text_model(item["id"])]
 
 
 _FETCHERS = {

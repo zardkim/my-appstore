@@ -8,6 +8,7 @@ import pytest
 from app.core.ai_models import (
     FALLBACK_MODELS,
     _sort_models,
+    _is_text_model,
     _OPENAI_EXCLUDE,
     list_models,
 )
@@ -24,21 +25,69 @@ class TestFallbackList:
         assert "gpt-5.6-sol" in FALLBACK_MODELS["openai"]
         assert "claude-fable-5-1" in FALLBACK_MODELS["claude"]
 
+    def test_openai_폴백에_gpt4_계열도_있다(self):
+        """키가 없으면 이 목록이 그대로 보인다. 구세대도 선택할 수 있어야 한다."""
+        for model in ("gpt-4.1", "gpt-4o", "gpt-4-turbo", "gpt-4"):
+            assert model in FALLBACK_MODELS["openai"]
+
     def test_각_목록이_최신순이다(self):
         for provider, models in FALLBACK_MODELS.items():
             assert models == _sort_models(models) or models[0] == models[0], provider
 
 
+class TestTextFilter:
+    """제공자가 generateContent 를 지원한다고 표시해도 음성/이미지/음악 전용
+    모델이 섞여 온다. 메타데이터 생성에는 쓸 수 없다."""
+
+    @pytest.mark.parametrize("model_id", [
+        "gemini-3.5-transcribe",
+        "gemini-3.1-flash-tts-preview",
+        "gemini-3-pro-image-preview",
+        "gemini-2.5-computer-use-preview-10-2025",
+        "gemini-robotics-er-2-preview",
+        "lyria-3-pro-preview",
+        "nano-banana-pro-preview",
+        "deep-research-pro-preview-12-2025",
+        "antigravity-preview-09-2026",
+    ])
+    def test_텍스트_모델이_아니다(self, model_id):
+        assert _is_text_model(model_id) is False
+
+    @pytest.mark.parametrize("model_id", [
+        "gemini-3.8-flash",
+        "gemini-2.5-pro",
+        "gpt-6-astra",
+        "gpt-4.1",
+        "claude-fable-5-1",
+    ])
+    def test_텍스트_모델이다(self, model_id):
+        assert _is_text_model(model_id) is True
+
+
 class TestSort:
     def test_버전이_높은_것이_앞에_온다(self):
-        out = _sort_models(["gpt-4o", "gpt-6-astra", "gpt-5.6-sol", "gpt-4o-mini"])
+        out = _sort_models(["gpt-4o", "gpt-6-astra", "gpt-5.6-sol", "gpt-4o-mini"], "gpt-")
         assert out[0] == "gpt-6-astra"
         assert out.index("gpt-5.6-sol") < out.index("gpt-4o")
 
     def test_gemini도_동일하다(self):
-        out = _sort_models(["gemini-2.0-flash", "gemini-3-pro-preview", "gemini-2.5-flash"])
+        out = _sort_models(["gemini-2.0-flash", "gemini-3-pro-preview", "gemini-2.5-flash"], "gemini-")
         assert out[0] == "gemini-3-pro-preview"
         assert out.index("gemini-2.5-flash") < out.index("gemini-2.0-flash")
+
+    def test_주력_계열이_먼저_온다(self):
+        """gemma / lyria 같은 다른 계열이 위로 올라오면 안 된다."""
+        out = _sort_models(["gemma-4-31b-it", "gemini-2.5-flash", "gemini-3.8-flash"], "gemini-")
+        assert out[0] == "gemini-3.8-flash"
+        assert out[-1] == "gemma-4-31b-it"
+
+    def test_날짜가_버전으로_오인되지_않는다(self):
+        """4자리 이상 숫자(연도)는 버전에서 제외한다.
+
+        제외하지 않으면 '...-12-2025' 같은 이름이 버전 2025 로 읽혀 맨 위로 온다.
+        """
+        out = _sort_models(["gemini-2.5-flash", "gemini-3.8-flash", "gemini-1.5-pro-001"], "gemini-")
+        assert out[0] == "gemini-3.8-flash"
 
     def test_숫자가_없어도_깨지지_않는다(self):
         assert _sort_models(["alpha", "beta"]) == ["alpha", "beta"]
