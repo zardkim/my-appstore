@@ -1272,80 +1272,26 @@
                 </select>
               </div>
 
-              <!-- OpenAI Models -->
-              <div v-if="aiProvider === 'openai'">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.metadata.openaiModel') }}</label>
-                <select v-model="aiModel" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                  <optgroup :label="t('settings.metadata.openaiGroupO1')">
-                    <option value="o1">{{ t('settings.metadata.openaiO1') }}</option>
-                    <option value="o1-preview">{{ t('settings.metadata.openaiO1Preview') }}</option>
-                    <option value="o1-mini">{{ t('settings.metadata.openaiO1Mini') }}</option>
-                  </optgroup>
-                  <optgroup :label="t('settings.metadata.openaiGroupGpt4o')">
-                    <option value="gpt-4o-mini">{{ t('settings.metadata.openaiGpt4oMini') }}</option>
-                    <option value="gpt-4o">{{ t('settings.metadata.openaiGpt4o') }}</option>
-                    <option value="gpt-4o-2024-11-20">{{ t('settings.metadata.openaiGpt4oDate1') }}</option>
-                    <option value="gpt-4o-2024-08-06">{{ t('settings.metadata.openaiGpt4oDate2') }}</option>
-                    <option value="gpt-4o-2024-05-13">{{ t('settings.metadata.openaiGpt4oDate3') }}</option>
-                  </optgroup>
-                  <optgroup :label="t('settings.metadata.openaiGroupGpt4Turbo')">
-                    <option value="gpt-4-turbo">{{ t('settings.metadata.openaiGpt4Turbo') }}</option>
-                    <option value="gpt-4-turbo-2024-04-09">{{ t('settings.metadata.openaiGpt4TurboDate') }}</option>
-                    <option value="gpt-4-turbo-preview">{{ t('settings.metadata.openaiGpt4TurboPreview') }}</option>
-                  </optgroup>
-                  <optgroup :label="t('settings.metadata.openaiGroupGpt4')">
-                    <option value="gpt-4">{{ t('settings.metadata.openaiGpt4') }}</option>
-                    <option value="gpt-4-0613">{{ t('settings.metadata.openaiGpt4Date') }}</option>
-                  </optgroup>
+              <!-- AI 모델 (제공자 API 에서 목록을 받아온다) -->
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('settings.metadata.aiModelLabel') }}</label>
+                  <button @click="loadAiModels(true)" :disabled="aiModelsLoading" type="button"
+                    class="text-xs px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50">
+                    {{ aiModelsLoading ? t('settings.metadata.aiModelLoading') : t('settings.metadata.aiModelRefresh') }}
+                  </button>
+                </div>
+                <select v-model="aiModel" :disabled="aiModelsLoading"
+                  class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-60">
+                  <option v-for="m in aiModels" :key="m" :value="m">{{ m }}</option>
+                  <!-- 저장된 값이 목록에 없으면(폐기된 모델 등) 선택이 사라지지 않도록 남겨둔다 -->
+                  <option v-if="aiModel && !aiModels.includes(aiModel)" :value="aiModel">
+                    {{ aiModel }} ({{ t('settings.metadata.aiModelNotInList') }})
+                  </option>
                 </select>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  {{ t('settings.metadata.openaiModelTip') }}
-                </p>
-              </div>
-
-              <!-- Gemini Models -->
-              <div v-if="aiProvider === 'gemini'">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.metadata.geminiModel') }}</label>
-                <select v-model="aiModel" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                  <optgroup :label="t('settings.metadata.geminiGroup3')">
-                    <option value="gemini-3-flash-preview">{{ t('settings.metadata.gemini3FlashPreview') }}</option>
-                    <option value="gemini-3-pro-preview">{{ t('settings.metadata.gemini3ProPreview') }}</option>
-                  </optgroup>
-                  <optgroup :label="t('settings.metadata.geminiGroup25')">
-                    <option value="gemini-2.5-flash">{{ t('settings.metadata.gemini25Flash') }}</option>
-                    <option value="gemini-2.5-pro">{{ t('settings.metadata.gemini25Pro') }}</option>
-                    <option value="gemini-2.5-flash-lite">{{ t('settings.metadata.gemini25FlashLite') }}</option>
-                  </optgroup>
-                  <optgroup :label="t('settings.metadata.geminiGroup20')">
-                    <option value="gemini-2.0-flash-exp">{{ t('settings.metadata.gemini20FlashExp') }}</option>
-                    <option value="gemini-2.0-flash">{{ t('settings.metadata.gemini20Flash') }}</option>
-                    <option value="gemini-2.0-flash-lite">{{ t('settings.metadata.gemini20FlashLite') }}</option>
-                  </optgroup>
-                </select>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  {{ t('settings.metadata.geminiModelTip') }}
-                </p>
-                <p class="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                  {{ t('settings.metadata.geminiQuotaWarning') }}
-                </p>
-              </div>
-
-              <!-- Claude Models -->
-              <div v-if="aiProvider === 'claude'">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('settings.metadata.claudeModel') }}</label>
-                <select v-model="aiModel" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                  <optgroup :label="t('settings.metadata.claudeGroup5')">
-                    <option value="claude-opus-5">{{ t('settings.metadata.claudeOpus5') }}</option>
-                    <option value="claude-sonnet-5">{{ t('settings.metadata.claudeSonnet5') }}</option>
-                  </optgroup>
-                  <optgroup :label="t('settings.metadata.claudeGroup4')">
-                    <option value="claude-opus-4-8">{{ t('settings.metadata.claudeOpus48') }}</option>
-                    <option value="claude-sonnet-4-6">{{ t('settings.metadata.claudeSonnet46') }}</option>
-                    <option value="claude-haiku-4-5">{{ t('settings.metadata.claudeHaiku45') }}</option>
-                  </optgroup>
-                </select>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  {{ t('settings.metadata.claudeModelTip') }}
+                <p class="text-xs mt-2" :class="aiModelsSource === 'api' ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'">
+                  <span v-if="aiModelsSource === 'api'">✓ {{ t('settings.metadata.aiModelFromApi', { count: aiModels.length }) }}</span>
+                  <span v-else>⚠ {{ aiModelsReason || t('settings.metadata.aiModelFallback') }}</span>
                 </p>
               </div>
 
@@ -2913,6 +2859,36 @@ const emojiGroups = {
 const scanMethod = ref('ai')
 const aiProvider = ref('gemini')
 const aiModel = ref('gemini-2.5-flash')
+// 모델 목록은 제공자 API 에서 받아온다. 하드코딩하면 계속 낡고, 사용자 키로는
+// 쓸 수 없는 모델이 섞이거나 폐기된 모델이 남는다.
+// 조회 실패 시 백엔드가 기본 목록으로 떨어지며 source 로 구분한다.
+const aiModels = ref([])
+const aiModelsSource = ref('fallback')
+const aiModelsReason = ref('')
+const aiModelsLoading = ref(false)
+
+const loadAiModels = async (manual = false) => {
+  if (!aiProvider.value) return
+  aiModelsLoading.value = true
+  try {
+    const res = await apiClient.get('/metadata/ai-models', { params: { provider: aiProvider.value } })
+    aiModels.value = res.data.models || []
+    aiModelsSource.value = res.data.source || 'fallback'
+    aiModelsReason.value = res.data.reason || ''
+    // 새로고침 버튼으로 부른 경우에만 선택값을 보정한다.
+    // 자동 호출에서 바꾸면 사용자가 저장해 둔 모델이 조용히 교체된다.
+    if (manual && aiModels.value.length && !aiModels.value.includes(aiModel.value)) {
+      aiModel.value = aiModels.value[0]
+    }
+  } catch (e) {
+    console.error('AI 모델 목록 조회 실패:', e)
+    aiModels.value = []
+    aiModelsSource.value = 'fallback'
+    aiModelsReason.value = t('settings.metadata.aiModelLoadFailed')
+  } finally {
+    aiModelsLoading.value = false
+  }
+}
 const geminiApiKey = ref('')
 const openaiApiKey = ref('')
 const claudeApiKey = ref('')
@@ -2989,14 +2965,12 @@ watch(locale, () => {
 })
 
 // AI 제공자 변경 시 기본 모델 설정
-const onProviderChange = () => {
-  if (aiProvider.value === 'openai') {
-    aiModel.value = 'gpt-4o-mini'
-  } else if (aiProvider.value === 'gemini') {
-    aiModel.value = 'gemini-2.5-flash'
-  } else if (aiProvider.value === 'claude') {
-    aiModel.value = 'claude-opus-5'
-  }
+const onProviderChange = async () => {
+  // 제공자가 바뀌면 이전 제공자의 모델 ID 는 무의미하므로 비우고,
+  // 새 목록을 받아 첫 항목으로 맞춘다.
+  aiModel.value = ''
+  aiModels.value = []
+  await loadAiModels(true)
 }
 
 // Scan Exceptions
@@ -3854,6 +3828,8 @@ onMounted(async () => {
     if (config.metadata) {
       scanMethod.value = config.metadata.scanMethod || 'ai'
       aiProvider.value = config.metadata.aiProvider || 'gemini'
+      // 저장된 제공자 기준으로 모델 목록을 받아온다(선택값은 건드리지 않는다)
+      loadAiModels(false)
       aiModel.value = config.metadata.aiModel || 'gemini-2.5-flash'
       // API 키: 실제 값을 UI에 표시하지 않음 - 저장 여부만 체크
       // 저장됨 표시 후 "수정" 버튼을 눌러야만 변경 가능

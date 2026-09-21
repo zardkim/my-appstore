@@ -902,6 +902,13 @@ export default {
       gemini25ProExp: 'Gemini 2.5 Pro: 무료 (실험적)',
       claudePricingTitle: 'Claude (모두 유료):',
       // Google Custom Search API
+      aiModelLabel: 'AI 모델',
+      aiModelRefresh: '목록 새로고침',
+      aiModelLoading: '불러오는 중...',
+      aiModelFromApi: '제공자 API에서 {count}개 모델을 가져왔습니다. 이 키로 실제 사용 가능한 목록입니다.',
+      aiModelFallback: 'API에서 목록을 가져오지 못해 기본 목록을 표시합니다. 최신이 아닐 수 있습니다.',
+      aiModelNotInList: '현재 목록에 없음',
+      aiModelLoadFailed: '모델 목록을 불러오지 못했습니다.',
       autoMatchTitle: '스캔 후 AI 자동 매칭',
       autoMatchDesc: '스캔이 끝나면 새로 발견된 항목을 AI로 자동 매칭해 제품으로 등록합니다. 끄면 스캔 목록에 쌓아두고 직접 매칭해야 합니다.',
       autoMatchWarnTitle: '켜기 전에 확인하세요',

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import Session
 from app.dependencies import get_current_user, get_current_admin_user, get_db
+from app.core.ai_models import list_models, FALLBACK_MODELS
 from app.core.ai_metadata import AIMetadataGeneratorV2 as AIMetadataGenerator
 from app.core.confidence import calculate_confidence_score, get_confidence_level, should_auto_register
 from app.core.parser import FilenameParser
@@ -441,3 +442,35 @@ async def register_metadata(
             success=False,
             error=str(e)
         )
+
+
+@router.get("/ai-models")
+async def get_ai_models(
+    provider: str,
+    current_user = Depends(get_current_admin_user),
+):
+    """제공자의 사용 가능 모델 목록 (관리자 전용).
+
+    저장된 API 키로 제공자의 모델 목록 엔드포인트를 호출한다.
+    실패하면 기본 목록으로 떨어지며, source 필드로 어느 쪽인지 알린다.
+
+    키는 요청 본문으로 받지 않는다 - 브라우저에는 마스킹된 값만 있기 때문이다.
+    """
+    config = load_config()
+    metadata_config = config.get("metadata", {})
+
+    key_field = {
+        "openai": "openaiApiKey",
+        "gemini": "geminiApiKey",
+        "claude": "claudeApiKey",
+    }.get((provider or "").lower())
+
+    api_key = metadata_config.get(key_field, "") if key_field else ""
+
+    models, source, reason = await list_models(provider, api_key)
+    return {
+        "provider": provider,
+        "source": source,      # "api" | "fallback"
+        "reason": reason,      # fallback 인 경우 사유
+        "models": models,
+    }

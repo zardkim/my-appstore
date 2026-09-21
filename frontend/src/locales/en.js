@@ -900,6 +900,13 @@ export default {
       gemini25ProExp: 'Gemini 2.5 Pro: Free (Experimental)',
       claudePricingTitle: 'Claude (All Paid):',
       // Google Custom Search API
+      aiModelLabel: 'AI model',
+      aiModelRefresh: 'Refresh list',
+      aiModelLoading: 'Loading…',
+      aiModelFromApi: 'Fetched {count} models from the provider API — these are what this key can actually use.',
+      aiModelFallback: 'Could not fetch the list from the API, showing the built-in list. It may be out of date.',
+      aiModelNotInList: 'not in current list',
+      aiModelLoadFailed: 'Failed to load the model list.',
       autoMatchTitle: 'Auto-match after scan',
       autoMatchDesc: 'Automatically match newly found items with AI and register them as products when a scan finishes. When off, items pile up in the scan list for manual matching.',
       autoMatchWarnTitle: 'Before turning this on',

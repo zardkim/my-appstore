@@ -10,7 +10,13 @@ import httpx
 from app.config import settings
 from app.core.parser import FilenameParser
 import logging
+import re
 logger = logging.getLogger(__name__)
+
+# Claude 5 계열 판정: claude-opus-5, claude-sonnet-5, claude-fable-5-1,
+# claude-haiku-5 … 처럼 "claude-<이름>-5" 로 시작하는 것들.
+# 구세대(opus-4-8, sonnet-4-6, haiku-4-5)는 매치되지 않는다.
+_CLAUDE5_PATTERN = re.compile(r"^claude-[a-z]+-5(?:[.\-]|$)")
 
 
 
@@ -968,13 +974,17 @@ Return a JSON object with the following fields. ALL fields are REQUIRED - use em
     def _claude_thinking_disabled_param(self) -> dict:
         """짧은 판정/테스트용 Claude 호출에 thinking을 끄기 위한 파라미터.
 
-        claude-opus-5/claude-sonnet-5는 thinking이 기본 활성화되어 있어
-        작은 max_tokens 예산이 thinking에 소비되고 텍스트 답변이 비어버릴 수
-        있으므로 명시적으로 꺼야 한다. 반면 opus-4-8/sonnet-4-6/haiku-4-5
-        같은 구세대 모델은 thinking이 기본 비활성화이고, "disabled" 타입
-        자체를 인식하지 못해 400 에러가 날 수 있으므로 아예 필드를 넣지 않는다.
+        Claude 5 계열(opus-5 / sonnet-5 / fable-5-1 …)은 thinking이 기본
+        활성화되어 있어 작은 max_tokens 예산이 thinking에 소비되고 텍스트 답변이
+        비어버릴 수 있으므로 명시적으로 꺼야 한다. 반면 opus-4-8/sonnet-4-6/
+        haiku-4-5 같은 구세대 모델은 thinking이 기본 비활성화이고, "disabled"
+        타입 자체를 인식하지 못해 400 에러가 날 수 있으므로 아예 필드를 넣지 않는다.
+
+        모델 목록을 제공자 API 에서 동적으로 받아오므로, 이름을 하나씩 나열하는
+        대신 Claude 5 계열 패턴으로 판정한다. 새 5.x 모델이 나와도 따로 손댈
+        필요가 없다.
         """
-        if self.model in ("claude-opus-5", "claude-sonnet-5"):
+        if _CLAUDE5_PATTERN.match(self.model or ""):
             return {"thinking": {"type": "disabled"}}
         return {}
 
