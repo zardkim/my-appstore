@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.76] - 2026-09-21
+
+### Added
+- **CI에서 스키마 드리프트 차단** — 모델과 마이그레이션이 어긋난 채로 이미지가 빌드되지 않습니다
+  - `.github/workflows/docker-build.yml`에 `schema-check` 잡 추가: postgres를 띄워 빈 DB에 `alembic upgrade head` 적용 후 `alembic check`로 모델과 대조
+  - `build-and-push`가 `needs: schema-check`로 의존하므로, 어긋나면 빌드가 아예 진행되지 않습니다
+  - 2026-09에 `activity_logs`/`product_videos`/`share_links` 세 테이블이 Alembic 밖에서만 만들어지던 드리프트가 실제로 쌓였었고, 그 상태로 `create_all()`을 제거했다면 신규 설치에서 테이블이 사라졌을 것입니다
+
+### Changed
+- `alembic/env.py`에 `include_object` 필터 추가 — `alembic check`를 가드로 쓰려면 "의도적으로 다른" 부분을 차이로 보고하지 않아야 합니다. 세 부류를 제외하며 각각 이유를 주석에 남겼습니다
+  - 손수 만든 GIN 인덱스 9개 — `gin_trgm_ops`는 모델로 표현할 수 없어 마이그레이션의 raw SQL로 만듭니다. 걸러내지 않으면 `drop_index`를 제안하고, 지우면 검색이 시퀀셜 스캔으로 돌아갑니다
+  - 보류 중인 죽은 테이블(`unmatched_items`, `scan_history`)과 컬럼(`products.crawled_from`)
+
+### 검증
+정상 상태에서 `No new upgrade operations detected.`(종료코드 0), 모델에 임시 컬럼을 하나 넣은 역검증에서 `Detected added column`(종료코드 255)을 확인했습니다. 필터가 넓어져 가드가 무력해지지 않았음을 확인한 것입니다.
+
+이로써 **A-2(스키마 관리 Alembic 통일) 5단계가 모두 완료**되었습니다.
+
 ## [1.4.75] - 2026-09-21
 
 ### Changed
