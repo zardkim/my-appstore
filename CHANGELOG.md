@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.75] - 2026-09-21
+
+### Changed
+- **스키마 정본을 Alembic 하나로 통일** — 그동안 스키마를 만드는 곳이 세 군데였습니다: `alembic/versions/`, `entrypoint.sh`의 수동 DDL, `main.py`의 `create_all()` + ALTER 안전망. 정본이 갈라져 실제로 장애가 났었습니다(v1.4.68: `products.release_year`가 배포 진입점에 반영되지 않아 목록 조회 500)
+  - `entrypoint.sh` (200 → 158줄): 수동 DDL 15개 제거, Alembic 실행으로 대체
+  - `main.py` (67줄 제거): `create_all()` + ALTER 안전망 4블록 제거
+- **마이그레이션 모드 자동 판정** — 기존 배포 DB는 `create_all()`로 만들어져 `alembic_version`이 없습니다. 그 상태로 `upgrade`를 돌리면 첫 리비전에서 죽으므로, DB 상태를 보고 모드를 고릅니다. **수동 `stamp`가 필요 없습니다.**
+
+  | DB 상태 | 동작 |
+  |---|---|
+  | 테이블 0개 | `alembic upgrade head` |
+  | 테이블 있음 / 버전 없음 | `stamp head` → `upgrade head` |
+  | `alembic_version` 있음 | `alembic upgrade head` |
+  | 최신보다 오래된 DB | 누락 항목 출력 후 **exit 1** |
+
+  마지막 항목을 둔 이유: 오래된 DB를 무조건 head로 stamp하면 **실제로는 없는 컬럼을 있다고 기록**하게 됩니다. 표본 검사(3개 테이블 + `products.release_year`, `users.email`, `filename_violations.classification`)로 조용한 오기록을 막습니다.
+
+### Docs
+- **`CLAUDE.md`에 Git/레지스트리 정책 명시** — 이 프로젝트는 **GitHub와 Docker Hub만** 사용합니다. Harbor·Gitea는 사용하지 않습니다. 전역 규칙(Harbor 기본)에 대한 의도적 예외이며, 1.4.69에서 같은 태그에 서로 다른 빌드가 올라간 사고가 계기입니다
+
+### ⚠️ 주의
+이번 릴리스부터 **Alembic 실패 = 앱 기동 실패**입니다. 이전에는 안전망이 덮어줬습니다. 문제 발생 시 이미지 태그를 `1.4.74`로 되돌리면 즉시 복구됩니다.
+
 ## [1.4.74] - 2026-09-21
 
 ### Fixed
