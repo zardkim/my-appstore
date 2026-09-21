@@ -17,7 +17,61 @@ env:
   FRONTEND_IMAGE: zardkim/myappstore-frontend
 
 jobs:
+  # 스키마 정본이 alembic/versions/ 하나라는 것을 CI 에서 강제한다.
+  # 모델을 고치고 리비전을 만들지 않으면 여기서 빌드가 깨진다.
+  # (2026-09 에 activity_logs / product_videos / share_links 세 테이블이
+  #  Alembic 밖에서만 만들어지고 있던 드리프트가 실제로 쌓였었다)
+  schema-check:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: myappstore
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myappstore
+      SECRET_KEY: ci-schema-check-only
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Apply migrations to an empty database
+        working-directory: ./backend
+        run: alembic upgrade head
+
+      - name: Verify models match migrations
+        working-directory: ./backend
+        run: |
+          # 모델과 마이그레이션이 어긋나면 0 이 아닌 코드로 종료한다.
+          # 의도적 예외(손수 만든 GIN 인덱스, 보류 중인 죽은 테이블/컬럼)는
+          # alembic/env.py 의 include_object 에서 걸러진다.
+          alembic check
+
   build-and-push:
+    needs: schema-check
     runs-on: ubuntu-latest
 
     steps:

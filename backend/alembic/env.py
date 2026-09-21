@@ -33,6 +33,60 @@ target_metadata = Base.metadata # Set target_metadata to your Base.metadata
 # ... etc.
 
 
+# ── autogenerate / check 에서 제외할 대상 ──────────────────────────────
+#
+# alembic check 를 CI 가드로 쓰려면, 모델과 DB 가 "의도적으로" 다른 부분을
+# 차이로 보고하지 않아야 한다. 아래 두 부류가 그렇다.
+
+# 1) 모델에 선언할 수 없는 손수 만든 인덱스.
+#    GIN + gin_trgm_ops 는 SQLAlchemy 모델로 표현하지 않고 마이그레이션에서
+#    raw SQL 로 만든다. autogenerate 는 이것을 "모델에 없는 인덱스"로 보고
+#    drop_index 를 제안하는데, 지우면 검색이 시퀀셜 스캔으로 돌아간다.
+IGNORED_INDEXES = {
+    "ix_products_title_trgm",
+    "ix_products_subtitle_trgm",
+    "ix_products_vendor_trgm",
+    "idx_products_title_trgm",
+    "idx_products_subtitle_trgm",
+    "idx_products_vendor_trgm",
+    "idx_posts_title_trgm",
+    "idx_filename_violations_file_name_trgm",
+    "ix_versions_product_id",
+}
+
+# 2) 모델은 제거했지만 테이블은 남겨두기로 한 것.
+#    운영 데이터 확인 전까지 drop 하지 않기로 결정된 상태다.
+#    (Plane: "[보류] MetadataCache · unmatched_items")
+IGNORED_TABLES = {
+    "unmatched_items",
+    "scan_history",
+}
+
+# 3) 모델에서는 뺐지만 DB 컬럼은 남겨두기로 한 것. (테이블, 컬럼) 쌍.
+#    products.crawled_from 은 값을 쓰는 코드가 없었지만(v1.4.74 에서 모델/스키마
+#    필드만 제거), 운영 데이터 확인 전까지 DROP COLUMN 하지 않는다.
+IGNORED_COLUMNS = {
+    ("products", "crawled_from"),
+}
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    """autogenerate / check 대상에서 의도적 예외를 걸러낸다.
+
+    여기에 무언가를 추가할 때는 반드시 이유를 남길 것. 이 필터가 넓어질수록
+    alembic check 의 가드 효과가 약해진다.
+    """
+    if type_ == "table" and name in IGNORED_TABLES:
+        return False
+    if type_ == "index" and name in IGNORED_INDEXES:
+        return False
+    if type_ == "column":
+        table = getattr(object, "table", None)
+        if table is not None and (table.name, name) in IGNORED_COLUMNS:
+            return False
+    return True
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -51,6 +105,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -74,7 +129,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            include_object=include_object,
         )
 
         with context.begin_transaction():
