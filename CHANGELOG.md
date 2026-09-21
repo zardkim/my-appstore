@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.73] - 2026-09-21
+
+### Fixed
+- **다운로드 이어받기(HTTP Range) 복구** — 프로덕션 빌드가 다시 X-Accel-Redirect 경로(`/api/download/{id}`)를 사용합니다. Nginx가 파일을 직접 서빙하므로 중단된 다운로드를 이어받을 수 있습니다
+  - 전제 조건이 해소되어 되돌린 것입니다: 운영 NAS compose의 `frontend` 서비스에 `volumes:` 블록이 통째로 없어 Nginx가 라이브러리를 읽지 못했고, 그래서 v1.4.67~v1.4.71 동안 X-Accel 다운로드가 전부 404였습니다. backend에만 파일이 보여 스캔·목록은 정상이라 발견이 늦었습니다
+  - backend와 동일한 라이브러리 폴더를 frontend에도 `:ro`로 마운트하고 컨테이너를 재생성해 확인했습니다
+
+### Changed
+- `frontend/src/utils/env.js` 주석에 전제 조건(frontend도 라이브러리를 마운트해야 함), 확인 명령(`docker exec myapp-frontend ls /app/data/library/`), 누락 시 증상을 명시했습니다
+
+### Docs
+- **docker-compose** 3개 파일의 라이브러리 추가 폴더 마운트 주석 정리 — backend/frontend 양쪽에 동일한 경고를 배치해 한쪽만 추가하는 실수를 막고, 예시를 실제 운영 구성(`/volume2/App`, `/volume3/App2`)으로 교체했습니다
+  - `docker-compose.prod.yml`의 backend에는 예시 블록이 아예 없어 추가
+  - `docker-compose.dev.yml`의 잘못된 예시 경로(`/library/NAS:ro`) 교정 — `SCAN_BASE_PATH`가 `/app/data/library`이므로 `/library/...`는 스캔되지 않습니다
+
 ## [1.4.72] - 2026-09-21
 
 ### Fixed
