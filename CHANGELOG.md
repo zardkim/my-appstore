@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.71] - 2026-09-19
 
+> 이 버전은 **git 태그가 없습니다**(버전 bump 커밋 `6f6cb8a`만 존재). Docker 이미지
+> `1.4.71`은 Docker Hub와 Harbor에 정상적으로 존재하며, 소급 태깅은 해당 태그의
+> 이미지를 현재 소스로 재빌드하게 되므로 의도적으로 공백으로 둡니다.
+
 ### Security
 - **의존성**: PostgreSQL 클라이언트 보안 업데이트 — `psycopg2-binary` 2.9.9 → 2.9.13 (번들 libpq 16.0 → 17.11), CVE-2024-10977 / CVE-2025-12818 해소
 - **docker-compose**: 3개 compose 파일 전부 postgres 이미지를 `15.19-alpine`으로 고정
