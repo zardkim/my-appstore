@@ -96,14 +96,23 @@ export function getBackendUrl(path) {
  * @returns {string} Download URL
  */
 export function getDownloadUrl(versionId, token) {
-  // 프로덕션 빌드(Docker/Nginx 환경)에서는 X-Accel-Redirect 경로를 사용 -
-  // Nginx가 파일을 직접 서빙하므로 다운로드 이어받기(HTTP Range)가 지원됨.
-  // `vite dev` 로컬 개발 서버는 Nginx 없이 백엔드로 직접 프록시하므로
-  // X-Accel-Redirect 헤더를 해석할 주체가 없어 /direct 스트리밍 경로를 사용.
-  if (import.meta.env.DEV) {
-    return `/api/download/direct/${versionId}?token=${token}`
-  }
-  return `/api/download/${versionId}?token=${token}`
+  // 현재는 항상 백엔드 직접 스트리밍(/direct)을 사용한다.
+  //
+  // X-Accel-Redirect 경로(/api/download/{id})는 Nginx(frontend 컨테이너)가
+  // 라이브러리 파일을 직접 읽어야 동작한다. 그런데 운영에서는 frontend 컨테이너의
+  // /app/data/library 가 비어 있어 모든 다운로드가 404로 실패했다.
+  // (backend 는 같은 파일을 읽을 수 있어 /direct 는 정상 200)
+  //
+  // 실제 1.4.70 이미지로 재현한 결과 Nginx 설정·경로 인코딩 자체는 정상이었고,
+  // 빈 디렉터리를 마운트했을 때만 운영과 동일한 응답(404 / Content-Length 153 /
+  // Content-Disposition 있음)이 재현됐다. 즉 설정이 아니라 파일 가시성 문제다.
+  //
+  // 트레이드오프: /direct 는 다운로드 이어받기(HTTP Range)를 지원하지 않고
+  // 파일이 백엔드를 거쳐 전송된다.
+  //
+  // frontend 컨테이너가 라이브러리를 보게 되면 아래 한 줄로 되돌린다:
+  //   if (!import.meta.env.DEV) return `/api/download/${versionId}?token=${token}`
+  return `/api/download/direct/${versionId}?token=${token}`
 }
 
 /**
