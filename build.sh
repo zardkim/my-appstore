@@ -1,11 +1,21 @@
 #!/bin/bash
-# MyApp Store - Build & Release Script
+# MyApp Store - Release Script
+#
+# 버전을 올리고 커밋 + 태그를 만든다. **이미지 빌드와 푸시는 하지 않는다.**
+#
+# 이미지는 GitHub Actions 가 만든다(.github/workflows/docker-build.yml).
+# `v*` 태그가 push 되면 트리거되어 schema-check -> build-and-push 순으로 돌고
+# Docker Hub 에 {버전}과 latest 로 푸시한다.
+#
+# 예전에는 이 스크립트도 로컬에서 빌드해 Docker Hub 에 푸시했다. 그러면 tag push 가
+# CI 를 트리거해 **같은 태그를 다시 빌드해 덮어쓰기** 때문에, 같은 버전인데 서로 다른
+# 바이너리가 도는 상태가 된다(1.4.69 에서 실제로 발생). 빌드는 CI 한 곳에서만 한다.
+#
 # 사용법: ./build.sh [patch|minor|major] [--no-push] [--no-commit]
-# 예시:
-#   ./build.sh           # patch 버전 자동 증가 + 빌드 + 커밋 + 푸시
-#   ./build.sh minor     # minor 버전 증가
-#   ./build.sh --no-push # 푸시 없이 빌드+커밋만
-#   ./build.sh --no-commit --no-push  # 빌드만
+#   ./build.sh                        patch 증가 + 커밋 + 태그 + push (CI 트리거)
+#   ./build.sh minor                  minor 증가
+#   ./build.sh --no-push              커밋/태그만, push 안 함 (CI 안 돎)
+#   ./build.sh --no-commit --no-push   버전 파일만 수정
 
 set -e
 
@@ -16,8 +26,6 @@ BACKEND_DIR="$SCRIPT_DIR/backend"
 FRONTEND_DIR="$SCRIPT_DIR/frontend"
 VERSION_FILE="$BACKEND_DIR/app/version.py"
 PACKAGE_JSON="$FRONTEND_DIR/package.json"
-COMPOSE_FILE="$SCRIPT_DIR/docker-compose.prod.yml"
-DOCKER_USER="zardkim"
 
 # 인자 파싱
 BUMP_TYPE="patch"
@@ -36,17 +44,12 @@ done
 CURRENT_VERSION=$(grep '__version__ = ' "$VERSION_FILE" | sed 's/__version__ = "\(.*\)"/\1/')
 echo "현재 버전: $CURRENT_VERSION"
 
-# 버전 파싱
 IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-# 버전 증가
 case $BUMP_TYPE in
-  major)
-    MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-  minor)
-    MINOR=$((MINOR + 1)); PATCH=0 ;;
-  patch)
-    PATCH=$((PATCH + 1)) ;;
+  major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+  minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+  patch) PATCH=$((PATCH + 1)) ;;
 esac
 
 NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
@@ -63,83 +66,49 @@ echo "version.py 업데이트 완료"
 # frontend/package.json 업데이트
 sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" "$PACKAGE_JSON"
 echo "package.json 업데이트 완료"
-# (docker-compose.prod.yml은 :latest 태그 고정 — 시놀로지 업데이트 감지용)
-
-# Git 커밋 해시 가져오기 (커밋 전이므로 현재 HEAD)
-GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "")
-
-# 백엔드 Docker 빌드
-echo ""
-echo "=== 백엔드 빌드 중... ==="
-docker build \
-  --build-arg VERSION="$NEW_VERSION" \
-  --build-arg BUILD_DATE="$BUILD_DATE" \
-  --build-arg VCS_REF="$GIT_COMMIT" \
-  -t "${DOCKER_USER}/myappstore-backend:${NEW_VERSION}" \
-  -t "${DOCKER_USER}/myappstore-backend:latest" \
-  "$BACKEND_DIR"
-echo "백엔드 빌드 완료"
-
-# 프론트엔드 Docker 빌드
-echo ""
-echo "=== 프론트엔드 빌드 중... ==="
-docker build \
-  --build-arg VERSION="$NEW_VERSION" \
-  --build-arg BUILD_DATE="$BUILD_DATE" \
-  --build-arg VCS_REF="$GIT_COMMIT" \
-  -t "${DOCKER_USER}/myappstore-frontend:${NEW_VERSION}" \
-  -t "${DOCKER_USER}/myappstore-frontend:latest" \
-  "$FRONTEND_DIR"
-echo "프론트엔드 빌드 완료"
+# (docker-compose*.yml 은 :latest 태그 고정 — 시놀로지 업데이트 감지용)
 
 # Git 커밋 + 태그
 if [ "$DO_COMMIT" = true ]; then
   echo ""
   echo "=== Git 커밋 중... ==="
-  cd "$SCRIPT_DIR"
   git add -A
   git commit -m "release: v${NEW_VERSION}
 
 - Version bump to ${NEW_VERSION}
 - Build date: ${BUILD_DATE}
-- Docker images: backend:${NEW_VERSION}, frontend:${NEW_VERSION} (latest 태그 동시 푸시)"
+- 이미지는 GitHub Actions 가 빌드해 Docker Hub 에 푸시한다 (latest 동시 갱신)"
   echo "Git 커밋 완료"
 
-  # 태그 생성
   git tag "v${NEW_VERSION}"
   echo "Git 태그 생성: v${NEW_VERSION}"
 fi
 
-# Docker Hub 푸시 + GitHub 푸시
+# GitHub push (태그 push 가 CI 를 트리거한다)
 if [ "$DO_PUSH" = true ]; then
-  echo ""
-  echo "=== Docker Hub 푸시 중... ==="
-  docker push "${DOCKER_USER}/myappstore-backend:${NEW_VERSION}"
-  docker push "${DOCKER_USER}/myappstore-backend:latest"
-  docker push "${DOCKER_USER}/myappstore-frontend:${NEW_VERSION}"
-  docker push "${DOCKER_USER}/myappstore-frontend:latest"
-  echo "Docker Hub 푸시 완료"
-
-  # GitHub 커밋 + 태그 푸시
   echo ""
   echo "=== GitHub 푸시 중... ==="
   git push origin main
-  echo "GitHub 커밋 푸시 완료: main"
+  echo "커밋 푸시 완료: main"
   git push origin "v${NEW_VERSION}"
-  echo "GitHub 태그 푸시 완료: v${NEW_VERSION}"
+  echo "태그 푸시 완료: v${NEW_VERSION}"
+  echo ""
+  echo "GitHub Actions 가 이미지를 빌드합니다:"
+  echo "  gh run watch   또는   https://github.com/zardkim/my-appstore/actions"
 fi
 
 echo ""
 echo "=== 완료! ==="
 echo "버전: $NEW_VERSION"
-echo "이미지:"
-echo "  - ${DOCKER_USER}/myappstore-backend:${NEW_VERSION}"
-echo "  - ${DOCKER_USER}/myappstore-frontend:${NEW_VERSION}"
 if [ "$DO_PUSH" = true ]; then
-  echo "Docker Hub에 푸시됨 (latest + $NEW_VERSION 태그)"
+  echo "CI 빌드 완료 후 이미지:"
+  echo "  zardkim/myappstore-backend:${NEW_VERSION}  (+ latest)"
+  echo "  zardkim/myappstore-frontend:${NEW_VERSION} (+ latest)"
+else
+  echo "push 하지 않았습니다. 이미지를 만들려면:"
+  echo "  git push origin main && git push origin v${NEW_VERSION}"
 fi
 echo ""
-echo "시놀로지 Container Manager:"
-echo "  docker-compose.prod.yml은 :latest 태그를 사용합니다."
-echo "  Container Manager → 프로젝트 → 업데이트 버튼 클릭 시"
-echo "  로컬 :latest digest vs Docker Hub :latest digest 비교로 업데이트 감지됩니다."
+echo "배포: 시놀로지 Container Manager → 프로젝트 → 업데이트"
+echo "  docker-compose.prod.yml 은 :latest 를 사용하므로"
+echo "  로컬 :latest digest 와 Docker Hub :latest digest 비교로 업데이트가 감지됩니다."

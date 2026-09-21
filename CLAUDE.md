@@ -60,55 +60,42 @@ This is the core feature of the application:
 
 1. **Filename Parsing**: Extract keywords from files (e.g., `Adobe_Photoshop_2024_v25.0.iso` → `Adobe`, `Photoshop`, `2024`)
 2. **AI Query**: Prompt example: "이 소프트웨어('Adobe Photoshop 2024')에 대한 짧은 설명, 공식 제조사, 대표 카테고리, 공식 아이콘 이미지 URL을 검색해서 JSON으로 줘."
-3. **Multi-Source Web Crawling**: Uses 9 sources in parallel with priority-based result merging:
+3. **Web Crawling**: 구현하지 않음 (2026-09-21 폐기 확정)
+   - 과거 문서에는 9개 소스(Softpedia / GitHub / Archive.org / FileHippo / SourceForge /
+     GitLab / DuckDuckGo / Bing / AlternativeTo)를 병렬 검색해 우선순위로 병합한다는
+     설계가 상세히 기술되어 있었으나 **코드로 구현된 적이 없다.**
+     `backend/app` 전체 검색 결과 해당 키워드는 0건이다.
+   - 실제 메타데이터 보강 경로는 다음 두 가지뿐이다:
+     - AI 생성 (`core/ai_metadata.py`, `core/metadata_enricher.py`)
+     - 이미지 검색 (`core/google_image_search.py` — Google CSE, 설정에서 on/off)
+   - `products.crawled_from` 컬럼은 이 설계의 잔재다. 값을 쓰는 코드가 없다.
 
-   **Priority 1 (Core - Highest Trust)**: Softpedia, GitHub, Archive.org
-   - Most reliable and detailed metadata
-
-   **Priority 2 (Support)**: FileHippo, SourceForge, GitLab
-   - Additional info and download links
-
-   **Priority 3 (Search Engines)**: DuckDuckGo, Bing
-   - General search and official site links
-
-   **Priority 4 (Other)**: AlternativeTo
-   - Software alternatives info
-
-   **Merge Strategy**:
-   - All sources searched in parallel for performance
-   - Results merged with priority: 1 → 2 → 3 → 4
-   - Official website: Priority 1 sources preferred
-   - Download URL: GitHub/SourceForge releases prioritized
-   - Descriptions: All sources combined (priority order)
-4. **Local Caching**: Store metadata in DB and cache images locally on NAS
+4. **Local Caching**: 아이콘/스크린샷을 NAS 로컬에 캐시 (`/data/icons`, `/data/screenshots`)
 
 **Critical**: For ambiguous filenames like `setup.exe`, use the parent folder name as search context.
 
-### Hybrid Caching Strategy ✅ IMPLEMENTED
-Three-layer caching approach for optimal performance:
+### Caching Strategy ✅ IMPLEMENTED (2계층)
+
+> **정정 (2026-09-21)**: 이전 문서는 "3계층 ✅ IMPLEMENTED"라며 2계층으로
+> `metadata_cache` DB 캐시를 기술했으나, **그 계층은 존재하지 않는다.**
+> `MetadataCache` 모델은 `app/api`·`app/core` 어디에서도 참조되지 않는다
+> (`models/__init__.py`의 export 한 줄뿐). v1.4.64의 죽은 코드 정리에서
+> 사용처가 제거되었고 모델만 남았다. 테이블 정리 여부는 보류 중이다.
 
 1. **File Cache (Images)**: `/data/icons`, `/data/screenshots`
-   - Product icons and screenshots cached locally
-   - Reduces external API dependency
-   - Permanent storage
+   - 제품 아이콘·스크린샷을 로컬에 캐시 (`core/icon_cache.py`)
+   - 외부 API 의존도 감소, 영구 보관
 
-2. **Database Cache (Metadata)**: `metadata_cache` table
-   - AI-generated metadata cached in PostgreSQL
-   - Prevents duplicate AI API calls
-   - Tracks hit count and confidence score
-   - Source tracking: ai/manual/web
-
-3. **Redis Cache (API Responses)**: Port 6379
-   - Product lists, searches, statistics
-   - TTL-based automatic expiration (60-600 seconds)
-   - Smart invalidation on data changes
-   - 40-60x performance improvement
-   - Graceful degradation if Redis unavailable
+2. **Redis Cache (API Responses)**: 포트 6379
+   - 제품 목록/검색/통계 응답
+   - TTL 기반 만료 (60~600초)
+   - 데이터 변경 시 스마트 무효화 — `KEYS` 대신 `SCAN` 사용 (대규모 캐시에서 Redis 블로킹 방지)
+   - Redis 연결 실패 시 예외를 삼키고 캐시 없이 동작 (graceful degradation)
 
 **Cache Management**:
 - Admin API: `GET /api/cache/stats`, `POST /api/cache/clear`
-- Automatic invalidation on: product updates, scans, AI matching
-- Key pattern: `{prefix}:{params_hash}`
+- 자동 무효화: 제품 수정, 스캔, AI 매칭 시
+- 키 패턴: `{prefix}:{params_hash}`
 
 ### File Scanning & Monitoring
 - Use Python `os.walk` to traverse configured folder paths
@@ -176,184 +163,100 @@ When implementing docker-compose.yml:
 2. **Filename Ambiguity Handling**: For generic filenames, use parent folder name as primary search context
 3. **Security**: Implement session-based download link validation even for internal NAS usage to prevent unauthorized access if links leak
 
-## Current Implementation Status (v3.0.0)
+## Current Implementation Status (v1.4.76, 2026-09-21 실측)
 
-### Backend Structure (30 files)
+> 이전 문서는 "v3.0.0 / 백엔드 30개 파일 / 프론트 17개 파일 / 모델 6개"로 적혀 있었다.
+> 아래는 코드에서 직접 센 값이다. 규모가 바뀌면 여기도 함께 고칠 것.
+
+| 항목 | 실측 |
+|---|---|
+| 버전 | **1.4.76** |
+| 백엔드 | **81개 `.py` / 15,276줄** |
+| API 라우터 | **24개** |
+| SQLAlchemy 모델 | **15개** |
+| 프론트엔드 뷰 | **21개 `.vue`** |
+| Alembic 마이그레이션 | **27개** (정본) |
+| 로케일 | ko / en |
+
+### 백엔드 구조
+
 ```
 backend/app/
-├── main.py                    # FastAPI app with scheduler auto-start
-├── config.py                  # Pydantic Settings (ICON_CACHE_DIR hardcoded to dev path)
-├── database.py                # SQLAlchemy engine + SessionLocal
-├── dependencies.py            # get_current_user, get_current_admin_user
-├── models/                    # 6 SQLAlchemy models
-│   ├── user.py
-│   ├── product.py
-│   ├── version.py
-│   ├── attachment.py
-│   ├── setting.py
-│   └── scan_history.py
-├── schemas/                   # 4 Pydantic schemas
-├── api/                       # 7 API routers
-│   ├── auth.py               # /login, /setup, /check-setup
-│   ├── users.py
-│   ├── products.py           # Enhanced with search, filters, stats
-│   ├── scan.py               # Manual scan with AI toggle
-│   ├── download.py           # X-Accel-Redirect
-│   ├── scheduler.py          # /start, /stop, /run-now, /status
-│   └── filesystem.py         # Folder browser API
-└── core/                      # 6 core modules
-    ├── security.py           # JWT + Bcrypt
-    ├── parser.py             # FilenameParser
-    ├── ai_metadata.py        # AIMetadataGenerator (OpenAI)
-    ├── icon_cache.py         # IconCache (httpx)
-    ├── scanner.py            # FileScanner (async/sync)
-    └── scheduler.py          # ScanScheduler (APScheduler)
+├── main.py            FastAPI 앱, 스케줄러 자동 시작
+│                      (스키마 DDL 없음 - entrypoint.sh 의 Alembic 이 담당)
+├── config.py          Pydantic Settings
+├── database.py        SQLAlchemy engine + SessionLocal
+├── dependencies.py    get_current_user, get_current_admin_user
+├── models/            15개 모델
+├── schemas/           Pydantic 스키마
+├── api/               24개 라우터 (아래 표)
+├── core/              스캐너·파서·분류기·AI·매처·캐시·스케줄러·알림
+└── middleware/        요청 로깅
+backend/alembic/       마이그레이션 27개 (스키마 정본)
+backend/entrypoint.sh  DB 대기 -> Alembic 모드 판정 -> upgrade/stamp -> 앱 기동
 ```
 
-### Frontend Structure (17 files)
+### API 라우터
+
+| 모듈 | prefix |
+|---|---|
+| `auth` | `/api/auth"` |
+| `products` | `/api/products"` |
+| `users` | `/api/users"` |
+| `invitations` | `/api/invitations"` |
+| `scan` | `/api/scan"` |
+| `download` | `/api/download"` |
+| `scheduler` | `/api/scheduler"` |
+| `filesystem` | `/api/filesystem"` |
+| `favorites` | `/api/favorites"` |
+| `scraps` | `/api/scraps"` |
+| `config` | `/api/config"` |
+| `metadata` | `/api/metadata"` |
+| `posts` | `/api/posts"` |
+| `comments` | `/api/posts"` |
+| `images` | `/api/images"` |
+| `version` | `/api"` |
+| `cache` | `/api/cache"` |
+| `notifications` | `/api/notifications"` |
+| `share` | `/api/share"` |
+| `backup` | `/api/backup"` |
+| `activity_log` | `/api"` |
+
+### 프론트엔드 구조
+
 ```
 frontend/src/
-├── main.js
-├── App.vue
-├── router/index.js           # Navigation guards
-├── store/auth.js             # Pinia auth state
-├── api/                      # 7 API clients
-│   ├── client.js            # Axios with interceptors
-│   ├── auth.js
-│   ├── products.js
-│   ├── scan.js
-│   ├── scheduler.js
-│   └── filesystem.js        # Folder browser API
-├── components/              # Reusable components
-│   ├── FolderBrowser.vue    # Folder selection modal
-│   └── ...
-└── views/                    # 10 views
-    ├── Login.vue
-    ├── Setup.vue
-    ├── Home.vue             # Dashboard with stats
-    ├── Discover.vue         # Product browsing
-    ├── ProductDetail.vue    # Product details with tabs
-    ├── Settings.vue         # Settings with folder browser integration
-    ├── Admin.vue            # 3 tabs: manual scan, scheduler, info
-    ├── Tips.vue             # Tips & Tech board list
-    ├── TipsDetail.vue       # Tips post detail view
-    └── TipsWrite.vue        # Tips post editor with TinyMCE
+├── main.js, App.vue
+├── router/index.js    네비게이션 가드 + 청크 로드 실패 자가 복구
+├── store/             Pinia (auth, locale)
+├── api/               Axios 클라이언트
+├── components/        admin · common · dialog · layout · product · violation
+├── locales/           ko.js / en.js
+└── views/             21개 화면
 ```
 
-### Key Implementation Details
+### 스키마 관리 (2026-09-21 통일 완료)
 
-**AI Metadata Generation**:
-- Model: GPT-4o-mini
-- Prompt: Korean language, JSON-only response
-- Categories: Graphics, Office, Development, Utility, Media, OS, Security, Network, Mac, Mobile, Patch, Driver, Source, Backup, Portable, Business, Engineering, Theme, Hardware, Uncategorized
-- Fallback: Parser-based metadata if API fails or unavailable
+정본은 `backend/alembic/versions/` **하나**다. 바꾸려면:
 
-**Scheduler**:
-- Global instance: `scan_scheduler` in `core/scheduler.py`
-- Auto-start on app startup if settings exist in DB
-- Cron expressions supported (default: "0 2 * * *")
-- Settings persisted in Settings table (scan_paths, cron_schedule, use_ai)
+```bash
+# 1. 모델 수정 후
+alembic revision --autogenerate -m "설명"
+# 2. 생성된 파일을 반드시 검토 (손수 만든 GIN 인덱스를 drop 하려 들 수 있다)
+```
 
-**Authentication**:
-- JWT tokens with HS256 algorithm
-- OAuth2PasswordBearer scheme
-- Token stored in localStorage on frontend
-- 401 responses trigger automatic logout
+- `entrypoint.sh` 가 DB 상태를 보고 `upgrade` / `stamp` / 중단을 자동 판정한다
+- CI 의 `schema-check` 잡이 `alembic check` 로 드리프트를 막는다 — 어긋나면 이미지가 빌드되지 않는다
+- ❌ `entrypoint.sh` 나 `main.py` 에 DDL 을 다시 넣지 말 것
+- 의도적 예외(손수 만든 GIN 인덱스, 보류 중인 죽은 테이블/컬럼)는 `alembic/env.py` 의 `include_object` 에서 제외한다
 
-**File Scanning Logic**:
-- Folder = Product (identified by folder_path)
-- File in folder = Version (identified by file_path)
-- Duplicate detection via DB unique constraints
-- Both sync and async scan methods available
+### 릴리스
 
-### Folder Browser Feature (v3.1.0)
+```bash
+./build.sh [patch|minor|major]   # 버전 bump + 커밋 + 태그 + push
+```
+이미지 빌드/푸시는 **GitHub Actions 만** 수행한다. `build.sh` 는 빌드하지 않는다.
 
-**Backend** (`app/api/filesystem.py`):
-- `GET /api/filesystem/browse?path={path}` - Browse directory contents
-  - Returns: current_path, parent_path, items (name, path, is_dir, is_readable)
-  - Default path: `/library`
-  - Admin-only access
-- `POST /api/filesystem/create-directory?path={path}` - Create new directory
-  - Admin-only access
-
-**Frontend** (`components/FolderBrowser.vue`):
-- Modal-based folder selection UI
-- Breadcrumb navigation
-- Visual folder tree with readable/unreadable indicators
-- Double-click to navigate, single-click to select
-- Direct path input support
-- Integrated into Settings.vue for scan folder configuration
-
-**Default Library Folder**:
-- Base path: `/library` (mounted from `./data/library`)
-- Used as default starting point for folder browser
-- NAS folders can be mounted as subdirectories (e.g., `/library/NAS`)
-
-### Known Hardcoded Values (Need Attention)
-
-1. **config.py**: `ICON_CACHE_DIR = "/home/nuricom/project/myappStore/data/icons"`
-   - Should use environment variable for Docker compatibility
-
-2. **Settings.vue**: Default folder is now `/library` (updated from `/tmp/myappstore_scan_test`)
-
-3. **docker-compose.yml**: Library folder configured
-   - `./data/library:/library` (main storage)
-   - Optional NAS mount: `- /volume1/Software:/library/NAS:ro`
-
-4. **main.py**: `Base.metadata.create_all(bind=engine)` commented out
-   - Using Alembic migrations recommended
-
-### Production Deployment Checklist
-
-- [ ] Set up Alembic migrations
-- [ ] Add Nginx service to docker-compose.yml for X-Accel-Redirect
-- [ ] Configure NAS volume mounts
-- [ ] Change ICON_CACHE_DIR to environment variable
-- [ ] Build frontend for production (Vite build)
-- [ ] Set up logging (replace print() statements)
-- [ ] Add health check endpoints
-- [ ] Configure CORS for production domains
-- [ ] Generate strong SECRET_KEY
-- [ ] (Optional) Add API rate limiting
-- [ ] (Optional) Add test suite
-
-### API Endpoints Reference
-
-**Auth**:
-- POST `/api/auth/login` - Login
-- GET `/api/auth/check-setup` - Check if setup needed
-- POST `/api/auth/setup` - Create admin account
-
-**Products**:
-- GET `/api/products/` - List with filters (category, vendor, search, sort)
-- GET `/api/products/recent` - Recent products
-- GET `/api/products/by-category` - Netflix-style grouping
-- GET `/api/products/search/suggestions` - Autocomplete
-- GET `/api/products/{id}` - Product details
-- GET `/api/products/stats/overview` - System stats
-- GET `/api/products/stats/categories` - Category stats
-
-**Scan**:
-- POST `/api/scan/start` - Manual scan (body: {scan_path, use_ai})
-
-**Scheduler**:
-- GET `/api/scheduler/status` - Scheduler status
-- POST `/api/scheduler/start` - Start scheduler (body: {cron_schedule, scan_paths, use_ai})
-- POST `/api/scheduler/stop` - Stop scheduler
-- POST `/api/scheduler/run-now` - Immediate scan
-- GET `/api/scheduler/config` - Get saved config
-
-**Download**:
-- GET `/api/download/{version_id}` - Download file (returns X-Accel-Redirect header)
-
-**Filesystem** (Admin-only):
-- GET `/api/filesystem/browse?path={path}` - Browse directory
-- POST `/api/filesystem/create-directory?path={path}` - Create directory
-
-All authenticated endpoints require `Authorization: Bearer <token>` header.
-Admin-only endpoints: all under `/api/scheduler`, `/api/scan`, `/api/users`, `/api/filesystem`.
-
-<!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
 This project is indexed by GitNexus as **my-appstore** (6425 symbols, 12485 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
