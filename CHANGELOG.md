@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.74] - 2026-09-21
+
+### Fixed
+- **배포 이미지에 Alembic 마이그레이션이 들어있지 않던 문제** — `Dockerfile`이 `./app`·`requirements.txt`·`entrypoint.sh`만 복사해서, 컨테이너 안에서 `alembic` 명령이 `No config file 'alembic.ini' found`로 실패했습니다
+  - `alembic` 실행파일은 설치돼 있었으나 **실행할 대상이 없었습니다.** 즉 마이그레이션은 배포 환경에서 한 번도 실행 가능한 적이 없었고, 이것이 `entrypoint.sh`가 `ALTER TABLE`/`CREATE INDEX`를 직접 짜 넣고 `main.py`가 `create_all()` + ALTER 안전망을 두게 된 근본 원인입니다
+  - `Dockerfile.prod`에는 해당 COPY가 이미 있었으나, CI가 빌드하는 `Dockerfile`에만 빠져 있었습니다
+
+### Added
+- **DB 마이그레이션** `adab022231f3` — Alembic 밖에서만 만들어지던 살아있는 테이블 3개(`activity_logs`, `product_videos`, `share_links`)를 Alembic으로 편입
+  - **추가 전용**입니다. 자동 생성분의 파괴적 연산(죽은 테이블 삭제, 손수 만든 GIN 인덱스 삭제, `crawled_from` 컬럼 삭제)은 전부 제거했습니다
+  - `entrypoint.sh`에만 있던 `idx_posts_title_trgm`, `idx_filename_violations_file_name_trgm`도 동일 이름 + `IF NOT EXISTS`로 추가
+- `app/models/__init__.py`에 `ActivityLog` 등록 — 빠져 있어서 `alembic revision --autogenerate`가 `drop_table('activity_logs')`를 생성할 위험이 있었습니다
+
+### Removed
+- **죽은 코드 1,191줄 제거** (도달 가능성 검증 후)
+  - `core/ai_metadata_old.py`(558), `core/metadata_enricher_old.py`(235), `core/bing_image_search.py`(97) — 임포트 0곳
+  - `core/filename_standardizer.py`(270) — 죽은 `_old` 파일만 임포트, API 라우트 없음
+  - `models/scan_history.py`(31) — 미사용 import 한 줄뿐. 실제 스캔 이력은 `scan_history.json` 파일
+  - `products.crawled_from` 모델/스키마 필드 — 값을 쓰는 코드가 삭제된 `_old` 파일뿐, 프론트 참조 0건 (DB 컬럼 자체는 유지)
+  - 백엔드 `print()` 27건 중 24건이 이 파일들에 있어 함께 해소되었습니다
+
+### 배포 후 필요한 조치
+운영 DB에는 `alembic_version` 테이블이 없습니다(`create_all()`로 만들어졌기 때문). 이 릴리스를 반영한 뒤 **한 번만** 실행하세요:
+```
+docker exec myapp-backend alembic stamp head
+```
+SQL을 실행하지 않고 "이 DB는 이미 최신"이라고 기록만 남깁니다. 이 작업 없이 `alembic upgrade head`를 돌리면 `relation "products" already exists`로 실패합니다.
+
 ## [1.4.73] - 2026-09-21
 
 ### Fixed
