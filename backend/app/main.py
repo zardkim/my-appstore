@@ -18,72 +18,14 @@ setup_logging()
 # 로거 인스턴스 생성
 logger = logging.getLogger(__name__)
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
-
-# ── 레거시 배포 호환: classification 컬럼이 없으면 직접 추가 ──────────
-# Alembic 마이그레이션 실패 또는 구 create_all() 배포 환경에서
-# classification 컬럼이 누락될 수 있으므로 앱 시작 시 직접 보장
-try:
-    from sqlalchemy import text as _text
-    with engine.connect() as _conn:
-        _conn.execute(_text(
-            "ALTER TABLE filename_violations "
-            "ADD COLUMN IF NOT EXISTS classification VARCHAR(20) NOT NULL DEFAULT 'product'"
-        ))
-        _conn.execute(_text(
-            "ALTER TABLE filename_violations "
-            "ADD COLUMN IF NOT EXISTS classification_auto BOOLEAN NOT NULL DEFAULT true"
-        ))
-        _conn.commit()
-except Exception:
-    pass  # 테이블이 아직 없거나 이미 컬럼이 있으면 무시
-
-# ── users.email 컬럼 보장 (ALTER TABLE은 별도 트랜잭션으로 커밋) ────────
-try:
-    from sqlalchemy import text as _text2
-    with engine.connect() as _conn2:
-        _conn2.execute(_text2(
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR"
-        ))
-        _conn2.commit()
-    logger.info("✓ users.email column verified")
-except Exception as _e2:
-    logger.info(f"users.email column: {_e2}")
-
-# UNIQUE 제약조건은 별도 트랜잭션 (실패해도 위 컬럼 추가는 유지)
-try:
-    from sqlalchemy import text as _text3
-    with engine.connect() as _conn3:
-        _conn3.execute(_text3("""
-            DO $$
-            BEGIN
-                IF NOT EXISTS (
-                    SELECT 1 FROM pg_constraint
-                    WHERE conname = 'users_email_key' AND conrelid = 'users'::regclass
-                ) THEN
-                    ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);
-                END IF;
-            END $$;
-        """))
-        _conn3.commit()
-except Exception:
-    pass
-
-# ── products.release_year 컬럼 보장 (Alembic 마이그레이션이 적용되지 않는 배포 환경 대비) ──
-try:
-    from sqlalchemy import text as _text4
-    with engine.connect() as _conn4:
-        _conn4.execute(_text4(
-            "ALTER TABLE products ADD COLUMN IF NOT EXISTS release_year INTEGER"
-        ))
-        _conn4.execute(_text4(
-            "CREATE INDEX IF NOT EXISTS ix_products_release_year ON products (release_year)"
-        ))
-        _conn4.commit()
-    logger.info("✓ products.release_year column verified")
-except Exception as _e4:
-    logger.info(f"products.release_year column: {_e4}")
+# 스키마는 entrypoint.sh 의 Alembic 이 책임진다.
+# 예전에는 여기서 Base.metadata.create_all() 과 ALTER TABLE 안전망 4블록을
+# 돌렸으나, 스키마 정본이 Alembic / entrypoint.sh / main.py 세 곳으로 갈라져
+# 실제로 장애가 났다 (v1.4.68: products.release_year 가 배포에 반영되지 않아
+# 목록 조회가 500). 이제 정본은 alembic/versions/ 하나다.
+#
+# 스키마를 바꾸려면 모델을 고치고 alembic revision --autogenerate 로
+# 리비전을 만든다. 여기에 DDL 을 다시 넣지 말 것.
 
 # Ensure required directories exist before app initialization
 required_directories = [

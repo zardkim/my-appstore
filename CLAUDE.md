@@ -2,6 +2,31 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🔴 이 프로젝트의 Git / 레지스트리 정책 (2026-09-21 확정)
+
+**이 프로젝트는 GitHub와 Docker Hub만 사용한다. Harbor와 Gitea는 사용하지 않는다.**
+
+| 용도 | 사용처 |
+|---|---|
+| Git 저장소 | **GitHub** — `github.com/zardkim/my-appstore` (정본, 유일) |
+| 컨테이너 이미지 | **Docker Hub** — `zardkim/myappstore-backend`, `zardkim/myappstore-frontend` |
+| 이미지 빌드/푸시 | **GitHub Actions** (`.github/workflows/docker-build.yml`) — `v*` 태그 push로 트리거 |
+| 운영 배포 | 시놀로지 Container Manager가 Docker Hub `:latest`를 pull |
+
+### 하지 말 것
+
+- ❌ Harbor(`harbor.nurilab.pe.kr`)에 푸시하지 않는다. `docker-compose*.yml`의 이미지 주소도 Docker Hub를 유지한다
+- ❌ Gitea(`gitea.nurilab.pe.kr`)에 미러/리모트를 추가하지 않는다. 정본을 두 곳에 두지 않는다
+- ❌ `build.sh`에 레지스트리 푸시 로직을 추가하지 않는다 — 빌드/푸시는 CI 한 곳에서만 한다
+
+> **참고**: 사용자 전역 규칙(`~/.claude/CLAUDE.md`)은 Harbor를 기본 레지스트리로 지정하지만,
+> 이 프로젝트는 공개 Docker Hub 이미지를 배포하므로 **의도적인 예외**다.
+> 2026-09-14 ~ 09-21에 Harbor를 백업본으로 병행 운영해 봤으나, 같은 태그에 서로 다른 빌드가
+> 올라가는 사고(1.4.69)가 발생해 단일화하기로 결정했다.
+> Harbor에 남아 있는 과거 이미지(~1.4.74)는 참고용일 뿐 **신뢰하지 말 것.**
+
+---
+
 ## Project Overview
 
 **MyApp Store** is a NAS-based personal software library management system that scans software files and uses AI to automatically generate metadata (descriptions, icons, vendors, categories), presenting them in an app store-like web UI.

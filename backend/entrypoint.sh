@@ -59,131 +59,89 @@ for i in range(max_retries):
         sys.exit(1)
 END
 
-# Database tables will be created automatically by SQLAlchemy
-echo "Database tables will be created by SQLAlchemy Base.metadata.create_all()"
+# ── 스키마 마이그레이션 (Alembic 이 정본) ────────────────────────────────
+#
+# 예전에는 이 자리에서 ALTER TABLE / CREATE INDEX 를 직접 실행하고
+# main.py 가 Base.metadata.create_all() 과 ALTER 안전망을 돌렸다.
+# 스키마 정본이 세 곳으로 갈라져 실제로 장애가 났었다
+# (v1.4.68: products.release_year 가 배포에 반영되지 않아 목록 조회 500).
+#
+# 기존 배포 DB 는 create_all() 로 만들어져 alembic_version 이 없다.
+# 그 상태로 upgrade 를 돌리면 첫 리비전에서
+# "relation \"products\" already exists" 로 죽으므로,
+# DB 상태를 보고 stamp/upgrade 를 자동으로 고른다.
+echo "Running database migrations (Alembic)..."
 
-# Ensure critical schema columns exist (classification columns for scan items)
-echo "Checking schema columns..."
-python3 << 'PYEND'
+# alembic/env.py 는 os.environ["DATABASE_URL"] 을 직접 읽는다.
+if [ -z "${DATABASE_URL:-}" ]; then
+    export DATABASE_URL="postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-myappstore}"
+    echo "  DATABASE_URL not set - constructed from individual vars"
+fi
+
+MIGRATION_MODE=$(python3 << 'PYEND'
 import os
-import psycopg2
+from sqlalchemy import create_engine, inspect
 
-database_url = os.getenv('DATABASE_URL', '')
-if not database_url:
-    postgres_user = os.getenv('POSTGRES_USER', 'postgres')
-    postgres_password = os.getenv('POSTGRES_PASSWORD', 'password')
-    postgres_db = os.getenv('POSTGRES_DB', 'myappstore')
-    database_url = f"postgresql://{postgres_user}:{postgres_password}@db:5432/{postgres_db}"
+engine = create_engine(os.environ["DATABASE_URL"])
+with engine.connect() as conn:
+    insp = inspect(conn)
+    tables = set(insp.get_table_names())
 
-try:
-    conn = psycopg2.connect(database_url)
-    cur = conn.cursor()
-    # Check if filename_violations table exists
-    cur.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'filename_violations')")
-    table_exists = cur.fetchone()[0]
-    if table_exists:
-        cur.execute("ALTER TABLE filename_violations ADD COLUMN IF NOT EXISTS classification VARCHAR(20) NOT NULL DEFAULT 'product'")
-        cur.execute("ALTER TABLE filename_violations ADD COLUMN IF NOT EXISTS classification_auto BOOLEAN NOT NULL DEFAULT true")
-        conn.commit()
-        print("✓ Schema columns verified")
+    if "alembic_version" in tables:
+        print("upgrade")
+    elif not tables:
+        print("fresh")
     else:
-        print("Note: filename_violations table not yet created (will be created by SQLAlchemy)")
-
-    # product_videos 테이블 자동 생성
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS product_videos (
-            id SERIAL PRIMARY KEY,
-            product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-            title VARCHAR(200) NOT NULL DEFAULT '',
-            description TEXT,
-            file_path VARCHAR NOT NULL,
-            file_name VARCHAR NOT NULL,
-            file_size BIGINT DEFAULT 0,
-            mime_type VARCHAR DEFAULT 'video/mp4',
-            sort_order INTEGER DEFAULT 0,
-            source VARCHAR DEFAULT 'upload',
-            created_at TIMESTAMPTZ DEFAULT NOW()
-        )
-    """)
-    cur.execute("CREATE INDEX IF NOT EXISTS ix_product_videos_product_id ON product_videos(product_id)")
-    conn.commit()
-    print("✓ product_videos table ready")
-
-    # activity_logs 테이블 생성 (없으면)
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS activity_logs (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER,
-            username VARCHAR(100),
-            action VARCHAR(50) NOT NULL,
-            resource_type VARCHAR(50),
-            resource_id INTEGER,
-            resource_name VARCHAR(500),
-            ip_address VARCHAR(50),
-            details TEXT,
-            created_at TIMESTAMPTZ DEFAULT NOW()
-        )
-    """)
-    cur.execute("CREATE INDEX IF NOT EXISTS ix_activity_logs_action ON activity_logs(action)")
-    cur.execute("CREATE INDEX IF NOT EXISTS ix_activity_logs_created_at ON activity_logs(created_at)")
-    conn.commit()
-    print("✓ activity_logs table ready")
-
-    # users.email 컬럼 추가 (없으면) - 독립 try-except으로 보장
-    try:
-        cur.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')")
-        users_exists = cur.fetchone()[0]
-        if users_exists:
-            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR")
-            conn.commit()
-            # UNIQUE 제약조건 별도 추가 (이미 있으면 무시)
-            try:
-                cur.execute("""
-                    DO $$
-                    BEGIN
-                        IF NOT EXISTS (
-                            SELECT 1 FROM pg_constraint
-                            WHERE conname = 'users_email_key'
-                        ) THEN
-                            ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);
-                        END IF;
-                    END $$;
-                """)
-                conn.commit()
-            except Exception:
-                conn.rollback()
-            try:
-                cur.execute("CREATE INDEX IF NOT EXISTS ix_users_email ON users (email)")
-                conn.commit()
-            except Exception:
-                conn.rollback()
-            print("✓ users.email column verified")
-        else:
-            print("Note: users table not yet created (will be created by SQLAlchemy)")
-    except Exception as email_e:
-        conn.rollback()
-        print(f"Note: users.email fix skipped: {email_e}")
-
-    # pg_trgm 확장 및 GIN 인덱스 생성 (검색 성능 최적화)
-    try:
-        cur.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
-        conn.commit()
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_products_title_trgm ON products USING GIN (title gin_trgm_ops)")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_products_subtitle_trgm ON products USING GIN (subtitle gin_trgm_ops)")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_products_vendor_trgm ON products USING GIN (vendor gin_trgm_ops)")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_posts_title_trgm ON posts USING GIN (title gin_trgm_ops)")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_filename_violations_file_name_trgm ON filename_violations USING GIN (file_name gin_trgm_ops)")
-        conn.commit()
-        print("✓ pg_trgm indexes created")
-    except Exception as idx_e:
-        print(f"Note: pg_trgm index creation skipped: {idx_e}")
-        conn.rollback()
-
-    cur.close()
-    conn.close()
-except Exception as e:
-    print(f"Note: Schema check skipped: {e}")
+        # create_all() 로 만들어진 기존 DB. head 로 stamp 하려면 스키마가
+        # 실제로 head 와 같아야 한다. 최근 리비전이 추가한 것들을 표본으로
+        # 확인해서, 하나라도 없으면 조용히 잘못 stamp 하지 않고 멈춘다.
+        missing = []
+        for t in ("activity_logs", "product_videos", "share_links"):
+            if t not in tables:
+                missing.append(f"table:{t}")
+        def cols(t):
+            return {c["name"] for c in insp.get_columns(t)} if t in tables else set()
+        if "release_year" not in cols("products"):
+            missing.append("column:products.release_year")
+        if "email" not in cols("users"):
+            missing.append("column:users.email")
+        if "classification" not in cols("filename_violations"):
+            missing.append("column:filename_violations.classification")
+        print("stamp" if not missing else "outdated:" + ",".join(missing))
 PYEND
+)
+
+case "$MIGRATION_MODE" in
+    fresh)
+        echo "  Empty database - creating schema from migrations"
+        alembic upgrade head
+        ;;
+    stamp)
+        echo "  Existing schema without alembic_version (legacy create_all deployment)"
+        echo "  -> stamping head without running SQL, then applying any pending migrations"
+        alembic stamp head
+        alembic upgrade head
+        ;;
+    upgrade)
+        echo "  Applying pending migrations"
+        alembic upgrade head
+        ;;
+    outdated:*)
+        echo "✗ ERROR: 기존 DB 가 최신 스키마보다 오래되었습니다."
+        echo "  누락: ${MIGRATION_MODE#outdated:}"
+        echo ""
+        echo "  이 DB 는 자동으로 stamp 할 수 없습니다. 잘못 stamp 하면"
+        echo "  실제로는 없는 컬럼을 있다고 기록하게 됩니다."
+        echo "  v1.4.74 이미지로 한 번 기동해 스키마를 맞춘 뒤 다시 시도하세요."
+        exit 1
+        ;;
+    *)
+        echo "✗ ERROR: 마이그레이션 모드를 판정하지 못했습니다: ${MIGRATION_MODE}"
+        exit 1
+        ;;
+esac
+
+echo "✓ Database schema is up to date"
 
 # config.json 파일이 없으면 config.sample.json에서 복사
 CONFIG_DIR="${CONFIG_DATA_DIR:-/app/data}"
