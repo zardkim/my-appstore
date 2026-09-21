@@ -16,6 +16,7 @@
 #      - 이벤트: 부팅-up
 #      - 실행 명령: /volume1/docker/myappstore/scripts/synology-mount-library.sh
 #
+# 이 스크립트는 마운트만 한다. 컨테이너는 재시작하지 않는다.
 # 수동 실행도 안전하다(멱등). 이미 마운트돼 있으면 건너뛴다.
 #
 #   ./synology-mount-library.sh            마운트 (필요한 것만)
@@ -35,9 +36,6 @@ MOUNT_PAIRS="
 /volume2/App:App
 /volume3/App2:App2
 "
-
-# 마운트 후 재시작할 컨테이너 (마운트가 새로 생긴 경우에만)
-CONTAINERS="myapp-backend myapp-frontend"
 
 # 부팅 직후에는 볼륨이 아직 준비되지 않았을 수 있다
 WAIT_TIMEOUT=120
@@ -203,30 +201,14 @@ do_mount() {
     failed=${failed:-0}
     rm -f "$result_file"
 
-    # 6) 새로 마운트된 게 있으면 컨테이너를 재시작한다
-    #
-    # 컨테이너가 기동한 뒤 호스트에서 만든 바인드 마운트는 컨테이너 안에서 보이지 않는다
-    # (마운트 전파가 private/rslave). 이번 장애가 정확히 이 경우였다 -
-    # 마운트가 없는 상태에서 frontend가 재생성되어 라이브러리가 빈 폴더로 보였다.
+    # 참고: 컨테이너 기동 후 호스트에서 만든 바인드 마운트는 컨테이너 안에서
+    # 보이지 않는다(마운트 전파가 private). 이 스크립트는 마운트만 하고
+    # 컨테이너는 건드리지 않으므로, 이미 떠 있는 컨테이너에 반영하려면
+    # 직접 재시작해야 한다.
     if [ "$mounted_any" -gt 0 ]; then
-        if command -v docker >/dev/null 2>&1; then
-            log "  새 마운트 ${mounted_any}건 - 컨테이너 재시작"
-            for c in $CONTAINERS; do
-                if docker ps -a --format '{{.Names}}' | grep -qx "$c"; then
-                    if docker restart "$c" >/dev/null 2>&1; then
-                        log "    재시작: $c"
-                    else
-                        log "    재시작 실패: $c"
-                    fi
-                else
-                    log "    건너뜀(없음): $c"
-                fi
-            done
-        else
-            log "  docker 명령을 찾을 수 없음 - 컨테이너를 직접 재시작할 것"
-        fi
+        log "  새로 마운트: ${mounted_any}건"
     else
-        log "  새로 마운트된 항목 없음 - 컨테이너 재시작 생략"
+        log "  새로 마운트된 항목 없음"
     fi
 
     if [ "$failed" -gt 0 ]; then
