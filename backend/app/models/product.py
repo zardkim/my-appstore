@@ -36,7 +36,6 @@ class Product(Base):
     release_year = Column(Integer, index=True)  # 출시 연도 (버전 구분/필터링용, title 문자열 파싱 대체)
 
     # 크롤링 메타데이터
-    crawled_from = Column(JSON)  # 크롤링 소스 {"softpedia": true, "github": true, ...}
     last_crawled_at = Column(DateTime(timezone=True))  # 마지막 크롤링 시간
     screenshots = Column(JSON, nullable=True)  # 스크린샷 목록 [{"type": "local|external", "url": "..."}, ...]
 

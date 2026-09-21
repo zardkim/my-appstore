@@ -7,7 +7,6 @@ import os
 from app.database import get_db
 from app.models.product import Product
 from app.models.version import Version
-from app.models.scan_history import ScanHistory
 from app.models.filename_violation import FilenameViolation
 from app.models.setting import Setting
 from app.models.favorite import Favorite

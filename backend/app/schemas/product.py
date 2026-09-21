@@ -58,7 +58,6 @@ class ProductResponse(ProductBase):
     release_notes: Optional[str] = None
     release_date: Optional[str] = None
     release_year: Optional[int] = None
-    crawled_from: Optional[Dict[str, Any]] = None
     last_crawled_at: Optional[datetime] = None
     screenshots: Optional[List[Optional[str]]] = None  # None 허용 (슬롯 위치 유지)
     installation_guide: Optional[str] = None
