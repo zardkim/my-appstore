@@ -27,6 +27,14 @@ RUN mkdir -p /app/static/icons
 # Copy application code
 COPY ./app ./app
 
+# Copy Alembic migrations
+# 이것이 없으면 컨테이너 안에서 alembic 명령이 동작하지 않는다
+# ("No config file 'alembic.ini' found"). Dockerfile.prod 에는 있었으나
+# CI 가 빌드하는 이 파일에는 빠져 있어서, 배포 환경에서는 마이그레이션을
+# 실행할 수 없었고 entrypoint.sh 가 DDL 을 직접 짜 넣고 있었다.
+COPY alembic.ini ./alembic.ini
+COPY ./alembic ./alembic
+
 # Expose port
 EXPOSE 8110
 
