@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.79] - 2026-09-21
+
+### Fixed
+- **Gemini 모델 목록이 쓸모없던 문제** — 제공자가 `generateContent` 지원으로 표시해도 음성/이미지/음악 전용 모델이 섞여 옵니다. 운영 응답 41개 중 **21개가 그랬고 정렬까지 깨져** 쓸 모델이 아래로 밀려 있었습니다
+
+  | | 맨 위에 오던 것 |
+  |---|---|
+  | 수정 전 | `deep-research-pro-preview-12-2025`, `antigravity-preview-09-2026`, `gemma-4-31b-it` |
+  | 수정 후 | `gemini-3.8-flash`, `gemini-3.7-flash`, `gemini-3.6-flash` |
+
+  - 텍스트 생성용이 아닌 모델 제외 (`tts`/`transcribe`/`image`/`audio`/`computer-use`/`robotics`/`lyria`/`nano-banana`/`veo`/`imagen`/`embedding`/`live`/`deep-research`/`antigravity`) — 41개 → 20개
+  - 정렬을 2단계로: 주력 계열(`gemini-`/`gpt-`) 우선 → 버전 내림차순. **4자리 이상 숫자는 연도로 보고 버전에서 제외** — `-12-2025`가 버전 2025로 읽혀 맨 위로 오던 것이 정렬이 깨진 직접 원인이었습니다
+
+- **OpenAI 목록에 gpt-4 계열이 없던 문제** — 필터 문제가 아니었습니다. `gpt-4`/`gpt-4.5-preview`/`gpt-4.1`/`gpt-4-turbo` 모두 필터를 통과합니다. 실제 원인은 **운영에 OpenAI 키가 설정되어 있지 않아** 폴백 목록(4개)만 보이고 있었던 것입니다
+  - 키 없이도 선택할 수 있도록 폴백에 `gpt-4.1`, `gpt-4.1-mini`, `gpt-4-turbo`, `gpt-4` 추가
+  - **키를 설정하면 API에서 전체 목록이 내려옵니다** — 그쪽이 정답입니다
+
 ## [1.4.78] - 2026-09-21
 
 ### Added
