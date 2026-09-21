@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.78] - 2026-09-21
+
+### Added
+- **야간 자동 스캔에서 앱 자동 등록** — 스케줄러가 스캔 후 AI 매칭을 수행합니다. 이전에는 스캔이 '스캔 항목'만 쌓고 끝나서 야간 자동화가 끊겨 있었고, 디스코드 알림도 야간에는 발생하지 않았습니다
+  - 설정 > 메타데이터에 **"스캔 후 AI 자동 매칭"** 토글 추가. 이 플래그(`metadata.autoMatch`)는 v1.2.0-beta부터 코드에만 있고 UI가 없어 켤 방법이 없었습니다
+  - 켤 때 AI 비용이 발생한다는 경고를 함께 표시합니다. 기본값은 꺼짐
+- **AI 모델 목록 동적 조회** — 설정 화면이 제공자 API에서 실제 사용 가능한 모델을 받아옵니다
+  - `GET /api/metadata/ai-models?provider=…` (관리자 전용). 저장된 키를 서버에서 읽어 사용합니다
+  - 조회 실패 시(키 없음/401/403/네트워크) 기본 목록으로 떨어지며, 화면에 어느 쪽인지 표시합니다
+  - 기본 목록에 `gpt-6-astra`, `gpt-5.6-sol`, `claude-fable-5-1` 포함
+  - 저장된 모델이 목록에 없으면 "현재 목록에 없음" 표시와 함께 유지합니다 — 선택이 조용히 바뀌지 않습니다
+- **요청 속도 제한** — 인증 없이 외부에서 두드릴 수 있는 엔드포인트 보호. 로그인 10회/60초, 가입·최초설정 5회/300초, 공유링크 30회/60초. 새 의존성 없이 구현했습니다(uvicorn 단일 워커)
+
+### Fixed
+- **경로 기본값** — `config.py`의 경로 10개가 특정 개발 머신의 절대 경로(`/home/nuricom/…`)였습니다. `DATA_DIR`(기본 `/app/data`) 기준으로 정리했고 각 항목도 환경변수로 덮어쓸 수 있습니다. compose는 모두 명시 주입하므로 운영 동작은 동일합니다
+- **Claude thinking 판정** — 이름 나열(`claude-opus-5`, `claude-sonnet-5`)에서 패턴(`^claude-[a-z]+-5`)으로 변경. `claude-fable-5-1`이 포함되고 앞으로 나올 5.x도 자동으로 잡힙니다
+
+### Changed
+- 루트 `package.json` 버전을 현재 버전으로 동기화하고, `build.sh`가 앞으로도 함께 갱신합니다 (1.3.23에 멈춰 있었음)
+
+### Docs
+- CHANGELOG에 누락돼 있던 **1.4.64 ~ 1.4.67** 항목을 커밋 이력 기준으로 보강했습니다
+
 ## [1.4.77] - 2026-09-21
 
 ### Fixed
