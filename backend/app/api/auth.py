@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 from app.database import get_db
+from app.core.rate_limit import rate_limit_login, rate_limit_signup
 from app.models.user import User, UserRole
 from app.schemas.auth import Token
 from app.schemas.user import UserCreate, UserResponse, UserRegister
@@ -40,7 +41,7 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token, dependencies=[Depends(rate_limit_login)])
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     remember_me: bool = Form(default=False),
@@ -100,7 +101,7 @@ async def check_setup(db: Session = Depends(get_db)):
     return {"needs_setup": user_count == 0}
 
 
-@router.post("/setup", response_model=UserResponse)
+@router.post("/setup", response_model=UserResponse, dependencies=[Depends(rate_limit_signup)])
 async def setup(user_data: UserCreate, db: Session = Depends(get_db)):
     """
     Initial setup endpoint - creates first admin user
@@ -176,7 +177,7 @@ async def check_registration_status():
     )
 
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register", response_model=UserResponse, dependencies=[Depends(rate_limit_signup)])
 async def register(user_data: UserRegister, db: Session = Depends(get_db)):
     """
     Public registration endpoint

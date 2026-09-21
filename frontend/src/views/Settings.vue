@@ -1493,6 +1493,45 @@
             </div>
           </div>
 
+          <!-- 자동 매칭 (스캔 후 AI 매칭 자동 실행) -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <div class="min-w-0">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('settings.metadata.autoMatchTitle') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('settings.metadata.autoMatchDesc') }}</p>
+              </div>
+              <label class="flex items-center gap-2 cursor-pointer flex-shrink-0 ml-4">
+                <span class="text-sm font-medium" :class="autoMatch ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'">
+                  {{ autoMatch ? 'ON' : 'OFF' }}
+                </span>
+                <div class="relative">
+                  <input type="checkbox" v-model="autoMatch" class="sr-only" />
+                  <div class="w-12 h-6 rounded-full transition-colors duration-200"
+                    :class="autoMatch ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'">
+                  </div>
+                  <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+                    :class="autoMatch ? 'translate-x-6' : 'translate-x-0'">
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div v-if="autoMatch" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4">
+              <div class="flex items-start">
+                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.48 0l-7.1 12.25A2 2 0 005 19z" />
+                </svg>
+                <div class="text-sm text-amber-800 dark:text-amber-300">
+                  <p class="font-semibold mb-1">{{ t('settings.metadata.autoMatchWarnTitle') }}</p>
+                  <ul class="list-disc list-inside space-y-1 text-xs">
+                    <li>{{ t('settings.metadata.autoMatchWarnCost') }}</li>
+                    <li>{{ t('settings.metadata.autoMatchWarnScanMethod') }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Google Image Search API Settings -->
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
@@ -2880,6 +2919,8 @@ const claudeApiKey = ref('')
 const googleApiKey = ref('')
 const googleCseId = ref('')
 const googleImageSearch = ref(false)
+// 스캔 후 AI 매칭 자동 실행 (수동 스캔 + 스케줄러 자동 스캔 양쪽에 적용)
+const autoMatch = ref(false)
 // API 키 상태 관리: 저장 여부 + 편집 모드
 const hasGeminiKey = ref(false)
 const hasOpenaiKey = ref(false)
@@ -3571,6 +3612,7 @@ const saveMetadataSettings = async () => {
       googleApiKey: (editingGoogleApiKey.value || !hasGoogleApiKey.value) ? googleApiKey.value : '',
       googleCseId: (editingGoogleCseId.value || !hasGoogleCseId.value) ? googleCseId.value : '',
       googleImageSearch: googleImageSearch.value,
+      autoMatch: autoMatch.value,
       useDefaultPrompt: useDefaultPrompt.value,
       customPromptOpenai: customPromptOpenai.value,
       customPromptGemini: customPromptGemini.value,
@@ -3821,6 +3863,7 @@ onMounted(async () => {
       hasGoogleApiKey.value = !!(config.metadata.googleApiKey)
       hasGoogleCseId.value = !!(config.metadata.googleCseId)
       googleImageSearch.value = config.metadata.googleImageSearch === true
+      autoMatch.value = config.metadata.autoMatch === true
       geminiApiKey.value = ''
       openaiApiKey.value = ''
       claudeApiKey.value = ''

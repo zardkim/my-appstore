@@ -26,6 +26,7 @@ BACKEND_DIR="$SCRIPT_DIR/backend"
 FRONTEND_DIR="$SCRIPT_DIR/frontend"
 VERSION_FILE="$BACKEND_DIR/app/version.py"
 PACKAGE_JSON="$FRONTEND_DIR/package.json"
+ROOT_PACKAGE_JSON="$SCRIPT_DIR/package.json"
 
 # 인자 파싱
 BUMP_TYPE="patch"
@@ -66,6 +67,11 @@ echo "version.py 업데이트 완료"
 # frontend/package.json 업데이트
 sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" "$PACKAGE_JSON"
 echo "package.json 업데이트 완료"
+
+# 루트 package.json 도 함께 갱신한다.
+# 예전에는 여기를 갱신하지 않아 1.3.23 에 멈춰 있었다.
+sed -i "0,/\"version\": \".*\"/s//\"version\": \"$NEW_VERSION\"/" "$ROOT_PACKAGE_JSON"
+echo "루트 package.json 업데이트 완료"
 # (docker-compose*.yml 은 :latest 태그 고정 — 시놀로지 업데이트 감지용)
 
 # Git 커밋 + 태그

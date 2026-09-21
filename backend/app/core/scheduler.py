@@ -137,6 +137,8 @@ class ScanScheduler:
             "scanned_folders": 0,
             "new_scan_items": 0,
             "deleted_violations": 0,
+            "matched": 0,
+            "match_failed": 0,
             "errors": [],
             "scanned_paths": []
         }
@@ -172,6 +174,34 @@ class ScanScheduler:
                     all_results["errors"].append(error_msg)
                     logger.error(f"  ✗ {error_msg}", exc_info=True)
 
+            # 스캔은 '스캔 항목'만 만든다. Product/Version 으로 올리려면 AI 매칭이
+            # 필요하다. 예전에는 이 호출이 없어서 야간 자동 스캔이 항목만 쌓고
+            # 끝났고, v1.4.69 의 디스코드 알림도 야간에는 발생하지 않았다.
+            #
+            # 실제 수행 여부는 config 의 metadata.autoMatch 가 결정한다.
+            # 꺼져 있으면 즉시 반환하므로 AI 비용이 발생하지 않는다.
+            try:
+                from app.api.scan import auto_match_scanned_files
+
+                match_results = await auto_match_scanned_files(db)
+                all_results["matched"] = match_results.get("matched", 0)
+                all_results["match_failed"] = match_results.get("failed", 0)
+                if match_results.get("errors"):
+                    all_results["errors"].extend(match_results["errors"])
+
+                if match_results.get("message"):
+                    logger.info(f"  · 자동 매칭 건너뜀: {match_results['message']}")
+                else:
+                    logger.info(
+                        f"  ✓ 자동 매칭: 성공 {all_results['matched']} / "
+                        f"실패 {all_results['match_failed']}"
+                    )
+            except Exception as e:
+                # 매칭이 실패해도 스캔 결과는 남겨야 한다
+                msg = f"자동 매칭 실패: {e}"
+                all_results["errors"].append(msg)
+                logger.error(f"  ✗ {msg}", exc_info=True)
+
             self.last_scan_time = datetime.now()
             self.last_scan_result = all_results
 
@@ -186,6 +216,8 @@ class ScanScheduler:
                 "new_scan_items": all_results["new_scan_items"],
                 "new_versions": all_results["new_versions"],
                 "deleted_violations": all_results["deleted_violations"],
+                "matched": all_results["matched"],
+                "match_failed": all_results["match_failed"],
                 "errors_count": len(all_results["errors"]),
                 "scanned_paths": all_results["scanned_paths"],
             }

@@ -1,3 +1,5 @@
+import os
+
 from pydantic_settings import BaseSettings
 from typing import List
 
@@ -33,15 +35,25 @@ class Settings(BaseSettings):
     APP_URL: str = "http://localhost:5900"  # Frontend URL for invitation links
 
     # Paths - 환경변수로 관리
-    SCAN_BASE_PATH: str = "/library"
-    ICON_CACHE_DIR: str = "/home/nuricom/project/myappStore/data/icons"
-    SCREENSHOT_CACHE_DIR: str = "/home/nuricom/project/myappStore/data/screenshots"
-    EXIMAGE_DIR: str = "/home/nuricom/project/myappStore/data/eximage"
-    PATCHES_DIR: str = "/home/nuricom/project/myappStore/data/patches"
-    ATTACHMENTS_DIR: str = "/home/nuricom/project/myappStore/data/attachments"
-    CONFIG_DATA_DIR: str = "/home/nuricom/project/myappStore/data"
-    SCAN_EXCLUSIONS_FILE: str = "/home/nuricom/project/myappStore/data/scan_exclusions.txt"
-    VIDEOS_DIR: str = "/home/nuricom/project/myappStore/data/videos"
+    #
+    # 기본값은 DATA_DIR 기준이며, DATA_DIR 자체도 환경변수로 바꿀 수 있다.
+    # docker-compose 는 아래 값들을 모두 명시적으로 주입하므로 운영에서는
+    # 기본값이 쓰이지 않지만, compose 밖(로컬 uvicorn, 테스트 등)에서는
+    # 이 기본값으로 동작한다.
+    #
+    # 예전에는 "/home/nuricom/project/myappStore/data/..." 처럼 특정 개발 머신의
+    # 절대 경로가 기본값이었다. 다른 환경에서는 존재하지 않는 경로다.
+    DATA_DIR: str = os.getenv("DATA_DIR", "/app/data")
+
+    SCAN_BASE_PATH: str = os.getenv("SCAN_BASE_PATH", f"{DATA_DIR}/library")
+    ICON_CACHE_DIR: str = os.getenv("ICON_CACHE_DIR", f"{DATA_DIR}/icons")
+    SCREENSHOT_CACHE_DIR: str = os.getenv("SCREENSHOT_CACHE_DIR", f"{DATA_DIR}/screenshots")
+    EXIMAGE_DIR: str = os.getenv("EXIMAGE_DIR", f"{DATA_DIR}/eximage")
+    PATCHES_DIR: str = os.getenv("PATCHES_DIR", f"{DATA_DIR}/patches")
+    ATTACHMENTS_DIR: str = os.getenv("ATTACHMENTS_DIR", f"{DATA_DIR}/attachments")
+    CONFIG_DATA_DIR: str = os.getenv("CONFIG_DATA_DIR", DATA_DIR)
+    SCAN_EXCLUSIONS_FILE: str = os.getenv("SCAN_EXCLUSIONS_FILE", f"{DATA_DIR}/scan_exclusions.txt")
+    VIDEOS_DIR: str = os.getenv("VIDEOS_DIR", f"{DATA_DIR}/videos")
 
     # CORS - comma-separated string
     CORS_ORIGINS: str = "http://localhost:5900,http://localhost:3000"
@@ -53,7 +65,7 @@ class Settings(BaseSettings):
 
     # Logging
     LOG_LEVEL: str = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-    LOG_DIR: str = "/home/nuricom/project/myappStore/data/logs"
+    LOG_DIR: str = os.getenv("LOG_DIR", f"{DATA_DIR}/logs")
     ENVIRONMENT: str = "development"  # development, production
 
     class Config:

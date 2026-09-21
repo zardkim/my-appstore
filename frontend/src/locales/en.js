@@ -900,6 +900,11 @@ export default {
       gemini25ProExp: 'Gemini 2.5 Pro: Free (Experimental)',
       claudePricingTitle: 'Claude (All Paid):',
       // Google Custom Search API
+      autoMatchTitle: 'Auto-match after scan',
+      autoMatchDesc: 'Automatically match newly found items with AI and register them as products when a scan finishes. When off, items pile up in the scan list for manual matching.',
+      autoMatchWarnTitle: 'Before turning this on',
+      autoMatchWarnCost: 'The AI API is called on every scan, which costs money. This applies to scheduled nightly scans too.',
+      autoMatchWarnScanMethod: "Requires 'Scan method' below to be set to AI, with an API key for that provider.",
       googleImageSearchTitle: '🔍 Google Image Search Settings',
       googleImageSearchDesc: 'A Google Custom Search API key and Search Engine ID are required to use the image search feature.',
       googleApiKeyLabel: 'Google API Key',

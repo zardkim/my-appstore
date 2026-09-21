@@ -191,6 +191,43 @@ SQL을 실행하지 않고 "이 DB는 이미 최신"이라고 기록만 남깁�
 - **docker-compose**: 다운로드 이어받기를 위해 frontend 컨테이너에 library 볼륨 읽기 전용 마운트(`./data:/app/data:ro`) 추가 필요
 - **Nginx**: `frontend/nginx.conf`에 `/protected` internal location 추가 (X-Accel-Redirect 대상)
 
+## [1.4.67] - 2026-08-25
+
+### Added
+- **다운로드 이어받기(HTTP Range)** — 문서화만 되어 있고 실제로는 연결되지 않았던 Nginx X-Accel-Redirect 구성을 정상화. Nginx가 파일을 직접 서빙하므로 중단된 다운로드를 이어받을 수 있습니다 (`6d5797f`)
+  - `frontend/nginx.conf`에 `/protected` internal location 추가
+  - frontend 컨테이너에 library 볼륨 읽기 전용 마운트 필요
+
+## [1.4.66] - 2026-08-02
+
+### Fixed
+- **DB**: `products.release_year` 컬럼 안전망을 실제 사용되는 진입점(`main.py`)에 추가 — `entrypoint.sh`는 Alembic을 호출하지 않아 마이그레이션이 배포에 반영되지 않았습니다 (`762b85e`)
+
+## [1.4.65] - 2026-08-02
+
+### Fixed
+- **보안**: 관리자 API 응답에 AI API 키가 평문으로 노출되던 문제 수정 — 항상 마스킹 처리 (`4776f07`)
+- **DB**: `release_year` 마이그레이션 안전망 추가
+
+### Changed
+- **docker-compose / env 템플릿**: `CLAUDE_API_KEY` 환경변수 추가 (`93c8fc5`)
+
+## [1.4.64] - 2026-08-02
+
+### Added
+- **AI 제공자**: Claude(Anthropic) 메타데이터 생성 지원 (`acf891c`)
+- **제품**: `products.release_year` 컬럼 추가 — 같은 이름이지만 연도가 다른 소프트웨어(AutoCAD 2026 vs 2027)가 같은 제품으로 오매칭되는 문제의 구조적 개선 (`2401880`)
+- **신뢰도 배지**: 제조사/출시연도/구체적인 이름 여부 기반 규칙형 신뢰도 스코어링 (`4727904`)
+- **메타데이터**: URL 또는 파일(txt/nfo/md/pdf) 원문을 소스로 사용하는 생성 엔드포인트 — AI가 임의로 지어내지 않고 주어진 텍스트 안에서만 추출 (`24329b6`)
+- **스캔**: 스캔 폴더 내 설명 파일(.txt/.nfo/.md) 자동 감지 + 원클릭 메타데이터 생성 UI (`e9975ea`)
+
+### Changed
+- **AI 프롬프트**: title/vendor/year 분리 재정비 (`5740150`)
+
+### Removed
+- 사용되지 않던 `unmatched.py` / `UnmatchedItem` 서브시스템 제거 — 어디서도 라우팅되지 않던 죽은 코드 (`a21e9da`)
+  - 이때 `unmatched_items` 테이블과 `MetadataCache` 모델은 판단 보류로 남겨두었고, v1.4.77에서 0행 확인 후 정리했습니다
+
 ## [1.4.63] - 2026-08-02
 
 ### Fixed

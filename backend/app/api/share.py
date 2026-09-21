@@ -5,6 +5,7 @@ from typing import Optional
 import logging
 
 from app.database import get_db
+from app.core.rate_limit import rate_limit_share
 from app.models.user import User
 from app.models.product import Product
 from app.models.version import Version
@@ -172,7 +173,7 @@ async def delete_share_link(
     return {"message": "공유링크가 삭제되었습니다."}
 
 
-@router.get("/view/{token}")
+@router.get("/view/{token}", dependencies=[Depends(rate_limit_share)])
 async def view_share_page(token: str, db: Session = Depends(get_db)):
     """공유 페이지 정보 조회 (비인증)"""
     link = db.query(ShareLink).filter(ShareLink.token == token).first()
@@ -194,7 +195,7 @@ async def view_share_page(token: str, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/access/{token}")
+@router.post("/access/{token}", dependencies=[Depends(rate_limit_share)])
 async def access_share_link(
     token: str,
     request: Request,

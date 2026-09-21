@@ -106,6 +106,8 @@ def get_default_config() -> Dict[str, Any]:
             "googleApiKey": "",
             "googleCseId": "",
             "googleImageSearch": False,
+            # 스캔 후 AI 자동 매칭. 켜면 스캔마다 AI 비용이 발생하므로 기본은 꺼둔다.
+            "autoMatch": False,
             "autoDescription": True,
             "autoIcon": True
         },

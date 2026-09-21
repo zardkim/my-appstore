@@ -902,6 +902,11 @@ export default {
       gemini25ProExp: 'Gemini 2.5 Pro: 무료 (실험적)',
       claudePricingTitle: 'Claude (모두 유료):',
       // Google Custom Search API
+      autoMatchTitle: '스캔 후 AI 자동 매칭',
+      autoMatchDesc: '스캔이 끝나면 새로 발견된 항목을 AI로 자동 매칭해 제품으로 등록합니다. 끄면 스캔 목록에 쌓아두고 직접 매칭해야 합니다.',
+      autoMatchWarnTitle: '켜기 전에 확인하세요',
+      autoMatchWarnCost: '스캔할 때마다 AI API가 호출되어 비용이 발생합니다. 야간 자동 스캔에도 동일하게 적용됩니다.',
+      autoMatchWarnScanMethod: '아래 \'스캔 방식\'이 AI로 설정되어 있고 해당 제공자의 API 키가 있어야 동작합니다.',
       googleImageSearchTitle: '🔍 Google 이미지 검색 설정',
       googleImageSearchDesc: '이미지 검색 기능을 사용하려면 Google Custom Search API 키와 검색엔진 ID가 필요합니다.',
       googleApiKeyLabel: 'Google API 키',
