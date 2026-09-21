@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.72] - 2026-09-21
+
+### Fixed
+- **다운로드**: 운영에서 모든 파일 다운로드가 404로 실패하던 문제 복구 — 프론트엔드가 다시 백엔드 직접 스트리밍(`/api/download/direct/{id}`)을 사용하도록 되돌림
+  - 원인은 X-Accel-Redirect 경로가 동작하려면 frontend 컨테이너의 Nginx가 라이브러리 파일을 직접 읽어야 하는데, 운영 frontend 컨테이너의 `/app/data/library`가 비어 있었던 것. backend는 같은 파일을 읽을 수 있어 `/direct`는 정상이었다
+  - 실제 `myappstore-frontend:1.4.70` 이미지로 재현 검증: 파일이 있으면 200(+Range 요청 시 206), 빈 디렉터리면 운영과 동일한 404(Content-Length 153, Content-Disposition 존재)
+  - Nginx 설정·경로 인코딩(한글/공백)·alias는 정상임을 확인 — 설정 문제가 아니라 파일 가시성 문제
+
+### Changed
+- **다운로드**: 위 조치로 다운로드 이어받기(HTTP Range)가 일시적으로 비활성화됨. frontend 컨테이너가 라이브러리를 보게 되면 `frontend/src/utils/env.js`의 주석대로 한 줄로 되돌릴 수 있다
+
+### Added
+- **운영**: NAS 재부팅 시 유실되는 라이브러리 바인드 마운트를 복구하는 스크립트 추가 (`scripts/synology-mount-library.sh`)
+  - `/proc/mounts`를 직접 확인해 중복 마운트를 방지, 겹쳐 쌓인 마운트 감지 및 정리(`--umount`), 상태 확인(`--status`), 부팅 직후 볼륨 대기 지원
+  - DSM 작업 스케줄러의 부팅-up 트리거에 root로 등록해 사용
+
+## [1.4.71] - 2026-09-19
+
+### Security
+- **의존성**: PostgreSQL 클라이언트 보안 업데이트 — `psycopg2-binary` 2.9.9 → 2.9.13 (번들 libpq 16.0 → 17.11), CVE-2024-10977 / CVE-2025-12818 해소
+- **docker-compose**: 3개 compose 파일 전부 postgres 이미지를 `15.19-alpine`으로 고정
+
+## [1.4.70] - 2026-09-14
+
+### Fixed
+- **PWA**: 재배포 후 홈 화면에 추가한 PWA에서 제품/게시글 상세 페이지 클릭이 아무 반응 없이 멈추던 문제 수정
+  - 원인: `GET /` 응답에 `Cache-Control` 헤더가 없어 브라우저가 휴리스틱 캐싱을 적용, 낡은 `index.html`이 가리키는 옛 해시 청크가 404가 되어 동적 import가 실패하고 vue-router가 이를 조용히 무시 (`index.html`의 `<meta http-equiv="Cache-Control">`은 브라우저의 캐시 판단에 쓰이지 않는다)
+  - `nginx.conf`: `index.html`과 `manifest.json`에 `no-cache, must-revalidate`를 실제 HTTP 헤더로 전송
+  - `nginx.conf`: `/assets/`에 `try_files $uri =404`를 적용해 없는 청크가 HTML로 응답되지 않도록 차단
+  - `nginx.conf`: 전역 `error_page 404 /index.html` 제거 (`location /`의 `try_files`가 SPA 라우트를 이미 처리)
+  - `router/index.js`: 청크 로드 실패 시 1회 하드 내비게이션으로 자가 복구 (10초 쿨다운)
+
+### Changed
+- **알림**: 디스코드 embed에서 제품 링크 제거 (썸네일·필드는 유지)
+
+## [1.4.69] - 2026-09-14
+
+### Added
+- **알림**: 디스코드 웹훅 알림 추가 (설정 > 일반설정) — 새 앱이 등록되거나 기존 앱에 새 버전이 추가되면 디스코드 채널로 공지
+  - 웹훅 URL 화이트리스트 검증(SSRF 방어), 메시지당 embed 10개 청킹, 커밋 완료 후 백그라운드 전송으로 스캔 응답 지연 없음
+  - 관리자 전용 테스트 전송 엔드포인트 (`POST /api/notifications/discord/test`) — 저장된 웹훅을 사용
+  - 웹훅 URL은 `SENSITIVE_FIELDS`로 등록되어 API 응답에서 항상 마스킹
+  - 알림은 스캔 항목을 AI 매칭해 앱이 실제로 등록될 때 전송된다. 스케줄러 자동 스캔은 스캔 항목만 쌓으므로 알림을 발생시키지 않는다
+
 ## [1.4.68] - 2026-08-26
 
 ### Added
