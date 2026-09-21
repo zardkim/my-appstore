@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.77] - 2026-09-21
+
+### Fixed
+- **언더스코어 파일명에서 포터블 감지·서비스팩 분류가 실패하던 버그** — 테스트 스위트를 작성하다 발견했습니다. 정규식 `\b`는 `_`를 단어 문자로 취급해 경계가 생기지 않습니다. 이 라이브러리는 언더스코어 파일명이 대부분이라 영향이 큽니다
+
+  | 입력 | 이전 | 수정 후 |
+  |---|---|---|
+  | `HeidiSQL_12.21_64_Portable.zip` | 포터블 아님 ❌ | 포터블 ✅ |
+  | `Portable_App.zip` | 포터블 아님 ❌ | 포터블 ✅ |
+  | `app_sp2.exe` | `product` ❌ | `update` ✅ |
+
+  `(?<![a-z0-9])...(?![a-z0-9])`로 영숫자 경계를 직접 지정했습니다. "Greenshot"이 `green`으로 오탐되지 않는 것도 테스트로 고정했습니다.
+
+  ⚠️ **이미 등록된 데이터에는 소급 적용되지 않습니다.** 기존 제품/버전의 `is_portable`과 스캔 항목의 `classification`은 재스캔/재분류가 필요합니다.
+
+### Added
+- **테스트 스위트 (1계층)** — `backend/tests/` 90개 테스트, 약 2초. 커버리지 수치가 아니라 과거에 실제로 터진 버그를 회귀 테스트로 고정하는 것을 우선했습니다
+  - `test_parser.py`, `test_classifier.py`, `test_confidence.py`, `test_security.py`, `test_config_masking.py`(v1.4.65 회귀), `test_discord_notifier.py`
+  - CI에 `test` 잡 추가. `build-and-push`가 `[schema-check, test]`에 의존합니다
+
+### Removed
+- **죽은 테이블 3개 제거** (마이그레이션 `e4a861c32785`) — 운영 DB에서 행 수가 전부 0임을 확인했습니다
+  - `unmatched_items` — v1.4.64에서 모델·API 제거, 테이블만 남아 있었음
+  - `scan_history` — 초기 커밋 이후 미사용. 실제 이력은 `scan_history.json` 파일
+  - `metadata_cache` — v1.4.64에서 사용처 제거. "신뢰도 신호로 쓸 여지"가 보존 사유였으나 신뢰도 스코어링은 규칙 기반 `core/confidence.py`로 구현되어 이 테이블을 쓰지 않았습니다
+- `app/models/metadata_cache.py` 및 export 제거
+
+### Changed
+- **`build.sh`에서 이미지 빌드/푸시 제거** — 버전 bump + 커밋 + 태그 + push까지만 합니다. 이미지는 GitHub Actions만 만듭니다. 예전에는 로컬 빌드 후 푸시하고 tag push가 CI를 트리거해 같은 태그를 다시 빌드해 덮어썼습니다(1.4.69에서 실제 발생)
+- **`CLAUDE.md` 정정** — 구현된 적 없는 "9개 소스 웹 크롤링" 폐기 기록, "Hybrid Caching 3계층"을 실재하는 2계층으로 정정, 규모 기술을 실측값으로 교체(v1.4.76 / 81개 `.py` 15,276줄 / 라우터 24개 / 모델 15개), 스키마·릴리스·레지스트리 정책 추가
+
 ## [1.4.76] - 2026-09-21
 
 ### Added
