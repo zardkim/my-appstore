@@ -54,13 +54,11 @@ IGNORED_INDEXES = {
     "ix_versions_product_id",
 }
 
-# 2) 모델은 제거했지만 테이블은 남겨두기로 한 것.
-#    운영 데이터 확인 전까지 drop 하지 않기로 결정된 상태다.
-#    (Plane: "[보류] MetadataCache · unmatched_items")
-IGNORED_TABLES = {
-    "unmatched_items",
-    "scan_history",
-}
+# 2) 제외할 테이블.
+#    unmatched_items / scan_history / metadata_cache 는 운영 DB 에서 행 수가
+#    0 인 것을 확인하고 마이그레이션으로 제거했으므로 더 이상 예외가 필요 없다.
+#    비워 두되 구조는 남긴다 - 같은 상황이 또 생기면 여기에 이유와 함께 추가한다.
+IGNORED_TABLES = set()
 
 # 3) 모델에서는 뺐지만 DB 컬럼은 남겨두기로 한 것. (테이블, 컬럼) 쌍.
 #    products.crawled_from 은 값을 쓰는 코드가 없었지만(v1.4.74 에서 모델/스키마

@@ -9,7 +9,6 @@ from app.models.post import Post
 from app.models.comment import Comment
 from app.models.filename_violation import FilenameViolation
 from app.models.invitation import Invitation
-from app.models.metadata_cache import MetadataCache
 from app.models.share_link import ShareLink
 from app.models.product_video import ProductVideo
 from app.models.activity_log import ActivityLog
@@ -27,7 +26,6 @@ __all__ = [
     "Comment",
     "FilenameViolation",
     "Invitation",
-    "MetadataCache",
     "ShareLink",
     "ProductVideo",
     "ActivityLog",
