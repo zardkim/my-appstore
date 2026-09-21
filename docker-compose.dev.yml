@@ -51,8 +51,16 @@ services:
       # - data/patches, data/logs, data/attachments, data/config
       # - data/library (사용자가 수동 생성)
 
-      # 선택사항: NAS의 기존 소프트웨어 폴더 마운트 (읽기 전용)
-      # - /volume1/Software:/library/NAS:ro
+      # ── 라이브러리 추가 폴더 마운트 (선택) ──────────────────────────
+      # 형식: /시놀로지경로:/app/data/library/표시될이름[:ro]
+      #
+      # ⚠️ 여기에 추가한 항목은 아래 frontend volumes에도 **똑같이** 넣어야 합니다.
+      #    빠뜨리면 Nginx가 파일을 읽지 못해 해당 폴더의 다운로드가 404로 실패합니다.
+      #    (백엔드만 파일이 보이므로 스캔·목록은 정상이라 발견이 늦습니다)
+      #
+      # 실제 운영 예시:
+      # - /volume2/App:/app/data/library/App:ro
+      # - /volume3/App2:/app/data/library/App2:ro
     environment:
       # Database
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-myappstore}
@@ -110,8 +118,13 @@ services:
     restart: unless-stopped
     volumes:
       - ./data:/app/data:ro
-      # 다운로드 이어받기(Range 요청)를 위해 Nginx가 파일을 직접 읽습니다.
-      # backend에 추가 폴더를 마운트했다면 여기에도 동일한 경로를 :ro로 추가해야 합니다.
+      # ⚠️ 위 backend volumes에 추가한 라이브러리 폴더를 여기에도 :ro 로 그대로 넣으세요.
+      #    Nginx가 X-Accel-Redirect로 파일을 직접 서빙하므로(다운로드 이어받기 지원),
+      #    누락되면 해당 폴더의 다운로드가 404로 실패합니다.
+      #
+      # backend와 동일하게:
+      # - /volume2/App:/app/data/library/App:ro
+      # - /volume3/App2:/app/data/library/App2:ro
     ports:
       - "${FRONTEND_PORT:-5900}:5900"
     environment:
