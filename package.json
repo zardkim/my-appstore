@@ -1,6 +1,6 @@
 {
   "name": "myappstore",
-  "version": "1.4.77",
+  "version": "1.4.78",
   "description": "NAS-based personal software library management system",
   "private": true,
   "scripts": {
