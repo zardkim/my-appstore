@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, Query
+from fastapi import APIRouter, Depends, HTTPException, Response, Query, Request
 from sqlalchemy.orm import Session
 from typing import Optional
 import os
@@ -59,6 +59,7 @@ async def get_user_from_token(
 @router.get("/{version_id}")
 async def download_file(
     version_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_user_from_token)
 ):
@@ -117,6 +118,25 @@ async def download_file(
             resource_name=version.file_name,
             user_id=current_user.id, username=current_user.username,
         )
+
+        # Nginx 가 파일을 못 읽어 되돌려보낸 요청이면 여기서 직접 스트리밍한다.
+        #
+        # Nginx 워커는 uid 101(nginx)로 돌고 백엔드는 root 로 돈다. 그래서 라이브러리에
+        # others 읽기 권한이 없는 파일은 백엔드만 읽을 수 있고 Nginx 는 403 을 낸다.
+        # 2026-10-06 운영에서 281개 중 38개가 이 상태였다.
+        #
+        # nginx.conf 의 /protected/ 가 403/404 를 @download_fallback 으로 넘기고,
+        # 그쪽이 이 헤더를 붙여 원래 URL 을 다시 호출한다. 루프는 이 분기가 막는다.
+        if request.headers.get('x-accel-fallback'):
+            from fastapi.responses import FileResponse
+
+            logger.warning(
+                f"Nginx 가 파일을 서빙하지 못해 백엔드 스트리밍으로 전환: {version.file_path} "
+                f"(파일 권한에 others 읽기가 없을 가능성이 높다)"
+            )
+            response = FileResponse(path=str(file_path), media_type='application/octet-stream')
+            response.headers['Content-Disposition'] = content_disposition
+            return response
 
         return Response(
             status_code=200,
