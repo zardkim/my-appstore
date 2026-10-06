@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.81] - 2026-10-06
+
+### Fixed
+- **일부 파일만 다운로드가 "권한 없음"으로 실패하던 문제** — Nginx가 읽을 수 없는 파일을 백엔드 스트리밍으로 자동 폴백합니다
+
+  Nginx 워커는 `uid 101(nginx)`로 돌고 백엔드는 `root`로 돕니다. 라이브러리에 others 읽기 권한이 없는 파일은 **백엔드만 읽을 수 있고 Nginx는 403**을 냅니다. X-Accel-Redirect는 Nginx가 파일을 직접 서빙하므로 그대로 실패합니다
+
+  운영 실측 (281개 버전 전수 조사) — **38개 실패, 전부 403**:
+
+  | 폴더 | 실패 |
+  |---|---|
+  | `App/네트워크 관련` | 15 |
+  | `App/CD&DVD` | 13 |
+  | `App/VMware 제품군` | 8 |
+  | `App2/맥 자료실` | 2 (39개 중 — 파일 단위 권한) |
+
+  같은 파일을 `/api/download/direct`(백엔드 root)로 받으면 전부 200입니다
+
+  - `nginx.conf`: `/protected/`에 `error_page 403 404 = @download_fallback`. 폴백은 원래 요청을 백엔드로 다시 보내며 `X-Accel-Fallback: 1`을 붙입니다
+  - `download.py`: 그 헤더가 있으면 X-Accel 대신 `FileResponse`로 직접 스트리밍합니다. **이 헤더가 무한 루프를 막습니다**
+  - 근본 해결은 파일 권한 수정입니다. 이건 그동안 다운로드가 조용히 실패하지 않게 하는 안전망입니다 — 이 기능은 같은 방식으로 세 번 깨졌습니다(location 누락 → 볼륨 마운트 누락 → 파일 권한)
+
+### 알려진 제약
+- **폴백 경로는 이어받기(Range)를 지원하지 않습니다.** starlette 0.27.0의 `FileResponse`에 Range 처리가 없기 때문입니다(기존 `/direct` 경로도 동일). 파일 권한을 고치면 Nginx 경로로 돌아가 Range가 다시 동작합니다
+
 ## [1.4.80] - 2026-10-06
 
 ### Fixed
