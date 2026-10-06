@@ -131,7 +131,8 @@ tags_metadata = [
 ]
 
 from fastapi import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 import traceback
 
 app = FastAPI(
@@ -187,6 +188,47 @@ NAS 기반 개인 소프트웨어 라이브러리 관리 시스템
         "name": "MIT License",
     },
 )
+
+# 다운로드는 anchor 네비게이션이라 프론트의 axios 인터셉터가 동작하지 않는다.
+# 토큰이 만료되면 브라우저에 {"detail":"Not authenticated"} 가 날것으로 표시되고
+# 로그인 화면으로 보내주지도 못한다. 사용자에게는 "권한이 없다"로 보인다.
+#
+# 프론트에서 보내기 전에 토큰을 확인하지만(ProductDetail.download), 그걸로 못 잡는
+# 경우도 있다 - 사용자가 삭제됨, SECRET_KEY 교체, 시계 오차 등.
+# 그래서 브라우저 내비게이션(Accept: text/html)이면 읽을 수 있는 안내 페이지를 준다.
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    is_download = request.url.path.startswith("/api/download")
+    wants_html = "text/html" in (request.headers.get("accept") or "")
+
+    if exc.status_code == 401 and is_download and wants_html:
+        return HTMLResponse(
+            status_code=401,
+            content="""<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로그인이 필요합니다</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+       display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;
+       background:#f9fafb;color:#111827;padding:24px}
+  .box{max-width:420px;text-align:center}
+  h1{font-size:20px;margin:0 0 12px}
+  p{color:#6b7280;line-height:1.6;margin:0 0 24px;font-size:15px}
+  a{display:inline-block;padding:12px 28px;background:#2563eb;color:#fff;
+    text-decoration:none;border-radius:10px;font-weight:600}
+  @media (prefers-color-scheme:dark){
+    body{background:#111827;color:#f9fafb} p{color:#9ca3af}
+  }
+</style></head><body><div class="box">
+<h1>로그인이 만료되었습니다</h1>
+<p>다운로드 권한을 확인할 수 없습니다.<br>다시 로그인한 뒤 내려받아 주세요.</p>
+<a href="/login">로그인 화면으로</a>
+</div></body></html>""",
+        )
+
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

@@ -1553,6 +1553,7 @@ Use empty values for unknown fields. Respond in JSON format only.`,
 
   // Product Detail Page
   productDetail: {
+    sessionExpired: 'Your session has expired. Please sign in again and retry the download.',
     back: 'Back',
     edit: 'Edit',
     cancel: 'Cancel',

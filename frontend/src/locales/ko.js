@@ -1507,6 +1507,7 @@ export default {
 
   // 제품 상세페이지
   productDetail: {
+    sessionExpired: '로그인이 만료되었습니다. 다시 로그인한 뒤 내려받아 주세요.',
     back: '뒤로 가기',
     edit: '편집',
     cancel: '취소',

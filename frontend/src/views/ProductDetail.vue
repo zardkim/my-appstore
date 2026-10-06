@@ -1741,8 +1741,34 @@ const handleImageError = (event) => {
   event.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif"%3E이미지를 불러올 수 없습니다%3C/text%3E%3C/svg%3E'
 }
 
-const download = (versionId, filename) => {
+// JWT 의 exp 를 읽어 만료 여부를 본다. 서명은 검증하지 않는다(서버가 한다).
+// 만료 여부만 알면 되므로 라이브러리 없이 payload 만 디코드한다.
+const isTokenExpired = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))
+    if (!payload.exp) return false
+    return payload.exp * 1000 <= Date.now()
+  } catch (e) {
+    return true   // 형식이 깨진 토큰은 만료로 취급
+  }
+}
+
+const download = async (versionId, filename) => {
   const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+
+  // 이 다운로드는 axios 가 아니라 anchor 네비게이션이다. 그래서 401 이 나도
+  // apiClient 의 응답 인터셉터가 동작하지 않아 로그인 화면으로 보내주지 못하고,
+  // 브라우저에 {"detail":"Not authenticated"} 가 날것으로 표시된다.
+  // (패치/자료실 탭은 axios blob 방식이라 인터셉터가 처리한다 - 그래서 동작이 달랐다)
+  // 그러니 보내기 전에 여기서 토큰을 확인한다.
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem('access_token')
+    sessionStorage.removeItem('access_token')
+    await alert.warning(t('productDetail.sessionExpired'))
+    router.push('/login')
+    return
+  }
+
   const url = getDownloadUrl(versionId, token)
   // PWA/모바일 환경에서 window.open(_blank)는 차단되므로
   // programmatic anchor click 방식으로 다운로드 (대용량 파일 메모리 문제 없음)
