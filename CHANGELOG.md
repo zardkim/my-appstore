@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.80] - 2026-10-06
+
+### Fixed
+- **버전 탭 다운로드가 토큰 만료 시 날것의 401을 보여주던 문제** — 제품 상세 > 버전 탭에서 다운로드를 누르면 권한이 없다는 식의 메시지가 뜨고 받아지지 않던 증상
+
+  버전 탭 다운로드만 **anchor 네비게이션**입니다(대용량 파일을 메모리에 올리지 않기 위한 선택). axios를 거치지 않으므로 `apiClient`의 응답 인터셉터가 동작하지 않아, 토큰이 만료되면 로그인 화면으로 보내주지 못하고 브라우저에 `{"detail":"Not authenticated"}`가 그대로 표시됩니다. 패치/자료실 탭은 axios blob 방식이라 인터셉터가 `/login`으로 보냅니다 — **같은 제품에서 탭에 따라 동작이 달랐던 이유**입니다
+
+  - 프론트엔드: 보내기 전에 토큰 존재·`exp` 만료를 확인하고, 만료면 토큰을 지운 뒤 안내 후 `/login`으로 이동 (서명 검증은 서버가 하므로 만료만 확인)
+  - 백엔드: `/api/download` 경로 + `Accept: text/html` + 401이면 읽을 수 있는 안내 페이지를 반환. 프론트 가드로 못 잡는 경우(사용자 삭제, `SECRET_KEY` 교체, 시계 오차)를 위한 두 번째 겹입니다. **API 호출(`Accept: application/json`)과 다운로드 외 경로의 401은 JSON 응답을 그대로 유지**합니다
+
+  > 참고: 다운로드 엔드포인트에 역할 검사는 없습니다(일반 사용자도 받을 수 있음). "다운로드할 권한이 없다"는 문구는 백엔드·프론트·배포 번들 어디에도 존재하지 않습니다
+
 ## [1.4.79] - 2026-09-21
 
 ### Fixed
